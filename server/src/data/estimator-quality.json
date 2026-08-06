@@ -1,0 +1,53 @@
+[
+  {
+    "id": "quality_essential",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "essential",
+    "label": "Essential",
+    "description": "Reliable, well-known brands. Everything that matters, nothing that does not.",
+    "multiplier": 0.92,
+    "highlights": [
+      "ISI-certified TMT steel",
+      "Vitrified tiles 600×600",
+      "Standard modular switches",
+      "Emulsion paint"
+    ],
+    "order": 1
+  },
+  {
+    "id": "quality_signature",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "signature",
+    "label": "Signature",
+    "description": "Our recommended specification. The balance most of our clients choose.",
+    "multiplier": 1,
+    "highlights": [
+      "TATA / JSW / Jindal TMT",
+      "Large-format vitrified tiles",
+      "Branded CP & sanitary ware",
+      "Premium emulsion & textures"
+    ],
+    "order": 2
+  },
+  {
+    "id": "quality_bespoke",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "bespoke",
+    "label": "Bespoke",
+    "description": "Imported finishes, designer fittings and detailing specified line by line.",
+    "multiplier": 1.18,
+    "highlights": [
+      "Imported marble & Italian stone",
+      "Designer CP fittings",
+      "Home automation ready",
+      "Custom joinery in veneer"
+    ],
+    "order": 3
+  }
+]

@@ -1,0 +1,149 @@
+[
+  {
+    "id": "tm_founder",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Neetu Sharma",
+    "role": "Founder & Principal Architect",
+    "department": "leadership",
+    "bio": "Leads design across every project, with a particular focus on resolving Vastu within the plan rather than around it.",
+    "photo": "https://picsum.photos/seed/team-founder/900/1125",
+    "experienceYears": 14,
+    "expertise": [
+      "Architectural design",
+      "Vastu planning",
+      "Client advisory"
+    ],
+    "order": 1,
+    "socials": {
+      "email": "neetuarchstone@gmail.com"
+    }
+  },
+  {
+    "id": "tm_director",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Rahul Verma",
+    "role": "Director — Operations",
+    "department": "leadership",
+    "bio": "Runs delivery across all live sites and owns the commercial relationship with every client.",
+    "photo": "https://picsum.photos/seed/team-director/900/1125",
+    "experienceYears": 16,
+    "expertise": [
+      "Turnkey delivery",
+      "Commercial",
+      "Vendor management"
+    ],
+    "order": 2
+  },
+  {
+    "id": "tm_civil",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Anand Meena",
+    "role": "Head — Civil & Structural",
+    "department": "engineering",
+    "bio": "Responsible for structural design and every stage-wise quality gate on site.",
+    "photo": "https://picsum.photos/seed/team-civil/900/1125",
+    "experienceYears": 12,
+    "expertise": [
+      "RCC design",
+      "Structural detailing",
+      "Quality assurance"
+    ],
+    "order": 3
+  },
+  {
+    "id": "tm_mep",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Farhan Qureshi",
+    "role": "MEP Engineer",
+    "department": "engineering",
+    "bio": "Designs and supervises mechanical, electrical, plumbing and fire systems across residential and commercial work.",
+    "photo": "https://picsum.photos/seed/team-mep/900/1125",
+    "experienceYears": 10,
+    "expertise": [
+      "HVAC",
+      "Electrical load design",
+      "Fire compliance"
+    ],
+    "order": 4
+  },
+  {
+    "id": "tm_interior",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Shruti Agarwal",
+    "role": "Head — Interior Design",
+    "department": "design",
+    "bio": "Takes interiors from concept through fabrication drawings to installation on site.",
+    "photo": "https://picsum.photos/seed/team-interior/900/1125",
+    "experienceYears": 9,
+    "expertise": [
+      "Interior design",
+      "Joinery detailing",
+      "Material curation"
+    ],
+    "order": 5
+  },
+  {
+    "id": "tm_site1",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Mahesh Jangid",
+    "role": "Senior Site Engineer",
+    "department": "site",
+    "bio": "Runs day-to-day execution and the stage-wise quality checklist on residential sites.",
+    "photo": "https://picsum.photos/seed/team-site1/900/1125",
+    "experienceYears": 11,
+    "expertise": [
+      "Site execution",
+      "Labour management",
+      "Quality checks"
+    ],
+    "order": 6
+  },
+  {
+    "id": "tm_pm",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Priya Nathani",
+    "role": "Project Manager",
+    "department": "engineering",
+    "bio": "Owns the milestone programme, weekly reporting and client communication on every live project.",
+    "photo": "https://picsum.photos/seed/team-pm/900/1125",
+    "experienceYears": 8,
+    "expertise": [
+      "Programme control",
+      "Reporting",
+      "Client communication"
+    ],
+    "order": 7
+  },
+  {
+    "id": "tm_support",
+    "createdAt": "2025-01-15T09:00:00.000Z",
+    "updatedAt": "2025-01-15T09:00:00.000Z",
+    "status": "published",
+    "name": "Vikas Saini",
+    "role": "Client Relations & Support",
+    "department": "support",
+    "bio": "The first person you reach, and the one who makes sure your question does not go anywhere else.",
+    "photo": "https://picsum.photos/seed/team-support/900/1125",
+    "experienceYears": 6,
+    "expertise": [
+      "Client support",
+      "Documentation",
+      "Coordination"
+    ],
+    "order": 8
+  }
+]

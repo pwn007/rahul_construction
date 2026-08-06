@@ -1,0 +1,768 @@
+// Neetu Archstone — data model
+//
+// PHASE 1: authored, not migrated. There is no database in the prototype; the API
+// is served by JsonRepository. This schema exists so that Phase 2 is a migration,
+// not a modelling exercise — every model below mirrors `web/src/types/domain.ts`
+// and the JSON seed files exactly.
+//
+// PHASE 2 ACTIVATION:
+//   1. Set DATABASE_URL in .env
+//   2. npm i @prisma/client && npm i -D prisma
+//   3. npx prisma migrate dev --name init
+//   4. In src/repositories/registry.ts, swap JsonRepository → PrismaRepository
+//
+// Nothing above the repository layer changes.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EntityStatus {
+  draft
+  published
+  archived
+}
+
+// ─────────────────────────────────────────────────────────────
+// Projects
+// ─────────────────────────────────────────────────────────────
+
+enum ProjectCategory {
+  residential
+  commercial
+  interior
+  mepf
+  turnkey
+  mixed_use  @map("mixed-use")
+}
+
+enum ProjectStage {
+  completed
+  ongoing
+  upcoming
+}
+
+enum PackageType {
+  civil
+  semi_furnished  @map("semi-furnished")
+  fully_furnished @map("fully-furnished")
+}
+
+model Project {
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  title          String
+  subtitle       String
+  excerpt        String
+  challenge      String          @db.Text
+  approach       String          @db.Text
+  outcome        String          @db.Text
+
+  category       ProjectCategory
+  stage          ProjectStage    @default(completed)
+  packageType    PackageType     @default(semi_furnished)
+
+  locality       String
+  city           String          @default("Jaipur")
+  latitude       Float
+  longitude      Float
+
+  year           Int
+  areaSqft       Int
+  floors         String
+  durationMonths Int
+  client         String?
+
+  coverImage     String
+  beforeImage    String?
+  afterImage     String?
+
+  featured       Boolean         @default(false)
+  order          Int             @default(0)
+  status         EntityStatus    @default(draft)
+
+  specs          Json            @default("[]")
+  services       String[]
+  tags           String[]
+
+  images         ProjectImage[]
+  testimonials   Testimonial[]
+  galleryItems   GalleryItem[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([category, stage, status])
+  @@index([featured, order])
+}
+
+model ProjectImage {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String
+  caption   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId, order])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Services
+// ─────────────────────────────────────────────────────────────
+
+model Service {
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  title        String
+  shortTitle   String
+  tagline      String
+  icon         String
+  summary      String
+  description  String       @db.Text
+  heroImage    String
+
+  features     Json         @default("[]")
+  deliverables String[]
+  process      Json         @default("[]")
+  stats        Json         @default("[]")
+  faqIds       String[]
+
+  featured     Boolean      @default(true)
+  order        Int          @default(0)
+  status       EntityStatus @default(published)
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Social proof
+// ─────────────────────────────────────────────────────────────
+
+enum TestimonialLanguage {
+  en
+  hi
+  hinglish
+}
+
+model Testimonial {
+  id        String              @id @default(cuid())
+  name      String
+  title     String?
+  locality  String
+  rating    Int                 @default(5)
+  quote     String              @db.Text
+  language  TestimonialLanguage @default(en)
+  avatar    String?
+  image     String?
+
+  projectId String?
+  project   Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  featured  Boolean             @default(false)
+  order     Int                 @default(0)
+  status    EntityStatus        @default(published)
+
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+enum Department {
+  leadership
+  design
+  engineering
+  site
+  support
+}
+
+model TeamMember {
+  id              String       @id @default(cuid())
+  name            String
+  role            String
+  department      Department
+  bio             String       @db.Text
+  photo           String
+  experienceYears Int          @default(0)
+  expertise       String[]
+  socials         Json?
+
+  order           Int          @default(0)
+  status          EntityStatus @default(published)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model ClientLogo {
+  id        String       @id @default(cuid())
+  name      String
+  logo      String
+  website   String?
+  order     Int          @default(0)
+  status    EntityStatus @default(published)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Media & editorial
+// ─────────────────────────────────────────────────────────────
+
+enum GalleryKind {
+  photo
+  video
+  drone
+  panorama @map("360")
+}
+
+model GalleryItem {
+  id        String       @id @default(cuid())
+  title     String
+  kind      GalleryKind  @default(photo)
+  category  String
+  url       String
+  thumbnail String
+  duration  String?
+
+  projectId String?
+  project   Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  order     Int          @default(0)
+  status    EntityStatus @default(published)
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([kind, status])
+}
+
+model MediaAsset {
+  id        String       @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  sizeBytes Int
+  width     Int?
+  height    Int?
+  folder    String       @default("uploads")
+  alt       String?
+  status    EntityStatus @default(published)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([folder])
+}
+
+model Post {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  title          String
+  excerpt        String
+  body           String       @db.Text
+  coverImage     String
+  category       String
+  tags           String[]
+
+  author         String
+  authorRole     String
+  authorAvatar   String
+
+  publishedAt    DateTime
+  readingMinutes Int          @default(5)
+  featured       Boolean      @default(false)
+  status         EntityStatus @default(draft)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([category, status, publishedAt])
+}
+
+enum FaqCategory {
+  general
+  pricing
+  process
+  mepf
+  interiors
+  vastu
+  careers
+}
+
+model Faq {
+  id        String       @id @default(cuid())
+  question  String
+  answer    String       @db.Text
+  category  FaqCategory  @default(general)
+  order     Int          @default(0)
+  status    EntityStatus @default(published)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([category, order])
+}
+
+// ─────────────────────────────────────────────────────────────
+// People ops
+// ─────────────────────────────────────────────────────────────
+
+enum EmploymentType {
+  full_time  @map("full-time")
+  part_time  @map("part-time")
+  contract
+  internship
+}
+
+model Job {
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  title            String
+  department       String
+  location         String
+  type             EmploymentType @default(full_time)
+  experience       String
+  salaryRange      String?
+  summary          String         @db.Text
+  responsibilities String[]
+  requirements     String[]
+  benefits         String[]
+  openings         Int            @default(1)
+  postedAt         DateTime       @default(now())
+  status           EntityStatus   @default(draft)
+
+  applications     Application[]
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+enum ApplicationStage {
+  new
+  screening
+  interview
+  offer
+  rejected
+}
+
+model Application {
+  id              String           @id @default(cuid())
+  jobId           String
+  job             Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobTitle        String
+
+  name            String
+  email           String
+  phone           String
+  experienceYears Int              @default(0)
+  resumeUrl       String
+  coverNote       String?          @db.Text
+
+  stage           ApplicationStage @default(new)
+  status          EntityStatus     @default(published)
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([jobId, stage])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Leads
+// ─────────────────────────────────────────────────────────────
+
+enum LeadSource {
+  contact_form  @map("contact-form")
+  service_page  @map("service-page")
+  project_page  @map("project-page")
+  estimator
+  download
+  exit_intent   @map("exit-intent")
+}
+
+enum EnquiryStage {
+  new
+  contacted
+  qualified
+  proposal
+  won
+  lost
+}
+
+model Enquiry {
+  id              String       @id @default(cuid())
+  name            String
+  phone           String
+  email           String?
+  serviceInterest String
+  city            String?
+  budget          String?
+  message         String       @db.Text
+
+  source          LeadSource   @default(contact_form)
+  stage           EnquiryStage @default(new)
+  assignedToId    String?
+  assignedTo      User?        @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  status          EntityStatus @default(published)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([stage, createdAt])
+  @@index([source])
+}
+
+enum EstimateStage {
+  new
+  contacted
+  qualified
+  converted
+  lost
+}
+
+model EstimateRequest {
+  id            String        @id @default(cuid())
+  name          String
+  phone         String
+  email         String?
+
+  propertyType  String
+  plotArea      Float
+  areaUnit      String        @default("sqft")
+  floors        Int
+  packageType   String
+  qualityTier   String
+  location      String
+  enhancements  String[]
+
+  builtUpArea   Float
+  totalMin      Float
+  totalMax      Float
+  timelineWeeks Int
+
+  stage         EstimateStage @default(new)
+  status        EntityStatus  @default(published)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([stage, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Site content & page builder
+// ─────────────────────────────────────────────────────────────
+
+enum DownloadCategory {
+  profile
+  brochure
+  certificate
+  catalogue
+  checklist
+}
+
+model Download {
+  id          String           @id @default(cuid())
+  title       String
+  description String
+  category    DownloadCategory @default(brochure)
+  fileUrl     String
+  fileType    String           @default("PDF")
+  fileSize    String
+  thumbnail   String
+  gated       Boolean          @default(false)
+  downloads   Int              @default(0)
+  order       Int              @default(0)
+  status      EntityStatus     @default(published)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Banner {
+  id        String       @id @default(cuid())
+  title     String
+  subtitle  String?
+  image     String
+  ctaLabel  String?
+  ctaHref   String?
+  placement String
+  order     Int          @default(0)
+  status    EntityStatus @default(draft)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([placement, order])
+}
+
+model HomeSection {
+  id         String       @id @default(cuid())
+  key        String       @unique
+  label      String
+  heading    String
+  subheading String
+  enabled    Boolean      @default(true)
+  order      Int          @default(0)
+  status     EntityStatus @default(published)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model NavItem {
+  id        String       @id @default(cuid())
+  label     String
+  href      String
+  parentId  String?
+  parent    NavItem?     @relation("NavTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  NavItem[]    @relation("NavTree")
+  badge     String?
+  highlight Boolean      @default(false)
+  order     Int          @default(0)
+  status    EntityStatus @default(published)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model FooterColumn {
+  id        String       @id @default(cuid())
+  heading   String
+  links     Json         @default("[]")
+  order     Int          @default(0)
+  status    EntityStatus @default(published)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model SeoMeta {
+  id          String       @id @default(cuid())
+  route       String       @unique
+  title       String
+  description String
+  keywords    String[]
+  ogImage     String
+  noIndex     Boolean      @default(false)
+  status      EntityStatus @default(published)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Setting {
+  id        String       @id @default(cuid())
+  key       String       @unique
+  label     String
+  value     String       @db.Text
+  group     String       @default("general")
+  type      String       @default("text")
+  status    EntityStatus @default(published)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([group])
+}
+
+// ─────────────────────────────────────────────────────────────
+// Access control
+// ─────────────────────────────────────────────────────────────
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  description String
+  permissions Json         @default("{}")
+  users       User[]
+  status      EntityStatus @default(published)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String?
+  avatar       String?
+
+  roleId       String
+  role         Role         @relation(fields: [roleId], references: [id])
+
+  active       Boolean      @default(true)
+  lastActiveAt DateTime     @default(now())
+  status       EntityStatus @default(published)
+
+  enquiries    Enquiry[]
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Estimator configuration (admin-editable, drives the public tool)
+// ─────────────────────────────────────────────────────────────
+
+model BaseRate {
+  id              String       @id @default(cuid())
+  key             String       @unique
+  label           String
+  description     String
+  minRate         Int
+  maxRate         Int
+  labourOnlyRate  Int
+  order           Int          @default(0)
+  status          EntityStatus @default(published)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model QualityTier {
+  id          String       @id @default(cuid())
+  key         String       @unique
+  label       String
+  description String
+  multiplier  Float
+  highlights  String[]
+  order       Int          @default(0)
+  status      EntityStatus @default(published)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model LocationMultiplier {
+  id         String       @id @default(cuid())
+  key        String       @unique
+  label      String
+  zone       String
+  multiplier Float
+  order      Int          @default(0)
+  status     EntityStatus @default(published)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Enhancement {
+  id           String       @id @default(cuid())
+  key          String       @unique
+  label        String
+  description  String
+  icon         String
+  pricingModel String       @default("lumpsum")
+  unitPrice    Int
+  appliesTo    String[]
+  order        Int          @default(0)
+  status       EntityStatus @default(published)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+// Client portal
+// ─────────────────────────────────────────────────────────────
+
+model PortalProject {
+  id              String            @id @default(cuid())
+  code            String            @unique
+  title           String
+  address         String
+  packageType     String
+  areaSqft        Int
+  contractValue   Float
+  startDate       DateTime
+  targetDate      DateTime
+  progress        Int               @default(0)
+  projectManager  Json
+  cameraFeedUrl   String?
+
+  milestones      Milestone[]
+  invoices        Invoice[]
+  documents       PortalDocument[]
+  updates         SiteUpdate[]
+
+  status          EntityStatus      @default(published)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+enum MilestoneState {
+  completed
+  in_progress @map("in-progress")
+  upcoming
+  delayed
+}
+
+model Milestone {
+  id              String         @id @default(cuid())
+  portalProjectId String
+  portalProject   PortalProject  @relation(fields: [portalProjectId], references: [id], onDelete: Cascade)
+
+  title           String
+  description     String
+  plannedDate     DateTime
+  actualDate      DateTime?
+  progress        Int            @default(0)
+  state           MilestoneState @default(upcoming)
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([portalProjectId, plannedDate])
+}
+
+enum InvoiceState {
+  paid
+  due
+  overdue
+  scheduled
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  portalProjectId String
+  portalProject   PortalProject @relation(fields: [portalProjectId], references: [id], onDelete: Cascade)
+
+  number          String        @unique
+  title           String
+  milestone       String
+  amount          Float
+  dueDate         DateTime
+  paidDate        DateTime?
+  state           InvoiceState  @default(scheduled)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([portalProjectId, state])
+}
+
+model PortalDocument {
+  id              String        @id @default(cuid())
+  portalProjectId String
+  portalProject   PortalProject @relation(fields: [portalProjectId], references: [id], onDelete: Cascade)
+
+  title           String
+  category        String
+  fileType        String
+  fileSize        String
+  url             String
+  uploadedAt      DateTime      @default(now())
+
+  @@index([portalProjectId, category])
+}
+
+model SiteUpdate {
+  id              String        @id @default(cuid())
+  portalProjectId String
+  portalProject   PortalProject @relation(fields: [portalProjectId], references: [id], onDelete: Cascade)
+
+  title           String
+  note            String        @db.Text
+  images          String[]
+  author          String
+  date            DateTime      @default(now())
+
+  @@index([portalProjectId, date])
+}

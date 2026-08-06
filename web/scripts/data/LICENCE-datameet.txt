@@ -1,0 +1,49 @@
+Jaipur municipal zone boundaries
+================================
+
+File          jaipur-zones.geojson
+Source        DataMeet — Municipal Spatial Data
+Repository    https://github.com/datameet/Municipal_Spatial_Data
+Exact file    https://raw.githubusercontent.com/datameet/Municipal_Spatial_Data/master/Jaipur/Jaipur_Zones.geojson
+Retrieved     2026-08-06
+sha256        8dc41b6e756a8d9ad14bcd9b5d2e23ce5e316d6b904694c5506729f8f3ada1c3
+Contents      10 Jaipur Municipal Corporation zone polygons (Zone_Name, Total_Ward)
+
+Licence       Creative Commons Attribution 4.0 International (CC BY 4.0)
+              https://creativecommons.org/licenses/by/4.0/
+
+WHAT CC BY 4.0 REQUIRES OF US
+-----------------------------
+Attribution must be visible to the reader, not buried in a repository. The
+`ProjectAtlas` component therefore renders a credit line in the map panel
+itself, sourced from `ATLAS_SOURCE` in src/data/jaipur-districts.ts. Do not
+remove it — it is a licence obligation, not decoration.
+
+There is no share-alike clause, so the simplified SVG paths we derive from
+this file may ship under the site's own terms.
+
+VINTAGE — READ BEFORE TRUSTING THESE AS CURRENT BOUNDARIES
+----------------------------------------------------------
+These are the *pre-2019* unified Jaipur Municipal Corporation zones. In
+December 2020 the JMC was split into JMC-Heritage (100 wards) and JMC-Greater
+(150 wards), and these polygons do not reflect that. No free vector data for
+the post-split boundaries could be found.
+
+For a marketing map this is acceptable, and arguably preferable — the older
+zone names are the ones Jaipur residents actually use. It is NOT acceptable
+for anything asserting current administrative fact. The atlas panel carries a
+provenance line saying so.
+
+COVERAGE LIMIT
+--------------
+These zones cover the old JMC area only. Land developed by the Jaipur
+Development Authority beyond that limit — Pratap Nagar most notably — falls
+outside every polygon. That is a true fact about the city, not a data defect,
+and the atlas renders such projects on the out-of-boundary ground with an
+explicit note rather than snapping them into the nearest zone.
+
+WHY THIS FILE IS COMMITTED RATHER THAN FETCHED
+----------------------------------------------
+Builds must be reproducible and must not depend on GitHub being reachable or
+on the upstream repository keeping this path. The sha256 above pins exactly
+what was used; re-download and compare before regenerating.

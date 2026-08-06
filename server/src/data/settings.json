@@ -1,0 +1,178 @@
+[
+  {
+    "id": "set_name",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "site.name",
+    "label": "Company name",
+    "value": "Neetu Archstone",
+    "group": "general",
+    "type": "text"
+  },
+  {
+    "id": "set_tagline",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "site.tagline",
+    "label": "Tagline",
+    "value": "Design · Build · Deliver",
+    "group": "general",
+    "type": "text"
+  },
+  {
+    "id": "set_tagline_hi",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "site.taglineHi",
+    "label": "Tagline (Hindi)",
+    "value": "नक़्शे से निर्माण तक",
+    "group": "general",
+    "type": "text"
+  },
+  {
+    "id": "set_desc",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "site.description",
+    "label": "Meta description",
+    "value": "Architecture, MEPF engineering, turnkey construction and interiors under one accountable system.",
+    "group": "general",
+    "type": "textarea"
+  },
+  {
+    "id": "set_phone",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "contact.phone",
+    "label": "Phone",
+    "value": "+91 70149 34752",
+    "group": "contact",
+    "type": "text"
+  },
+  {
+    "id": "set_email",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "contact.email",
+    "label": "Email",
+    "value": "neetuarchstone@gmail.com",
+    "group": "contact",
+    "type": "text"
+  },
+  {
+    "id": "set_address",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "contact.address",
+    "label": "Address",
+    "value": "India Gate, Jaipur, Rajasthan",
+    "group": "contact",
+    "type": "textarea"
+  },
+  {
+    "id": "set_hours",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "contact.hours",
+    "label": "Working hours",
+    "value": "Mon – Sat, 10:00 AM – 7:00 PM",
+    "group": "contact",
+    "type": "text"
+  },
+  {
+    "id": "set_whatsapp",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "contact.whatsapp",
+    "label": "WhatsApp number",
+    "value": "917014934752",
+    "group": "contact",
+    "type": "text"
+  },
+  {
+    "id": "set_ig",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "social.instagram",
+    "label": "Instagram",
+    "value": "https://instagram.com/neetuarchstone",
+    "group": "social",
+    "type": "url"
+  },
+  {
+    "id": "set_li",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "social.linkedin",
+    "label": "LinkedIn",
+    "value": "https://linkedin.com/company/neetuarchstone",
+    "group": "social",
+    "type": "url"
+  },
+  {
+    "id": "set_yt",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "social.youtube",
+    "label": "YouTube",
+    "value": "https://youtube.com/@neetuarchstone",
+    "group": "social",
+    "type": "url"
+  },
+  {
+    "id": "set_ga",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "analytics.ga4",
+    "label": "GA4 Measurement ID",
+    "value": "G-XXXXXXXXXX",
+    "group": "analytics",
+    "type": "text"
+  },
+  {
+    "id": "set_brand",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "theme.brandColor",
+    "label": "Brand accent colour",
+    "value": "#00AEEF",
+    "group": "theme",
+    "type": "color"
+  },
+  {
+    "id": "set_navy",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "theme.primaryColor",
+    "label": "Primary dark colour",
+    "value": "#0A1B4D",
+    "group": "theme",
+    "type": "color"
+  },
+  {
+    "id": "set_radius",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "theme.radius",
+    "label": "Base corner radius (px)",
+    "value": "16",
+    "group": "theme",
+    "type": "number"
+  }
+]

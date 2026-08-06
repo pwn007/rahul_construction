@@ -1,0 +1,448 @@
+[
+  {
+    "id": "pp_1",
+    "createdAt": "2025-09-01T09:00:00.000Z",
+    "updatedAt": "2026-07-28T09:00:00.000Z",
+    "status": "published",
+    "code": "NA-2025-114",
+    "title": "Residence at Vaishali Nagar",
+    "address": "Plot 42, Sector 8, Vaishali Nagar, Jaipur",
+    "packageType": "Turnkey — Semi Furnished",
+    "areaSqft": 3240,
+    "contractValue": 6480000,
+    "startDate": "2025-10-06T00:00:00.000Z",
+    "targetDate": "2026-10-30T00:00:00.000Z",
+    "progress": 62,
+    "projectManager": {
+      "name": "Priya Nathani",
+      "phone": "+91 70149 34752",
+      "avatar": "https://picsum.photos/seed/team-pm/200/200"
+    },
+    "cameraFeedUrl": "https://picsum.photos/seed/camera-feed-live/1600/900",
+    "milestones": [
+      {
+        "id": "ms_1",
+        "title": "Design & approvals",
+        "description": "Working drawings issued, JDA submission cleared.",
+        "plannedDate": "2025-11-20T00:00:00.000Z",
+        "actualDate": "2025-11-18T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms_2",
+        "title": "Foundation & plinth",
+        "description": "Excavation, footings, plinth beam and filling complete.",
+        "plannedDate": "2026-01-10T00:00:00.000Z",
+        "actualDate": "2026-01-08T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms_3",
+        "title": "Ground floor structure",
+        "description": "Columns, beams and GF slab cast and cured.",
+        "plannedDate": "2026-03-15T00:00:00.000Z",
+        "actualDate": "2026-03-21T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms_4",
+        "title": "First floor structure",
+        "description": "Columns, beams and FF slab cast.",
+        "plannedDate": "2026-05-30T00:00:00.000Z",
+        "actualDate": "2026-06-04T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms_5",
+        "title": "Masonry & plaster",
+        "description": "Brickwork, internal and external plaster.",
+        "plannedDate": "2026-08-10T00:00:00.000Z",
+        "progress": 68,
+        "state": "in-progress"
+      },
+      {
+        "id": "ms_6",
+        "title": "MEPF first fix",
+        "description": "Concealed electrical, plumbing and drainage.",
+        "plannedDate": "2026-08-25T00:00:00.000Z",
+        "progress": 34,
+        "state": "in-progress"
+      },
+      {
+        "id": "ms_7",
+        "title": "Flooring & finishing",
+        "description": "Tiling, painting, doors, windows and fittings.",
+        "plannedDate": "2026-10-05T00:00:00.000Z",
+        "progress": 0,
+        "state": "upcoming"
+      },
+      {
+        "id": "ms_8",
+        "title": "Snagging & handover",
+        "description": "Final inspection, snag closure and key handover.",
+        "plannedDate": "2026-10-30T00:00:00.000Z",
+        "progress": 0,
+        "state": "upcoming"
+      }
+    ],
+    "invoices": [
+      {
+        "id": "inv_1",
+        "number": "NA/25-26/114-01",
+        "title": "Booking & agreement",
+        "amount": 648000,
+        "dueDate": "2025-10-06T00:00:00.000Z",
+        "paidDate": "2025-10-05T00:00:00.000Z",
+        "state": "paid",
+        "milestone": "On signing"
+      },
+      {
+        "id": "inv_2",
+        "number": "NA/25-26/114-02",
+        "title": "Foundation & plinth",
+        "amount": 972000,
+        "dueDate": "2026-01-12T00:00:00.000Z",
+        "paidDate": "2026-01-14T00:00:00.000Z",
+        "state": "paid",
+        "milestone": "Plinth level complete"
+      },
+      {
+        "id": "inv_3",
+        "number": "NA/25-26/114-03",
+        "title": "Ground floor structure",
+        "amount": 1296000,
+        "dueDate": "2026-03-25T00:00:00.000Z",
+        "paidDate": "2026-03-24T00:00:00.000Z",
+        "state": "paid",
+        "milestone": "GF slab cast"
+      },
+      {
+        "id": "inv_4",
+        "number": "NA/26-27/114-04",
+        "title": "Upper floor structure",
+        "amount": 1296000,
+        "dueDate": "2026-06-10T00:00:00.000Z",
+        "paidDate": "2026-06-09T00:00:00.000Z",
+        "state": "paid",
+        "milestone": "Final slab cast"
+      },
+      {
+        "id": "inv_5",
+        "number": "NA/26-27/114-05",
+        "title": "Masonry, plaster & MEPF rough-in",
+        "amount": 972000,
+        "dueDate": "2026-07-25T00:00:00.000Z",
+        "state": "overdue",
+        "milestone": "Plaster complete"
+      },
+      {
+        "id": "inv_6",
+        "number": "NA/26-27/114-06",
+        "title": "Flooring, painting & fittings",
+        "amount": 972000,
+        "dueDate": "2026-10-10T00:00:00.000Z",
+        "state": "scheduled",
+        "milestone": "Finishing complete"
+      },
+      {
+        "id": "inv_7",
+        "number": "NA/26-27/114-07",
+        "title": "Handover",
+        "amount": 324000,
+        "dueDate": "2026-10-30T00:00:00.000Z",
+        "state": "scheduled",
+        "milestone": "Snag-free handover"
+      }
+    ],
+    "documents": [
+      {
+        "id": "doc_1",
+        "title": "Approved floor plans — GF & FF",
+        "category": "drawing",
+        "fileType": "PDF",
+        "fileSize": "3.4 MB",
+        "uploadedAt": "2025-11-18T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_2",
+        "title": "Structural drawings — footings & slabs",
+        "category": "drawing",
+        "fileType": "PDF",
+        "fileSize": "5.1 MB",
+        "uploadedAt": "2025-11-22T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_3",
+        "title": "MEPF layouts — electrical & plumbing",
+        "category": "drawing",
+        "fileType": "PDF",
+        "fileSize": "4.7 MB",
+        "uploadedAt": "2026-02-04T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_4",
+        "title": "JDA approval letter",
+        "category": "approval",
+        "fileType": "PDF",
+        "fileSize": "640 KB",
+        "uploadedAt": "2025-11-15T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_5",
+        "title": "Construction agreement — signed",
+        "category": "contract",
+        "fileType": "PDF",
+        "fileSize": "1.2 MB",
+        "uploadedAt": "2025-10-06T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_6",
+        "title": "Bill of quantities — final",
+        "category": "contract",
+        "fileType": "XLSX",
+        "fileSize": "820 KB",
+        "uploadedAt": "2025-10-06T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_7",
+        "title": "Concrete cube test report — GF slab",
+        "category": "report",
+        "fileType": "PDF",
+        "fileSize": "310 KB",
+        "uploadedAt": "2026-03-28T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc_8",
+        "title": "Soil investigation report",
+        "category": "report",
+        "fileType": "PDF",
+        "fileSize": "1.8 MB",
+        "uploadedAt": "2025-10-14T09:00:00.000Z",
+        "url": "#"
+      }
+    ],
+    "updates": [
+      {
+        "id": "upd_1",
+        "title": "External plaster started on the north face",
+        "note": "Scaffolding is up and external plaster began on the north elevation this week. Weather held, so we expect the full north and east faces done by next Friday.",
+        "date": "2026-07-28T09:00:00.000Z",
+        "images": [
+          "https://picsum.photos/seed/update-plaster-1/1200/800",
+          "https://picsum.photos/seed/update-plaster-2/1200/800"
+        ],
+        "author": "Mahesh Jangid"
+      },
+      {
+        "id": "upd_2",
+        "title": "Electrical first fix — ground floor complete",
+        "note": "All concealed conduiting on the ground floor is complete and inspected. Point locations were verified against the approved layout before closing.",
+        "date": "2026-07-21T09:00:00.000Z",
+        "images": [
+          "https://picsum.photos/seed/update-electrical-1/1200/800"
+        ],
+        "author": "Farhan Qureshi"
+      },
+      {
+        "id": "upd_3",
+        "title": "Internal brickwork finished on both floors",
+        "note": "Brickwork is complete across both levels. Curing is ongoing. Internal plaster starts Monday, beginning with the first floor.",
+        "date": "2026-07-14T09:00:00.000Z",
+        "images": [
+          "https://picsum.photos/seed/update-brick-1/1200/800",
+          "https://picsum.photos/seed/update-brick-2/1200/800",
+          "https://picsum.photos/seed/update-brick-3/1200/800"
+        ],
+        "author": "Mahesh Jangid"
+      },
+      {
+        "id": "upd_4",
+        "title": "First floor slab — 28-day strength confirmed",
+        "note": "Cube test results are in and the FF slab has achieved design strength. Report uploaded to your documents.",
+        "date": "2026-07-04T09:00:00.000Z",
+        "images": [
+          "https://picsum.photos/seed/update-slab-1/1200/800"
+        ],
+        "author": "Anand Meena"
+      }
+    ]
+  },
+  {
+    "id": "pp_2",
+    "createdAt": "2026-04-12T09:00:00.000Z",
+    "updatedAt": "2026-07-25T09:00:00.000Z",
+    "status": "published",
+    "code": "NA-2026-131",
+    "title": "Interiors — Mansarovar Apartment",
+    "address": "Flat 703, Sunrise Heights, Mansarovar, Jaipur",
+    "packageType": "Interior Work — Fully Furnished",
+    "areaSqft": 1850,
+    "contractValue": 4810000,
+    "startDate": "2026-05-04T00:00:00.000Z",
+    "targetDate": "2026-08-22T00:00:00.000Z",
+    "progress": 84,
+    "projectManager": {
+      "name": "Shruti Agarwal",
+      "phone": "+91 70149 34752",
+      "avatar": "https://picsum.photos/seed/team-interior/200/200"
+    },
+    "cameraFeedUrl": "https://picsum.photos/seed/camera-feed-interior/1600/900",
+    "milestones": [
+      {
+        "id": "ms2_1",
+        "title": "Design & material freeze",
+        "description": "Layouts, 3D views and material boards approved.",
+        "plannedDate": "2026-05-20T00:00:00.000Z",
+        "actualDate": "2026-05-19T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms2_2",
+        "title": "Civil & electrical modifications",
+        "description": "Point shifting, minor civil work and false ceiling framing.",
+        "plannedDate": "2026-06-10T00:00:00.000Z",
+        "actualDate": "2026-06-12T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms2_3",
+        "title": "Workshop fabrication",
+        "description": "Kitchen, wardrobes and joinery built off-site.",
+        "plannedDate": "2026-07-05T00:00:00.000Z",
+        "actualDate": "2026-07-03T00:00:00.000Z",
+        "progress": 100,
+        "state": "completed"
+      },
+      {
+        "id": "ms2_4",
+        "title": "Installation",
+        "description": "Kitchen, wardrobes, ceilings and lighting installed.",
+        "plannedDate": "2026-08-05T00:00:00.000Z",
+        "progress": 76,
+        "state": "in-progress"
+      },
+      {
+        "id": "ms2_5",
+        "title": "Styling & handover",
+        "description": "Loose furniture, curtains, styling and snag closure.",
+        "plannedDate": "2026-08-22T00:00:00.000Z",
+        "progress": 0,
+        "state": "upcoming"
+      }
+    ],
+    "invoices": [
+      {
+        "id": "inv2_1",
+        "number": "NA/26-27/131-01",
+        "title": "Design & booking",
+        "amount": 962000,
+        "dueDate": "2026-05-04T00:00:00.000Z",
+        "paidDate": "2026-05-03T00:00:00.000Z",
+        "state": "paid",
+        "milestone": "On signing"
+      },
+      {
+        "id": "inv2_2",
+        "number": "NA/26-27/131-02",
+        "title": "Material freeze & fabrication start",
+        "amount": 1924000,
+        "dueDate": "2026-06-15T00:00:00.000Z",
+        "paidDate": "2026-06-15T00:00:00.000Z",
+        "state": "paid",
+        "milestone": "Fabrication start"
+      },
+      {
+        "id": "inv2_3",
+        "number": "NA/26-27/131-03",
+        "title": "Installation",
+        "amount": 1443000,
+        "dueDate": "2026-08-05T00:00:00.000Z",
+        "state": "due",
+        "milestone": "Installation start"
+      },
+      {
+        "id": "inv2_4",
+        "number": "NA/26-27/131-04",
+        "title": "Handover",
+        "amount": 481000,
+        "dueDate": "2026-08-22T00:00:00.000Z",
+        "state": "scheduled",
+        "milestone": "Snag-free handover"
+      }
+    ],
+    "documents": [
+      {
+        "id": "doc2_1",
+        "title": "Interior layout & furniture plan",
+        "category": "drawing",
+        "fileType": "PDF",
+        "fileSize": "2.6 MB",
+        "uploadedAt": "2026-05-19T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc2_2",
+        "title": "Joinery fabrication drawings",
+        "category": "drawing",
+        "fileType": "PDF",
+        "fileSize": "6.2 MB",
+        "uploadedAt": "2026-06-02T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc2_3",
+        "title": "Material & finish schedule",
+        "category": "contract",
+        "fileType": "PDF",
+        "fileSize": "940 KB",
+        "uploadedAt": "2026-05-19T09:00:00.000Z",
+        "url": "#"
+      },
+      {
+        "id": "doc2_4",
+        "title": "Society NOC for interior work",
+        "category": "approval",
+        "fileType": "PDF",
+        "fileSize": "280 KB",
+        "uploadedAt": "2026-05-01T09:00:00.000Z",
+        "url": "#"
+      }
+    ],
+    "updates": [
+      {
+        "id": "upd2_1",
+        "title": "Kitchen installed, wardrobes underway",
+        "note": "The modular kitchen is fully installed including the counter and chimney. Wardrobe carcasses are in for two bedrooms; shutters arrive Thursday.",
+        "date": "2026-07-25T09:00:00.000Z",
+        "images": [
+          "https://picsum.photos/seed/update-kitchen-1/1200/800",
+          "https://picsum.photos/seed/update-kitchen-2/1200/800"
+        ],
+        "author": "Shruti Agarwal"
+      },
+      {
+        "id": "upd2_2",
+        "title": "False ceiling complete, lighting next",
+        "note": "Gypsum ceiling and cove detailing finished across the living, dining and all bedrooms. Profile lighting installation begins this week.",
+        "date": "2026-07-16T09:00:00.000Z",
+        "images": [
+          "https://picsum.photos/seed/update-ceiling-1/1200/800"
+        ],
+        "author": "Shruti Agarwal"
+      }
+    ]
+  }
+]

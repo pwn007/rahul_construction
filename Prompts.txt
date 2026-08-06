@@ -1,0 +1,595 @@
+# Enterprise Construction Company Website - Phase 1 (Prototype)
+
+You are a **Senior Software Architect, Senior UI/UX Designer, Product Strategist, and Full Stack Engineer** with expertise in building award-winning enterprise websites.
+
+Your task is to design and develop a **world-class enterprise construction company website prototype** for our client.
+
+## Project Objective
+
+Build a premium, modern, highly interactive, enterprise-level construction company website that looks better than any competitor in the market.
+
+This is **NOT** just another company website.
+
+The website should make visitors feel that they are interacting with a multi-billion dollar construction brand.
+
+The UI should be memorable, elegant, premium, fast, interactive, and conversion-focused.
+
+The design should be something users want to revisit because of its experience.
+
+---
+
+# Company Information
+
+The company portfolio is attached.
+
+File:
+**Port1.pdf**
+
+Study it thoroughly.
+
+Understand:
+
+* Company profile
+* Services
+* Mission
+* Vision
+* Values
+* Projects
+* Industries
+* Strengths
+* Target customers
+* Everything mentioned in the portfolio
+
+This portfolio will become the primary source of truth.
+
+---
+
+# Existing Company Website
+
+Website:
+
+https://archubicbuildcon.com/
+
+Explore this website deeply.
+
+Do NOT just read the homepage.
+
+Explore every page.
+
+Understand:
+
+* Navigation
+* Information Architecture
+* User Journey
+* Services
+* Forms
+* Animations
+* UI Components
+* Images
+* Typography
+* Layout
+* Mobile responsiveness
+* Performance
+* Every small interaction
+
+One feature that I particularly like is the **Construction Cost Estimator**.
+
+Study it carefully.
+
+Understand:
+
+* User flow
+* Inputs
+* Calculations
+* UX
+* Output screen
+* Validation
+* Design
+
+We will build a much better version of this feature.
+
+Do not miss any feature from this website.
+
+---
+
+# Competitor Research
+
+Competitor Website:
+
+https://reidiusinfra.in/about-us
+
+Research every page.
+
+Study:
+
+* Design
+* Content
+* Services
+* Layout
+* Components
+* User Experience
+* Navigation
+* Animations
+* Branding
+* CTA placement
+* Project showcase
+* Contact flow
+* Trust-building elements
+
+Do NOT copy the UI.
+
+Do NOT clone the website.
+
+Instead,
+
+extract the best ideas and improve upon them.
+
+---
+
+# Internet Research
+
+Research the best construction company websites globally.
+
+Study premium websites from companies such as:
+
+* L&T Construction
+* Turner Construction
+* Bechtel
+* Skanska
+* Vinci Construction
+* Balfour Beatty
+* DPR Construction
+* AECOM
+* Jacobs
+* Fluor
+* Kiewit
+* Bouygues Construction
+* Gensler
+* Foster + Partners
+
+Also explore websites that have won:
+
+* Awwwards
+* CSS Design Awards
+* FWA
+* Behance
+* Dribbble
+
+Research the latest trends in:
+
+* Premium web design
+* Motion design
+* 3D interactions
+* GSAP animations
+* Scroll storytelling
+* Luxury enterprise websites
+* Architecture websites
+* Real estate websites
+* Construction websites
+
+Combine the best ideas into one unique experience.
+
+---
+
+# Goal
+
+The final website should look like an enterprise product.
+
+Not a template.
+
+Not a Bootstrap website.
+
+Not an ordinary React website.
+
+It should feel handcrafted.
+
+Visitors should immediately trust the company.
+
+The website should increase:
+
+* credibility
+* trust
+* lead generation
+* engagement
+* brand value
+
+---
+
+# Design Direction
+
+Design language should be:
+
+* Modern
+* Premium
+* Minimal
+* Architectural
+* Luxury
+* Enterprise
+* Bold
+* Professional
+
+Use:
+
+* glassmorphism where appropriate
+* soft shadows
+* premium gradients
+* subtle textures
+* clean whitespace
+* large typography
+* smooth transitions
+* elegant icons
+* premium illustrations
+* cinematic imagery
+* micro interactions
+
+The UI should feel alive.
+
+---
+
+# Animations
+
+Use meaningful animations only.
+
+Possible technologies:
+
+* GSAP
+* Framer Motion
+* Lenis Smooth Scroll
+* Lottie
+* Three.js (only if it adds value)
+* ScrollTrigger
+
+Ideas include:
+
+* Hero reveal animations
+* Scroll storytelling
+* Counters
+* Project transitions
+* Before/After sliders
+* Interactive timelines
+* Animated service cards
+* Image reveal effects
+* Hover interactions
+* Mouse-follow effects
+* Loading screens
+* Smooth page transitions
+* Section pinning
+* Parallax
+
+Animations should feel premium.
+
+Never overdo them.
+
+Performance is important.
+
+---
+
+# Website Features
+
+Research and include the best features suitable for a construction company.
+
+Possible features include:
+
+## Home
+
+* Cinematic Hero
+* Company Overview
+* Services
+* Featured Projects
+* Industries
+* Why Choose Us
+* Achievements
+* Interactive Statistics
+* Client Logos
+* Testimonials
+* Latest News
+* Contact CTA
+
+---
+
+## Projects
+
+* Advanced filtering
+* Categories
+* Timeline
+* Project gallery
+* Before/After comparison
+* Project details page
+* Interactive maps
+
+---
+
+## Construction Cost Estimator
+
+Build an improved version.
+
+Should include:
+
+* Property Type
+* Plot Size
+* Floors
+* Material Quality
+* Construction Type
+* Interior Options
+* Exterior Options
+* Location
+* Estimated Cost
+* Estimated Timeline
+* PDF Estimate (mock)
+
+Beautiful UX.
+
+Interactive.
+
+Step-by-step wizard.
+
+Progress indicator.
+
+---
+
+## Services
+
+Dedicated pages.
+
+Icons.
+
+Images.
+
+FAQs.
+
+CTA.
+
+---
+
+## About
+
+Interactive company timeline.
+
+Mission.
+
+Vision.
+
+Leadership.
+
+Values.
+
+Achievements.
+
+Certifications.
+
+---
+
+## Careers
+
+Mock listings.
+
+Application form.
+
+Company culture.
+
+---
+
+## Blog
+
+Mock articles.
+
+Categories.
+
+Search.
+
+---
+
+## Contact
+
+Interactive map.
+
+Inquiry form.
+
+Branches.
+
+Social links.
+
+---
+
+## Gallery
+
+Image gallery.
+
+Video gallery.
+
+Drone footage.
+
+360° views (mock).
+
+---
+
+## Client Portal (Prototype)
+
+Mock dashboard.
+
+Project progress.
+
+Invoices.
+
+Documents.
+
+Timeline.
+
+No backend required.
+
+---
+
+## Downloads
+
+Company profile.
+
+Brochure.
+
+Certificates.
+
+Catalogues.
+
+---
+
+# Admin Panel (Prototype Only)
+
+We also need a complete admin dashboard.
+
+No database.
+
+Mock data only.
+
+Design it as if it will later connect to an API.
+
+Admin modules should include:
+
+* Dashboard
+* Analytics
+* Project Management
+* Service Management
+* Team Management
+* Testimonial Management
+* Client Logos
+* Gallery
+* Blogs
+* FAQs
+* Careers
+* Job Applications
+* Contact Queries
+* Cost Estimator Configuration
+* Hero Section
+* Home Page Sections
+* About Page
+* Settings
+* SEO
+* Meta Tags
+* Users
+* Roles
+* Media Library
+* File Upload
+* Banners
+* Forms
+* Footer
+* Navbar
+* Theme Settings
+
+Every module should support:
+
+* Add
+* Edit
+* Delete
+* Preview
+
+Use mock data.
+
+Design for future scalability.
+
+---
+
+# Tech Stack
+
+Frontend:
+
+* React
+* Vite
+* React Router
+* Tailwind CSS
+* Framer Motion
+* GSAP
+* Shadcn/UI
+* React Hook Form
+* Zod
+* TanStack Query (mock)
+* Lucide Icons
+
+Backend:
+
+* Node.js
+* Express.js
+* Prisma
+
+Database:
+
+No database for Phase 1.
+
+Everything should use mock JSON data.
+
+Design the architecture so Prisma can be connected later without major refactoring.
+
+---
+
+# Architecture
+
+Follow enterprise folder structure.
+
+Use:
+
+* reusable components
+* feature-based architecture
+* clean code
+* scalable architecture
+* modular folders
+* hooks
+* utils
+* constants
+* services
+* layouts
+* pages
+* shared components
+
+---
+
+# Deliverables
+
+Before writing code, complete the following:
+
+1. Study the PDF thoroughly.
+2. Analyze the existing company website.
+3. Analyze the competitor website.
+4. Research the best construction websites worldwide.
+5. Research award-winning UI inspiration.
+6. Identify missing opportunities.
+7. Create a complete feature list.
+8. Create sitemap.
+9. Define user journeys.
+10. Define design system.
+11. Define component library.
+12. Define animation strategy.
+13. Define folder architecture.
+14. Create implementation roadmap.
+15. Then start development.
+
+Do not skip the research phase.
+
+---
+
+# Development Rules
+
+* Think like a senior architect.
+* Do not rush into coding.
+* Plan first.
+* Explain architectural decisions.
+* Build reusable components.
+* Write production-quality code.
+* Follow best React practices.
+* Keep code clean and maintainable.
+* Use TypeScript where appropriate.
+* Focus on accessibility and responsiveness.
+* Optimize performance.
+* Prepare the codebase for future backend integration.
+
+---
+
+# Working Directory
+
+Perform all development inside the following directory only:
+
+`/Users/pawanpant/Documents/Freelance/Rahul_Verma/Phase_1`
+
+Do not create files outside this directory.
+
+---
+
+# Expected Outcome
+
+The final prototype should be portfolio-worthy and feel comparable to websites built by leading global digital agencies. It should showcase exceptional UI/UX, thoughtful interactions, enterprise-grade architecture, and a scalable foundation ready for future backend integration.

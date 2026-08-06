@@ -1,0 +1,80 @@
+[
+  {
+    "id": "usr_1",
+    "createdAt": "2025-03-01T09:00:00.000Z",
+    "updatedAt": "2025-03-01T09:00:00.000Z",
+    "status": "published",
+    "name": "Neetu Sharma",
+    "email": "neetu@neetuarchstone.com",
+    "roleId": "role_owner",
+    "roleName": "Owner",
+    "avatar": "https://picsum.photos/seed/team-founder/200/200",
+    "lastActiveAt": "2026-07-30T09:30:00.000Z",
+    "active": true
+  },
+  {
+    "id": "usr_2",
+    "createdAt": "2025-03-01T09:00:00.000Z",
+    "updatedAt": "2025-03-01T09:00:00.000Z",
+    "status": "published",
+    "name": "Rahul Verma",
+    "email": "rahul@neetuarchstone.com",
+    "roleId": "role_admin",
+    "roleName": "Administrator",
+    "avatar": "https://picsum.photos/seed/team-director/200/200",
+    "lastActiveAt": "2026-07-30T09:30:00.000Z",
+    "active": true
+  },
+  {
+    "id": "usr_3",
+    "createdAt": "2025-05-14T09:00:00.000Z",
+    "updatedAt": "2025-05-14T09:00:00.000Z",
+    "status": "published",
+    "name": "Priya Nathani",
+    "email": "priya@neetuarchstone.com",
+    "roleId": "role_admin",
+    "roleName": "Administrator",
+    "avatar": "https://picsum.photos/seed/team-pm/200/200",
+    "lastActiveAt": "2026-07-29T09:30:00.000Z",
+    "active": true
+  },
+  {
+    "id": "usr_4",
+    "createdAt": "2025-08-02T09:00:00.000Z",
+    "updatedAt": "2025-08-02T09:00:00.000Z",
+    "status": "published",
+    "name": "Shruti Agarwal",
+    "email": "shruti@neetuarchstone.com",
+    "roleId": "role_editor",
+    "roleName": "Editor",
+    "avatar": "https://picsum.photos/seed/team-interior/200/200",
+    "lastActiveAt": "2026-07-28T09:30:00.000Z",
+    "active": true
+  },
+  {
+    "id": "usr_5",
+    "createdAt": "2026-01-20T09:00:00.000Z",
+    "updatedAt": "2026-01-20T09:00:00.000Z",
+    "status": "published",
+    "name": "Vikas Saini",
+    "email": "vikas@neetuarchstone.com",
+    "roleId": "role_editor",
+    "roleName": "Editor",
+    "avatar": "https://picsum.photos/seed/team-support/200/200",
+    "lastActiveAt": "2026-07-27T09:30:00.000Z",
+    "active": true
+  },
+  {
+    "id": "usr_6",
+    "createdAt": "2026-02-11T09:00:00.000Z",
+    "updatedAt": "2026-02-11T09:00:00.000Z",
+    "status": "published",
+    "name": "Mahesh Jangid",
+    "email": "mahesh@neetuarchstone.com",
+    "roleId": "role_viewer",
+    "roleName": "Viewer",
+    "avatar": "https://picsum.photos/seed/team-site1/200/200",
+    "lastActiveAt": "2026-07-21T09:30:00.000Z",
+    "active": false
+  }
+]
