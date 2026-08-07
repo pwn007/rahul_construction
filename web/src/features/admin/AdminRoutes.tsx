@@ -15,16 +15,13 @@ import { MODULES, MODULE_GROUPS, MODULE_BY_KEY, EXTRA_NAV } from './config/modul
 import { ResourcePage } from './engine/ResourcePage';
 import { AdminDashboard } from './screens/Dashboard';
 import { AdminAnalytics, AdminEstimatorConfig, AdminRoles, AdminTheme, AdminDataReset } from './screens/System';
-import { enquiries, estimateRequests, applications, users } from '@/data/ops';
-
-const BADGES: Record<string, number> = {
-  enquiries: enquiries.filter((e) => e.stage === 'new').length,
-  estimates: estimateRequests.filter((e) => e.stage === 'new').length,
-  applications: applications.filter((a) => a.stage === 'new').length,
-};
+import { users } from '@/data/ops';
+import { useLeadCounts } from './useLeadCounts';
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [filter, setFilter] = useState('');
+  /* Live, so a lead submitted on the public site moves this badge. */
+  const { badges } = useLeadCounts();
 
   const groups = MODULE_GROUPS.map((group) => ({
     group,
@@ -81,9 +78,9 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 >
                   <Icon name={item.icon} className="h-4 w-4 shrink-0" />
                   <span className="flex-1 truncate">{item.label}</span>
-                  {BADGES[item.key] ? (
+                  {badges[item.key] ? (
                     <span className="num rounded-full bg-cyan-500 px-1.5 py-0.5 text-[0.65rem] font-semibold text-white">
-                      {BADGES[item.key]}
+                      {badges[item.key]}
                     </span>
                   ) : null}
                 </NavLink>

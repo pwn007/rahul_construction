@@ -11,7 +11,10 @@ const CONTENT: Record<'privacy' | 'terms', { title: string; lead: string; sectio
         heading: 'What we collect',
         body: [
           'When you submit an enquiry, use the cost estimator, download a gated document or apply for a role, we collect the details you enter — typically your name, mobile number and, optionally, your email address and a description of your project.',
-          'We also collect basic, anonymous usage analytics: which pages were viewed, from which broad geography, and on what type of device. This is used to improve the site, not to identify you.',
+      /* This used to claim we collect anonymous usage analytics. There is no
+         analytics code on this site — no GA, no GTM, no pixel — so the claim
+         was untrue. Restore an accurate sentence if tracking is ever added. */
+      'We do not run any third-party analytics, advertising pixels or cross-site trackers on this website. Nothing you do here is shared with an advertising network.',
         ],
       },
       {

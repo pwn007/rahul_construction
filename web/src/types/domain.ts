@@ -238,7 +238,13 @@ export interface Enquiry extends BaseEntity {
   city?: string;
   budget?: string;
   message: string;
-  source: 'contact-form' | 'service-page' | 'project-page' | 'estimator' | 'download' | 'exit-intent';
+  /**
+   * Where the lead came from. Only values the site actually produces.
+   * `service-page`, `project-page` and `exit-intent` were removed — they were
+   * in the union and in the admin filter dropdown, but no code path ever set
+   * them, so the filter offered three options that could never match a row.
+   */
+  source: 'contact-form' | 'estimator' | 'download' | 'newsletter';
   stage: 'new' | 'contacted' | 'qualified' | 'proposal' | 'won' | 'lost';
   assignedTo?: string;
 }

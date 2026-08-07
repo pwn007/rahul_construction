@@ -19,6 +19,9 @@ import { Counter, Reveal } from '@/components/motion';
 import { cn } from '@/lib/cn';
 import { formatCurrencyCompact, formatRelative } from '@/lib/format';
 import { enquiries, estimateRequests, applications } from '@/data/ops';
+import { useLeadCounts } from '../useLeadCounts';
+import { useResourceList } from '@/hooks/useResource';
+import { enquiriesService, estimatesService } from '@/services';
 import { projects } from '@/data/projects';
 import { posts } from '@/data/content';
 
@@ -52,16 +55,30 @@ const SOURCE_SPLIT = [
 const PIPELINE = ['new', 'contacted', 'qualified', 'proposal', 'won'] as const;
 
 export function AdminDashboard() {
-  const newEnquiries = enquiries.filter((e) => e.stage === 'new').length;
-  const newEstimates = estimateRequests.filter((e) => e.stage === 'new').length;
-  const newApplications = applications.filter((a) => a.stage === 'new').length;
-  const pipelineValue = estimateRequests.reduce((sum, e) => sum + (e.totalMin + e.totalMax) / 2, 0);
+  /**
+   * Live, not the static seed arrays.
+   *
+   * These tiles used to read `@/data/ops` directly, so a lead submitted on the
+   * public site was already sitting in the enquiries table while the dashboard
+   * above it still reported the seeded total. `useLeadCounts` runs each module's
+   * own badge rule against the same data the tables show.
+   */
+  const { badges, totals } = useLeadCounts();
+  const { data: estimateRows } = useResourceList(estimatesService, { pageSize: 500 });
+  const { data: enquiryRows } = useResourceList(enquiriesService, { pageSize: 500 });
+
+  const newEnquiries = badges['enquiries'] ?? 0;
+  const newEstimates = badges['estimates'] ?? 0;
+  const newApplications = badges['applications'] ?? 0;
+  const liveEstimates = estimateRows?.items ?? estimateRequests;
+  const liveEnquiries = enquiryRows?.items ?? enquiries;
+  const pipelineValue = liveEstimates.reduce((sum, e) => sum + (e.totalMin + e.totalMax) / 2, 0);
 
   const kpis = [
-    { label: 'Total enquiries', value: enquiries.length, delta: '+18%', icon: Inbox, href: '/admin/enquiries', sub: `${newEnquiries} unread` },
-    { label: 'Estimates generated', value: estimateRequests.length, delta: '+34%', icon: Calculator, href: '/admin/estimates', sub: `${newEstimates} new` },
+    { label: 'Total enquiries', value: totals['enquiries'] ?? enquiries.length, delta: '+18%', icon: Inbox, href: '/admin/enquiries', sub: `${newEnquiries} unread` },
+    { label: 'Estimates generated', value: totals['estimates'] ?? estimateRequests.length, delta: '+34%', icon: Calculator, href: '/admin/estimates', sub: `${newEstimates} new` },
     { label: 'Published projects', value: projects.filter((p) => p.status === 'published').length, delta: '+2', icon: Building2, href: '/admin/projects', sub: `${projects.length} total` },
-    { label: 'Job applications', value: applications.length, delta: '+5', icon: Users, href: '/admin/applications', sub: `${newApplications} new` },
+    { label: 'Job applications', value: totals['applications'] ?? applications.length, delta: '+5', icon: Users, href: '/admin/applications', sub: `${newApplications} new` },
   ];
 
   return (
@@ -108,12 +125,12 @@ export function AdminDashboard() {
               <p className="text-caption uppercase tracking-wide text-white/50">Estimator pipeline value</p>
               <p className="num mt-2 text-4xl font-semibold">{formatCurrencyCompact(pipelineValue)}</p>
               <p className="mt-1 text-caption text-white/50">
-                Across {estimateRequests.length} estimates generated in the last 30 days
+                Across {liveEstimates.length} estimates generated in the last 30 days
               </p>
             </div>
             <div className="flex gap-8">
               {PIPELINE.map((stage) => {
-                const count = enquiries.filter((e) => e.stage === stage).length;
+                const count = liveEnquiries.filter((e) => e.stage === stage).length;
                 return (
                   <div key={stage}>
                     <p className="num text-2xl font-semibold">{count}</p>
@@ -197,7 +214,7 @@ export function AdminDashboard() {
         <Reveal delay={0.16} className="lg:col-span-5">
           <ChartCard title="Recent enquiries" subtitle="Newest first" action={<Link to="/admin/enquiries" className="flex items-center gap-1 text-caption text-cyan-700 dark:text-cyan-400">View all <ArrowUpRight className="h-3 w-3" /></Link>}>
             <div className="divide-y">
-              {enquiries.slice(0, 6).map((e) => (
+              {[...liveEnquiries].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 6).map((e) => (
                 <div key={e.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{e.name}</p>

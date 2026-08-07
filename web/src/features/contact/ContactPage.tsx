@@ -22,12 +22,36 @@ const contactSchema = z.object({
   email: z.string().email('Enter a valid email address').or(z.literal('')).optional(),
   serviceInterest: z.string().min(1, 'Please choose a service'),
   budget: z.string().optional(),
+  /**
+   * The site promises to "book a consultation" in six places and, until now,
+   * never asked when. One field turns that from a figure of speech into
+   * something the team can actually act on.
+   */
+  callbackWindow: z.string().optional(),
   message: z.string().min(10, 'Tell us a little more — at least 10 characters'),
 });
 
 type ContactForm = z.infer<typeof contactSchema>;
 
 const BUDGETS = ['Not sure yet', 'Under ₹25 L', '₹25 – 50 L', '₹50 L – 1 Cr', '₹1 – 2 Cr', 'Above ₹2 Cr'];
+
+/**
+ * The three WhatsApp links on this page used to be bare `wa.me/<number>` with no
+ * body, so the conversation opened with the visitor having to explain
+ * themselves. The estimator already pre-writes its context into the message;
+ * this matches that, at the level of detail a contact page knows.
+ */
+const WHATSAPP_HREF = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
+  'Hi Neetu Archstone, I found you through your website and would like to discuss a project.',
+)}`;
+
+const CALLBACK_WINDOWS = [
+  'Any time during working hours',
+  'Morning (10 AM – 1 PM)',
+  'Afternoon (1 – 5 PM)',
+  'Evening (5 – 7 PM)',
+  'Weekend',
+];
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -40,7 +64,7 @@ export default function ContactPage() {
     reset,
   } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { name: '', phone: '', email: '', serviceInterest: '', budget: '', message: '' },
+    defaultValues: { name: '', phone: '', email: '', serviceInterest: '', budget: '', callbackWindow: CALLBACK_WINDOWS[0], message: '' },
   });
 
   const onSubmit = async (data: ContactForm) => {
@@ -50,7 +74,7 @@ export default function ContactPage() {
       email: data.email,
       serviceInterest: data.serviceInterest,
       budget: data.budget,
-      message: data.message,
+      message: data.callbackWindow ? `${data.message}\n\nBest time to call: ${data.callbackWindow}` : data.message,
       city: 'Jaipur',
       source: 'contact-form',
       stage: 'new',
@@ -80,7 +104,7 @@ export default function ContactPage() {
               {SITE.phone}
             </Button>
             <Button
-              href={`https://wa.me/${SITE.whatsapp}`}
+              href={WHATSAPP_HREF}
               external
               variant="secondary"
               size="lg"
@@ -123,7 +147,7 @@ export default function ContactPage() {
               <div className="space-y-3">
                 {[
                   { icon: Phone, label: 'Call us', value: SITE.phone, href: `tel:${SITE.phoneRaw}`, note: SITE.hours },
-                  { icon: MessageCircle, label: 'WhatsApp', value: 'Message us instantly', href: `https://wa.me/${SITE.whatsapp}`, note: 'Usually answered within the hour', external: true },
+                  { icon: MessageCircle, label: 'WhatsApp', value: 'Message us instantly', href: WHATSAPP_HREF, note: 'Usually answered within the hour', external: true },
                   { icon: Mail, label: 'Email', value: SITE.email, href: `mailto:${SITE.email}`, note: 'Replies within one working day' },
                   { icon: MapPin, label: 'Office', value: SITE.address.full, note: 'Visits by appointment' },
                 ].map((item) => {
@@ -186,7 +210,7 @@ export default function ContactPage() {
                       {SITE.phone} and we will pick it up sooner.
                     </p>
                     <div className="mt-8 flex flex-wrap justify-center gap-3">
-                      <Button href={`https://wa.me/${SITE.whatsapp}`} external variant="accent" size="lg" leftIcon={<MessageCircle className="h-4 w-4" />}>
+                      <Button href={WHATSAPP_HREF} external variant="accent" size="lg" leftIcon={<MessageCircle className="h-4 w-4" />}>
                         WhatsApp us now
                       </Button>
                       <Button variant="secondary" size="lg" onClick={() => setSubmitted(false)}>
@@ -227,12 +251,22 @@ export default function ContactPage() {
                       </Select>
                     </FormField>
 
-                    <FormField label="Indicative budget" htmlFor="budget" hint="Optional" className="sm:col-span-2">
+                    <FormField label="Indicative budget" htmlFor="budget" hint="Optional">
                       <Select id="budget" {...register('budget')}>
                         <option value="">Prefer not to say</option>
                         {BUDGETS.map((b) => (
                           <option key={b} value={b}>
                             {b}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormField>
+
+                    <FormField label="Best time to call you" htmlFor="callbackWindow" hint="Optional">
+                      <Select id="callbackWindow" {...register('callbackWindow')} defaultValue={CALLBACK_WINDOWS[0]}>
+                        {CALLBACK_WINDOWS.map((w) => (
+                          <option key={w} value={w}>
+                            {w}
                           </option>
                         ))}
                       </Select>

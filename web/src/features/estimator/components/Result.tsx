@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Check, Download, Info, MessageCircle, RotateCcw, Ruler, Share2 } from 'lucide-react';
+import { ArrowUpRight, Check, Download, Info, MessageCircle, Plus, RotateCcw, Ruler, Share2 } from 'lucide-react';
 import { Badge, Button, Dialog, FormField, Input, useToast } from '@/components/ui';
 import { Counter, Reveal } from '@/components/motion';
 import { formatCurrency, formatCurrencyCompact, formatDuration, formatNumber } from '@/lib/format';
@@ -12,6 +12,8 @@ import { projects } from '@/data/projects';
 import { estimatesService } from '@/services';
 import { COST_HEADS } from '@/constants/estimator';
 import type { EstimateResult, EstimatorInput } from '../model';
+import { StepEnhancements } from './Steps';
+import { StepMaterials } from './StepMaterials';
 import { useCopy } from '@/hooks';
 
 /* ------------------------------------------------------------------ */
@@ -132,11 +134,13 @@ function LeadDialog({
 export function ResultScreen({
   result,
   input,
+  patch,
   onRestart,
   shareUrl,
 }: {
   result: EstimateResult;
   input: EstimatorInput;
+  patch: (next: Partial<EstimatorInput>) => void;
   onRestart: () => void;
   shareUrl: string;
 }) {
@@ -159,9 +163,17 @@ export function ResultScreen({
     const { generateEstimatePdf } = await import('../pdf');
     generateEstimatePdf(result, lead);
     setLeadOpen(false);
-    push({ kind: 'success', title: 'Your estimate is downloading', description: 'We will call you within one working day.' });
 
-    // Fire-and-forget lead capture — the download must never wait on the network.
+    /**
+     * The PDF is already on their machine, so the capture never blocks it — but
+     * the outcome is no longer hidden.
+     *
+     * This used to end in `.catch(() => undefined)` while the toast promised
+     * "We will call you within one working day." If the write failed, the
+     * visitor was told they would be contacted by a business that had never
+     * received their details. Now the promise is only made once the record
+     * exists, and a failure offers a channel that cannot silently fail.
+     */
     void estimatesService
       .create({
         name: lead.name,
@@ -184,7 +196,20 @@ export function ResultScreen({
         timelineWeeks: result.timelineWeeks,
         stage: 'new',
       })
-      .catch(() => undefined);
+      .then(() =>
+        push({
+          kind: 'success',
+          title: 'Your estimate is downloading',
+          description: 'We will call you within one working day.',
+        }),
+      )
+      .catch(() =>
+        push({
+          kind: 'error',
+          title: 'Your estimate is downloading',
+          description: 'We could not save your details, so nobody will call. Send it on WhatsApp and we will pick it up.',
+        }),
+      );
   };
 
   const whatsappText = encodeURIComponent(
@@ -243,6 +268,20 @@ export function ResultScreen({
                   {copied ? 'Copied' : 'Copy link'}
                 </Button>
               </div>
+
+              {/*
+                A visitor who wants to talk but does not want a PDF and does not
+                use WhatsApp previously had nowhere to go from this screen —
+                the only routes off it were the download gate, wa.me, and
+                browsing projects.
+              */}
+              <p className="mt-6 text-caption text-white/55">
+                Want us to walk you through it?{' '}
+                <Link to={ROUTES.contact} className="link-underline font-medium text-cyan-400">
+                  Book a consultation
+                </Link>{' '}
+                and we will go through the numbers line by line — no charge, no obligation.
+              </p>
             </div>
 
             <div className="lg:col-span-5">
@@ -274,6 +313,47 @@ export function ResultScreen({
           </div>
         </div>
       </Reveal>
+
+      {/*
+        Refinement panels.
+
+        These two used to be wizard steps 5 and 6 — twenty-nine material choices
+        and twelve enhancement toggles standing between the visitor and a number
+        that neither of them was required to produce. They live here now, after
+        the estimate, collapsed. Someone looking at their own figure will happily
+        spend a minute moving it; someone who has not seen one yet will not.
+      */}
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <RefinePanel
+          title="Add enhancements"
+          summary={
+            input.enhancements.length
+              ? `${input.enhancements.length} added · ${formatCurrencyCompact(result.enhancementsCost)}`
+              : 'Modular kitchen, false ceiling, solar, lift and more'
+          }
+          count={input.enhancements.length}
+        >
+          <StepEnhancements input={input} patch={patch} chargeableArea={result.chargeableArea} embedded />
+        </RefinePanel>
+
+        <RefinePanel
+          title="Specify materials"
+          summary={
+            input.materialMode === 'custom'
+              ? `Custom specification · ${result.specAdjustment >= 0 ? '+' : '−'}${formatCurrencyCompact(Math.abs(result.specAdjustment))}`
+              : 'Brand by brand — steel, tiles, switches, sanitaryware'
+          }
+          count={input.materialMode === 'custom' ? Object.keys(input.materials ?? {}).length : 0}
+        >
+          <StepMaterials
+            input={input}
+            patch={patch}
+            builtUpArea={result.builtUpArea}
+            specAdjustment={result.specAdjustment}
+            embedded
+          />
+        </RefinePanel>
+      </div>
 
       {/* Breakdown */}
       <div className="mt-6 grid gap-6 lg:grid-cols-12">
@@ -554,12 +634,12 @@ export function LiveCostMeter({ result, compact }: { result: EstimateResult; com
 
               <p className="mt-4 flex items-start gap-2 border-t pt-4 text-caption leading-relaxed text-muted">
                 <Ruler className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
-                Add your plot area in step 2 and this updates with every choice after it.
+                Add your plot area above and this updates with every choice after it.
               </p>
             </>
           )}
         </div>
-        {compact && <p className="shrink-0 text-caption text-subtle">Step 2</p>}
+        {compact && <p className="shrink-0 text-caption text-subtle">Add area</p>}
       </div>
     );
   }
@@ -619,5 +699,54 @@ export function LiveCostMeter({ result, compact }: { result: EstimateResult; com
         </p>
       )}
     </div>
+  );
+}
+
+/* ==================================================================== */
+/* Refinement panel                                                      */
+/* ==================================================================== */
+
+/**
+ * A collapsed drawer on the result screen.
+ *
+ * Uses a native `<details>` rather than animated state: it is keyboard- and
+ * screen-reader-accessible for free, survives a re-render, and needs no motion
+ * gating. The summary carries the current selection so the panel stays useful
+ * while shut — a visitor should be able to see that they have added four
+ * enhancements without opening anything.
+ */
+function RefinePanel({
+  title,
+  summary,
+  count,
+  children,
+}: {
+  title: string;
+  summary: string;
+  count: number;
+  children: ReactNode;
+}) {
+  return (
+    <details className="surface group rounded-xl border shadow-sm open:shadow-md">
+      <summary className="flex cursor-pointer list-none items-center gap-4 p-6">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
+          <Plus className="h-5 w-5 transition-transform duration-300 group-open:rotate-45" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex items-center gap-2">
+            <span className="font-display text-heading-md font-semibold">{title}</span>
+            {count > 0 && (
+              <Badge variant="brand" size="sm">
+                {count}
+              </Badge>
+            )}
+          </span>
+          <span className="mt-0.5 block truncate text-caption text-muted">{summary}</span>
+        </span>
+        <span className="shrink-0 text-caption text-subtle group-open:hidden">Open</span>
+        <span className="hidden shrink-0 text-caption text-subtle group-open:block">Close</span>
+      </summary>
+      <div className="border-t p-6 pt-7">{children}</div>
+    </details>
   );
 }

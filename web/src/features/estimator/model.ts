@@ -67,7 +67,17 @@ export const DEFAULT_INPUT: EstimatorInput = {
   packageKey: 'semi-furnished',
   quality: 'signature',
   location: 'mansarovar',
-  enhancements: ['modular-kitchen', 'false-ceiling'],
+  /**
+   * Nothing pre-selected, for the same reason `plotArea` is 0.
+   *
+   * This used to seed `['modular-kitchen', 'false-ceiling']` — a ₹2.85 L lumpsum
+   * plus ₹95/sqft charged into the live meter from the first screen, before the
+   * visitor had seen the enhancement list at all. On a 2,160 sq ft build that is
+   * ~₹4.7 L, roughly a tenth of the estimate, agreed to by nobody. It also meant
+   * a default configuration with no plot area still returned ₹2.76 L.
+   * Enhancements are now opt-in on the result screen, priced individually.
+   */
+  enhancements: [],
   materialMode: 'recommended',
   materials: {},
 };

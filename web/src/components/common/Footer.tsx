@@ -101,16 +101,46 @@ export function Footer() {
             <p className="mt-5 text-sm text-white/60">
               Practical guides on building in Jaipur — costs, timelines and the decisions that matter. No noise.
             </p>
+            {/*
+              This used to validate the address, fire a "Subscribed" toast and
+              store nothing at all — a form that lied to every visitor who used
+              it. It now writes a real lead so the address reaches the same
+              inbox as every other enquiry.
+            */}
             <form
               className="mt-5 flex gap-2"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                if (!email.includes('@')) {
+                const address = email.trim();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
                   push({ kind: 'warning', title: 'Enter a valid email address' });
                   return;
                 }
-                push({ kind: 'success', title: 'Subscribed', description: 'You will hear from us once a month at most.' });
-                setEmail('');
+                try {
+                  /*
+                   * Imported on submit, not at module scope.
+                   *
+                   * The footer renders on every page, so a static import here
+                   * pulls the whole services layer — adapters and all seed data —
+                   * into the entry chunk. That cost 14 KB gzip at first paint to
+                   * support a form almost nobody uses. Same reasoning as the
+                   * dynamic jsPDF import in the estimator.
+                   */
+                  const { enquiriesService } = await import('@/services');
+                  await enquiriesService.create({
+                    name: address.split('@')[0] ?? 'Newsletter subscriber',
+                    phone: '',
+                    email: address,
+                    serviceInterest: 'Newsletter',
+                    message: 'Subscribed to the newsletter from the site footer.',
+                    source: 'newsletter',
+                    stage: 'new',
+                  });
+                  push({ kind: 'success', title: 'Subscribed', description: 'You will hear from us once a month at most.' });
+                  setEmail('');
+                } catch {
+                  push({ kind: 'error', title: 'That did not go through', description: 'Please try again, or email us directly.' });
+                }
               }}
             >
               <Input

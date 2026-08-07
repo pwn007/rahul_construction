@@ -13,7 +13,7 @@ import { SITE } from '@/constants/site';
 import { IMG } from '@/lib/media';
 import { usePrefersReducedMotion } from '@/hooks';
 import { calculateEstimate, decodeInput, encodeInput, DEFAULT_INPUT, type EstimatorInput } from './model';
-import { StepIntent, StepSite, StepStructure, StepPackage, StepEnhancements } from './components/Steps';
+import { StepPlot, StepBuild, StepFinish } from './components/Steps';
 import { StepMaterials } from './components/StepMaterials';
 import { LiveCostMeter, ResultScreen } from './components/Result';
 
@@ -50,27 +50,65 @@ const DELIVERABLES = [
   },
 ];
 
-const STEPS = [
-  { key: 'intent', label: 'Project' },
-  { key: 'site', label: 'Site' },
-  { key: 'structure', label: 'Structure' },
-  { key: 'package', label: 'Package' },
-  { key: 'materials', label: 'Materials' },
-  { key: 'extras', label: 'Enhancements' },
+/**
+ * Three questions, then the number.
+ *
+ * The model has exactly one required input — the area — and every other field
+ * ships with a working default. The old seven-step wizard therefore stood
+ * between the visitor and a figure it could already have produced, with the two
+ * heaviest steps (fourteen material categories, twelve enhancement toggles)
+ * contributing nothing to the default calculation at all. Both now live on the
+ * result screen as optional refinements, where a visitor who has seen their
+ * number is far more willing to spend the effort.
+ */
+const ALL_STEPS = [
+  { key: 'plot', label: 'Your plot' },
+  { key: 'build', label: 'Your build' },
+  { key: 'finish', label: 'Your finish' },
   { key: 'result', label: 'Estimate' },
 ] as const;
+
+type StepKey = (typeof ALL_STEPS)[number]['key'];
+
+/** Interiors-only projects have no structure to configure, so that step is not shown at all. */
+function stepsFor(propertyType: EstimatorInput['propertyType']) {
+  return propertyType === 'interior-only' ? ALL_STEPS.filter((s) => s.key !== 'build') : [...ALL_STEPS];
+}
 
 export default function EstimatorPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const reduced = usePrefersReducedMotion();
 
-  const [step, setStep] = useState(0);
   const [input, setInput] = useState<EstimatorInput>(() => ({
     ...DEFAULT_INPUT,
     ...readStore<Partial<EstimatorInput>>(STORAGE_KEYS.estimator, {}, 'session'),
     ...decodeInput(location.search),
   }));
+
+  const steps = useMemo(() => stepsFor(input.propertyType), [input.propertyType]);
+
+  /**
+   * The step is part of the draft, not local state.
+   *
+   * It used to be a bare `useState(0)`, so refreshing on the last step dropped
+   * you back to the first with forward navigation disabled — every answer
+   * survived but your position did not. A deep link that pre-answered the
+   * package (see PackageCard) landed on step one too, re-asking what the link
+   * had already said. Both are fixed by seeding from the saved draft and from
+   * whatever the URL already answers.
+   */
+  const [step, setStep] = useState(() => {
+    const saved = readStore<{ step?: number }>(STORAGE_KEYS.estimator, {}, 'session').step;
+    const decoded = decodeInput(location.search);
+    const initial = saved ?? (decoded.packageKey ? 2 : decoded.plotArea ? 1 : 0);
+    return Math.max(0, Math.min(stepsFor(decoded.propertyType ?? DEFAULT_INPUT.propertyType).length - 1, initial));
+  });
+
+  /* A property-type change can shorten the list under our feet. */
+  useEffect(() => {
+    setStep((prev) => Math.min(prev, steps.length - 1));
+  }, [steps.length]);
 
   const result = useMemo(() => calculateEstimate(input), [input]);
 
@@ -80,8 +118,8 @@ export default function EstimatorPage() {
 
   /* Draft survives a refresh; the URL stays deep-linkable. */
   useEffect(() => {
-    writeStore(STORAGE_KEYS.estimator, input, 'session');
-  }, [input]);
+    writeStore(STORAGE_KEYS.estimator, { ...input, step }, 'session');
+  }, [input, step]);
 
   useEffect(() => {
     navigate({ search: encodeInput(input) }, { replace: true });
@@ -89,7 +127,7 @@ export default function EstimatorPage() {
   }, [input]);
 
   const goTo = (next: number) => {
-    setStep(Math.max(0, Math.min(STEPS.length - 1, next)));
+    setStep(Math.max(0, Math.min(steps.length - 1, next)));
     const anchor = document.getElementById('wizard');
     if (anchor) {
       const top = anchor.getBoundingClientRect().top + window.scrollY - 100;
@@ -103,12 +141,13 @@ export default function EstimatorPage() {
     goTo(0);
   };
 
-  const isResult = step === STEPS.length - 1;
+  const current: StepKey = steps[step]?.key ?? 'plot';
+  const stepLabel = `Step ${step + 1} of ${steps.length - 1}`;
+  const isResult = current === 'result';
   const shareUrl = `${SITE.url}/estimator?${encodeInput(input)}`;
 
-  // Step 1 asks nothing quantitative, so it is always advanceable.
-  // From step 2 onward the plot/carpet area is what the whole model rests on.
-  const canAdvance = step === 0 || input.plotArea > 0;
+  /** The area is the model's only genuine requirement, and it is asked on step 1. */
+  const canAdvance = input.plotArea > 0;
 
   return (
     <>
@@ -195,7 +234,7 @@ export default function EstimatorPage() {
           {/* Step indicator */}
           <div className="mb-10 overflow-x-auto no-scrollbar">
             <ol className="flex min-w-max items-center gap-1">
-              {STEPS.map((s, i) => {
+              {steps.map((s, i) => {
                 const done = i < step;
                 const active = i === step;
                 return (
@@ -222,7 +261,7 @@ export default function EstimatorPage() {
                       </span>
                       {s.label}
                     </button>
-                    {i < STEPS.length - 1 && (
+                    {i < steps.length - 1 && (
                       <span className={cn('mx-1 h-px w-6 shrink-0', i < step ? 'bg-cyan-500' : 'bg-[rgb(var(--c-border))]')} aria-hidden />
                     )}
                   </li>
@@ -232,7 +271,7 @@ export default function EstimatorPage() {
           </div>
 
           {isResult ? (
-            <ResultScreen result={result} input={input} onRestart={restart} shareUrl={shareUrl} />
+            <ResultScreen result={result} input={input} patch={patch} onRestart={restart} shareUrl={shareUrl} />
           ) : (
             <div className="grid gap-8 lg:grid-cols-12">
               <div className="lg:col-span-8">
@@ -245,19 +284,9 @@ export default function EstimatorPage() {
                       exit={reduced ? { opacity: 0 } : { opacity: 0, x: -20 }}
                       transition={{ duration: reduced ? 0.15 : 0.35, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      {step === 0 && <StepIntent input={input} patch={patch} />}
-                      {step === 1 && <StepSite input={input} patch={patch} />}
-                      {step === 2 && <StepStructure input={input} patch={patch} />}
-                      {step === 3 && <StepPackage input={input} patch={patch} />}
-                      {step === 4 && (
-                        <StepMaterials
-                          input={input}
-                          patch={patch}
-                          builtUpArea={result.builtUpArea}
-                          specAdjustment={result.specAdjustment}
-                        />
-                      )}
-                      {step === 5 && <StepEnhancements input={input} patch={patch} chargeableArea={result.chargeableArea} />}
+                      {current === 'plot' && <StepPlot input={input} patch={patch} stepLabel={stepLabel} />}
+                      {current === 'build' && <StepBuild input={input} patch={patch} stepLabel={stepLabel} />}
+                      {current === 'finish' && <StepFinish input={input} patch={patch} stepLabel={stepLabel} />}
                     </motion.div>
                   </AnimatePresence>
 
@@ -278,14 +307,14 @@ export default function EstimatorPage() {
                       disabled={!canAdvance}
                       rightIcon={<ArrowRight className="h-4 w-4" />}
                     >
-                      {step === STEPS.length - 2 ? 'See my estimate' : 'Continue'}
+                      {step === steps.length - 2 ? 'See my estimate' : 'Continue'}
                     </Button>
                   </div>
                 </div>
 
                 <p className="mt-4 text-caption text-subtle">
-                  Your progress is saved automatically. The URL carries your configuration — bookmark it or send it to
-                  someone.
+                  Your answers and your place in the flow are both saved — a refresh will not lose them. The URL carries
+                  your configuration, so you can bookmark it or send it to someone.
                 </p>
               </div>
 

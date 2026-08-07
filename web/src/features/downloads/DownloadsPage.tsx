@@ -46,6 +46,7 @@ export default function DownloadsPage() {
       setError('Please enter your name and a valid mobile number.');
       return;
     }
+    /* The file is released either way; only the capture outcome is reported. */
     void enquiriesService
       .create({
         name: name.trim(),
@@ -55,7 +56,13 @@ export default function DownloadsPage() {
         source: 'download',
         stage: 'new',
       })
-      .catch(() => undefined);
+      .catch(() =>
+        push({
+          kind: 'error',
+          title: 'Your download has started',
+          description: 'We could not save your details this time — call or WhatsApp us if you would like a follow-up.',
+        }),
+      );
 
     if (gated) startDownload(gated);
     setGated(null);

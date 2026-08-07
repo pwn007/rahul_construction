@@ -16,11 +16,14 @@ export function StepMaterials({
   patch,
   builtUpArea,
   specAdjustment,
+  embedded,
 }: {
   input: EstimatorInput;
   patch: Patch;
   builtUpArea: number;
   specAdjustment: number;
+  /** True when rendered inside a result-screen refinement panel. */
+  embedded?: boolean;
 }) {
   const [active, setActive] = useState(0);
   const category = MATERIAL_CATEGORIES[active];
@@ -58,11 +61,13 @@ export function StepMaterials({
   if (input.materialMode !== 'custom') {
     return (
       <div>
-        <StepHeading
-          eyebrow="Step 5 of 7"
-          title="Which materials?"
-          lead="Take our recommended specification, or choose brand by brand — steel, cement, tiles, switches, sanitaryware and more."
-        />
+        {!embedded && (
+          <StepHeading
+            eyebrow="Materials"
+            title="Which materials?"
+            lead="Take our recommended specification, or choose brand by brand — steel, cement, tiles, switches, sanitaryware and more."
+          />
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <RadioCard
@@ -118,11 +123,13 @@ export function StepMaterials({
 
   return (
     <div>
-      <StepHeading
-        eyebrow="Step 5 of 7"
-        title="Specify your materials"
-        lead="Fourteen categories, the same brands and rates we buy at. Every choice moves your estimate immediately."
-      />
+      {!embedded && (
+        <StepHeading
+          eyebrow="Materials"
+          title="Specify your materials"
+          lead="Fourteen categories, the same brands and rates we buy at. Every choice moves your estimate immediately."
+        />
+      )}
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <button

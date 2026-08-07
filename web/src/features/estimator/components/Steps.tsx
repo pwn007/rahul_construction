@@ -29,16 +29,28 @@ export function StepHeading({ eyebrow, title, lead }: { eyebrow: string; title: 
 }
 
 /* ==================================================================== */
-/* 1 — Intent                                                            */
+/* 1 — Your plot: what, how, how big, where                              */
 /* ==================================================================== */
 
-export function StepIntent({ input, patch }: { input: EstimatorInput; patch: Patch }) {
+/**
+ * Merged from the old "Intent" and "Site" steps.
+ *
+ * Only one input in the whole estimator is actually required — the area — and
+ * it used to sit behind a step that asked nothing quantitative. Putting the
+ * property type, the service model, the area and the locality on one screen
+ * means the visitor supplies everything the model genuinely needs before the
+ * first Continue, and the live meter has a real number from that moment on.
+ */
+export function StepPlot({ input, patch, stepLabel }: { input: EstimatorInput; patch: Patch; stepLabel: string }) {
+  const areaSqft = toSqft(input.plotArea, input.areaUnit);
+  const isInterior = input.propertyType === 'interior-only';
+
   return (
     <div>
       <StepHeading
-        eyebrow="Step 1 of 7"
-        title="What are you building?"
-        lead="This sets the cost model. Commercial and mixed-use carry higher loads, compliance requirements and therefore higher rates."
+        eyebrow={stepLabel}
+        title="What are you building, and where?"
+        lead="Commercial and mixed-use carry higher loads and compliance requirements, so they price differently. Everything else on this page we can assume for you."
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -80,31 +92,8 @@ export function StepIntent({ input, patch }: { input: EstimatorInput; patch: Pat
           />
         </div>
       </div>
-    </div>
-  );
-}
 
-/* ==================================================================== */
-/* 2 — Site                                                              */
-/* ==================================================================== */
-
-export function StepSite({ input, patch }: { input: EstimatorInput; patch: Patch }) {
-  const areaSqft = toSqft(input.plotArea, input.areaUnit);
-  const isInterior = input.propertyType === 'interior-only';
-
-  return (
-    <div>
-      <StepHeading
-        eyebrow="Step 2 of 7"
-        title={isInterior ? 'How large is the space?' : 'Tell us about your plot'}
-        lead={
-          isInterior
-            ? 'Enter the carpet or built-up area you want fitted out.'
-            : 'Plot size and locality. We convert units automatically — enter whichever you know.'
-        }
-      />
-
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="mt-10 grid gap-6 sm:grid-cols-2">
         <FormField label={isInterior ? 'Area' : 'Plot area'} htmlFor="plotArea" required>
           <div className="flex gap-2">
             <Input
@@ -145,65 +134,27 @@ export function StepSite({ input, patch }: { input: EstimatorInput; patch: Patch
         </FormField>
       </div>
 
-      {!isInterior && (
-        <div className="mt-8">
-          <div className="mb-2 flex items-center gap-2">
-            <p className="text-[0.8125rem] font-medium">Ground coverage after setbacks</p>
-            <Tooltip content="The share of your plot you can actually build on after mandatory setbacks. 70–75% is typical for a residential plot in Jaipur.">
-              <Info className="h-3.5 w-3.5 text-subtle" />
-            </Tooltip>
-          </div>
-          <div className="flex items-center gap-4">
-            <input
-              type="range"
-              min={40}
-              max={95}
-              step={1}
-              value={Math.round(input.builtUpRatio * 100)}
-              onChange={(e) => patch({ builtUpRatio: Number(e.target.value) / 100 })}
-              className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[rgb(var(--c-text))]/[0.1] accent-cyan-500"
-              aria-label="Ground coverage percentage"
-            />
-            <span className="num w-14 text-right text-sm font-semibold">{Math.round(input.builtUpRatio * 100)}%</span>
-          </div>
-          <p className="num mt-3 text-caption text-subtle">
-            Footprint ≈ {formatNumber(areaSqft * input.builtUpRatio)} sq ft per floor
-          </p>
-        </div>
-      )}
     </div>
   );
 }
 
 /* ==================================================================== */
-/* 3 — Structure                                                         */
+/* 2 — Your build: floors, levels, footprint                             */
 /* ==================================================================== */
 
-export function StepStructure({ input, patch }: { input: EstimatorInput; patch: Patch }) {
-  const isInterior = input.propertyType === 'interior-only';
-
-  if (isInterior) {
-    return (
-      <div>
-        <StepHeading
-          eyebrow="Step 3 of 7"
-          title="Structure"
-          lead="You selected an interiors-only project, so there is no structure to configure. Continue to choose your package."
-        />
-        <div className="surface flex items-start gap-4 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.05] p-5">
-          <Info className="mt-0.5 h-5 w-5 shrink-0 text-cyan-500" />
-          <p className="text-sm text-muted">
-            Interior fit-outs are priced on the area being finished, not on plot size and floor count.
-          </p>
-        </div>
-      </div>
-    );
-  }
+/**
+ * Never rendered for interiors-only projects — that path skips this step
+ * entirely rather than showing a heading with no inputs under it, which is what
+ * the old "Structure" step did.
+ */
+export function StepBuild({ input, patch, stepLabel }: { input: EstimatorInput; patch: Patch; stepLabel: string }) {
+  const areaSqft = toSqft(input.plotArea, input.areaUnit);
+  const coveragePct = Math.round(input.builtUpRatio * 100);
 
   return (
     <div>
       <StepHeading
-        eyebrow="Step 3 of 7"
+        eyebrow={stepLabel}
         title="How many floors?"
         lead="Each additional floor adds structure, services and roughly four weeks to the programme."
       />
@@ -249,23 +200,70 @@ export function StepStructure({ input, patch }: { input: EstimatorInput; patch: 
           <Switch checked={input.hasStilt} onChange={(v) => patch({ hasStilt: v })} label="Include stilt parking" />
         </label>
       </div>
+
+      {/*
+        Ground coverage is a JDA setback question most homeowners cannot answer,
+        so it is presented as a stated assumption they may correct rather than a
+        raw control they must set. It used to be an unlabelled live slider on the
+        site step, where dragging it from 72% to 95% silently inflated the
+        estimate by a third.
+      */}
+      <details className="group mt-8 rounded-lg border border-dashed p-5">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+          <span>
+            <span className="block text-[0.8125rem] font-medium">
+              We have assumed you can build on {coveragePct}% of the plot
+            </span>
+            <span className="num mt-0.5 block text-caption text-subtle">
+              Footprint ≈ {formatNumber(areaSqft * input.builtUpRatio)} sq ft per floor · typical after Jaipur setbacks
+            </span>
+          </span>
+          <span className="shrink-0 text-caption text-cyan-700 group-open:hidden dark:text-cyan-400">Adjust</span>
+          <span className="hidden shrink-0 text-caption text-subtle group-open:block">Close</span>
+        </summary>
+
+        <div className="mt-5 border-t pt-5">
+          <div className="mb-2 flex items-center gap-2">
+            <p className="text-[0.8125rem] font-medium">Ground coverage after setbacks</p>
+            <Tooltip content="The share of your plot you can actually build on after mandatory setbacks. 70–75% is typical for a residential plot in Jaipur. Your architect or the JDA sanction plan will give the exact figure.">
+              <Info className="h-3.5 w-3.5 text-subtle" />
+            </Tooltip>
+          </div>
+          <div className="flex items-center gap-4">
+            <input
+              type="range"
+              min={40}
+              max={95}
+              step={1}
+              value={coveragePct}
+              onChange={(e) => patch({ builtUpRatio: Number(e.target.value) / 100 })}
+              className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-[rgb(var(--c-text))]/[0.1] accent-cyan-500"
+              aria-label="Ground coverage percentage"
+            />
+            <span className="num w-14 text-right text-sm font-semibold">{coveragePct}%</span>
+          </div>
+          <p className="mt-3 text-caption text-subtle">
+            Leave this alone if you are not sure — it only changes the footprint we price.
+          </p>
+        </div>
+      </details>
     </div>
   );
 }
 
 /* ==================================================================== */
-/* 4 — Package & quality                                                 */
+/* 3 — Your finish: package & quality                                    */
 /* ==================================================================== */
 
-export function StepPackage({ input, patch }: { input: EstimatorInput; patch: Patch }) {
+export function StepFinish({ input, patch, stepLabel }: { input: EstimatorInput; patch: Patch; stepLabel: string }) {
   const labourOnly = input.serviceModel === 'labour-only';
 
   return (
     <div>
       <StepHeading
-        eyebrow="Step 4 of 7"
+        eyebrow={stepLabel}
         title="How far should we take it?"
-        lead="Three levels of completion, taken directly from our published rate card."
+        lead="Three levels of completion, taken directly from our published rate card. You can refine materials and add extras once you have seen your number."
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -363,17 +361,29 @@ export function StepPackage({ input, patch }: { input: EstimatorInput; patch: Pa
 }
 
 /* ==================================================================== */
-/* 5 — Enhancements                                                      */
+/* Enhancements — now a post-estimate refinement, not a step             */
 /* ==================================================================== */
 
+/**
+ * Moved out of the wizard and onto the result screen.
+ *
+ * Enhancements are purely additive: they never block the calculation. Asking for
+ * twelve yes/no decisions before showing a number cost us visitors for no
+ * modelling benefit, and two of them used to arrive pre-ticked — a ₹2.85 L
+ * modular kitchen and a ₹95/sqft false ceiling that inflated the meter by
+ * roughly 10% before anyone had seen the list. Nothing is pre-selected now.
+ */
 export function StepEnhancements({
   input,
   patch,
   chargeableArea,
+  embedded,
 }: {
   input: EstimatorInput;
   patch: Patch;
   chargeableArea: number;
+  /** True when rendered inside a result-screen panel rather than as a wizard step. */
+  embedded?: boolean;
 }) {
   const available = ENHANCEMENTS.filter((e) => e.appliesTo.includes(input.propertyType));
   const labourOnly = input.serviceModel === 'labour-only';
@@ -393,11 +403,13 @@ export function StepEnhancements({
 
   return (
     <div>
-      <StepHeading
-        eyebrow="Step 6 of 7"
-        title="Anything else?"
-        lead="These are the line items that most often get discovered late and blow the budget. Add them now and see the real number."
-      />
+      {!embedded && (
+        <StepHeading
+          eyebrow="Enhancements"
+          title="Anything else?"
+          lead="These are the line items that most often get discovered late and blow the budget. Add them now and see the real number."
+        />
+      )}
 
       {labourOnly && (
         <div className="mb-6 flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/[0.06] p-4">

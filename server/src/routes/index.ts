@@ -61,6 +61,18 @@ const estimateSchema = z.object({
   qualityTier: z.string(),
   location: z.string(),
   enhancements: z.array(z.string()).default([]),
+  /**
+   * The estimator's material specification.
+   *
+   * These three were missing from this schema while the client had been sending
+   * them since the material picker shipped. Zod strips unknown keys and
+   * `validate()` reassigns `req.body` to the parsed result, so the entire
+   * specification was being discarded on arrival — silently, and only once
+   * VITE_API_MODE=http made this route live at all.
+   */
+  materialMode: z.enum(['recommended', 'custom']).optional(),
+  materials: z.record(z.record(z.string())).optional(),
+  specAdjustment: z.number().optional(),
   builtUpArea: z.number().positive(),
   totalMin: z.number().nonnegative(),
   totalMax: z.number().nonnegative(),

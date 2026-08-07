@@ -673,7 +673,7 @@ export const MODULES: ResourceConfig<never>[] = [
     canCreate: false,
     filters: [
       { key: 'stage', label: 'Stage', options: ['new', 'contacted', 'qualified', 'proposal', 'won', 'lost'].map((v) => ({ value: v, label: v })) },
-      { key: 'source', label: 'Source', options: ['contact-form', 'service-page', 'project-page', 'estimator', 'download', 'exit-intent'].map((v) => ({ value: v, label: v })) },
+      { key: 'source', label: 'Source', options: ['contact-form', 'estimator', 'download', 'newsletter'].map((v) => ({ value: v, label: v })) },
     ],
     badge: (rows: never[]) => (rows as unknown as { stage: string }[]).filter((r) => r.stage === 'new').length || undefined,
     columns: [
