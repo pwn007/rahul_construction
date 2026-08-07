@@ -27,7 +27,7 @@ import { useHotkey, useLockBodyScroll, usePrefersReducedMotion } from '@/hooks';
 import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
 
 /* ==================================================================== */
-/* Preloader — once per session, never blocks longer than ~1.4s          */
+/* Preloader — once per session, never blocks longer than ~3.0s          */
 /* ==================================================================== */
 
 export function Preloader() {
@@ -40,14 +40,18 @@ export function Preloader() {
     writeStore(STORAGE_KEYS.preloaderSeen, true, 'session');
 
     const start = performance.now();
-    const duration = 1200;
+    const duration = 1900;
     let frame = 0;
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
-      setProgress(Math.round((1 - Math.pow(1 - t, 3)) * 100));
+      // Exponent 1.8 rather than a cubic: a cubic ease-out is already at 87% by
+      // the halfway mark, so the crane, scaffold and the worker's climb down —
+      // everything above 70% — flashed past in the last sliver. Left unrounded
+      // so the scene interpolates continuously instead of in 101 discrete steps.
+      setProgress((1 - Math.pow(1 - t, 1.8)) * 100);
       if (t < 1) frame = requestAnimationFrame(tick);
-      else window.setTimeout(() => setVisible(false), 180);
+      else window.setTimeout(() => setVisible(false), 300);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
@@ -90,7 +94,7 @@ export function Preloader() {
           <div className="relative mt-8 h-px w-56 overflow-hidden bg-white/15">
             <motion.div className="h-full bg-cyan-500" style={{ width: `${progress}%` }} />
           </div>
-          <p className="num relative mt-3 text-caption text-white/40">{progress}%</p>
+          <p className="num relative mt-3 text-caption text-white/40">{Math.round(progress)}%</p>
         </motion.div>
       )}
     </AnimatePresence>

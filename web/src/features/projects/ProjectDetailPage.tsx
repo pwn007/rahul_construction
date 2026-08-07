@@ -75,7 +75,11 @@ export default function ProjectDetailPage() {
                 {project.category.replace('-', ' ')}
               </Badge>
               {project.stage !== 'completed' && (
-                <Badge variant="warning" size="md">
+                // Solid rather than the default tinted warning badge: this sits
+                // on a photograph, where a 12% fill is invisible and #D97706
+                // text drops to ~3.2:1 over any bright part of the image. Amber
+                // on ink is 6.3:1 and holds up whatever the cover photo is.
+                <Badge variant="warning" size="md" className="bg-warning text-ink-950">
                   {project.stage === 'ongoing' ? 'In progress' : 'Upcoming'}
                 </Badge>
               )}

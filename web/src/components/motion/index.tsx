@@ -8,7 +8,15 @@ import {
   type ElementType,
   type ReactNode,
 } from 'react';
-import { motion, useInView as useFramerInView, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import {
+  motion,
+  useInView as useFramerInView,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { usePrefersReducedMotion, useHasFinePointer, useInView } from '@/hooks';
 import { formatNumber } from '@/lib/format';
@@ -369,15 +377,51 @@ export function Magnetic({
 /* ScrollProgress — thin top bar                                         */
 /* ==================================================================== */
 
+/**
+ * The progress bar carries a spirit level at its leading edge: a short glass
+ * vial with a bubble that lags behind the direction of travel, overshoots when
+ * you stop, and settles back to centre.
+ *
+ * The physics are the point — a bubble that simply tracked the scroll position
+ * would be decoration, whereas one that is visibly wrong while you are moving
+ * and only true once you have stopped is the instrument behaving like itself.
+ * It comes free: `useVelocity` on the scroll progress into a deliberately
+ * under-damped spring is exactly the second-order response of the real thing.
+ *
+ * Everything stays inside the bar's existing 2px, so nothing is clipped at the
+ * top of the viewport and the chrome is no taller than before.
+ */
 export function ScrollProgress({ className }: { className?: string }) {
+  const reduced = usePrefersReducedMotion();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 220, damping: 40, restDelta: 0.001 });
+  const left = useTransform(scaleX, (v) => `${v * 100}%`);
+
+  const velocity = useVelocity(scrollYProgress);
+  // Under-damped on purpose: damping this low is what produces the overshoot.
+  const drift = useSpring(useTransform(velocity, [-2, 0, 2], [13, 0, -13], { clamp: true }), {
+    stiffness: 90,
+    damping: 11,
+    mass: 0.6,
+  });
+
   return (
-    <motion.div
-      style={{ scaleX }}
-      className={cn('fixed inset-x-0 top-0 z-[60] h-[2px] origin-left bg-cyan-500', className)}
-      aria-hidden
-    />
+    <>
+      <motion.div
+        style={{ scaleX }}
+        className={cn('fixed inset-x-0 top-0 z-[60] h-[2px] origin-left bg-cyan-500', className)}
+        aria-hidden
+      />
+      {!reduced && (
+        <motion.div
+          style={{ left }}
+          className="pointer-events-none fixed top-0 z-[61] h-[2px] w-11 -translate-x-full overflow-hidden rounded-full bg-navy-900/30"
+          aria-hidden
+        >
+          <motion.span style={{ x: drift }} className="absolute left-4 top-0 h-[2px] w-3 rounded-full bg-white/80" />
+        </motion.div>
+      )}
+    </>
   );
 }
 

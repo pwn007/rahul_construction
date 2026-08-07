@@ -240,25 +240,12 @@
     stroke-dasharray: 6 4;
   }
 
-  /* Preloader: the worker's arm swinging a hammer. Short, small-amplitude and
-     eased so it reads as work rather than a wave. */
-  @keyframes build-scene-arm {
-    0%, 100% { transform: rotate(-32deg); }
-    55% { transform: rotate(6deg); }
-    70% { transform: rotate(2deg); }
-  }
-  .build-scene-arm {
-    animation: build-scene-arm 0.62s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-
-  @keyframes build-scene-dust {
-    0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
-    35% { opacity: 1; }
-    100% { opacity: 0; transform: translate(6px, -9px) scale(1.5); }
-  }
-  .build-scene-dust {
-    animation: build-scene-dust 1.6s ease-out infinite;
-  }
+  /* The preloader worker's hammer swing, walk cycle and dust used to live here
+     as keyframes. They are now computed in BuildScene.tsx instead: a CSS
+     `transform` overrides the SVG `transform` attribute carrying his pose, and
+     `transform-origin` on an SVG group is still inconsistent across Safari
+     versions — the old dust keyframe scaled about the viewBox centre and threw
+     the particles off-canvas. See the note in BuildScene.tsx. */
 
   @keyframes atlas-pin-in {
     from { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }

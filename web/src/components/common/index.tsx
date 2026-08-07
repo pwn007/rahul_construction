@@ -3,6 +3,7 @@ import { ArrowUpRight, ChevronRight, Quote, Star } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Badge, Button } from '@/components/ui';
 import { MaskImage, Reveal, SplitText, TiltCard } from '@/components/motion';
+import { DimensionLine } from './DimensionLine';
 import { ROUTES } from '@/constants/routes';
 import { formatNumber } from '@/lib/format';
 import type { Project, Testimonial } from '@/types/domain';
@@ -101,9 +102,12 @@ export function StatTile({
   className?: string;
 }) {
   return (
-    <div className={cn('flex flex-col', className)}>
-      <span className={cn('num text-display-sm font-semibold leading-none', tone === 'light' ? 'text-white' : 'text-navy-800 dark:text-white')}>
-        {value}
+    <div className={cn('group flex flex-col', className)}>
+      <span className="relative inline-flex self-start">
+        <span className={cn('num text-display-sm font-semibold leading-none', tone === 'light' ? 'text-white' : 'text-navy-800 dark:text-white')}>
+          {value}
+        </span>
+        <DimensionLine tone={tone} />
       </span>
       <span className={cn('mt-3 text-sm font-medium', tone === 'light' ? 'text-white/70' : 'text-[rgb(var(--c-text))]')}>{label}</span>
       {sublabel && <span className={cn('mt-1 text-caption', tone === 'light' ? 'text-white/40' : 'text-subtle')}>{sublabel}</span>}

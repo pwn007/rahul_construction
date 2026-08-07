@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { Counter, Parallax, Reveal, SplitText } from '@/components/motion';
+import { DimensionLine } from './DimensionLine';
 import { ROUTES } from '@/constants/routes';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { HIGH_PRIORITY_IMG } from '@/lib/dom';
@@ -229,7 +230,7 @@ export function PageHero({
                 <div
                   key={stat.label}
                   className={cn(
-                    'py-5 lg:py-6',
+                    'group py-5 lg:py-6',
                     dark && 'border-white/10',
                     i % 2 === 1 ? 'border-l pl-5' : 'lg:border-l lg:pl-6',
                     i >= 2 && 'border-t lg:border-t-0',
@@ -242,14 +243,18 @@ export function PageHero({
                       dark ? 'text-white' : 'text-navy-800 dark:text-white',
                     )}
                   >
-                    {typeof stat.value === 'number' && stat.count !== false ? (
-                      <Counter value={stat.value} />
-                    ) : (
-                      stat.value
-                    )}
-                    {stat.suffix && <span className="text-cyan-600 dark:text-cyan-400">{stat.suffix}</span>}
+                    <span className="relative inline-flex">
+                      {typeof stat.value === 'number' && stat.count !== false ? (
+                        <Counter value={stat.value} />
+                      ) : (
+                        stat.value
+                      )}
+                      {stat.suffix && <span className="text-cyan-600 dark:text-cyan-400">{stat.suffix}</span>}
+                      <DimensionLine tone={dark ? 'light' : 'dark'} />
+                    </span>
                   </dd>
-                  <dt className={cn('mt-1.5 text-caption', dark ? 'text-white/45' : 'text-subtle')}>{stat.label}</dt>
+                  {/* mt-3 rather than mt-1.5 — the dimension line lives in this gap. */}
+                  <dt className={cn('mt-3 text-caption', dark ? 'text-white/45' : 'text-subtle')}>{stat.label}</dt>
                 </div>
               ))}
             </dl>
