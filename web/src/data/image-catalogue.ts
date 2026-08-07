@@ -8,72 +8,72 @@
 
 export const IMAGE_POOLS = {
   "residential": [
-    "residential-01.jpg",
-    "residential-02.jpg",
-    "residential-03.jpg",
-    "residential-04.jpg",
-    "residential-05.jpg",
-    "residential-06.jpg",
-    "residential-07.jpg",
-    "residential-08.jpg",
-    "residential-09.jpg"
+    "residential-01.webp",
+    "residential-02.webp",
+    "residential-03.webp",
+    "residential-04.webp",
+    "residential-05.webp",
+    "residential-06.webp",
+    "residential-07.webp",
+    "residential-08.webp",
+    "residential-09.webp"
   ],
   "interior": [
-    "interior-01.jpg",
-    "interior-02.jpg",
-    "interior-03.jpg",
-    "interior-04.jpg",
-    "interior-05.jpg",
-    "interior-06.jpg",
-    "interior-07.jpg",
-    "interior-08.jpg",
-    "interior-09.jpg"
+    "interior-01.webp",
+    "interior-02.webp",
+    "interior-03.webp",
+    "interior-04.webp",
+    "interior-05.webp",
+    "interior-06.webp",
+    "interior-07.webp",
+    "interior-08.webp",
+    "interior-09.webp"
   ],
   "construction": [
-    "construction-01.jpg",
-    "construction-02.jpg",
-    "construction-03.jpg",
-    "construction-04.jpg",
-    "construction-05.jpg",
-    "construction-06.jpg",
-    "construction-07.jpg",
-    "construction-08.jpg",
-    "construction-09.jpg"
+    "construction-01.webp",
+    "construction-02.webp",
+    "construction-03.webp",
+    "construction-04.webp",
+    "construction-05.webp",
+    "construction-06.webp",
+    "construction-07.webp",
+    "construction-08.webp",
+    "construction-09.webp"
   ],
   "mepf": [
-    "mepf-01.jpg",
-    "mepf-02.jpg",
-    "mepf-03.jpg",
-    "mepf-04.jpg",
-    "mepf-05.jpg",
-    "mepf-06.jpg",
-    "mepf-07.jpg"
+    "mepf-01.webp",
+    "mepf-02.webp",
+    "mepf-03.webp",
+    "mepf-04.webp",
+    "mepf-05.webp",
+    "mepf-06.webp",
+    "mepf-07.webp"
   ],
   "jaipur": [
-    "jaipur-01.jpg",
-    "jaipur-02.jpg",
-    "jaipur-03.jpg",
-    "jaipur-04.jpg",
-    "jaipur-05.jpg",
-    "jaipur-06.jpg",
-    "jaipur-07.jpg",
-    "jaipur-08.jpg"
+    "jaipur-01.webp",
+    "jaipur-02.webp",
+    "jaipur-03.webp",
+    "jaipur-04.webp",
+    "jaipur-05.webp",
+    "jaipur-06.webp",
+    "jaipur-07.webp",
+    "jaipur-08.webp"
   ],
   "commercial": [
-    "commercial-01.jpg",
-    "commercial-02.jpg",
-    "commercial-03.jpg",
-    "commercial-04.jpg",
-    "commercial-05.jpg"
+    "commercial-01.webp",
+    "commercial-02.webp",
+    "commercial-03.webp",
+    "commercial-04.webp",
+    "commercial-05.webp"
   ],
   "detail": [
-    "detail-01.jpg",
-    "detail-02.jpg",
-    "detail-03.jpg",
-    "detail-04.jpg",
-    "detail-05.jpg",
-    "detail-06.jpg",
-    "detail-07.jpg"
+    "detail-01.webp",
+    "detail-02.webp",
+    "detail-03.webp",
+    "detail-04.webp",
+    "detail-05.webp",
+    "detail-06.webp",
+    "detail-07.webp"
   ]
 } as const;
 

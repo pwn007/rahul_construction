@@ -1,0 +1,11 @@
+# Staging / client-showcase deployment.
+#
+# The app is a client-rendered SPA whose canonical tags point at
+# https://www.neetuarchstone.com (see src/constants/site.ts), so an indexed copy
+# on a preview domain would compete with the real site for the same URLs.
+#
+# Remove this file — or replace it with a real Allow + sitemap — when the site
+# goes live on its own domain.
+
+User-agent: *
+Disallow: /

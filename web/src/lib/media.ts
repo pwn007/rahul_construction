@@ -33,29 +33,29 @@ const BASE = '/images';
  * a bug. These are assigned by hand so every headline slot is visually distinct.
  */
 const PINNED: Record<string, string> = {
-  'hero-primary': 'residential-01.jpg',
+  'hero-primary': 'residential-01.webp',
 
   // Project covers — the Projects grid compares these directly
-  'jagatpura-cover': 'residential-02.jpg',
-  'pratapnagar-cover': 'residential-03.jpg',
-  'mansarovar-cover': 'residential-04.jpg',
-  'gaushala-cover': 'residential-05.jpg',
-  'malviya-cover': 'residential-06.jpg',
-  'jhotwara-cover': 'residential-07.jpg',
-  'sanganer-cover': 'residential-08.jpg',
-  'vaishali-cover': 'interior-01.jpg',
-  'tonk-cover': 'commercial-01.jpg',
-  'ajmer-cover': 'commercial-02.jpg',
+  'jagatpura-cover': 'residential-02.webp',
+  'pratapnagar-cover': 'residential-03.webp',
+  'mansarovar-cover': 'residential-04.webp',
+  'gaushala-cover': 'residential-05.webp',
+  'malviya-cover': 'residential-06.webp',
+  'jhotwara-cover': 'residential-07.webp',
+  'sanganer-cover': 'residential-08.webp',
+  'vaishali-cover': 'interior-01.webp',
+  'tonk-cover': 'commercial-01.webp',
+  'ajmer-cover': 'commercial-02.webp',
 
   // Page heroes
-  'about-hero': 'residential-09.jpg',
-  'projects-hero': 'detail-01.jpg',
-  'services-hero': 'detail-02.jpg',
-  'careers-hero': 'construction-01.jpg',
-  'vastu-hero': 'jaipur-01.jpg',
-  'estimator-hero': 'detail-03.jpg',
-  'about-studio': 'detail-04.jpg',
-  'careers-team': 'construction-05.jpg',
+  'about-hero': 'residential-09.webp',
+  'projects-hero': 'detail-01.webp',
+  'services-hero': 'detail-02.webp',
+  'careers-hero': 'construction-01.webp',
+  'vastu-hero': 'jaipur-01.webp',
+  'estimator-hero': 'detail-03.webp',
+  'about-studio': 'detail-04.webp',
+  'careers-team': 'construction-05.webp',
 };
 
 /** Explicit routes win. Ordered: first matching pattern decides. */
@@ -111,7 +111,7 @@ export function img(seed: string, _width?: number, _height?: number): string {
 
   const pool = poolFor(seed);
   const files = IMAGE_POOLS[pool] as readonly string[];
-  if (!files?.length) return `${BASE}/residential-01.jpg`;
+  if (!files?.length) return `${BASE}/residential-01.webp`;
   return `${BASE}/${files[hash(seed) % files.length]}`;
 }
 

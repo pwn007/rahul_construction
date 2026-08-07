@@ -45,6 +45,7 @@ export const STORAGE_KEYS = {
   preloaderSeen: 'archstone.preloader.seen',
   portalUser: 'archstone.portal.user',
   adminUser: 'archstone.admin.user',
+  adminUnlocked: 'archstone.admin.unlocked',
   adminOverrides: 'archstone.admin.overrides',
   exitIntent: 'archstone.exitintent.seen',
 } as const;

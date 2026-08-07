@@ -17,6 +17,7 @@ import { AdminDashboard } from './screens/Dashboard';
 import { AdminAnalytics, AdminEstimatorConfig, AdminRoles, AdminTheme, AdminDataReset } from './screens/System';
 import { users } from '@/data/ops';
 import { useLeadCounts } from './useLeadCounts';
+import { AdminGate, isAdminUnlocked, lockAdmin } from './AdminGate';
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [filter, setFilter] = useState('');
@@ -150,7 +151,12 @@ function AdminShell() {
                 </div>
               </div>
             )}
-            <Link to={ROUTES.home} className="rounded-md p-2 text-subtle transition-colors hover:bg-[rgb(var(--c-text))]/[0.06] hover:text-danger" aria-label="Sign out">
+            <Link
+              to={ROUTES.home}
+              onClick={lockAdmin}
+              className="rounded-md p-2 text-subtle transition-colors hover:bg-[rgb(var(--c-text))]/[0.06] hover:text-danger"
+              aria-label="Sign out"
+            >
               <LogOut className="h-[18px] w-[18px]" />
             </Link>
           </div>
@@ -210,10 +216,15 @@ function AdminShell() {
 }
 
 export default function AdminRoutes() {
+  /* Read once — the gate writes the flag before flipping this, so a reload keeps you in. */
+  const [unlocked, setUnlocked] = useState(isAdminUnlocked);
+
   useEffect(() => {
     document.documentElement.style.setProperty('--nav-h', '64px');
     return () => document.documentElement.style.setProperty('--nav-h', '76px');
   }, []);
+
+  if (!unlocked) return <AdminGate onUnlock={() => setUnlocked(true)} />;
 
   return <AdminShell />;
 }
