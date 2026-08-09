@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import type { EstimateResult } from './model';
+import { MATERIAL_GROUPS, QUANTITY_UNIT_LABEL } from '@/constants/materials';
 import { SITE } from '@/constants/site';
 import { formatCurrency, formatCurrencyCompact, formatDate, formatNumber } from '@/lib/format';
 
@@ -120,8 +121,8 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
   y = twoCol(
     [
       ['Service model', result.labels.serviceModel],
-      ['Package', `${result.labels.packageLabel} — ${result.labels.packageHeadline}`],
-      ['Plot area', `${formatNumber(result.plotAreaSqft)} sq ft`],
+      ['Finish level', `${result.labels.packageLabel} — ${result.labels.packageHeadline}`],
+      ['Area per floor', `${formatNumber(result.areaPerFloorSqft)} sq ft`],
       ['Built-up area', `${formatNumber(result.builtUpArea)} sq ft`],
       ['Floors', result.labels.floors],
       ['Material quality', result.labels.quality],
@@ -132,6 +133,42 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
   );
 
   y += 10;
+
+  /* ---------------- What you are paying for ---------------- */
+  /* Commercial split first, matching the screen — it is the breakdown a client
+     reads, where the construction heads below are the one a contractor reads. */
+  doc.setFont('helvetica', 'bold').setFontSize(11);
+  setColor(NAVY);
+  doc.text('What you are paying for', M, y);
+  y += 18;
+
+  setFill(LIGHT);
+  doc.rect(M, y, W - M * 2, 20, 'F');
+  doc.setFont('helvetica', 'bold').setFontSize(8.5);
+  setColor(GREY);
+  doc.text('COMPONENT', M + 10, y + 13.5);
+  doc.text('SHARE', W - M - 150, y + 13.5, { align: 'right' });
+  doc.text('AMOUNT', W - M - 10, y + 13.5, { align: 'right' });
+  y += 20;
+
+  result.commercial.forEach((head, i) => {
+    if (i % 2 === 1) {
+      setFill([250, 251, 253]);
+      doc.rect(M, y, W - M * 2, 22, 'F');
+    }
+    doc.setFont('helvetica', 'normal').setFontSize(9.5);
+    setColor(NAVY);
+    doc.text(head.label, M + 10, y + 14.5);
+    setColor(GREY);
+    doc.setFontSize(9);
+    doc.text(`${head.percent.toFixed(0)}%`, W - M - 150, y + 14.5, { align: 'right' });
+    doc.setFont('helvetica', 'bold').setFontSize(9.5);
+    setColor(NAVY);
+    doc.text(formatCurrency(head.amount), W - M - 10, y + 14.5, { align: 'right' });
+    y += 22;
+  });
+
+  y += 20;
 
   /* ---------------- Cost breakdown ---------------- */
   doc.setFont('helvetica', 'bold').setFontSize(11);
@@ -190,7 +227,86 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
     y += 12;
   }
 
-  /* ---------------- Page 2 ---------------- */
+  /* ---------------- Page 2 — itemised materials ---------------- */
+  /* The quantities are the reason this page exists. A client can take "994 bags
+     of cement at Rs 400" to a supplier and check it; they cannot check a lump. */
+  if (result.materialLines.length) {
+    doc.addPage();
+    y = 60;
+
+    doc.setFont('helvetica', 'bold').setFontSize(11);
+    setColor(NAVY);
+    doc.text('Itemised materials', M, y);
+    y += 14;
+
+    doc.setFont('helvetica', 'normal').setFontSize(8.5);
+    setColor(GREY);
+    doc.text(
+      'Quantities use published thumb rules and are indicative. Final quantities come from approved drawings and a bar-bending schedule.',
+      M,
+      y + 8,
+      { maxWidth: W - M * 2 },
+    );
+    y += 26;
+
+    setFill(LIGHT);
+    doc.rect(M, y, W - M * 2, 20, 'F');
+    doc.setFont('helvetica', 'bold').setFontSize(8.5);
+    setColor(GREY);
+    doc.text('MATERIAL', M + 10, y + 13.5);
+    doc.text('SPECIFICATION', M + 150, y + 13.5);
+    doc.text('QUANTITY', W - M - 230, y + 13.5, { align: 'right' });
+    doc.text('RATE', W - M - 120, y + 13.5, { align: 'right' });
+    doc.text('AMOUNT', W - M - 10, y + 13.5, { align: 'right' });
+    y += 20;
+
+    MATERIAL_GROUPS.forEach((group) => {
+      const lines = result.materialLines.filter((l) => l.group === group.key);
+      if (!lines.length) return;
+
+      doc.setFont('helvetica', 'bold').setFontSize(8.5);
+      setColor(CYAN);
+      doc.text(group.label.toUpperCase(), M + 10, y + 12);
+      y += 18;
+
+      lines.forEach((line, i) => {
+        if (i % 2 === 1) {
+          setFill([250, 251, 253]);
+          doc.rect(M, y, W - M * 2, 20, 'F');
+        }
+        doc.setFont('helvetica', 'normal').setFontSize(9);
+        setColor(NAVY);
+        doc.text(line.label, M + 10, y + 13.5);
+        setColor(GREY);
+        doc.setFontSize(8.5);
+        doc.text(line.spec.slice(0, 48), M + 150, y + 13.5);
+        doc.text(
+          `${formatNumber(line.quantity)} ${QUANTITY_UNIT_LABEL[line.unit]}`,
+          W - M - 230,
+          y + 13.5,
+          { align: 'right' },
+        );
+        doc.text(`${formatCurrency(line.unitRate)}`, W - M - 120, y + 13.5, { align: 'right' });
+        doc.setFont('helvetica', 'bold').setFontSize(9);
+        setColor(NAVY);
+        doc.text(formatCurrency(line.amount), W - M - 10, y + 13.5, { align: 'right' });
+        y += 20;
+      });
+
+      y += 6;
+    });
+
+    const materialsTotal = result.commercial.find((c) => c.key === 'materials')?.amount ?? 0;
+    setFill(NAVY);
+    doc.rect(M, y, W - M * 2, 26, 'F');
+    doc.setFont('helvetica', 'bold').setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Total materials', M + 10, y + 17);
+    doc.text(formatCurrency(materialsTotal), W - M - 10, y + 17, { align: 'right' });
+    y += 42;
+  }
+
+  /* ---------------- Programme & payments ---------------- */
   doc.addPage();
   y = 60;
 
@@ -258,73 +374,6 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
   });
 
   y += 24;
-
-  /* ---------------- Specification schedule ---------------- */
-  if (result.specSchedule.length) {
-    if (y > H - 260) { doc.addPage(); y = 60; }
-
-    doc.setFont('helvetica', 'bold').setFontSize(11);
-    setColor(NAVY);
-    doc.text('Material specification', M, y);
-    doc.setFont('helvetica', 'normal').setFontSize(8);
-    setColor(GREY);
-    doc.text('Priced as the difference from our standard specification.', M, y + 12);
-    y += 26;
-
-    setFill(LIGHT);
-    doc.rect(M, y, barW, 20, 'F');
-    doc.setFont('helvetica', 'bold').setFontSize(8.5);
-    setColor(GREY);
-    doc.text('CATEGORY', M + 10, y + 13.5);
-    doc.text('ITEM', M + 130, y + 13.5);
-    doc.text('SELECTION', M + 260, y + 13.5);
-    doc.text('EFFECT', W - M - 10, y + 13.5, { align: 'right' });
-    y += 20;
-
-    result.specSchedule.forEach((line, i) => {
-      if (y > H - 90) { doc.addPage(); y = 60; }
-      if (i % 2 === 1) { setFill([250, 251, 253]); doc.rect(M, y, barW, 20, 'F'); }
-
-      doc.setFont('helvetica', 'normal').setFontSize(8.5);
-      setColor(GREY);
-      doc.text(line.category, M + 10, y + 13);
-      doc.text(line.group.slice(0, 26), M + 130, y + 13);
-      setColor(NAVY);
-      doc.setFontSize(8.5);
-      doc.text(line.choice.slice(0, 24), M + 260, y + 13);
-
-      const effect = line.quantifiedAtBoq
-        ? 'At BOQ'
-        : line.delta === 0
-          ? 'Standard'
-          : `${line.delta > 0 ? '+' : ''}${formatCurrency(line.delta)}`;
-      doc.setFont('helvetica', 'bold').setFontSize(8.5);
-      doc.text(effect, W - M - 10, y + 13, { align: 'right' });
-      y += 20;
-    });
-
-    setFill(NAVY);
-    doc.rect(M, y, barW, 24, 'F');
-    doc.setFont('helvetica', 'bold').setFontSize(9.5);
-    doc.setTextColor(255, 255, 255);
-    doc.text('Specification adjustment', M + 10, y + 16);
-    doc.text(
-      `${result.specAdjustment > 0 ? '+' : ''}${formatCurrency(result.specAdjustment)}`,
-      W - M - 10, y + 16, { align: 'right' },
-    );
-    y += 40;
-
-    if (result.specDeferredCount > 0) {
-      doc.setFont('helvetica', 'normal').setFontSize(8);
-      setColor(GREY);
-      const note = doc.splitTextToSize(
-        `Note: ${result.specDeferredCount} selection(s) are priced per running foot, tonne, cubic metre or fitting. These require a quantity take-off from approved drawings and are listed at unit rate rather than included in the headline.`,
-        barW,
-      ) as string[];
-      doc.text(note, M, y);
-      y += note.length * 11 + 14;
-    }
-  }
 
   /* ---------------- Assumptions ---------------- */
   doc.setFont('helvetica', 'bold').setFontSize(11);

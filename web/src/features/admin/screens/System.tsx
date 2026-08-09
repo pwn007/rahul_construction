@@ -19,8 +19,8 @@ import { ChartCard } from './Dashboard';
 import { useTheme } from '@/app/providers';
 import { formatCurrency, formatNumber } from '@/lib/format';
 import { roles } from '@/data/ops';
-import { PACKAGES, QUALITY_TIERS, LOCATIONS, ENHANCEMENTS } from '@/constants/estimator';
-import { MATERIAL_CATEGORIES } from '@/constants/materials';
+import { PACKAGES, LOCATIONS, ENHANCEMENTS } from '@/constants/estimator';
+import { MATERIAL_GROUPS, MATERIAL_LINES, QUANTITY_UNIT_LABEL, defaultOption } from '@/constants/materials';
 import { resetOverlay } from '@/services/adapters/mock.adapter';
 import type { PermissionAction } from '@/types/domain';
 
@@ -170,7 +170,6 @@ export function AdminAnalytics() {
 export function AdminEstimatorConfig() {
   const [tab, setTab] = useState('rates');
   const [rates, setRates] = useState(PACKAGES.map((p) => ({ key: p.key, label: p.label, min: p.minRate, max: p.maxRate, labour: p.labourOnlyRate })));
-  const [quality, setQuality] = useState(QUALITY_TIERS.map((q) => ({ key: q.key, label: q.label, multiplier: q.multiplier })));
   const [locations, setLocations] = useState(LOCATIONS.map((l) => ({ key: l.key, label: l.label, zone: l.zone, multiplier: l.multiplier })));
   const [enhancements, setEnhancements] = useState(ENHANCEMENTS.map((e) => ({ key: e.key, label: e.label, model: e.pricingModel, price: e.unitPrice })));
   const { push } = useToast();
@@ -200,18 +199,19 @@ export function AdminEstimatorConfig() {
       <div className="flex items-start gap-3 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.05] p-4">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" />
         <p className="text-caption leading-relaxed text-muted">
-          Cost model: <span className="num">chargeable area × base rate × quality multiplier × location multiplier × property-type
-          factor</span>, plus enhancements, plus 3% contingency, presented as a −6% / +8% range.
+          Cost model: <span className="num">Σ (quantity × rate) × locality × property-type factor</span> over the
+          materials the visitor selected, divided by the materials share to give the total — so every selection
+          moves the estimate directly. Base rates below are no longer an input; they are the band the bottom-up
+          total is checked against.
         </p>
       </div>
 
       <Tabs
         tabs={[
           { value: 'rates', label: 'Base rates', count: rates.length },
-          { value: 'quality', label: 'Quality tiers', count: quality.length },
           { value: 'locations', label: 'Localities', count: locations.length },
           { value: 'enhancements', label: 'Enhancements', count: enhancements.length },
-          { value: 'materials', label: 'Material catalogue', count: MATERIAL_CATEGORIES.length },
+          { value: 'materials', label: 'Materials', count: MATERIAL_LINES.length },
         ]}
         value={tab}
         onChange={setTab}
@@ -228,19 +228,6 @@ export function AdminEstimatorConfig() {
               <NumberCell key="min" value={r.min} onChange={(v) => setRates((s) => s.map((x, j) => (j === i ? { ...x, min: v } : x)))} />,
               <NumberCell key="max" value={r.max} onChange={(v) => setRates((s) => s.map((x, j) => (j === i ? { ...x, max: v } : x)))} />,
               <NumberCell key="lab" value={r.labour} onChange={(v) => setRates((s) => s.map((x, j) => (j === i ? { ...x, labour: v } : x)))} />,
-            ])}
-          />
-        </div>
-      )}
-
-      {tab === 'quality' && (
-        <div className="surface overflow-hidden rounded-xl border">
-          <ConfigTable
-            headers={['Tier', 'Multiplier', 'Effect on a ₹2,000/sq ft base']}
-            rows={quality.map((q, i) => [
-              <span key="l" className="font-medium">{q.label}</span>,
-              <NumberCell key="m" value={q.multiplier} step={0.01} onChange={(v) => setQuality((s) => s.map((x, j) => (j === i ? { ...x, multiplier: v } : x)))} />,
-              <span key="e" className="num text-muted">{formatCurrency(2000 * q.multiplier)} / sq ft</span>,
             ])}
           />
         </div>
@@ -265,76 +252,52 @@ export function AdminEstimatorConfig() {
           <div className="flex items-start gap-3 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.05] p-4">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" />
             <p className="text-caption leading-relaxed text-muted">
-              The catalogue behind the estimator&apos;s <strong>Specify materials myself</strong> step — 14 categories
-              transcribed from the published rate card. Each group declares a <em>baseline</em> (the grade already
-              included in the package rate); the estimator prices only the difference from it. Items priced per RFT,
-              TON, CUM or NOS are listed at unit rate and quantified at BOQ stage.
+              These seventeen lines <strong>are</strong> the pricing model. The visitor grades each one and the
+              estimate is built upward from them: quantity × rate, summed over whatever the visitor selected,
+              then divided by the materials share to give the total. Nothing is pre-selected — the visitor picks
+              every material and every brand. The <Badge variant="brand" size="sm">highlighted</Badge> brand in
+              each row is the default, and carries the calibrated rate the rate-card check runs against. Rates
+              marked <Badge variant="warning" size="sm">indicative</Badge> are derived rather than published.
             </p>
           </div>
 
-          {MATERIAL_CATEGORIES.map((category) => (
-            <div key={category.id} className="surface overflow-hidden rounded-xl border">
-              <div className="flex items-center justify-between gap-4 border-b bg-[rgb(var(--c-surface-2))] px-5 py-3">
-                <h3 className="flex items-center gap-2 font-display text-heading-md font-semibold">
-                  <span aria-hidden>{category.icon}</span>
-                  {category.label}
-                </h3>
-                <Badge variant="default" size="sm">
-                  {(category.brands?.length ?? 0) + (category.groups?.length ?? 0)} group(s)
-                </Badge>
-              </div>
+          {MATERIAL_GROUPS.map((group) => {
+            const lines = MATERIAL_LINES.filter((l) => l.group === group.key);
+            if (!lines.length) return null;
 
-              <div className="divide-y">
-                {category.brands && (
-                  <div className="px-5 py-3">
-                    <p className="text-overline uppercase text-subtle">Brands</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {category.brands.map((b) => (
-                        <Badge key={b.name} variant="default" size="sm">
-                          {b.name}
-                          {b.alt ? ` / ${b.alt}` : ''}
+            return (
+              <div key={group.key} className="surface overflow-hidden rounded-xl border">
+                <div className="flex items-center justify-between gap-4 border-b bg-[rgb(var(--c-surface-2))] px-5 py-3">
+                  <h3 className="font-display text-heading-md font-semibold">{group.label}</h3>
+                  <Badge variant="default" size="sm">{lines.length} material(s)</Badge>
+                </div>
+
+                <ConfigTable
+                  headers={['Material', 'Brands offered', 'Qty / sq ft', 'Unit', 'Default rate', '']}
+                  rows={lines.map((line) => [
+                    <span key="l" className="font-medium">{line.label}</span>,
+                    <span key="o" className="flex flex-wrap gap-1">
+                      {line.options.map((o) => (
+                        <Badge key={o.key} variant={o.isDefault ? 'brand' : 'default'} size="sm">
+                          {o.label} · {formatCurrency(o.rate)}
+                          {o.provisional ? ' *' : ''}
                         </Badge>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {category.groups?.map((group) => (
-                  <div key={group.name} className="px-5 py-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-overline uppercase text-subtle">{group.name}</p>
-                      <Badge variant="brand" size="sm">baseline: {group.baseline}</Badge>
-                      {group.coverage ? (
-                        <Badge variant="default" size="sm">coverage ×{group.coverage}</Badge>
-                      ) : (
-                        <Badge variant="warning" size="sm">quantified at BOQ</Badge>
+                    </span>,
+                    String(line.coefficient),
+                    QUANTITY_UNIT_LABEL[line.unit],
+                    formatCurrency(defaultOption(line).rate),
+                    <span key="flags" className="flex flex-wrap gap-1">
+                      {line.essential && <Badge variant="default" size="sm">essential</Badge>}
+                      {line.options.some((o) => o.provisional) && (
+                        <Badge variant="warning" size="sm">indicative</Badge>
                       )}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {group.options.map((o) => (
-                        <span
-                          key={o.name}
-                          className="num rounded-md border px-2 py-1 text-caption text-muted"
-                        >
-                          {o.name}
-                          {o.priceLabel ? ` · ${o.priceLabel}` : ''}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-                {category.extras?.map((e) => (
-                  <div key={e.name} className="px-5 py-3">
-                    <p className="text-overline uppercase text-subtle">{e.name} (yes / no)</p>
-                    <p className="mt-1 text-caption text-subtle">
-                      Drives the <span className="num">{e.enhancementKey}</span> enhancement — never priced twice.
-                    </p>
-                  </div>
-                ))}
+                    </span>,
+                  ])}
+                />
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

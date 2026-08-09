@@ -76,19 +76,61 @@ Theme editor with live preview.
 ## The four things worth looking at
 
 ### 1. Construction Cost Estimator — `/estimator`
-The competitive wedge. Seven steps, a **live cost meter that updates on every keystroke**, and a result
-screen with a head-wise cost breakdown, milestone payment schedule, phase-by-phase programme, and a
-**branded, vector PDF** the visitor can take away.
+The competitive wedge. **Two screens** — where and how big, then a material list you build yourself —
+a **live cost meter**, and a result that discloses progressively: a four-way commercial split, then
+materials itemised down to the bag of cement, then the programme, payment schedule and a **branded,
+vector PDF**.
 
-- Cost model lives in [`web/src/features/estimator/model.ts`](web/src/features/estimator/model.ts) —
-  transparent, unit-tested-shaped, and driven entirely by constants in
-  [`web/src/constants/estimator.ts`](web/src/constants/estimator.ts).
-- Rates are anchored to the client's **published rate card** (Port1.pdf p.14–15), not invented.
-- State persists to `sessionStorage` and is encoded in the URL, so a refresh never loses progress and
-  a configuration can be shared as a link.
-- The PDF is built with vector primitives (jsPDF), not a screenshot — real selectable text, ~30 KB,
-  and it is **dynamically imported** so 114 KB gzip never touches first paint.
-- Lead capture is deliberately placed *after* value is delivered: name + phone, only at the download.
+- **Two questions, not seven.** The model needs one required input, the area. Everything else either
+  defaults (residential, turnkey, no basement) or moves behind an *Advanced* disclosure.
+- **Nothing is pre-selected.** Step 2 arrives empty. You tap a material, pick its brand, and add it.
+  Every material in the estimate is there because someone put it there — which is the whole point of
+  the screen, and what the competitor's calculator gets right.
+- **21 materials, 58 brand options**, restored from the client's own published calculator: cement
+  (UltraTech/Ambuja, JK Super, ACC, Wonder/Shree), steel (JSW/Jindal, TATA TISCON, Kamadhenu/Rathi),
+  flooring at three tile price points, paint from Tractor to Royal Matt, CP sets, kitchens at
+  ₹1L/₹1.5L/₹2L, tanks by size. Never ranked, never tier-named — two window options cost the same,
+  and the cheapest cement is not "Economy".
+- **Scope is derived, never asked.** Pick a kitchen and the build is fully furnished; pick only
+  cement and bricks and it is structural. Nobody types "semi-furnished" — a contract term with a rate
+  band attached, and not a question a homeowner can answer.
+- **A partial selection is labelled as one.** Pick three materials and the headline reads *"Cost of
+  the work you selected"* with a strip naming what a complete build still needs. The competitor
+  produces a confident total no matter what you selected; naming the gap costs nothing.
+- **Ready-mix and site-mix are mutually exclusive.** Same concrete bought two ways; selecting one
+  drops the other. The competitor lists Cement *and* Mix Concrete as additive rows and charges for
+  the same cubic metre twice.
+
+**The pricing model is bottom-up, and that is the whole point.**
+
+```
+materialsCost = Σ quantity × brandRate × locality × buildingType   over selected materials
+total         = materialsCost ÷ materialsShare                     ← the inversion
+```
+
+The estimator used to run top-down: a package rate produced a total and the material lines were
+normalised into a share of it. That guaranteed reconciliation, but it also meant **a material choice
+could not move the number** — the normalisation factor absorbed it. Dividing by the share runs the
+same relationship the other way, so every selection moves the estimate by exactly what it costs.
+
+- **The breakdown cannot lie**, and now as plain arithmetic rather than something engineered. `total`
+  is *defined* as materialsCost ÷ share, so the Materials head cannot fail to equal the lines that
+  produced it, and `quantity × rate = amount` holds on every line.
+- **Inverting the model did not invent a new price list.** Selecting every material at its default
+  brand lands inside the client's own published rate card for all three scopes — ₹1,329 against a
+  ₹1,200–1,400 card, ₹2,047 against ₹1,800–2,200, ₹2,603 against ₹2,500–3,000. That is the
+  calibration alarm, asserted on every run.
+- `npm run check:estimator` proves it across **12,288 configurations**, plus: exactly one default
+  brand per material, ready-mix actually supplanting site-mix, and an **empty selection pricing zero
+  without NaN or a divide-by-zero**.
+- Icons are **21 inline SVG glyphs** in Lucide's drawing grammar (~1 KB gzip). Lucide has no cement
+  bag, rebar, tile, transit mixer or sanitaryware icon, and emoji render as different artwork on
+  every platform.
+- Selection persists to `sessionStorage` and packs into the URL as `?m=cement:jk-super,steel:tata…`.
+  Legacy `?pkg=` and `?tier=` links resolve onto an equivalent selection.
+- The PDF is vector (jsPDF), ~30 KB, **dynamically imported** so 114 KB gzip never touches first paint.
+- Lead capture sits *after* value is delivered: name + phone, only at the download. The record stores
+  the exact material-and-brand map, so an estimator can rebuild the quotation line by line.
 
 ### 2. The declarative admin engine — `web/src/features/admin/`
 Twenty CRUD modules are **twenty config objects**, not twenty screens.
@@ -256,6 +298,7 @@ npm run dev          # dev server, port 5173
 npm run build        # typecheck + production build
 npm run typecheck    # tsc --noEmit
 npm run build:districts  # regenerate the Project Atlas geometry (output is committed)
+npm run check:estimator   # assert every estimator breakdown reconciles to the level above it
 npm run preview      # serve the production build
 
 # server/

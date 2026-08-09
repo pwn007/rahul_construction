@@ -254,17 +254,28 @@ export interface EstimateRequest extends BaseEntity {
   phone: string;
   email?: string;
   propertyType: string;
-  plotArea: number;
+  /**
+   * Built-up area of one floor, in `areaUnit`. Was `plotArea` until the estimator
+   * stopped deriving built-up area through a ground-coverage ratio — keeping the
+   * old name would have left the column meaning one thing for records captured
+   * before the change and another for records captured after.
+   */
+  areaPerFloor: number;
   areaUnit: string;
   floors: number;
   packageType: string;
   qualityTier: string;
   location: string;
   enhancements: string[];
-  /** Material specification captured from the estimator's step 5. */
-  materialMode?: 'recommended' | 'custom';
-  materials?: Record<string, Record<string, string>>;
-  specAdjustment?: number;
+  /**
+   * The exact specification the visitor chose, material key → grade, so an
+   * estimator can rebuild the quotation line by line rather than guess at what
+   * "semi-furnished" meant on the day.
+   */
+  /** materialKey → chosen brand key, exactly as the visitor selected it. */
+  materials?: Record<string, string>;
+  /** Sum of the priced material lines. Everything else derives from it. */
+  materialsCost?: number;
   builtUpArea: number;
   totalMin: number;
   totalMax: number;
@@ -378,14 +389,32 @@ export interface BaseRate extends BaseEntity {
   order: number;
 }
 
-export interface QualityTier extends BaseEntity {
+/**
+ * A priced material line, as the admin panel sees it.
+ *
+ * Replaced `QualityTier`. A single global quality multiplier had nothing left to
+ * multiply once the build stopped being described by one tier — and the
+ * per-material grade ladder that briefly replaced it went the same way, because
+ * ranking twenty-one materials is not a judgement a homeowner can make.
+ */
+export interface MaterialSpec extends BaseEntity {
   key: string;
   label: string;
-  description: string;
-  multiplier: number;
-  highlights: string[];
+  group: string;
+  unit: string;
+  /** Quantity per sq ft of chargeable area. */
+  coefficient: number;
+  /** Brands to choose between, serialised as "label ₹rate" for the admin table. */
+  options: string[];
+  /** ₹ per unit of the default option — the calibrated rate. */
+  defaultRate: number;
+  /** True when any option's rate is derived rather than published. */
+  provisional: boolean;
+  /** A complete build needs this. Advisory only. */
+  essential: boolean;
   order: number;
 }
+
 
 export interface LocationMultiplier extends BaseEntity {
   key: string;

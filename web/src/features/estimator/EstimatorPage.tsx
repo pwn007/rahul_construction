@@ -13,8 +13,7 @@ import { SITE } from '@/constants/site';
 import { IMG } from '@/lib/media';
 import { usePrefersReducedMotion } from '@/hooks';
 import { calculateEstimate, decodeInput, encodeInput, DEFAULT_INPUT, type EstimatorInput } from './model';
-import { StepPlot, StepBuild, StepFinish } from './components/Steps';
-import { StepMaterials } from './components/StepMaterials';
+import { StepSite, StepMaterialSelect } from './components/Steps';
 import { LiveCostMeter, ResultScreen } from './components/Result';
 
 /**
@@ -51,29 +50,27 @@ const DELIVERABLES = [
 ];
 
 /**
- * Three questions, then the number.
+ * Two questions, then the number.
  *
  * The model has exactly one required input — the area — and every other field
- * ships with a working default. The old seven-step wizard therefore stood
- * between the visitor and a figure it could already have produced, with the two
- * heaviest steps (fourteen material categories, twelve enhancement toggles)
- * contributing nothing to the default calculation at all. Both now live on the
- * result screen as optional refinements, where a visitor who has seen their
- * number is far more willing to spend the effort.
+ * ships with a working default. The original seven-step wizard therefore stood
+ * between the visitor and a figure it could already have produced; collapsing it
+ * to three helped, but the remaining three still asked nine questions, of which
+ * six had a safe default and two were industry vocabulary a homeowner has no way
+ * to evaluate.
+ *
+ * What is left is the irreducible set: where, how big, how finished. The service
+ * model, building type, basement, stilt and coverage all default; materials and
+ * enhancements live on the result screen, where a visitor who has already seen
+ * their number is far more willing to spend the effort.
  */
 const ALL_STEPS = [
-  { key: 'plot', label: 'Your plot' },
-  { key: 'build', label: 'Your build' },
-  { key: 'finish', label: 'Your finish' },
+  { key: 'site', label: 'Your building' },
+  { key: 'materials', label: 'Your materials' },
   { key: 'result', label: 'Estimate' },
 ] as const;
 
 type StepKey = (typeof ALL_STEPS)[number]['key'];
-
-/** Interiors-only projects have no structure to configure, so that step is not shown at all. */
-function stepsFor(propertyType: EstimatorInput['propertyType']) {
-  return propertyType === 'interior-only' ? ALL_STEPS.filter((s) => s.key !== 'build') : [...ALL_STEPS];
-}
 
 export default function EstimatorPage() {
   const location = useLocation();
@@ -86,7 +83,7 @@ export default function EstimatorPage() {
     ...decodeInput(location.search),
   }));
 
-  const steps = useMemo(() => stepsFor(input.propertyType), [input.propertyType]);
+  const steps = useMemo(() => [...ALL_STEPS], []);
 
   /**
    * The step is part of the draft, not local state.
@@ -101,14 +98,9 @@ export default function EstimatorPage() {
   const [step, setStep] = useState(() => {
     const saved = readStore<{ step?: number }>(STORAGE_KEYS.estimator, {}, 'session').step;
     const decoded = decodeInput(location.search);
-    const initial = saved ?? (decoded.packageKey ? 2 : decoded.plotArea ? 1 : 0);
-    return Math.max(0, Math.min(stepsFor(decoded.propertyType ?? DEFAULT_INPUT.propertyType).length - 1, initial));
+    const initial = saved ?? (decoded.materials ? 1 : 0);
+    return Math.max(0, Math.min(ALL_STEPS.length - 1, initial));
   });
-
-  /* A property-type change can shorten the list under our feet. */
-  useEffect(() => {
-    setStep((prev) => Math.min(prev, steps.length - 1));
-  }, [steps.length]);
 
   const result = useMemo(() => calculateEstimate(input), [input]);
 
@@ -141,13 +133,13 @@ export default function EstimatorPage() {
     goTo(0);
   };
 
-  const current: StepKey = steps[step]?.key ?? 'plot';
+  const current: StepKey = steps[step]?.key ?? 'site';
   const stepLabel = `Step ${step + 1} of ${steps.length - 1}`;
   const isResult = current === 'result';
   const shareUrl = `${SITE.url}/estimator?${encodeInput(input)}`;
 
   /** The area is the model's only genuine requirement, and it is asked on step 1. */
-  const canAdvance = input.plotArea > 0;
+  const canAdvance = input.areaPerFloor > 0;
 
   return (
     <>
@@ -170,9 +162,9 @@ export default function EstimatorPage() {
         title="What will your build actually cost?"
         lead={
           <>
-            Seven quick steps, about two minutes. You get a costed range, a head-wise breakdown, a milestone payment
-            schedule, an estimated programme and a branded PDF — built on our published rate card, not a
-            number pulled from the air.
+            Two questions, about thirty seconds. You get a costed range, an itemised breakdown down to the
+            bag of cement, a milestone payment schedule, an estimated programme and a branded PDF — built on
+            our published rate card, not a number pulled from the air.
           </>
         }
         breadcrumbs={[{ label: 'Cost Estimator' }]}
@@ -284,9 +276,15 @@ export default function EstimatorPage() {
                       exit={reduced ? { opacity: 0 } : { opacity: 0, x: -20 }}
                       transition={{ duration: reduced ? 0.15 : 0.35, ease: [0.16, 1, 0.3, 1] }}
                     >
-                      {current === 'plot' && <StepPlot input={input} patch={patch} stepLabel={stepLabel} />}
-                      {current === 'build' && <StepBuild input={input} patch={patch} stepLabel={stepLabel} />}
-                      {current === 'finish' && <StepFinish input={input} patch={patch} stepLabel={stepLabel} />}
+                      {current === 'site' && <StepSite input={input} patch={patch} stepLabel={stepLabel} />}
+                      {current === 'materials' && (
+                        <StepMaterialSelect
+                          input={input}
+                          patch={patch}
+                          stepLabel={stepLabel}
+                          chargeableArea={result.chargeableArea}
+                        />
+                      )}
                     </motion.div>
                   </AnimatePresence>
 

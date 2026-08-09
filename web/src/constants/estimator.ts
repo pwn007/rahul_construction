@@ -9,7 +9,6 @@
 
 export type PropertyTypeKey = 'residential' | 'commercial' | 'mixed-use' | 'interior-only';
 export type PackageKey = 'civil' | 'semi-furnished' | 'fully-furnished';
-export type QualityKey = 'essential' | 'signature' | 'bespoke';
 export type ServiceModel = 'turnkey' | 'labour-only';
 export type AreaUnit = 'sqft' | 'sqyd' | 'sqm';
 
@@ -35,14 +34,6 @@ export interface PackageOption {
   labourInclusions: string[];
   /** Cost distribution across construction heads — must sum to 1. */
   weights: Record<CostHeadKey, number>;
-}
-
-export interface QualityOption {
-  key: QualityKey;
-  label: string;
-  description: string;
-  multiplier: number;
-  highlights: string[];
 }
 
 export interface LocationOption {
@@ -72,7 +63,6 @@ export const COST_HEADS: { key: CostHeadKey; label: string; description: string;
   { key: 'interior', label: 'Interiors', description: 'Kitchen, wardrobes, ceilings, fixtures', color: '#B99465' },
   { key: 'misc', label: 'Approvals & Site', description: 'Approvals, supervision, contingency', color: '#828A9C' },
 ];
-
 export const PROPERTY_TYPES: PropertyTypeOption[] = [
   {
     key: 'residential',
@@ -103,7 +93,19 @@ export const PROPERTY_TYPES: PropertyTypeOption[] = [
     factor: 1.0,
   },
 ];
-
+/**
+ * The client's published rate card (Port1.pdf p.14–15).
+ *
+ * `minRate`/`maxRate` no longer *drive* the estimate — pricing runs bottom-up
+ * from the material grades. They are now the **validation band**: at Standard
+ * grade the bottom-up total must land inside them for every scope, which is what
+ * `npm run check:estimator` asserts. Keeping them as an independent check is
+ * more useful than keeping them as an input, because a drift in the coefficients
+ * now fails a test instead of quietly repricing the product.
+ *
+ * `labourOnlyRate` is still a direct input — under a labour-only contract there
+ * are no materials of ours to price up from.
+ */
 export const PACKAGES: PackageOption[] = [
   {
     key: 'civil',
@@ -143,29 +145,76 @@ export const PACKAGES: PackageOption[] = [
   },
 ];
 
-export const QUALITY_TIERS: QualityOption[] = [
+/* ------------------------------------------------------------------ */
+/* Commercial split — what the visitor sees first                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The *commercial* breakdown (materials / labour / design / approvals) is a
+ * different axis from the *construction* breakdown (structure / finishing / MEPF
+ * / interiors). Both are true; only this one answers "what am I paying for?",
+ * which is the question a homeowner actually asks. The construction heads move
+ * behind a disclosure.
+ */
+export type CommercialHeadKey = 'materials' | 'labour' | 'design' | 'overhead';
+
+export const COMMERCIAL_HEADS: {
+  key: CommercialHeadKey;
+  label: string;
+  description: string;
+  color: string;
+}[] = [
   {
-    key: 'essential',
-    label: 'Essential',
-    description: 'Reliable, well-known brands. Everything that matters, nothing that does not.',
-    multiplier: 0.92,
-    highlights: ['ISI-certified TMT steel', 'Vitrified tiles 600×600', 'Standard modular switches', 'Emulsion paint'],
+    key: 'materials',
+    label: 'Materials',
+    description: 'Everything that ends up in the building — cement, steel, tiles, wiring, fittings.',
+    color: '#0A1B4D',
   },
   {
-    key: 'signature',
-    label: 'Signature',
-    description: 'Our recommended specification. The balance most of our clients choose.',
-    multiplier: 1.0,
-    highlights: ['TATA / JSW / Jindal TMT', 'Large-format vitrified tiles', 'Branded CP & sanitary ware', 'Premium emulsion & textures'],
+    key: 'labour',
+    label: 'Labour',
+    description: 'Masons, bar-benders, carpenters, electricians, plumbers, painters.',
+    color: '#00AEEF',
   },
   {
-    key: 'bespoke',
-    label: 'Bespoke',
-    description: 'Imported finishes, designer fittings and detailing specified line by line.',
-    multiplier: 1.18,
-    highlights: ['Imported marble & Italian stone', 'Designer CP fittings', 'Home automation ready', 'Custom joinery in veneer'],
+    key: 'design',
+    label: 'Design & project management',
+    description: 'Drawings, structural and MEPF design, site engineers, supervision.',
+    color: '#B99465',
+  },
+  {
+    key: 'overhead',
+    label: 'Approvals, site & contingency',
+    description: 'Setup, temporary works, testing, wastage allowance and contingency.',
+    color: '#828A9C',
   },
 ];
+
+/**
+ * Commercial split per package. Each row must sum to exactly 1.
+ *
+ * These are not invented: they sit inside the published Indian benchmark bands
+ * (materials 55–60%, labour 25–30%, design 5–8%, overhead 5–10%) and are then
+ * calibrated so the bottom-up material lines in `materials.ts` reconcile against
+ * the pool they produce — see `MATERIAL_LINES` and the normalisation factor
+ * asserted in the estimator's reconciliation test.
+ *
+ * Every row here was arrived at by calibration, not preference. Pricing runs
+ * bottom-up from the material lines, so these ratios are the only thing standing
+ * between the summed materials and the total — and `npm run check:estimator`
+ * asserts that each one lands the resulting ₹/sq ft inside the rate card the
+ * client publishes for that scope. Change a coefficient in `materials.ts` and
+ * one of these usually has to move with it; the test says which.
+ *
+ * Civil sits at a higher labour share than the finished packages because a
+ * structure-only contract is labour-intensive and buys no finishing materials.
+ * All four rows stay inside the published Indian bands.
+ */
+export const COST_SPLIT: Record<PackageKey, Record<CommercialHeadKey, number>> = {
+  civil: { materials: 0.57, labour: 0.28, design: 0.05, overhead: 0.1 },
+  'semi-furnished': { materials: 0.56, labour: 0.25, design: 0.08, overhead: 0.11 },
+  'fully-furnished': { materials: 0.58, labour: 0.23, design: 0.09, overhead: 0.1 },
+};
 
 /** Locality multipliers — Jaipur zones from the client's actual project history, plus other cities. */
 export const LOCATIONS: LocationOption[] = [
@@ -183,37 +232,17 @@ export const LOCATIONS: LocationOption[] = [
   { key: 'outside-jaipur', label: 'Outside Jaipur (Rajasthan)', zone: 'Rajasthan', multiplier: 1.06 },
 ];
 
+/**
+ * Optional extras that sit OUTSIDE the material model.
+ *
+ * Modular kitchen, wardrobes, false ceiling and waterproofing used to live here
+ * too. They are now `MATERIAL_LINES`, and leaving them in both places would let a
+ * visitor add — and pay for — the same kitchen twice: once as an opt-in material
+ * and again as an enhancement. Everything remaining is genuinely not a material
+ * line: whole systems (HVAC, solar, lift, automation) or works outside the
+ * building envelope (boundary wall, landscaping, elevation treatment).
+ */
 export const ENHANCEMENTS: EnhancementOption[] = [
-  {
-    key: 'modular-kitchen',
-    label: 'Modular Kitchen',
-    description: 'Base + wall units, counter, chimney, hob and accessories.',
-    icon: 'ChefHat',
-    pricingModel: 'lumpsum',
-    unitPrice: 285000,
-    appliesTo: ['residential', 'mixed-use', 'interior-only'],
-    head: 'interior',
-  },
-  {
-    key: 'false-ceiling',
-    label: 'False Ceiling & Cove Lighting',
-    description: 'Gypsum ceiling with profile lighting in living and bedrooms.',
-    icon: 'Lightbulb',
-    pricingModel: 'per-sqft',
-    unitPrice: 95,
-    appliesTo: ['residential', 'commercial', 'mixed-use', 'interior-only'],
-    head: 'interior',
-  },
-  {
-    key: 'wardrobes',
-    label: 'Designer Wardrobes',
-    description: 'Full-height wardrobes with laminate/veneer shutters.',
-    icon: 'DoorClosed',
-    pricingModel: 'lumpsum',
-    unitPrice: 210000,
-    appliesTo: ['residential', 'mixed-use', 'interior-only'],
-    head: 'interior',
-  },
   {
     key: 'elevation',
     label: 'Premium Elevation',
@@ -223,16 +252,6 @@ export const ENHANCEMENTS: EnhancementOption[] = [
     unitPrice: 165,
     appliesTo: ['residential', 'commercial', 'mixed-use'],
     head: 'finishing',
-  },
-  {
-    key: 'waterproofing',
-    label: 'Full Waterproofing',
-    description: 'Terrace, bathrooms, sunken slabs and external walls.',
-    icon: 'Umbrella',
-    pricingModel: 'per-sqft',
-    unitPrice: 42,
-    appliesTo: ['residential', 'commercial', 'mixed-use'],
-    head: 'structure',
   },
   {
     key: 'anti-termite',

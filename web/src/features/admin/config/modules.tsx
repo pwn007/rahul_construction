@@ -780,7 +780,7 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'propertyType', label: 'Property type', type: 'text', span: 4 },
       { name: 'packageType', label: 'Package', type: 'text', span: 4 },
       { name: 'qualityTier', label: 'Quality tier', type: 'text', span: 4 },
-      { name: 'plotArea', label: 'Plot area', type: 'number', span: 4 },
+      { name: 'areaPerFloor', label: 'Area per floor', type: 'number', span: 4 },
       { name: 'floors', label: 'Floors', type: 'number', span: 4 },
       { name: 'builtUpArea', label: 'Built-up area', type: 'number', span: 4 },
       { name: 'totalMin', label: 'Estimate — low', type: 'currency', span: 4 },
@@ -797,7 +797,7 @@ export const MODULES: ResourceConfig<never>[] = [
     preview: (row: never) => {
       const e = row as unknown as {
         name: string; phone: string; propertyType: string; packageType: string; qualityTier: string;
-        location: string; plotArea: number; builtUpArea: number; floors: number; totalMin: number;
+        location: string; areaPerFloor: number; builtUpArea: number; floors: number; totalMin: number;
         totalMax: number; timelineWeeks: number; enhancements: string[];
       };
       return (
@@ -819,7 +819,7 @@ export const MODULES: ResourceConfig<never>[] = [
               ['Package', e.packageType],
               ['Quality', e.qualityTier],
               ['Locality', e.location],
-              ['Plot area', `${formatNumber(e.plotArea)}`],
+              ['Area per floor', `${formatNumber(e.areaPerFloor)}`],
               ['Floors', String(e.floors)],
             ].map(([k, v]) => (
               <div key={k}>

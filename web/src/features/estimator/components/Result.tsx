@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Check, Download, Info, MessageCircle, Plus, RotateCcw, Ruler, Share2 } from 'lucide-react';
-import { Badge, Button, Dialog, FormField, Input, useToast } from '@/components/ui';
+import { Badge, Button, Dialog, FormField, Input, Switch, useToast } from '@/components/ui';
 import { Counter, Reveal } from '@/components/motion';
 import { formatCurrency, formatCurrencyCompact, formatDuration, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/cn';
@@ -11,9 +11,10 @@ import { SITE } from '@/constants/site';
 import { projects } from '@/data/projects';
 import { estimatesService } from '@/services';
 import { COST_HEADS } from '@/constants/estimator';
+import { MATERIAL_GROUPS, QUANTITY_UNIT_LABEL } from '@/constants/materials';
 import type { EstimateResult, EstimatorInput } from '../model';
+import { missingEssentials, specSummary } from '../model';
 import { StepEnhancements } from './Steps';
-import { StepMaterials } from './StepMaterials';
 import { useCopy } from '@/hooks';
 
 /* ------------------------------------------------------------------ */
@@ -128,6 +129,182 @@ function LeadDialog({
 }
 
 /* ------------------------------------------------------------------ */
+/* Commercial split — "what am I actually paying for?"                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The first thing on the result screen after the number itself.
+ *
+ * Materials / labour / design / approvals is a different axis from structure /
+ * finishing / MEPF / interiors, and it is the one a homeowner asks about. The
+ * construction heads are still here, one disclosure down, for anyone comparing
+ * against a contractor's quotation.
+ *
+ * Each row expands into its own detail: materials into the itemised list,
+ * the rest into an explanation of what the money covers. Nothing is a black box,
+ * and nothing arrives before it is asked for.
+ */
+function CommercialSplit({
+  result,
+  children,
+}: {
+  result: EstimateResult;
+  /** Rendered inside the materials row when it is expanded. */
+  children?: ReactNode;
+}) {
+  const [open, setOpen] = useState<string | null>(null);
+
+  return (
+    <div className="surface rounded-xl border">
+      <div className="border-b p-6">
+        <h3 className="font-display text-heading-lg font-semibold">Where the money goes</h3>
+        <p className="mt-1.5 text-caption text-muted">
+          Every line adds up to the total above — tap any row to see what it covers.
+        </p>
+      </div>
+
+      <div className="divide-y">
+        {result.commercial.map((head) => {
+          const isOpen = open === head.key;
+          const expandable = head.key === 'materials' && Boolean(children);
+
+          return (
+            <div key={head.key}>
+              <button
+                type="button"
+                onClick={() => setOpen(isOpen ? null : head.key)}
+                aria-expanded={isOpen}
+                className="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-[rgb(var(--c-surface-2))]"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span className="font-medium">{head.label}</span>
+                    <span className="num shrink-0 font-semibold">{formatCurrency(head.amount)}</span>
+                  </span>
+
+                  <span className="mt-2 flex items-center gap-3">
+                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-[rgb(var(--c-text))]/[0.07]">
+                      <motion.span
+                        className="block h-full rounded-full"
+                        style={{ background: head.color }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${head.percent}%` }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </span>
+                    <span className="num w-11 shrink-0 text-right text-caption text-subtle">
+                      {head.percent.toFixed(0)}%
+                    </span>
+                  </span>
+                </span>
+
+                <Plus
+                  className={cn('h-4 w-4 shrink-0 text-subtle transition-transform', isOpen && 'rotate-45')}
+                  aria-hidden
+                />
+              </button>
+
+              {isOpen && (
+                <div className="border-t bg-[rgb(var(--c-surface-2))] p-5">
+                  <p className="text-caption leading-relaxed text-muted">{head.description}</p>
+                  {expandable && <div className="mt-5">{children}</div>}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Itemised materials                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Quantity, rate and amount for every material line.
+ *
+ * The quantities are the point. "₹3,97,900 of cement" is a claim; "994 bags at
+ * ₹400" is something a visitor can take to a supplier and check, and checking is
+ * what turns an estimate into an argument. No competitor in this market shows
+ * quantities at all — the closest, Brick&Bolt, shows brand names per tier.
+ *
+ * Rates shown here are delivered rates: the catalogue rate after the tier,
+ * locality and normalisation scaling, so quantity × rate = amount holds exactly
+ * on screen. A reader who multiplies two columns gets the third.
+ */
+function MaterialBreakdown({ result }: { result: EstimateResult }) {
+  const pool = result.commercial.find((c) => c.key === 'materials')?.amount ?? 0;
+
+  if (!result.materialLines.length) {
+    return (
+      <p className="text-caption leading-relaxed text-muted">
+        You have chosen to buy the materials yourself, so there is no material cost in this estimate —
+        only labour, design and site costs.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      {MATERIAL_GROUPS.map((group) => {
+        const lines = result.materialLines.filter((l) => l.group === group.key);
+        if (!lines.length) return null;
+        const subtotal = lines.reduce((sum, l) => sum + l.amount, 0);
+
+        return (
+          <div key={group.key}>
+            <div className="flex items-baseline justify-between gap-3 border-b pb-2">
+              <p className="text-[0.8125rem] font-semibold">{group.label}</p>
+              <p className="num text-caption font-medium">{formatCurrency(subtotal)}</p>
+            </div>
+
+            <ul className="mt-1 divide-y divide-dashed">
+              {lines.map((line) => (
+                <li key={line.key} className="flex items-baseline justify-between gap-4 py-2.5">
+                  <span className="min-w-0">
+                    <span className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="text-caption font-medium">{line.label}</span>
+                      <span className="text-caption text-subtle">
+                        {line.spec}
+                        {line.provisional && ' *'}
+                      </span>
+                    </span>
+                    <span className="num block text-caption text-subtle">
+                      {formatNumber(line.quantity)} {QUANTITY_UNIT_LABEL[line.unit]} @ ₹
+                      {formatNumber(Math.round(line.unitRate))}
+                    </span>
+                  </span>
+                  <span className="num shrink-0 text-caption font-medium">{formatCurrency(line.amount)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+
+      <div className="flex items-baseline justify-between gap-3 border-t pt-3">
+        <p className="text-[0.8125rem] font-semibold">Total materials</p>
+        <p className="num font-semibold">{formatCurrency(pool)}</p>
+      </div>
+
+      <p className="flex items-start gap-2 text-caption leading-relaxed text-subtle">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <span>
+          Quantities use published thumb rules — 0.4 bags of cement and 4 kg of steel per sq ft, and so on. They
+          are close enough to plan and budget against, and they are not a take-off: final quantities come from
+          approved drawings and a bar-bending schedule.
+          {result.materialLines.some((l) => l.provisional) && (
+            <> Rates marked <span className="font-medium">*</span> have an indicative grade spread.</>
+          )}
+        </span>
+      </p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Result screen                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -147,6 +324,18 @@ export function ResultScreen({
   const [leadOpen, setLeadOpen] = useState(false);
   const { push } = useToast();
   const { copied, copy } = useCopy();
+
+
+  /**
+   * A partial selection has priced partial work, and the screen has to say so.
+   *
+   * A visitor who picked three materials has priced three materials, not a house.
+   * The competitor's calculator produces a confident total regardless of what you
+   * selected; naming what is missing costs us nothing and is the difference
+   * between an estimate and a number.
+   */
+  const missing = missingEssentials(input);
+  const complete = missing.length === 0 && result.materialLines.length > 0;
 
   const related = useMemo(
     () =>
@@ -180,16 +369,18 @@ export function ResultScreen({
         phone: lead.phone,
         email: lead.email,
         propertyType: input.propertyType,
-        plotArea: input.plotArea,
+        areaPerFloor: input.areaPerFloor,
         areaUnit: input.areaUnit,
         floors: input.floors,
-        packageType: input.packageKey,
-        qualityTier: input.quality,
+        // Scope is derived, not chosen — sales still sees rate-card language.
+        packageType: result.scope,
+        qualityTier: specSummary(input),
         location: input.location,
         enhancements: input.enhancements,
-        materialMode: input.materialMode,
+        // The exact specification, so an estimator can rebuild the quote line by line.
+        // The exact material and brand set, so an estimator can rebuild the quote line by line.
         materials: input.materials,
-        specAdjustment: Math.round(result.specAdjustment),
+        materialsCost: Math.round(result.materialsCost),
         builtUpArea: Math.round(result.builtUpArea),
         totalMin: Math.round(result.min),
         totalMax: Math.round(result.max),
@@ -227,7 +418,8 @@ export function ResultScreen({
           <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
               <Badge variant="brand" size="lg" className="bg-cyan-500 text-white">
-                <Check className="h-3.5 w-3.5" /> Your estimate is ready
+                <Check className="h-3.5 w-3.5" />
+                {complete ? 'Your estimate is ready' : 'Cost of the work you selected'}
               </Badge>
 
               <p className="num mt-6 text-[clamp(2.25rem,5vw,3.75rem)] font-semibold leading-none tracking-tight">
@@ -275,6 +467,17 @@ export function ResultScreen({
                 the only routes off it were the download gate, wa.me, and
                 browsing projects.
               */}
+              {missing.length > 0 && (
+                <p className="mt-6 flex items-start gap-2 rounded-lg border border-white/15 bg-white/[0.06] p-3.5 text-caption leading-relaxed text-white/70">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                  <span>
+                    This prices only what you selected. A complete build also needs{' '}
+                    <span className="font-medium text-white">{missing.map((m) => m.label).join(', ')}</span> —
+                    add them on the previous step if you want us to supply those too.
+                  </span>
+                </p>
+              )}
+
               <p className="mt-6 text-caption text-white/55">
                 Want us to walk you through it?{' '}
                 <Link to={ROUTES.contact} className="link-underline font-medium text-cyan-400">
@@ -289,12 +492,12 @@ export function ResultScreen({
                 <p className="text-caption uppercase tracking-wide text-white/45">Your configuration</p>
                 <dl className="mt-4 space-y-2.5 text-sm">
                   {[
-                    ['Type', result.labels.propertyType],
-                    ['Model', result.labels.serviceModel],
-                    ['Package', result.labels.packageLabel],
-                    ['Quality', result.labels.quality],
+                    ['Finish', result.labels.packageLabel],
+                    ['Built-up area', `${formatNumber(Math.round(result.builtUpArea))} sq ft`],
                     ['Floors', result.labels.floors],
                     ['Location', result.labels.location],
+                    ['Building type', result.labels.propertyType],
+                    ['Contract', result.labels.serviceModel],
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between gap-4">
                       <dt className="text-white/45">{k}</dt>
@@ -315,43 +518,66 @@ export function ResultScreen({
       </Reveal>
 
       {/*
-        Refinement panels.
+        The commercial split, immediately under the number.
 
-        These two used to be wizard steps 5 and 6 — twenty-nine material choices
-        and twelve enhancement toggles standing between the visitor and a number
-        that neither of them was required to produce. They live here now, after
-        the estimate, collapsed. Someone looking at their own figure will happily
-        spend a minute moving it; someone who has not seen one yet will not.
+        This answers "what am I paying for?" in four rows using words a homeowner
+        already owns, and every row expands. Materials expands all the way down to
+        quantities — 994 bags of cement at ₹400 — which is the level at which an
+        estimate stops being a claim and becomes something you can check.
       */}
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <Reveal delay={0.06}>
+        <div className="mt-6">
+          <CommercialSplit result={result}>
+            <MaterialBreakdown result={result} />
+          </CommercialSplit>
+        </div>
+      </Reveal>
+
+      {/*
+        Service model, demoted from a step-one question to a switch here.
+
+        Turnkey vs labour-only used to be the second thing the estimator asked,
+        with two rate cards an order of magnitude apart (₹1,200–3,000 against
+        ₹100–199 per sq ft) and no explanation of why. It reads as an error unless
+        you already know what a labour contract is. Almost everyone wants turnkey;
+        the minority who do not can say so here, after the number, in plain words.
+      */}
+      <div className="surface mt-4 flex items-center justify-between gap-4 rounded-xl border p-5">
+        <div className="min-w-0">
+          <p className="text-[0.9375rem] font-medium">I&apos;ll buy the materials myself</p>
+          <p className="mt-1 text-caption leading-relaxed text-muted">
+            We supervise and execute; you procure everything. Removes the material cost from this estimate
+            and reprices the work at our labour-only rate.
+          </p>
+        </div>
+        <Switch
+          checked={input.serviceModel === 'labour-only'}
+          onChange={(v) => patch({ serviceModel: v ? 'labour-only' : 'turnkey' })}
+          label="Buy materials myself"
+        />
+      </div>
+
+      {/*
+        Enhancements — the one refinement that still belongs here.
+
+        The material picker used to sit beside this as a second panel. Step 2 now
+        *is* the material picker, so keeping it would have meant two places to
+        choose flooring, which is exactly the kind of duplication that makes a
+        tool feel like a form. Enhancements are different: they are whole systems
+        (solar, lift, HVAC) that sit outside the material model, and they are
+        purely additive, so they never block the number.
+      */}
+      <div className="mt-4">
         <RefinePanel
-          title="Add enhancements"
+          title="Add extras"
           summary={
             input.enhancements.length
               ? `${input.enhancements.length} added · ${formatCurrencyCompact(result.enhancementsCost)}`
-              : 'Modular kitchen, false ceiling, solar, lift and more'
+              : 'Solar, lift, HVAC, home automation, boundary wall and more'
           }
           count={input.enhancements.length}
         >
           <StepEnhancements input={input} patch={patch} chargeableArea={result.chargeableArea} embedded />
-        </RefinePanel>
-
-        <RefinePanel
-          title="Specify materials"
-          summary={
-            input.materialMode === 'custom'
-              ? `Custom specification · ${result.specAdjustment >= 0 ? '+' : '−'}${formatCurrencyCompact(Math.abs(result.specAdjustment))}`
-              : 'Brand by brand — steel, tiles, switches, sanitaryware'
-          }
-          count={input.materialMode === 'custom' ? Object.keys(input.materials ?? {}).length : 0}
-        >
-          <StepMaterials
-            input={input}
-            patch={patch}
-            builtUpArea={result.builtUpArea}
-            specAdjustment={result.specAdjustment}
-            embedded
-          />
         </RefinePanel>
       </div>
 
@@ -462,80 +688,6 @@ export function ResultScreen({
         </Reveal>
       )}
 
-      {/* Specification schedule */}
-      {result.specSchedule.length > 0 && (
-        <Reveal delay={0.1} className="mt-6">
-          <div className="surface rounded-xl border p-7 shadow-sm">
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <div>
-                <h3 className="font-display text-heading-lg font-semibold">Your material specification</h3>
-                <p className="mt-1.5 text-caption text-muted">
-                  Priced as the difference from our standard specification — the package rate already includes a
-                  standard grade.
-                </p>
-              </div>
-              <span
-                className={cn(
-                  'num shrink-0 rounded-full px-3 py-1.5 text-caption font-medium',
-                  result.specAdjustment > 0 && 'bg-warning/12 text-warning',
-                  result.specAdjustment < 0 && 'bg-success/12 text-success',
-                  result.specAdjustment === 0 && 'bg-[rgb(var(--c-text))]/[0.06] text-subtle',
-                )}
-              >
-                {result.specAdjustment > 0 ? '+' : ''}
-                {formatCurrency(result.specAdjustment)}
-              </span>
-            </div>
-
-            <div className="mt-5 overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b text-left">
-                    <th className="pb-2.5 pr-4 font-medium text-subtle">Category</th>
-                    <th className="pb-2.5 pr-4 font-medium text-subtle">Item</th>
-                    <th className="pb-2.5 pr-4 font-medium text-subtle">Selection</th>
-                    <th className="pb-2.5 text-right font-medium text-subtle">Effect</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.specSchedule.map((line, i) => (
-                    <tr key={`${line.category}-${line.group}-${i}`} className="border-b last:border-0">
-                      <td className="py-2.5 pr-4 text-muted">{line.category}</td>
-                      <td className="py-2.5 pr-4 text-muted">{line.group}</td>
-                      <td className="py-2.5 pr-4">
-                        <span className="font-medium">{line.choice}</span>
-                        {line.priceLabel && <span className="num ml-2 text-caption text-subtle">{line.priceLabel}</span>}
-                      </td>
-                      <td className="py-2.5 text-right">
-                        {line.quantifiedAtBoq ? (
-                          <span className="text-caption text-subtle">At BOQ</span>
-                        ) : line.delta === 0 ? (
-                          <span className="text-caption text-subtle">Standard</span>
-                        ) : (
-                          <span className={cn('num font-medium', line.delta > 0 ? 'text-warning' : 'text-success')}>
-                            {line.delta > 0 ? '+' : ''}
-                            {formatCurrency(line.delta)}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {result.specDeferredCount > 0 && (
-              <p className="mt-4 flex items-start gap-2 text-caption leading-relaxed text-subtle">
-                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                {result.specDeferredCount} selection{result.specDeferredCount === 1 ? ' is' : 's are'} priced per
-                running foot, tonne, cubic metre or fitting. Those need a quantity take-off from approved drawings,
-                so they are recorded here at their unit rate rather than guessed into the headline.
-              </p>
-            )}
-          </div>
-        </Reveal>
-      )}
-
       {/* Assumptions */}
       <Reveal delay={0.1} className="mt-6">
         <div className="rounded-xl border border-dashed p-7">
@@ -606,7 +758,13 @@ export function ResultScreen({
  * expectation instead, and the number arrives the moment it is genuinely theirs.
  */
 export function LiveCostMeter({ result, compact }: { result: EstimateResult; compact?: boolean }) {
-  const ready = result.chargeableArea > 0;
+  /**
+   * Two things have to be true before there is anything to show: an area, and at
+   * least one material. Rendering ₹0 as though it were an estimate is worse than
+   * rendering nothing — it looks like the tool decided your house is free.
+   */
+  const noArea = result.chargeableArea <= 0;
+  const ready = !noArea && result.materialLines.length > 0;
 
   if (!ready) {
     return (
@@ -634,12 +792,16 @@ export function LiveCostMeter({ result, compact }: { result: EstimateResult; com
 
               <p className="mt-4 flex items-start gap-2 border-t pt-4 text-caption leading-relaxed text-muted">
                 <Ruler className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
-                Add your plot area above and this updates with every choice after it.
+                {noArea
+                  ? 'Add your built-up area above and this updates with every choice after it.'
+                  : 'Select the materials you want us to supply and this fills in as you go.'}
               </p>
             </>
           )}
         </div>
-        {compact && <p className="shrink-0 text-caption text-subtle">Add area</p>}
+        {compact && (
+          <p className="shrink-0 text-caption text-subtle">{noArea ? 'Add area' : 'Pick materials'}</p>
+        )}
       </div>
     );
   }

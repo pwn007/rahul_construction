@@ -1,5 +1,6 @@
-import type { BaseRate, Enhancement, LocationMultiplier, QualityTier } from '@/types/domain';
-import { ENHANCEMENTS, LOCATIONS, PACKAGES, QUALITY_TIERS } from '@/constants/estimator';
+import type { BaseRate, Enhancement, LocationMultiplier, MaterialSpec } from '@/types/domain';
+import { ENHANCEMENTS, LOCATIONS, PACKAGES } from '@/constants/estimator';
+import { MATERIAL_LINES, defaultOption } from '@/constants/materials';
 
 /**
  * Persisted mirror of the estimator constants.
@@ -27,13 +28,17 @@ export const BASE_RATES: BaseRate[] = PACKAGES.map((p, i) => ({
   order: i + 1,
 }));
 
-export const QUALITY_RECORDS: QualityTier[] = QUALITY_TIERS.map((q, i) => ({
-  ...meta(`quality_${q.key}`),
-  key: q.key,
-  label: q.label,
-  description: q.description,
-  multiplier: q.multiplier,
-  highlights: [...q.highlights],
+export const MATERIAL_RECORDS: MaterialSpec[] = MATERIAL_LINES.map((line, i) => ({
+  ...meta(`mat_${line.key}`),
+  key: line.key,
+  label: line.label,
+  group: line.group,
+  unit: line.unit,
+  coefficient: line.coefficient,
+  options: line.options.map((o) => `${o.label} — ₹${o.rate}`),
+  defaultRate: defaultOption(line).rate,
+  provisional: line.options.some((o) => o.provisional),
+  essential: Boolean(line.essential),
   order: i + 1,
 }));
 

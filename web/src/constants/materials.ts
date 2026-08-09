@@ -1,437 +1,534 @@
 import type { CostHeadKey } from './estimator';
 
 /**
- * Material specification catalogue.
+ * Material pricing model.
  *
- * Transcribed verbatim from the client's existing calculator
- * (archubicbuildcon.com/calculator) — 14 categories, every brand, every
- * sub-category, every option and every published rate.
+ * The client's existing calculator (archubicbuildcon.com/calculator) was
+ * transcribed here in full — 14 categories, every brand, every published rate —
+ * as a *specification* catalogue: it recorded which brand you picked and priced
+ * the difference from a package baseline.
  *
- * WHAT WE ADD OVER THE ORIGINAL
- * The original records selections and posts them to a lead endpoint; the choices
- * never affect a number and the user never sees a cost. Here every option carries
- * a parsed `rate` + `unit`, and each group declares a `baseline` and a `coverage`
- * factor, so a choice moves the estimate live.
- *
- * WHY DELTAS, NOT ABSOLUTES
- * The package rate (₹1,800–2,200/sq ft) already includes a standard specification.
- * Adding a chosen ₹/sq ft rate on top would double-count it. We therefore price the
- * *difference* from each group's baseline option. Choosing the baseline costs nothing
- * extra; trading up or down moves the number by the real difference.
- *
- * `coverage` = the share of built-up area a group actually applies to. Wall paint
- * covers ~2.4× the floor area; door shutters ~5%. Groups priced per RFT / TON / CUM /
- * NOS need a quantity take-off we cannot honestly do from four inputs, so they carry
- * no coverage: they are recorded in the specification schedule at their unit rate and
- * excluded from the headline, with that stated on screen and in the PDF.
+ * That catalogue has been folded into `MATERIAL_LINES` below and removed. It
+ * could name a brand but never a quantity, so it could not answer "how much
+ * cement does my house need"; and because the package rate already carried a
+ * standard specification, it could only ever express a choice as a ± delta.
+ * Pricing now runs bottom-up from quantity × graded rate, so every published
+ * price point it held lives on as a grade — see the `spec` strings, which carry
+ * the original brand names.
  */
 
-export type RateUnit = 'sqft' | 'rft' | 'ton' | 'cum' | 'nos' | 'lumpsum';
+/* ==================================================================== */
+/* Bottom-up material lines — what the estimator actually prices          */
+/* ==================================================================== */
+
+/**
+ * Quantity coefficients per sq ft of chargeable area, and one rate each.
+ *
+ * These lines ARE the pricing model. The visitor selects the materials they want
+ * and the estimate is built upward from them — materials summed directly, then
+ * labour, design and site costs derived from the materials share.
+ *
+ * ONE CARD PER BRAND
+ * Every brand stands on its own, at its own price. The source calculator groups
+ * equivalents — "KAMADHENU Or RATHI", "ULTRATECH / AMBUJA" — and reproducing that
+ * meant one card had to represent two suppliers at once, which reads as a single
+ * ambiguous choice rather than two clear ones. Equivalent brands simply share a
+ * rate; nothing is paired on screen.
+ *
+ * BRANDS, NOT TIERS
+ * Each material offers the brands and specifications the client's own calculator
+ * lists, with their published prices. They are never ranked and never given tier
+ * names: two of the window options cost the same, and the cheapest cement is not
+ * "Economy". Where the client publishes distinct prices the option *ratios* come
+ * from those figures; where the published unit differs from ours, the default
+ * option keeps the calibrated absolute rate and the rest scale by the published
+ * ratio. Where brands carry no published price difference at all — cement, steel,
+ * bricks — the spread is derived and marked `provisional`.
+ *
+ * NOTHING IS PRE-SELECTED
+ * The visitor picks every material and every brand. `MaterialLine.essential`
+ * marks what a complete build needs, but it only drives an advisory coverage
+ * strip — it never blocks, and it never pre-ticks.
+ *
+ * The five structural coefficients are the published Indian thumb rules, and
+ * they converge tightly across sources:
+ *
+ *   cement 0.40 bags/sq ft (published range 0.40–0.50)
+ *   steel  4.00 kg/sq ft   (3.5–4.5)
+ *   sand   0.90 cft/sq ft  (0.8–1.0)
+ *   agg.   1.10 cft/sq ft  (1.0–1.2)
+ *   bricks 8 nos/sq ft     (5–10, depending on wall type)
+ *
+ * They are thumb rules, not a take-off, and the UI says so. Final quantities come
+ * from approved drawings and a bar-bending schedule. A real BOQ for a 2,000 sq ft
+ * house runs 80–150 line items across 12–18 sections; twenty sections is the
+ * granularity a homeowner can actually hold in their head.
+ */
+
+export type QuantityUnit = 'bag' | 'kg' | 'cft' | 'cum' | 'ton' | 'nos' | 'sqft' | 'rft' | 'point';
+
+export type MaterialGroupKey = 'structure' | 'finishing' | 'services' | 'fixtures';
+
+export const MATERIAL_GROUPS: { key: MaterialGroupKey; label: string; description: string }[] = [
+  { key: 'structure', label: 'Structure', description: 'What holds the building up' },
+  { key: 'finishing', label: 'Finishing', description: 'What you see and touch' },
+  { key: 'services', label: 'Services', description: 'Electrical, plumbing and water' },
+  { key: 'fixtures', label: 'Fixtures & joinery', description: 'Kitchen, wardrobes, ceilings' },
+];
 
 export interface MaterialOption {
-  name: string;
-  /** "Or RATHI" — the original shows an equivalent alternative brand. */
-  alt?: string;
-  /** Exactly as printed on the client's calculator. */
-  priceLabel?: string;
-  rate?: number;
-  unit?: RateUnit;
-}
-
-export interface MaterialGroup {
-  name: string;
-  options: MaterialOption[];
-  /** Option treated as "already included in the package rate". */
-  baseline: string;
-  /** Share of built-up area this group applies to. Omitted ⇒ excluded from the headline. */
-  coverage?: number;
-  head: CostHeadKey;
-}
-
-export interface MaterialExtra {
-  name: string;
-  /** Maps onto an existing enhancement so the cost is never counted twice. */
-  enhancementKey: string;
-}
-
-export interface MaterialCategory {
-  id: string;
+  key: string;
+  /** The brand, as the client's own calculator names it. */
   label: string;
-  icon: string;
-  /** Brand-only categories: spec signal, no direct rate. */
-  brands?: MaterialOption[];
-  groups?: MaterialGroup[];
-  extras?: MaterialExtra[];
-  /** Shown under the category title to explain what the choice affects. */
+  /** Grade, size or what the allowance buys. */
+  detail?: string;
+  /** ₹ per unit. */
+  rate: number;
+  /** Exactly one per material. Carries the calibrated rate — see the note below. */
+  isDefault?: boolean;
+  /** True when this rate is derived rather than published. Surfaced with an asterisk. */
+  provisional?: boolean;
+}
+
+export interface MaterialLine {
+  key: string;
+  label: string;
+  group: MaterialGroupKey;
+  head: CostHeadKey;
+  /** Quantity per sq ft of chargeable area. */
+  coefficient: number;
+  unit: QuantityUnit;
+  /** One line for the collapsed row — what this material is, in plain words. */
+  blurb: string;
+  /** Brands or specifications to choose between. Never ranked, never tier-named. */
+  options: MaterialOption[];
+  /** Scopes that can include this line. */
+  packages: PackageKeyRef[];
+  /** A complete build needs this. Drives the coverage strip, never blocks anything. */
+  essential?: boolean;
+  /**
+   * This is the *alternative* way of buying something, not the norm.
+   *
+   * `exclusiveWith` has to be declared symmetrically or the UI and the pricing
+   * disagree about which row is live — but that symmetry means "materials that
+   * participate in an exclusion" cannot tell you which side is the default. This
+   * can: ready-mix is the alternative, site-mixed cement is the norm.
+   */
+  isAlternative?: boolean;
+  /**
+   * Materials this one replaces.
+   *
+   * Ready-mix and site-mixed concrete are the same concrete bought two ways — the
+   * trade advice is explicitly "either mix on site or order RMC". Reidius lists
+   * Cement *and* Mix Concrete as two additive rows, which charges for the same
+   * cubic metre twice. Selecting one here drops the other.
+   */
+  exclusiveWith?: string[];
+  /** Expanded detail — provenance, or what the allowance covers. */
   note?: string;
 }
 
-const sqft = (n: number) => ({ rate: n, unit: 'sqft' as const, priceLabel: `₹${n}/sqft` });
+type PackageKeyRef = 'civil' | 'semi-furnished' | 'fully-furnished';
 
-export const MATERIAL_CATEGORIES: MaterialCategory[] = [
+const ALL: PackageKeyRef[] = ['civil', 'semi-furnished', 'fully-furnished'];
+const FINISHED: PackageKeyRef[] = ['semi-furnished', 'fully-furnished'];
+const FURNISHED: PackageKeyRef[] = ['fully-furnished'];
+
+export const MATERIAL_LINES: MaterialLine[] = [
+  /* ---- Structure --------------------------------------------------- */
   {
-    id: 'steel',
-    label: 'TMT Steel',
-    icon: '🔩',
-    note: 'Reinforcement grade drives structural durability. All listed brands are Fe500D or better.',
-    brands: [
-      { name: 'TATA TISCON' },
-      { name: 'JINDAL PANTHER' },
-      { name: 'KAMADHENU', alt: 'RATHI' },
-      { name: 'JSW' },
-    ],
-  },
-  {
-    id: 'bricks',
-    label: 'Bricks',
-    icon: '🧱',
-    note: 'Masonry choice affects thermal performance and plaster consumption.',
-    brands: [
-      { name: 'FLY ASH BRICKS' },
-      { name: 'RENWEL', alt: 'CLAY BRICKS' },
-      { name: 'KANOTA', alt: 'HANUMANGARH' },
-    ],
-    extras: [
-      { name: 'Water Proofing', enhancementKey: 'waterproofing' },
-      { name: 'Termite Solution', enhancementKey: 'anti-termite' },
-    ],
-  },
-  {
-    id: 'cement',
+    key: 'cement',
     label: 'Cement',
-    icon: '🏗️',
-    note: 'All options are OPC/PPC 43–53 grade from established plants.',
-    brands: [
-      { name: 'ULTRATECH', alt: 'AMBUJA' },
-      { name: 'JK SUPER' },
-      { name: 'WONDER', alt: 'SHREE' },
-      { name: 'ACC' },
+    group: 'structure',
+    head: 'structure',
+    coefficient: 0.4,
+    unit: 'bag',
+    blurb: 'Binder for concrete, masonry and plaster',
+    packages: ALL,
+    essential: true,
+    exclusiveWith: ['rmc'],
+    options: [
+      { key: 'ultratech', label: 'UltraTech', detail: 'PPC', rate: 420, isDefault: true },
+      { key: 'ambuja', label: 'Ambuja', detail: 'PPC', rate: 420 },
+      { key: 'jk-super', label: 'JK Super', detail: 'OPC 53-grade', rate: 455, provisional: true },
+      { key: 'acc', label: 'ACC', detail: 'OPC 43-grade', rate: 405, provisional: true },
+      { key: 'wonder', label: 'Wonder', detail: 'PPC', rate: 390, provisional: true },
+      { key: 'shree', label: 'Shree', detail: 'PPC', rate: 390, provisional: true },
     ],
+    note: '50 kg bags. Thumb rule 0.40–0.50 bags per sq ft.',
   },
   {
-    id: 'electrical',
-    label: 'Electrical',
-    icon: '⚡',
-    groups: [
-      {
-        name: 'Slab & Wall Material',
-        head: 'mep',
-        baseline: 'JINDAL',
-        options: [{ name: 'SHIVA' }, { name: 'JINDAL' }, { name: 'OTHER BRANDS' }],
-      },
-      {
-        name: 'Wires & Cables',
-        head: 'mep',
-        baseline: 'PARAMOUNT',
-        options: [{ name: 'SCHNEIDER / GM' }, { name: 'PARAMOUNT' }, { name: 'RR / HAVELLS' }],
-      },
-      {
-        name: 'Switches & Plates',
-        head: 'mep',
-        baseline: 'ANCHOR PENTA',
-        coverage: 1.0,
-        options: [
-          { name: 'ANCHOR PENTA', ...sqft(12) },
-          { name: 'HAVELLS', ...sqft(18) },
-          { name: 'SCHNEIDER', ...sqft(18) },
-          { name: 'GM', ...sqft(18) },
-        ],
-      },
+    key: 'steel',
+    label: 'TMT Steel',
+    group: 'structure',
+    head: 'structure',
+    coefficient: 4,
+    unit: 'kg',
+    blurb: 'Reinforcement for footings, columns and slabs',
+    packages: ALL,
+    essential: true,
+    /* Four brands, exactly as the source lists them. JSW and Jindal Panther were
+       briefly merged into one option here — they are separate manufacturers and
+       the source never paired them. JSW stays the default, so the calibrated
+       ₹72 is unchanged. */
+    options: [
+      { key: 'tata', label: 'TATA TISCON', detail: 'Fe550D', rate: 78, provisional: true },
+      { key: 'jindal', label: 'Jindal Panther', detail: 'Fe500D', rate: 74, provisional: true },
+      { key: 'jsw', label: 'JSW', detail: 'Fe500D', rate: 72, isDefault: true },
+      { key: 'kamadhenu', label: 'Kamadhenu', detail: 'Fe500D', rate: 66, provisional: true },
+      { key: 'rathi', label: 'Rathi', detail: 'Fe500D', rate: 66, provisional: true },
     ],
+    note: 'Thumb rule 3.5–4.5 kg per sq ft; final quantity from the bar-bending schedule.',
   },
   {
-    id: 'flooring',
-    label: 'Flooring',
-    icon: '🪨',
-    groups: [
-      {
-        name: 'Vitrified Tiles',
-        head: 'finishing',
-        baseline: 'Upto ₹80/sqft',
-        coverage: 0.72,
-        options: [
-          { name: 'Upto ₹50/sqft', ...sqft(50) },
-          { name: 'Upto ₹80/sqft', ...sqft(80) },
-          { name: 'Upto ₹120/sqft', ...sqft(120) },
-        ],
-      },
-      {
-        name: 'Ceramic Wall Tile',
-        head: 'finishing',
-        baseline: 'Upto ₹80/sqft',
-        coverage: 0.3,
-        options: [
-          { name: 'Upto ₹50/sqft', ...sqft(50) },
-          { name: 'Upto ₹80/sqft', ...sqft(80) },
-          { name: 'Upto ₹120/sqft', ...sqft(120) },
-        ],
-      },
-      {
-        name: 'Granite',
-        head: 'finishing',
-        baseline: 'Upto ₹90/sqft',
-        coverage: 0.1,
-        options: [
-          { name: 'Upto ₹75/sqft', ...sqft(75) },
-          { name: 'Upto ₹90/sqft', ...sqft(90) },
-          { name: 'Upto ₹120/sqft', ...sqft(120) },
-        ],
-      },
-      {
-        name: 'Rough Stone',
-        head: 'finishing',
-        baseline: 'Upto ₹60/sqft',
-        coverage: 0.18,
-        options: [
-          { name: 'Upto ₹40/sqft', ...sqft(40) },
-          { name: 'Upto ₹60/sqft', ...sqft(60) },
-          { name: 'Upto ₹90/sqft', ...sqft(90) },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'door',
-    label: 'Door',
-    icon: '🚪',
-    groups: [
-      {
-        name: 'Door Shutter',
-        head: 'finishing',
-        baseline: '₹55/sqft',
-        coverage: 0.05,
-        options: [
-          { name: '₹45/sqft', ...sqft(45) },
-          { name: '₹55/sqft', ...sqft(55) },
-          { name: '₹65/sqft', ...sqft(65) },
-        ],
-      },
-      {
-        name: 'Door Frame',
-        head: 'finishing',
-        baseline: 'GRANITE',
-        coverage: 0.05,
-        options: [
-          { name: 'WOODEN', ...sqft(35) },
-          { name: 'GRANITE', ...sqft(20) },
-          { name: 'KAROLI STONE', ...sqft(8) },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'windows',
-    label: 'Windows',
-    icon: '🪟',
-    groups: [
-      {
-        name: 'Windows',
-        head: 'finishing',
-        baseline: 'ALUMINIUM',
-        coverage: 0.11,
-        options: [
-          { name: 'UPVC', ...sqft(65) },
-          { name: 'ALUMINIUM', ...sqft(55) },
-          { name: 'WOODEN', ...sqft(65) },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'wall-finish',
-    label: 'Wall Finish',
-    icon: '🎨',
-    groups: [
-      {
-        name: 'POP False Ceiling',
-        head: 'interior',
-        baseline: 'JK SUPER',
-        options: [{ name: 'BIRLA / SACARNI' }, { name: 'JK SUPER' }, { name: 'OTHER BRANDS' }],
-      },
-      {
-        name: 'POP in Walls',
-        head: 'finishing',
-        baseline: 'PHANTI',
-        coverage: 2.4,
-        options: [
-          { name: 'PLUMB', ...sqft(18) },
-          { name: 'PHANTI', ...sqft(15) },
-          { name: 'PUNNING', ...sqft(10) },
-        ],
-      },
-      {
-        name: 'Internal Wall Paint',
-        head: 'finishing',
-        baseline: 'PREMIUM',
-        coverage: 2.4,
-        options: [
-          { name: 'ROYAL MATT', ...sqft(45) },
-          { name: 'PREMIUM', ...sqft(25) },
-          { name: 'TRACTOR EMULSION', ...sqft(20) },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'hand-rails',
-    label: 'Hand Rails',
-    icon: '🏠',
-    note: 'Priced per running foot — quantified against the approved drawings at BOQ stage.',
-    groups: [
-      {
-        name: 'Stair Handrail',
-        head: 'finishing',
-        baseline: 'SS RAILING 304',
-        options: [
-          { name: 'SS RAILING 304', rate: 400, unit: 'rft', priceLabel: '₹400/RFT' },
-          { name: 'MS RAILING', rate: 1000, unit: 'rft', priceLabel: '₹1000/RFT' },
-          { name: 'SS RAILING GLASS', rate: 1200, unit: 'rft', priceLabel: '₹1200/RFT' },
-        ],
-      },
-      {
-        name: 'Balcony Handrail',
-        head: 'finishing',
-        baseline: 'SS GLASS 1000',
-        options: [
-          { name: 'SS GLASS 1200', rate: 1200, unit: 'rft', priceLabel: '₹1200/RFT' },
-          { name: 'SS GLASS 1500', rate: 1500, unit: 'rft', priceLabel: '₹1500/RFT' },
-          { name: 'SS GLASS 1000', rate: 1000, unit: 'rft', priceLabel: '₹1000/RFT' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'stone',
-    label: 'Stone',
-    icon: '⛰️',
-    note: 'Priced per tonne — quantified from the foundation and masonry drawings.',
-    groups: [
-      {
-        name: 'Stone',
-        head: 'structure',
-        baseline: 'MASONRY STONE',
-        options: [{ name: 'MASONRY STONE', rate: 750, unit: 'ton', priceLabel: '₹750/TON' }],
-      },
-    ],
-  },
-  {
-    id: 'concrete',
-    label: 'Mix Concrete',
-    icon: '🪣',
-    note: 'Priced per cubic metre — quantified from the structural design.',
-    groups: [
-      {
-        name: 'Concrete',
-        head: 'structure',
-        baseline: 'M20',
-        options: [
-          { name: 'M25', rate: 3500, unit: 'cum', priceLabel: '₹3500/CUM' },
-          { name: 'M20', rate: 3300, unit: 'cum', priceLabel: '₹3300/CUM' },
-        ],
-      },
-      {
-        name: 'PCC (Plain Cement Concrete)',
-        head: 'structure',
-        baseline: 'M7.5',
-        options: [{ name: 'M7.5', rate: 2000, unit: 'cum', priceLabel: '₹2000/CUM' }],
-      },
-    ],
-  },
-  {
-    id: 'sand',
+    key: 'sand',
     label: 'Sand',
-    icon: '🏖️',
-    note: 'Priced per tonne — quantified from mortar and concrete volumes.',
-    groups: [
-      {
-        name: 'Sand',
-        head: 'structure',
-        baseline: 'M/E SAND',
-        options: [
-          { name: 'RIVER SAND', rate: 1250, unit: 'ton', priceLabel: '₹1250/TON' },
-          { name: 'M/E SAND', rate: 900, unit: 'ton', priceLabel: '₹900/TON' },
-        ],
-      },
+    group: 'structure',
+    head: 'structure',
+    coefficient: 0.9,
+    unit: 'cft',
+    blurb: 'Fine aggregate for concrete, masonry and plaster',
+    packages: ALL,
+    essential: true,
+    exclusiveWith: ['rmc'],
+    options: [
+      { key: 'river', label: 'River sand', detail: 'Screened', rate: 55, isDefault: true },
+      { key: 'msand', label: 'M-sand', detail: 'Manufactured', rate: 40 },
+    ],
+    note: 'Published at ₹1,250 and ₹900 per tonne respectively.',
+  },
+  {
+    key: 'aggregate',
+    label: 'Aggregate',
+    group: 'structure',
+    head: 'structure',
+    coefficient: 1.1,
+    unit: 'cft',
+    blurb: 'Coarse aggregate for RCC and PCC',
+    packages: ALL,
+    essential: true,
+    exclusiveWith: ['rmc'],
+    options: [
+      { key: 'graded', label: 'Graded 20 mm & 10 mm', rate: 45, isDefault: true },
+      { key: 'washed', label: 'Washed, low-silt', rate: 52, provisional: true },
     ],
   },
   {
-    id: 'plumbing',
+    key: 'rmc',
+    label: 'Ready-mix concrete',
+    group: 'structure',
+    head: 'structure',
+    coefficient: 0.042,
+    unit: 'cum',
+    blurb: 'Batched off site and pumped — replaces cement, sand and aggregate',
+    packages: ALL,
+    isAlternative: true,
+    exclusiveWith: ['cement', 'sand', 'aggregate'],
+    options: [
+      { key: 'm25', label: 'M25', detail: 'Design mix, pumped', rate: 5600, isDefault: true },
+      { key: 'm20', label: 'M20', detail: 'Design mix, pumped', rate: 5280 },
+      { key: 'm75', label: 'M7.5', detail: 'PCC only', rate: 3200 },
+    ],
+    note: 'You buy the same concrete one way or the other, never both — selecting this drops the site-mix materials.',
+  },
+  {
+    key: 'bricks',
+    label: 'Bricks & blocks',
+    group: 'structure',
+    head: 'structure',
+    coefficient: 8,
+    unit: 'nos',
+    blurb: 'Masonry for walls and partitions',
+    packages: ALL,
+    essential: true,
+    options: [
+      { key: 'renwel', label: 'Renwel', detail: 'Branded clay brick', rate: 9, isDefault: true },
+      { key: 'clay', label: 'Clay brick', detail: 'Standard local kiln', rate: 9 },
+      { key: 'flyash', label: 'Fly-ash block', rate: 7, provisional: true },
+      { key: 'kanota', label: 'Kanota', rate: 11, provisional: true },
+      { key: 'hanumangarh', label: 'Hanumangarh', rate: 11, provisional: true },
+    ],
+    note: 'Count varies 5–10 per sq ft with wall thickness and block size.',
+  },
+  {
+    key: 'stone',
+    label: 'Foundation stone',
+    group: 'structure',
+    head: 'structure',
+    coefficient: 0.0125,
+    unit: 'ton',
+    blurb: 'Rubble masonry for footings and plinth',
+    packages: ALL,
+    essential: true,
+    options: [{ key: 'masonry', label: 'Masonry stone', detail: 'Kota quarry', rate: 750, isDefault: true }],
+    note: 'Roughly 30 tonnes on a 2,400 sq ft build.',
+  },
+  {
+    key: 'waterproofing',
+    label: 'Waterproofing',
+    group: 'structure',
+    head: 'structure',
+    coefficient: 1,
+    unit: 'sqft',
+    blurb: 'Membranes, coatings and concrete admixtures',
+    packages: ALL,
+    essential: true,
+    options: [
+      { key: 'standard', label: 'Terrace, baths & sunken slabs', rate: 40, isDefault: true },
+      { key: 'full', label: 'Full envelope + crystalline admixture', rate: 55, provisional: true },
+    ],
+  },
+
+  /* ---- Finishing ---------------------------------------------------- */
+  {
+    key: 'flooring',
+    label: 'Flooring & tiles',
+    group: 'finishing',
+    head: 'finishing',
+    coefficient: 1,
+    unit: 'sqft',
+    blurb: 'Floor tiles plus bathroom and kitchen wall dado',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 't50', label: 'Vitrified, tile up to ₹50/sq ft', rate: 60 },
+      { key: 't80', label: 'Vitrified, tile up to ₹80/sq ft', rate: 95, isDefault: true },
+      { key: 't120', label: 'Large-format & marble, up to ₹120/sq ft', rate: 142 },
+    ],
+    note: 'Rate covers supply and laying across the whole floor area, not just the tile.',
+  },
+  {
+    key: 'wall-finish',
+    label: 'Wall finish & paint',
+    group: 'finishing',
+    head: 'finishing',
+    coefficient: 2.4,
+    unit: 'sqft',
+    blurb: 'POP, putty, primer and two coats — inside and out',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'tractor', label: 'Tractor emulsion', rate: 22 },
+      { key: 'premium', label: 'Premium emulsion', rate: 28, isDefault: true },
+      { key: 'royal', label: 'Royal Matt + textures', rate: 50 },
+    ],
+    note: 'Wall area runs about 2.4× the floor area.',
+  },
+  {
+    key: 'doors',
+    label: 'Doors',
+    group: 'finishing',
+    head: 'finishing',
+    coefficient: 0.004,
+    unit: 'nos',
+    blurb: 'Frame, shutter, hardware and polish',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'flush', label: 'Flush shutter', detail: 'Granite frame', rate: 9800 },
+      { key: 'laminated', label: 'Laminated shutter', detail: 'Wooden frame', rate: 12000, isDefault: true },
+      { key: 'teak', label: 'Teak veneer', detail: 'Polished wooden frame', rate: 14200 },
+    ],
+    note: 'Roughly one door per 250 sq ft.',
+  },
+  {
+    key: 'windows',
+    label: 'Windows',
+    group: 'finishing',
+    head: 'finishing',
+    coefficient: 0.08,
+    unit: 'sqft',
+    blurb: 'Glazed and fitted — about 8% of floor area',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'aluminium', label: 'Aluminium', detail: 'Single glazed', rate: 440 },
+      { key: 'upvc', label: 'UPVC', detail: 'Single glazed', rate: 520, isDefault: true },
+      { key: 'wooden', label: 'Wooden', detail: 'Seasoned hardwood', rate: 520 },
+    ],
+  },
+
+  /* ---- Services ------------------------------------------------------ */
+  {
+    key: 'conduiting',
+    label: 'Electrical & plumbing conduiting',
+    group: 'services',
+    head: 'mep',
+    coefficient: 1,
+    unit: 'sqft',
+    blurb: 'Conduit and drainage cast into the structure — no fittings',
+    packages: ['civil'],
+    essential: true,
+    options: [
+      { key: 'isi', label: 'ISI conduit, drainage cast in', rate: 75, isDefault: true },
+      { key: 'pvc', label: 'PVC conduit and sleeves', rate: 62, provisional: true },
+    ],
+  },
+  {
+    key: 'electrical',
+    label: 'Electrical',
+    group: 'services',
+    head: 'mep',
+    coefficient: 0.025,
+    unit: 'point',
+    blurb: 'Conduit, wire, switch, plate and DB share — one point per 40 sq ft',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'anchor', label: 'Anchor Penta', rate: 4100, provisional: true },
+      { key: 'havells', label: 'Havells modular', rate: 4400, isDefault: true },
+      { key: 'schneider', label: 'Schneider', detail: 'Modular', rate: 4700, provisional: true },
+      { key: 'gm', label: 'GM', detail: 'Modular', rate: 4700, provisional: true },
+    ],
+    note: 'The client publishes switch rates (₹12 and ₹18 per sq ft); a switch is only part of a point, so the spread here is scaled from it rather than taken literally.',
+  },
+  {
+    key: 'plumbing',
     label: 'Plumbing',
-    icon: '🔧',
-    groups: [
-      {
-        name: 'PVC (Internal & External)',
-        head: 'mep',
-        baseline: 'SUPREME / PRINCE',
-        options: [{ name: 'ASHIRVAD / ASTRAL' }, { name: 'SUPREME / PRINCE' }, { name: 'KISAN' }],
-      },
-      {
-        name: 'CPVC (Internal & External)',
-        head: 'mep',
-        baseline: 'SUPREME / PRINCE',
-        options: [{ name: 'ASHIRVAD / ASTRAL' }, { name: 'SUPREME / PRINCE' }, { name: 'KISAN' }],
-      },
-      {
-        name: 'CP-Vitreous',
-        head: 'mep',
-        baseline: '35K - ₹35,000/NOS',
-        options: [
-          { name: '35K - ₹35,000/NOS', rate: 35000, unit: 'nos', priceLabel: '₹35,000 per set' },
-          { name: '50K - ₹50,000/NOS', rate: 50000, unit: 'nos', priceLabel: '₹50,000 per set' },
-        ],
-      },
+    group: 'services',
+    head: 'mep',
+    coefficient: 1,
+    unit: 'sqft',
+    blurb: 'Supply and drainage lines, valves and testing',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'ashirvad', label: 'Ashirvad', detail: 'CPVC & PVC', rate: 45, isDefault: true },
+      { key: 'astral', label: 'Astral', detail: 'CPVC & PVC', rate: 45 },
+      { key: 'supreme', label: 'Supreme', detail: 'CPVC & PVC', rate: 41, provisional: true },
+      { key: 'prince', label: 'Prince', detail: 'CPVC & PVC', rate: 41, provisional: true },
+      { key: 'kisan', label: 'Kisan', detail: 'CPVC & PVC', rate: 37, provisional: true },
+    ],
+    note: 'Fixtures are priced separately.',
+  },
+  {
+    key: 'bathroom',
+    label: 'Bathroom fixtures',
+    group: 'services',
+    head: 'mep',
+    coefficient: 0.0025,
+    unit: 'nos',
+    blurb: 'WC, basin, shower, taps and accessories — priced per bathroom',
+    /* The source prices CP-vitreous by class with no brand attached, so the class
+       is the label and the brands are examples. Pairing Jaquar with Kohler as
+       equivalents was wrong twice over: invented, and not peers. */
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'set35', label: '₹35,000 class', detail: 'Parryware, Essco or equivalent', rate: 22000, isDefault: true },
+      { key: 'set50', label: '₹50,000 class', detail: 'Jaquar, Kohler or equivalent', rate: 31400 },
     ],
   },
   {
-    id: 'preferences',
-    label: 'Preferences',
-    icon: '⚙️',
-    groups: [
-      {
-        /**
-         * TODO(client): the source calculator lists PREMIUM at ₹1,50,000 and CLASSIC at
-         * ₹2,00,000 — i.e. "premium" is cheaper than "classic". Transcribed exactly as
-         * published; please confirm whether the two labels are swapped.
-         */
-        name: 'Modular Kitchen',
-        head: 'interior',
-        baseline: 'BASIC',
-        options: [
-          { name: 'PREMIUM', rate: 150000, unit: 'lumpsum', priceLabel: '₹1,50,000' },
-          { name: 'CLASSIC', rate: 200000, unit: 'lumpsum', priceLabel: '₹2,00,000' },
-          { name: 'BASIC', rate: 100000, unit: 'lumpsum', priceLabel: '₹1,00,000' },
-        ],
-      },
-      {
-        name: 'Water Tank',
-        head: 'mep',
-        baseline: '1000L+500L',
-        options: [
-          { name: '500L×2', rate: 10000, unit: 'lumpsum', priceLabel: '₹10,000' },
-          { name: '1000L+500L', rate: 15000, unit: 'lumpsum', priceLabel: '₹15,000' },
-          { name: '5000L', rate: 50000, unit: 'lumpsum', priceLabel: '₹50,000' },
-          { name: '10000L', rate: 100000, unit: 'lumpsum', priceLabel: '₹1,00,000' },
-          { name: '50000L', rate: 500000, unit: 'lumpsum', priceLabel: '₹5,00,000' },
-        ],
-      },
+    key: 'water-tank',
+    label: 'Water tanks',
+    group: 'services',
+    head: 'mep',
+    coefficient: 0.0004,
+    unit: 'nos',
+    blurb: 'Overhead and underground storage, with pump',
+    packages: ALL,
+    essential: true,
+    options: [
+      { key: 's10', label: '500 L × 2', rate: 10000 },
+      { key: 's15', label: '1,000 L + 500 L', rate: 15000, isDefault: true },
+      { key: 's50', label: '5,000 L', rate: 50000 },
+      { key: 's100', label: '10,000 L', rate: 100000 },
     ],
+  },
+
+  /* ---- Fixtures & joinery -------------------------------------------- */
+  {
+    key: 'kitchen',
+    label: 'Modular kitchen',
+    group: 'fixtures',
+    head: 'interior',
+    coefficient: 0.008,
+    unit: 'rft',
+    blurb: 'Base and wall units, counter, chimney and hob',
+    packages: FURNISHED,
+    options: [
+      { key: 'basic', label: 'Basic', detail: 'About ₹1 L for a typical kitchen', rate: 5000 },
+      { key: 'premium', label: 'Premium', detail: 'About ₹1.5 L', rate: 7500, isDefault: true },
+      { key: 'classic', label: 'Classic', detail: 'About ₹2 L', rate: 10000 },
+    ],
+    note: 'Quoted per running foot of platform, as the trade does. About 20 rft in a 2,500 sq ft home.',
+  },
+  {
+    key: 'wardrobes',
+    label: 'Wardrobes & joinery',
+    group: 'fixtures',
+    head: 'interior',
+    coefficient: 0.0016,
+    unit: 'nos',
+    blurb: 'Full-height wardrobes, roughly one per bedroom',
+    packages: FURNISHED,
+    options: [
+      { key: 'laminate', label: 'Laminate shutters', rate: 62000, provisional: true },
+      { key: 'acrylic', label: 'Acrylic shutters', rate: 85000, isDefault: true },
+      { key: 'membrane', label: 'Membrane shutters', rate: 85000, provisional: true },
+      { key: 'veneer', label: 'Veneer shutters', detail: 'Soft-close hardware', rate: 118000, provisional: true },
+    ],
+  },
+  {
+    key: 'ceiling',
+    label: 'False ceiling & lighting',
+    group: 'fixtures',
+    head: 'interior',
+    coefficient: 0.55,
+    unit: 'sqft',
+    blurb: 'Living areas and bedrooms — about 55% of floor area',
+    packages: FURNISHED,
+    options: [
+      { key: 'plain', label: 'Plain gypsum, surface lights', rate: 170, provisional: true },
+      { key: 'cove', label: 'Gypsum with cove lighting', rate: 230, isDefault: true },
+      { key: 'designer', label: 'Designer profile + smart lighting', rate: 310, provisional: true },
+    ],
+  },
+  {
+    key: 'railings',
+    label: 'Staircase railings',
+    group: 'fixtures',
+    head: 'finishing',
+    coefficient: 0.02,
+    unit: 'rft',
+    blurb: 'Stair and balcony railings, fitted and polished',
+    packages: FURNISHED,
+    options: [
+      { key: 'ms', label: 'MS railing', detail: 'Painted mild steel', rate: 1200, provisional: true },
+      { key: 'ss304', label: 'SS 304 railing', rate: 1800, isDefault: true },
+      { key: 'ssglass', label: 'SS with toughened glass', rate: 5400 },
+    ],
+    /*
+     * The source calculator prices MS railing at ₹1,000/rft against SS 304 at
+     * ₹400/rft — mild steel at 2.5× stainless, which is backwards from every
+     * market rate and looks like a transposition in their data. Shipping it
+     * verbatim would put an obviously wrong number in front of a customer, so MS
+     * is priced below SS here and flagged provisional. Raised with the client.
+     */
+    note: 'MS rate is provisional — the published figure appears transposed with SS and is being confirmed.',
   },
 ];
 
-/** Locations offered by the source calculator's Project Details step. */
-export const CALCULATOR_CITIES = [
-  'Jaipur',
-  'Mansarovar',
-  'Vaishali Nagar',
-  'Malviya Nagar',
-  'Jagatpura',
-  'Ajmer Road',
-  'Tonk Road',
-  'Delhi NCR',
-  'Other',
-] as const;
+export const MATERIAL_LINE_BY_KEY = Object.fromEntries(MATERIAL_LINES.map((l) => [l.key, l]));
 
-/** Units that need a drawing-based take-off and are therefore excluded from the headline. */
-export const QUANTIFIED_AT_BOQ: RateUnit[] = ['rft', 'ton', 'cum', 'nos'];
+/** The option a material carries when nothing has been chosen — and the calibrated rate. */
+export function defaultOption(line: MaterialLine): MaterialOption {
+  return line.options.find((o) => o.isDefault) ?? line.options[0]!;
+}
 
-export const MATERIAL_CATEGORY_BY_ID = Object.fromEntries(MATERIAL_CATEGORIES.map((c) => [c.id, c]));
+export function optionOf(line: MaterialLine, key: string | undefined): MaterialOption {
+  return line.options.find((o) => o.key === key) ?? defaultOption(line);
+}
+
+export const QUANTITY_UNIT_LABEL: Record<QuantityUnit, string> = {
+  bag: 'bags',
+  kg: 'kg',
+  cft: 'cft',
+  cum: 'cum',
+  ton: 'ton',
+  nos: 'nos',
+  sqft: 'sq ft',
+  rft: 'rft',
+  point: 'points',
+};

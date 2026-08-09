@@ -11,7 +11,8 @@
     "optimize:images": "node scripts/optimize-images.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint src --ext .ts,.tsx",
+    "check:estimator": "tsx scripts/check-estimator.ts"
   },
   "engines": {
     "node": "22.x"
@@ -46,6 +47,7 @@
     "postcss": "^8.4.49",
     "sharp": "^0.35.3",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.11",
     "typescript": "^5.7.2",
     "vite": "^5.4.11"
   }

@@ -19,7 +19,7 @@ import type {
   PortalProject,
   Post,
   Project,
-  QualityTier,
+  MaterialSpec,
   Role,
   SeoMeta,
   Service,
@@ -61,7 +61,7 @@ export const RESOURCES = {
   media: 'media',
   portalProjects: 'portal-projects',
   estimatorRates: 'estimator-rates',
-  estimatorQuality: 'estimator-quality',
+  estimatorMaterials: 'estimator-materials',
   estimatorLocations: 'estimator-locations',
   estimatorEnhancements: 'estimator-enhancements',
 } as const;
@@ -90,7 +90,7 @@ export const rolesService = createResourceService<Role>(RESOURCES.roles);
 export const mediaService = createResourceService<MediaAsset>(RESOURCES.media);
 export const portalService = createResourceService<PortalProject>(RESOURCES.portalProjects);
 export const estimatorRatesService = createResourceService<BaseRate>(RESOURCES.estimatorRates);
-export const estimatorQualityService = createResourceService<QualityTier>(RESOURCES.estimatorQuality);
+export const estimatorMaterialsService = createResourceService<MaterialSpec>(RESOURCES.estimatorMaterials);
 export const estimatorLocationsService = createResourceService<LocationMultiplier>(RESOURCES.estimatorLocations);
 export const estimatorEnhancementsService = createResourceService<Enhancement>(RESOURCES.estimatorEnhancements);
 
