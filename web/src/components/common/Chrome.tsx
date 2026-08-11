@@ -16,90 +16,12 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import { LogoMark } from './Logo';
-import { BuildScene } from './BuildScene';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { projects } from '@/data/projects';
 import { services } from '@/data/services';
 import { posts } from '@/data/content';
-import { useHotkey, useLockBodyScroll, usePrefersReducedMotion } from '@/hooks';
-import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
-
-/* ==================================================================== */
-/* Preloader — once per session, never blocks longer than ~3.0s          */
-/* ==================================================================== */
-
-export function Preloader() {
-  const reduced = usePrefersReducedMotion();
-  const [visible, setVisible] = useState(() => !reduced && !readStore(STORAGE_KEYS.preloaderSeen, false, 'session'));
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    if (!visible) return;
-    writeStore(STORAGE_KEYS.preloaderSeen, true, 'session');
-
-    const start = performance.now();
-    const duration = 1900;
-    let frame = 0;
-
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      // Exponent 1.8 rather than a cubic: a cubic ease-out is already at 87% by
-      // the halfway mark, so the crane, scaffold and the worker's climb down —
-      // everything above 70% — flashed past in the last sliver. Left unrounded
-      // so the scene interpolates continuously instead of in 101 discrete steps.
-      setProgress((1 - Math.pow(1 - t, 1.8)) * 100);
-      if (t < 1) frame = requestAnimationFrame(tick);
-      else window.setTimeout(() => setVisible(false), 300);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [visible]);
-
-  useLockBodyScroll(visible);
-
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-ink-950"
-          exit={{ clipPath: 'inset(0% 0% 100% 0%)' }}
-          transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-        >
-          <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-30" aria-hidden />
-
-          {/*
-            The site builds itself while the page loads. Every element is keyed
-            to a percentage of `progress`, so this doubles as the progress
-            indicator rather than decorating one.
-          */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-[min(78vw,420px)]"
-          >
-            <BuildScene progress={progress} />
-          </motion.div>
-
-          <div className="relative mt-4 flex items-center gap-2.5">
-            <LogoMark className="h-7 w-7" />
-            <p className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
-              {SITE.wordmark.primary} <span className="text-cyan-500">{SITE.wordmark.secondary}</span>
-            </p>
-          </div>
-          <p className="relative mt-2 font-deva text-sm text-white/40">{SITE.taglineHi}</p>
-
-          <div className="relative mt-8 h-px w-56 overflow-hidden bg-white/15">
-            <motion.div className="h-full bg-cyan-500" style={{ width: `${progress}%` }} />
-          </div>
-          <p className="num relative mt-3 text-caption text-white/40">{Math.round(progress)}%</p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+import { useHotkey, useLockBodyScroll } from '@/hooks';
 
 /* ==================================================================== */
 /* Floating action rail                                                  */
@@ -191,7 +113,8 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       { id: 'p-careers', label: 'Careers', group: 'Pages', href: ROUTES.careers, icon: Users },
       { id: 'p-downloads', label: 'Downloads', group: 'Pages', href: ROUTES.downloads, icon: Download },
       { id: 'p-contact', label: 'Contact', group: 'Pages', href: ROUTES.contact, icon: MessageCircle },
-      { id: 'p-portal', label: 'Client Portal', group: 'Pages', href: ROUTES.portal, icon: LayoutDashboard },
+      // Client Portal is commented out for now — see app/router.tsx.
+      // { id: 'p-portal', label: 'Client Portal', group: 'Pages', href: ROUTES.portal, icon: LayoutDashboard },
       { id: 'p-admin', label: 'Admin Panel', group: 'Pages', href: ROUTES.admin, icon: LayoutDashboard },
     ];
     const svc: Command[] = services.map((s) => ({

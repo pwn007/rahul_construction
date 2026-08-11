@@ -164,49 +164,56 @@ export const COMMERCIAL_MODEL = {
 export const SERVICES_INTRO =
   'We provide end-to-end construction services tailored to meet diverse project needs — from concept design to final execution.';
 
-/** Process — PDF page 7. */
+/**
+ * Process — PDF page 7.
+ *
+ * Descriptions are deliberately short (≈80 characters). They render in a
+ * six-across rail on the home page, so anything longer turns each column into a
+ * paragraph and the process stops being readable at a glance.
+ */
 export const PROCESS_STEPS = [
   {
     step: 1,
     title: 'Understanding Your Vision',
-    description: 'We begin by understanding your requirements, preferences, lifestyle and goals — before a single line is drawn.',
+    description: 'Your requirements, lifestyle and goals — mapped before a single line is drawn.',
     icon: 'Target',
     duration: 'Week 1',
   },
   {
     step: 2,
     title: 'Design & Planning',
-    description: 'Our architects create designs that balance aesthetics, functionality and Vastu, with structural and MEPF coordinated from day one.',
+    description: 'Aesthetics, function and Vastu balanced, with structure and MEPF coordinated from day one.',
     icon: 'PencilRuler',
     duration: 'Weeks 2–6',
   },
   {
     step: 3,
     title: 'Integrated Execution',
-    description: 'All teams — civil, MEPF, interiors — work under one system, so nothing falls between the gaps.',
+    description: 'Civil, MEPF and interiors under one system, so nothing falls between the gaps.',
     icon: 'Hammer',
     duration: 'Month 2 onward',
   },
   {
     step: 4,
     title: 'Regular Updates',
-    description: 'Consistent updates on progress and milestones, with live camera access to your site from anywhere.',
+    description: 'Progress every week, plus live camera access to your site from anywhere.',
     icon: 'RefreshCw',
     duration: 'Weekly',
   },
   {
     step: 5,
     title: 'On-Time Delivery',
-    description: 'We hand over on schedule with a documented quality assurance checklist signed off stage by stage.',
+    description: 'Handover on schedule, against a quality checklist signed off stage by stage.',
     icon: 'CircleCheck',
     duration: 'Handover',
   },
   {
     step: 6,
     title: 'Free Maintenance',
-    description: 'One full year of complimentary service and support after delivery — because our name stays on the building.',
+    description: 'Twelve months of complimentary service after delivery — our name stays on the building.',
     icon: 'Wrench',
-    duration: '12 months post-handover',
+    /* Short enough to stay on one line beside the step number in the six-across rail. */
+    duration: '12 months',
   },
 ] as const;
 

@@ -252,8 +252,25 @@
     to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
 
-  .section { @apply py-24 md:py-32 lg:py-40; }
-  .section-sm { @apply py-16 md:py-20 lg:py-24; }
+  /**
+   * Vertical rhythm.
+   *
+   * These are *symmetric* paddings, so what a reader actually sees between two
+   * stacked sections is the sum of both — a section's bottom plus the next
+   * section's top. That doubling is easy to miss when tuning one section at a
+   * time, and it is what made the page read as over-spaced: `.section-sm` at the
+   * old `lg:py-24` put 96px on each side, so every boundary came to 192px.
+   *
+   * At these values a `.section-sm` boundary is 96 / 112 / 128px. Pick the new
+   * number by halving the gap you want, not by eyeballing one section.
+   *
+   * `.section` is the roomier tier and currently has no call sites — every
+   * section in the app uses `.section-sm`. It is kept in proportion rather than
+   * deleted so the pair still means something, but do not assume it is
+   * load-bearing.
+   */
+  .section { @apply py-16 md:py-20 lg:py-24; }
+  .section-sm { @apply py-12 md:py-14 lg:py-16; }
 
   .hairline { @apply h-px w-full bg-current opacity-10; }
 

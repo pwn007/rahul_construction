@@ -42,7 +42,6 @@ export function removeStore(key: string, kind: Store = 'local'): void {
 export const STORAGE_KEYS = {
   theme: 'archstone.theme',
   estimator: 'archstone.estimator.draft',
-  preloaderSeen: 'archstone.preloader.seen',
   portalUser: 'archstone.portal.user',
   adminUser: 'archstone.admin.user',
   adminUnlocked: 'archstone.admin.unlocked',

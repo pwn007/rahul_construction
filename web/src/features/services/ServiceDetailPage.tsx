@@ -2,7 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Icon } from '@/lib/icons';
 import { Seo } from '@/components/seo/Seo';
-import { CtaBand, PageHero, ProjectCard, SectionHeader } from '@/components/common';
+import { BuildingSystems, CtaBand, PageHero, ProjectCard, SectionHeader } from '@/components/common';
 import { Accordion, Badge, Button } from '@/components/ui';
 import { Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
@@ -104,6 +104,9 @@ export default function ServiceDetailPage() {
           </div>
         </div>
       </section>
+
+      {/* The four routes, drawn — sets up the discipline-by-discipline detail below. */}
+      {isMepf && <BuildingSystems showLink={false} />}
 
       {/* MEPF disciplines deep-dive */}
       {isMepf && (

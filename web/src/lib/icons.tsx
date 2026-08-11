@@ -165,9 +165,22 @@ export const ICONS: Record<string, LucideIcon> = {
 };
 
 /** Render an icon by its registry name. Falls back to a neutral square. */
-export function Icon({ name, className }: { name: string; className?: string }) {
+/**
+ * Extra SVG props are forwarded so an icon can be positioned *inside* another
+ * drawing — `x`/`y`/`width`/`height` on a nested `<svg>`. The MEPF building
+ * section places these at the end of each service run, which is what keeps the
+ * glyph in the drawing identical to the one in its legend.
+ *
+ * Lucide marks itself `stroke="currentColor"`, so a caller sets `color` (not
+ * `stroke`) on the parent to tint it.
+ */
+export function Icon({
+  name,
+  className,
+  ...rest
+}: { name: string; className?: string } & React.SVGProps<SVGSVGElement>) {
   const Cmp = ICONS[name] ?? Square;
-  return <Cmp className={className} aria-hidden />;
+  return <Cmp className={className} aria-hidden {...rest} />;
 }
 
 export const ICON_NAMES = Object.keys(ICONS);

@@ -1,18 +1,14 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowUpRight, Video } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Icon } from '@/lib/icons';
-import { Badge, Button } from '@/components/ui';
-import { Counter, MaskImage, Reveal, SplitText, StaggerGroup } from '@/components/motion';
+import { Counter, Reveal, SplitText } from '@/components/motion';
 import { ProjectCard, SectionHeader, StatTile, TestimonialCard } from '@/components/common';
-import { ACHIEVEMENTS, PROCESS_STEPS, SMART_CONSTRUCTION } from '@/constants/site';
+import { ACHIEVEMENTS, PROCESS_STEPS } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { projects } from '@/data/projects';
 import { testimonials } from '@/data/people';
-import { posts } from '@/data/content';
-import { formatDate } from '@/lib/format';
-import { IMG } from '@/lib/media';
 import { usePrefersReducedMotion } from '@/hooks';
 import { cn } from '@/lib/cn';
 
@@ -38,7 +34,7 @@ export function FeaturedProjects() {
           }
         />
 
-        <div className="mt-14 grid gap-5 lg:grid-cols-12">
+        <div className="mt-10 grid gap-5 lg:grid-cols-12">
           {hero && (
             <div className="lg:col-span-7">
               <ProjectCard project={hero} size="lg" />
@@ -61,17 +57,29 @@ export function FeaturedProjects() {
 }
 
 /* ==================================================================== */
-/* Process — pinned scroll narrative                                     */
+/* Process — horizontal rail                                             */
 /* ==================================================================== */
 
+/**
+ * "How we work", read left to right.
+ *
+ * This was an alternating vertical timeline: six stages stacked down the page,
+ * each one requiring a scroll to reach the next. It was the single tallest
+ * section on the home page and you could never see the shape of the process —
+ * only whichever stage happened to be in the viewport.
+ *
+ * Now all six sit on one rail, so the whole engagement is legible at a glance.
+ * The cyan progress fill runs L→R instead of top-down; it is the same
+ * `useScroll` transform as before with `width` swapped for `height`.
+ */
 export function ProcessSection() {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = usePrefersReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 70%', 'end 90%'] });
-  const progressHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+  const progressWidth = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
 
   return (
-    <section ref={ref} className="on-dark grain relative overflow-hidden bg-ink-950 py-24 text-white md:py-32">
+    <section ref={ref} className="section-sm on-dark grain relative overflow-hidden bg-ink-950 text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
       <div className="pointer-events-none absolute -right-32 top-1/3 h-[480px] w-[480px] rounded-full bg-cyan-500/10 blur-[120px]" aria-hidden />
 
@@ -83,40 +91,65 @@ export function ProcessSection() {
           tone="light"
         />
 
-        <div className="relative mt-16 md:mt-20">
-          {/* Spine — desktop centre, mobile left */}
-          <div className="absolute left-[19px] top-0 h-full w-px bg-white/12 md:left-1/2 md:-translate-x-1/2" aria-hidden />
-          <motion.div
-            className="absolute left-[19px] top-0 w-px origin-top bg-cyan-500 md:left-1/2 md:-translate-x-1/2"
-            style={{ height: reduced ? '100%' : progressHeight }}
+        <div className="relative mt-10 md:mt-12">
+          {/*
+            The rail only renders at `lg`, where all six nodes share a row. At `md`
+            the grid wraps to 3×2 and at `sm` it becomes a swipe row, so a single
+            full-width line would connect nothing.
+
+            It has to stop at the *sixth node's centre*, not the container edge, or
+            it trails off into empty space. With six columns and a 1.25rem gap the
+            last centre sits one column short of the right edge, plus the node's own
+            20px radius — hence the calc. Both the track and the progress fill live
+            inside this wrapper so the animated width is a percentage of the rail
+            rather than of the container.
+          */}
+          <div
+            className="pointer-events-none absolute left-5 top-5 hidden h-px right-[calc((100%-6.25rem)/6-1.25rem)] lg:block"
             aria-hidden
-          />
-
-          <div className="space-y-10 md:space-y-0">
-            {PROCESS_STEPS.map((step, i) => {
-              const isRight = i % 2 === 1;
-              return (
-                <Reveal key={step.step} delay={0.05} y={30}>
-                  <div className={cn('relative flex items-start gap-6 pl-12 md:gap-0 md:pl-0', 'md:grid md:grid-cols-2 md:py-8')}>
-                    {/* Node */}
-                    <span className="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full border border-cyan-500/40 bg-ink-950 md:left-1/2 md:top-10 md:-translate-x-1/2">
-                      <Icon name={step.icon} className="h-[18px] w-[18px] text-cyan-500" />
-                    </span>
-
-                    <div className={cn('md:px-12', isRight ? 'md:col-start-2 md:text-left' : 'md:col-start-1 md:text-right')}>
-                      <p className="num text-caption text-cyan-500">
-                        {String(step.step).padStart(2, '0')} · {step.duration}
-                      </p>
-                      <h3 className="mt-2 font-display text-heading-lg font-semibold text-white">{step.title}</h3>
-                      <p className={cn('mt-2 text-sm leading-relaxed text-white/55', isRight ? 'md:mr-auto' : 'md:ml-auto', 'md:max-w-[36ch]')}>
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                </Reveal>
-              );
-            })}
+          >
+            <div className="h-full w-full bg-white/12" />
+            <motion.div
+              className="absolute inset-y-0 left-0 origin-left bg-cyan-500"
+              style={{ width: reduced ? '100%' : progressWidth }}
+            />
           </div>
+
+          {/*
+            Below `md` the cards bleed to the screen edge and snap-scroll, which
+            reads as "there is more to the right" without needing arrows.
+            `scroll-px` matters: without it the first card snaps to the scrollport
+            edge and eats the container's own left padding.
+          */}
+          <ol className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-5 overflow-x-auto px-5 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-12 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-6 lg:gap-x-5">
+            {PROCESS_STEPS.map((step, i) => (
+              <Reveal
+                key={step.step}
+                as="li"
+                delay={i * 0.06}
+                y={30}
+                className="w-[68vw] max-w-[260px] shrink-0 snap-start md:w-auto md:max-w-none"
+              >
+                <span className="relative flex h-10 w-10 items-center justify-center rounded-full border border-cyan-500/40 bg-ink-950">
+                  <Icon name={step.icon} className="h-[18px] w-[18px] text-cyan-500" />
+                </span>
+
+                {/* Up from `text-caption`/cyan-500. It carries the sequence and the
+                    timeline — the two things a reader scans this section for — and at
+                    13px it was the first thing to disappear. cyan-400 is 8.9:1 on
+                    ink-950 against cyan-500's 7.4:1. */}
+                <p className="num mt-5 text-sm font-medium text-cyan-400">
+                  {String(step.step).padStart(2, '0')} · {step.duration}
+                </p>
+                {/* Titles run to two lines in a sixth-width column; the min-height keeps
+                    every description starting on the same baseline across the rail. */}
+                <h3 className="mt-1.5 font-display text-heading-md font-semibold text-white lg:min-h-[3.5rem]">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-[0.9375rem] leading-relaxed text-white/70">{step.description}</p>
+              </Reveal>
+            ))}
+          </ol>
         </div>
       </div>
     </section>
@@ -163,79 +196,19 @@ export function Achievements() {
   );
 }
 
-/* ==================================================================== */
-/* Smart construction / live monitoring                                  */
-/* ==================================================================== */
-
-export function SmartConstruction() {
-  return (
-    <section className="section-sm">
-      <div className="container">
-        <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-          <div className="lg:col-span-6">
-            <Reveal>
-              <Badge variant="brand" size="lg" className="mb-5">
-                <Video className="h-3.5 w-3.5" /> Smart construction
-              </Badge>
-            </Reveal>
-            <h2 className="text-display-md">
-              <SplitText text="Watch your building rise" />
-            </h2>
-            <Reveal delay={0.15}>
-              <p className="mt-6 max-w-lead text-body-lg text-muted">
-                Real-time site monitoring and quality checks give you transparency, control and peace of mind
-                throughout the construction process — whether you are in Jaipur or Dubai.
-              </p>
-            </Reveal>
-
-            <StaggerGroup stagger={0.08} className="mt-10 grid gap-6 sm:grid-cols-2">
-              {SMART_CONSTRUCTION.map((item) => (
-                <div key={item.title}>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
-                    <Icon name={item.icon} className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-4 font-display text-heading-md font-semibold">{item.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted">{item.description}</p>
-                </div>
-              ))}
-            </StaggerGroup>
-
-            <Reveal delay={0.4}>
-              <Button href={ROUTES.portal} variant="secondary" size="lg" className="mt-9" rightIcon={<ArrowUpRight className="h-4 w-4" />}>
-                See the client portal
-              </Button>
-            </Reveal>
-          </div>
-
-          <div className="lg:col-span-6">
-            <Reveal delay={0.2}>
-              <div className="relative overflow-hidden rounded-xl border shadow-lg">
-                <img src={IMG.wide('camera-feed-live')} alt="Live site camera feed" className="aspect-video w-full object-cover" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink-950/70 to-transparent" aria-hidden />
-
-                <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-ink-950/70 px-3 py-1.5 backdrop-blur-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-danger" />
-                  </span>
-                  <span className="text-[0.7rem] font-medium uppercase tracking-wider text-white">Live</span>
-                </div>
-
-                <div className="absolute inset-x-4 bottom-4 flex items-end justify-between text-white">
-                  <div>
-                    <p className="text-caption text-white/60">NA-2025-114 · Vaishali Nagar</p>
-                    <p className="font-display text-heading-md font-semibold">Camera 02 — North elevation</p>
-                  </div>
-                  <p className="num text-caption text-white/60">62% complete</p>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+/*
+ * `SmartConstruction` and `LatestInsights` used to live here too.
+ *
+ *  · SmartConstruction restated process step 04 ("Regular Updates") at full
+ *    section width. It survives as a proof link into /portal from `WhyChooseUs`.
+ *  · LatestInsights sent first-time construction leads into the blog halfway
+ *    down the funnel. /blog is still linked from the nav and the footer.
+ *
+ * `Testimonials` was also folded away — into `WhyChooseUs` as a three-card row —
+ * and has since been split back out below at the client's request. Social proof
+ * earns its own band; it was competing with the commitment cards for the same
+ * column.
+ */
 
 /* ==================================================================== */
 /* Testimonials                                                          */
@@ -253,64 +226,15 @@ export function Testimonials() {
           align="center"
         />
 
-        <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {testimonials.map((t, i) => (
             <Reveal key={t.id} delay={i * 0.07}>
-              <div onMouseEnter={() => setActive(i)} className={cn('h-full transition-transform duration-500', active === i && 'md:-translate-y-1')}>
+              <div
+                onMouseEnter={() => setActive(i)}
+                className={cn('h-full transition-transform duration-500', active === i && 'md:-translate-y-1')}
+              >
                 <TestimonialCard testimonial={t} />
               </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ==================================================================== */
-/* Latest insights                                                       */
-/* ==================================================================== */
-
-export function LatestInsights() {
-  const latest = posts.slice(0, 3);
-
-  return (
-    <section className="section-sm">
-      <div className="container">
-        <SectionHeader
-          overline="Insights"
-          title="Guides on building in Jaipur"
-          lead="Practical writing on costs, timelines and the decisions that actually change the outcome."
-          action={
-            <Link to={ROUTES.blog} className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400">
-              All insights <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          }
-        />
-
-        <div className="mt-14 grid gap-8 md:grid-cols-3">
-          {latest.map((post, i) => (
-            <Reveal key={post.id} delay={i * 0.08}>
-              <Link to={ROUTES.post(post.slug)} className="group block">
-                <MaskImage
-                  src={post.coverImage}
-                  alt={post.title}
-                  ratio="aspect-[16/10]"
-                  className="rounded-lg"
-                  imgClassName="transition-transform duration-[1.1s] ease-out-expo group-hover:scale-105"
-                />
-                <div className="mt-5 flex items-center gap-3 text-caption text-subtle">
-                  <Badge variant="brand" size="sm">
-                    {post.category}
-                  </Badge>
-                  <span>{formatDate(post.publishedAt)}</span>
-                  <span className="num">{post.readingMinutes} min</span>
-                </div>
-                <h3 className="mt-3 font-display text-heading-lg font-semibold transition-colors group-hover:text-cyan-700 dark:group-hover:text-cyan-400">
-                  {post.title}
-                </h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{post.excerpt}</p>
-              </Link>
             </Reveal>
           ))}
         </div>

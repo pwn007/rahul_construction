@@ -1,7 +1,7 @@
 import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Navbar, Footer, Preloader, FloatingRail, CommandPalette, useCommandPalette } from '@/components/common';
+import { Navbar, Footer, FloatingRail, CommandPalette, useCommandPalette } from '@/components/common';
 import { ScrollProgress } from '@/components/motion';
 import { Spinner } from '@/components/ui';
 import { useLenisScroll, getLenis } from '@/hooks/useLenis';
@@ -53,7 +53,6 @@ export function PublicLayout() {
 
   return (
     <HeroToneProvider>
-      <Preloader />
       <ScrollToTop />
       <ScrollProgress />
       <Navbar onOpenPalette={() => setOpen(true)} />

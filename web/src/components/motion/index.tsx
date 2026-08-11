@@ -254,6 +254,7 @@ export function Counter({
   duration = 1800,
   decimals = 0,
   className,
+  threshold = 0.4,
 }: {
   value: number;
   suffix?: string;
@@ -261,9 +262,19 @@ export function Counter({
   duration?: number;
   decimals?: number;
   className?: string;
+  /**
+   * How much of the number must be on screen before it counts up.
+   *
+   * 0.4 suits a counter that scrolls into view mid-page — it stops the count
+   * running while the element is still mostly below the fold. Pass a lower
+   * value for one that is *already* on screen at load but sits low in the
+   * viewport, where 0.4 may never be reached without scrolling and the visitor
+   * is left looking at a zero.
+   */
+  threshold?: number;
 }) {
   const reduced = usePrefersReducedMotion();
-  const { ref, inView } = useInView<HTMLSpanElement>({ threshold: 0.4 });
+  const { ref, inView } = useInView<HTMLSpanElement>({ threshold });
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {

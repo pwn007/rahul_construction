@@ -73,7 +73,8 @@ export const MAIN_NAV: NavLink[] = [
       { label: 'About Us', href: ROUTES.about, description: 'Our story, values and leadership.' },
       { label: 'Careers', href: ROUTES.careers, description: 'Build with us.' },
       { label: 'Insights', href: ROUTES.blog, description: 'Guides on building in Jaipur.' },
-      { label: 'Client Portal', href: ROUTES.portal, description: 'Track your project live.' },
+      // Client Portal is commented out for now — see app/router.tsx.
+      // { label: 'Client Portal', href: ROUTES.portal, description: 'Track your project live.' },
     ],
   },
   { label: 'Contact', href: ROUTES.contact },
@@ -107,7 +108,8 @@ export const FOOTER_NAV = [
       { label: 'Pricing & Packages', href: ROUTES.pricing },
       { label: 'Gallery', href: ROUTES.gallery },
       { label: 'Downloads', href: ROUTES.downloads },
-      { label: 'Client Portal', href: ROUTES.portal },
+      // Client Portal is commented out for now — see app/router.tsx.
+      // { label: 'Client Portal', href: ROUTES.portal },
     ],
   },
 ] as const;

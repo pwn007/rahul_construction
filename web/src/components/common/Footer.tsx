@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Youtube } from 'lucide-react';
 import { Button, Input, useToast } from '@/components/ui';
 import { Logo } from './Logo';
-import { Reveal, SplitText } from '@/components/motion';
 import { FOOTER_NAV, ROUTES } from '@/constants/routes';
 import { SITE } from '@/constants/site';
 
@@ -27,41 +26,17 @@ export function Footer() {
         aria-hidden
       />
 
-      {/* CTA band */}
-      <div className="relative border-b border-white/10">
-        <div className="container py-20 md:py-28">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
-            <div className="lg:col-span-7">
-              <p className="overline">Let's build your dream</p>
-              <h2 className="mt-4 text-display-md text-white">
-                <SplitText text="Ready to experience hassle-free construction?" />
-              </h2>
-              <p className="mt-5 max-w-lead text-body-lg text-white/60">
-                Connect with us today and take the first step toward building your dream space with confidence.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3 lg:col-span-5 lg:justify-end">
-              <Button href={ROUTES.estimator} variant="accent" size="xl" rightIcon={<ArrowUpRight className="h-4 w-4" />}>
-                Get a free estimate
-              </Button>
-              <Button href={ROUTES.contact} variant="outline" size="xl" className="border-white/25 text-white hover:bg-white/10">
-                Book a consultation
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main */}
-      <div className="relative container py-16">
-        <div className="grid gap-12 lg:grid-cols-12">
+      <div className="relative container py-12">
+        <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <Logo tone="light" />
-            <p className="mt-4 text-caption uppercase tracking-[0.22em] text-cyan-400">{SITE.tagline}</p>
-            <p className="mt-4 max-w-[38ch] text-sm leading-relaxed text-white/55">{SITE.description}</p>
-            <p className="mt-4 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
+            <p className="mt-3 text-caption uppercase tracking-[0.22em] text-cyan-400">{SITE.tagline}</p>
+            {/* `SITE.description` used to sit here — it is the hero sub-headline again,
+                three screens later, and it was the tallest thing in this column. */}
+            <p className="mt-3 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
 
-            <div className="mt-8 space-y-3">
+            <div className="mt-6 space-y-2.5">
               <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 text-sm text-white/70 transition-colors hover:text-cyan-400">
                 <Phone className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.phone}
               </a>
@@ -79,11 +54,11 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="grid gap-10 sm:grid-cols-3 lg:col-span-5">
+          <div className="grid gap-8 sm:grid-cols-3 lg:col-span-5">
             {FOOTER_NAV.map((col) => (
               <div key={col.heading}>
                 <h3 className="text-overline uppercase text-white/40">{col.heading}</h3>
-                <ul className="mt-5 space-y-3">
+                <ul className="mt-4 space-y-2">
                   {col.links.map((link) => (
                     <li key={link.href}>
                       <Link to={link.href} className="link-underline text-sm text-white/70 transition-colors hover:text-white">
@@ -98,7 +73,7 @@ export function Footer() {
 
           <div className="lg:col-span-3">
             <h3 className="text-overline uppercase text-white/40">Stay informed</h3>
-            <p className="mt-5 text-sm text-white/60">
+            <p className="mt-4 text-sm text-white/60">
               Practical guides on building in Jaipur — costs, timelines and the decisions that matter. No noise.
             </p>
             {/*
@@ -108,7 +83,7 @@ export function Footer() {
               inbox as every other enquiry.
             */}
             <form
-              className="mt-5 flex gap-2"
+              className="mt-4 flex gap-2"
               onSubmit={async (e) => {
                 e.preventDefault();
                 const address = email.trim();
@@ -156,35 +131,39 @@ export function Footer() {
               </Button>
             </form>
 
-            <div className="mt-8 flex gap-2">
-              {SOCIALS.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.label}
-                  className="flex h-10 w-10 items-center justify-center rounded-md border border-white/12 text-white/60 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
-                >
-                  <s.icon className="h-[18px] w-[18px]" />
-                </a>
-              ))}
-            </div>
           </div>
         </div>
 
-        {/* Oversized wordmark */}
-        <Reveal className="mt-20 select-none" y={40}>
-          <p className="text-center font-display text-[clamp(3rem,14vw,12rem)] font-semibold leading-none tracking-tighter text-white/[0.045]">
-            NEETU ARCHSTONE
-          </p>
-        </Reveal>
-
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-caption text-white/40 sm:flex-row">
-          <p>
+        {/*
+          Legal bar, now carrying the socials too.
+          --------------------------------------------------------------
+          Two blocks came out of here: the oversized "NEETU ARCHSTONE" watermark
+          (up to 12rem tall plus an 80px margin, purely decorative) and the social
+          row that sat on its own under the newsletter. Every link survives.
+        */}
+        <div className="mt-8 flex flex-col items-center gap-5 border-t border-white/10 pt-6 text-caption text-white/40 md:flex-row md:justify-between">
+          <p className="order-3 md:order-1">
             © {year} {SITE.legalName}. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
+
+          <div className="order-1 flex gap-2 md:order-2">
+            {SOCIALS.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-white/12 text-white/60 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
+              >
+                <s.icon className="h-4 w-4" />
+              </a>
+            ))}
+          </div>
+
+          {/* `md:pr-16` keeps the last link clear of the fixed FloatingRail button,
+              which sits over the bottom-right of the viewport. */}
+          <div className="order-2 flex items-center gap-6 md:order-3 md:pr-16">
             <Link to={ROUTES.privacy} className="transition-colors hover:text-white">
               Privacy Policy
             </Link>

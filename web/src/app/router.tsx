@@ -23,8 +23,15 @@ const ContactPage = lazy(() => import('@/features/contact/ContactPage'));
 const LegalPage = lazy(() => import('@/features/legal/LegalPage'));
 const NotFoundPage = lazy(() => import('@/features/legal/NotFoundPage'));
 
-/* Portal */
-const PortalRoutes = lazy(() => import('@/features/portal/PortalRoutes'));
+/*
+ * Portal — switched off for now.
+ *
+ * Commented rather than deleted: the feature is complete and this is a
+ * temporary hold, so restoring it is uncommenting this import and the route
+ * below, plus the five link sites listed there. Leaving the `lazy()` import
+ * commented also keeps the portal chunk out of the build entirely.
+ */
+// const PortalRoutes = lazy(() => import('@/features/portal/PortalRoutes'));
 
 /* Admin */
 const AdminRoutes = lazy(() => import('@/features/admin/AdminRoutes'));
@@ -81,7 +88,16 @@ export function AppRouter() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
-        <Route path="/portal/*" element={<PortalRoutes />} />
+        {/*
+          Off for now. Uncomment with the import above to bring the portal back.
+          Public entry points also commented, all marked "Client Portal is
+          commented out":
+            · constants/routes.ts — main nav (Company) and FOOTER_NAV (Resources)
+            · components/common/Chrome.tsx — command palette
+            · features/home/sections/Narrative.tsx — "Watch your site live"
+            · data/ops.ts — admin footer-config seed
+        */}
+        {/* <Route path="/portal/*" element={<PortalRoutes />} /> */}
         <Route path="/admin/*" element={<AdminRoutes />} />
       </Routes>
     </Suspense>
