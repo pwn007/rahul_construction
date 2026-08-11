@@ -9,3 +9,5 @@ build/
 *.tsbuildinfo
 .vite/
 coverage/
+.vercel
+.env*
