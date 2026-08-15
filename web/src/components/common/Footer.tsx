@@ -37,10 +37,10 @@ export function Footer() {
             <p className="mt-3 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
 
             <div className="mt-6 space-y-2.5">
-              <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 text-sm text-white/70 transition-colors hover:text-cyan-400">
+              <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 py-1 text-sm text-white/70 transition-colors hover:text-cyan-400">
                 <Phone className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.phone}
               </a>
-              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 text-sm text-white/70 transition-colors hover:text-cyan-400">
+              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 py-1 text-sm text-white/70 transition-colors hover:text-cyan-400">
                 <Mail className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.email}
               </a>
               <p className="flex items-start gap-3 text-sm text-white/70">
@@ -61,7 +61,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-2">
                   {col.links.map((link) => (
                     <li key={link.href}>
-                      <Link to={link.href} className="link-underline text-sm text-white/70 transition-colors hover:text-white">
+                      <Link to={link.href} className="link-underline inline-block py-1 text-sm text-white/70 transition-colors hover:text-white">
                         {link.label}
                       </Link>
                     </li>
@@ -154,7 +154,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
-                className="flex h-9 w-9 items-center justify-center rounded-md border border-white/12 text-white/60 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-md border border-white/12 text-white/60 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
               >
                 <s.icon className="h-4 w-4" />
               </a>
@@ -164,13 +164,13 @@ export function Footer() {
           {/* `md:pr-16` keeps the last link clear of the fixed FloatingRail button,
               which sits over the bottom-right of the viewport. */}
           <div className="order-2 flex items-center gap-6 md:order-3 md:pr-16">
-            <Link to={ROUTES.privacy} className="transition-colors hover:text-white">
+            <Link to={ROUTES.privacy} className="inline-block py-1 transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link to={ROUTES.terms} className="transition-colors hover:text-white">
+            <Link to={ROUTES.terms} className="inline-block py-1 transition-colors hover:text-white">
               Terms & Conditions
             </Link>
-            <Link to={ROUTES.admin} className="transition-colors hover:text-white">
+            <Link to={ROUTES.admin} className="inline-block py-1 transition-colors hover:text-white">
               Admin
             </Link>
           </div>

@@ -76,7 +76,10 @@ export function FloatingRail() {
           expanded ? 'rotate-90 bg-navy-800 text-white' : 'bg-cyan-500 text-white hover:scale-105',
         )}
       >
-        {!expanded && <span className="absolute inset-0 animate-pulse-ring rounded-full bg-cyan-500/40" aria-hidden />}
+        {/* Inset so the 2.2x pulse stays inside the button's own box. At `inset-0`
+            it reached ~33px past the rail, and the rail is pinned to the right
+            edge of the viewport — enough to widen the document on a 360px phone. */}
+        {!expanded && <span className="absolute inset-[22%] animate-pulse-ring rounded-full bg-cyan-500/40" aria-hidden />}
         {expanded ? <X className="h-6 w-6" /> : <MessageCircle className="relative h-6 w-6" />}
       </button>
     </div>

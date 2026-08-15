@@ -126,7 +126,16 @@ export default function PricingPage() {
         <div className="container">
           <SectionHeader overline="Compare" title="Exactly what is in each package" lead="No asterisks. If it is not ticked, it is not included." />
 
-          <div className="mt-10 overflow-x-auto">
+          {/*
+            Two renderings of one source.
+
+            A 640px minimum on a 360px phone means dragging sideways to answer
+            "is MEPF included" — the one question this table exists for. Below
+            `md` each scope item becomes a card with the three packages listed
+            under it. `hidden`/`md:hidden` rather than CSS-only tricks, so only
+            one of the two is ever in the accessibility tree.
+          */}
+          <div className="mt-10 hidden overflow-x-auto md:block">
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
                 <tr className="border-b">
@@ -167,6 +176,45 @@ export default function PricingPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Stacked equivalent, phones and small tablets. */}
+          <div className="mt-8 space-y-6 md:hidden">
+            {MATRIX.map((group) => (
+              <div key={group.group}>
+                <p className="text-overline uppercase text-subtle">{group.group}</p>
+                <ul className="mt-3 space-y-3">
+                  {group.rows.map((row) => (
+                    <li key={row.label} className="surface rounded-xl border p-4 shadow-sm">
+                      <p className="font-medium">{row.label}</p>
+                      <dl className="mt-3 space-y-2">
+                        {PACKAGES.map((pkg, i) => {
+                          const included = [row.civil, row.semi, row.full][i];
+                          return (
+                            <div key={pkg.key} className="flex items-center justify-between gap-3 text-sm">
+                              <dt className="text-muted">{pkg.label}</dt>
+                              <dd className="flex items-center gap-1.5">
+                                {included ? (
+                                  <>
+                                    <Check className="h-4 w-4 text-cyan-500" strokeWidth={3} />
+                                    <span className="text-caption text-subtle">Included</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Minus className="h-4 w-4 text-[rgb(var(--c-text-subtle))]/50" />
+                                    <span className="text-caption text-subtle">Not included</span>
+                                  </>
+                                )}
+                              </dd>
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </section>

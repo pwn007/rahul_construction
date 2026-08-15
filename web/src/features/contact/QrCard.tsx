@@ -58,7 +58,9 @@ export function QrCard() {
 
   return (
     <div className="surface rounded-xl border p-5 shadow-sm">
-      <div className="flex items-start gap-5">
+      {/* A 96px QR plus a non-wrapping "Save contact" button will not fit beside
+          each other on a 320px screen, so the row stacks below `sm`. */}
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:gap-5">
         <div className="shrink-0 rounded-lg border bg-[rgb(var(--c-surface-2))] p-2.5">
           {dataUrl ? (
             <img src={dataUrl} alt={`QR code linking to ${SITE.url}`} className="h-24 w-24 dark:invert" />

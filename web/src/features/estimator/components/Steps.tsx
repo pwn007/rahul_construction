@@ -491,12 +491,19 @@ export function StepMaterialSelect({
           type="button"
           onClick={() => scrollStrip(-1)}
           aria-label="Scroll materials left"
-          className="surface absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm transition-colors hover:border-cyan-500"
+          className="surface absolute left-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm transition-colors hover:border-cyan-500 sm:flex"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
 
-        <div ref={stripRef} className="no-scrollbar flex gap-3 overflow-x-auto px-11 py-2">
+        {/*
+          `px-11` reserved 88px for the two arrows. On a 320px screen that left
+          roughly 160px for the tiles themselves, which is the misalignment the
+          client reported. Below `sm` the arrows are hidden and the padding goes
+          with them, so the strip is a plain swipe surface with snap points — the
+          same pattern as the home process rail — and gets the full width back.
+        */}
+        <div ref={stripRef} className="no-scrollbar flex snap-x snap-mandatory scroll-px-1 gap-3 overflow-x-auto px-1 py-2 sm:scroll-px-11 sm:px-11">
           {visible.map((line) => {
             const isLive = activeKeys.has(line.key);
             const isActive = line.key === activeLine?.key;
@@ -565,7 +572,7 @@ export function StepMaterialSelect({
           type="button"
           onClick={() => scrollStrip(1)}
           aria-label="Scroll materials right"
-          className="surface absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm transition-colors hover:border-cyan-500"
+          className="surface absolute right-0 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border shadow-sm transition-colors hover:border-cyan-500 sm:flex"
         >
           <ChevronRight className="h-4 w-4" />
         </button>

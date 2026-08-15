@@ -77,7 +77,7 @@ export function ProjectsHero({
           <div className="lg:col-span-6 lg:pt-6">
             <Reveal>
               <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-caption text-subtle">
-                <Link to={ROUTES.home} className="transition-colors hover:text-cyan-700 dark:hover:text-cyan-400">
+                <Link to={ROUTES.home} className="inline-block py-1 transition-colors hover:text-cyan-700 dark:hover:text-cyan-400">
                   Home
                 </Link>
                 <ChevronRight className="h-3 w-3" />

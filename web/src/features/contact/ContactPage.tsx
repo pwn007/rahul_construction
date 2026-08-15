@@ -141,7 +141,7 @@ export default function ContactPage() {
 
       <section className="section-sm">
         <div className="container">
-          <div className="grid gap-10 lg:grid-cols-12">
+          <div className="grid gap-10 [&>*]:min-w-0 lg:grid-cols-12">
             {/* Details */}
             <div className="lg:col-span-5">
               <div className="space-y-3">

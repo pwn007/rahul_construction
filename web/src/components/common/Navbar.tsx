@@ -111,7 +111,7 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
                 onClick={toggle}
                 aria-label={`Switch to ${resolved === 'dark' ? 'light' : 'dark'} theme`}
                 className={cn(
-                  'hidden h-10 w-10 items-center justify-center rounded-md transition-colors sm:flex',
+                  'hidden h-11 w-11 items-center justify-center rounded-md transition-colors sm:flex',
                   overDark ? 'text-white hover:bg-white/10' : 'hover:bg-[rgb(var(--c-text))]/[0.06]',
                 )}
               >
@@ -126,7 +126,7 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open menu"
                 className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-md transition-colors lg:hidden',
+                  'flex h-11 w-11 items-center justify-center rounded-md transition-colors lg:hidden',
                   overDark ? 'text-white hover:bg-white/10' : 'hover:bg-[rgb(var(--c-text))]/[0.06]',
                 )}
               >

@@ -49,7 +49,7 @@ export function PackageCard({
       </p>
       <h3 className="mt-1 font-display text-display-sm font-semibold">{pkg.label}</h3>
 
-      <p className="num mt-6 text-3xl font-semibold">
+      <p className="num mt-6 text-2xl font-semibold sm:text-3xl">
         {model === 'turnkey' ? (
           <>
             ₹{formatNumber(pkg.minRate)} – {formatNumber(pkg.maxRate)}

@@ -107,11 +107,11 @@ export default function GalleryPage() {
 
                       <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-ink-950/70 px-2.5 py-1 backdrop-blur-sm">
                         <Meta.icon className="h-3 w-3 text-cyan-400" />
-                        <span className="text-[0.65rem] font-medium uppercase tracking-wide text-white">{Meta.label}</span>
+                        <span className="text-[0.75rem] font-medium uppercase tracking-wide text-white">{Meta.label}</span>
                       </span>
 
                       {item.duration && (
-                        <span className="num absolute right-3 top-3 rounded bg-ink-950/70 px-2 py-0.5 text-[0.65rem] text-white backdrop-blur-sm">
+                        <span className="num absolute right-3 top-3 rounded bg-ink-950/70 px-2 py-0.5 text-[0.75rem] text-white backdrop-blur-sm">
                           {item.duration}
                         </span>
                       )}

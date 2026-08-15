@@ -265,7 +265,10 @@ export default function EstimatorPage() {
           {isResult ? (
             <ResultScreen result={result} input={input} patch={patch} onRestart={restart} shareUrl={shareUrl} />
           ) : (
-            <div className="grid gap-8 lg:grid-cols-12">
+            /* `[&>*]:min-w-0` — a grid item defaults to `min-width: auto`, so it
+               refuses to shrink below its content's min-content width. Any wide
+               child then widens the item, the grid, and the document with it. */
+            <div className="grid gap-8 [&>*]:min-w-0 lg:grid-cols-12">
               <div className="lg:col-span-8">
                 <div className="surface rounded-xl border p-7 shadow-sm md:p-10">
                   <AnimatePresence mode="wait">
@@ -288,7 +291,10 @@ export default function EstimatorPage() {
                     </motion.div>
                   </AnimatePresence>
 
-                  <div className="mt-10 flex items-center justify-between gap-4 border-t pt-6">
+                  {/* "See my estimate" plus "Back", both `whitespace-nowrap`, do not fit side
+                      by side at 320px. They wrap and go full-width on the narrowest
+                      screens, which also gives each a full-width tap target. */}
+                  <div className="mt-10 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <Button
                       variant="ghost"
                       size="lg"
@@ -335,7 +341,9 @@ export default function EstimatorPage() {
 
       {/* Mobile sticky meter */}
       {!isResult && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t p-3 lg:hidden">
+        /* `pr-20` keeps the content clear of the floating action button, which is
+           fixed bottom-right at z-40 and was sitting on top of the price. */
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t p-3 pr-20 lg:hidden">
           <div className="glass rounded-xl">
             <LiveCostMeter result={result} compact />
           </div>

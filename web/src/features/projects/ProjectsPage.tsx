@@ -150,8 +150,10 @@ export default function ProjectsPage() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-2">
-                <Select value={locality} onChange={(e) => setFilter('locality', e.target.value)} aria-label="Filter by locality" className="h-9 w-auto text-caption">
+              {/* A native select with `w-auto` sizes to its longest option — the locality
+                  list pushed this row to 559px and took the document with it. */}
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={locality} onChange={(e) => setFilter('locality', e.target.value)} aria-label="Filter by locality" className="h-11 w-full min-w-0 flex-1 text-caption sm:w-auto sm:flex-none">
                   <option value="all">All localities</option>
                   {localities.map((l) => (
                     <option key={l} value={l}>
@@ -159,14 +161,14 @@ export default function ProjectsPage() {
                     </option>
                   ))}
                 </Select>
-                <Select value={stage} onChange={(e) => setFilter('stage', e.target.value)} aria-label="Filter by status" className="h-9 w-auto text-caption">
+                <Select value={stage} onChange={(e) => setFilter('stage', e.target.value)} aria-label="Filter by status" className="h-11 w-full min-w-0 flex-1 text-caption sm:w-auto sm:flex-none">
                   {STAGES.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s.label}
                     </option>
                   ))}
                 </Select>
-                <Select value={sort} onChange={(e) => setFilter('sort', e.target.value)} aria-label="Sort projects" className="h-9 w-auto text-caption">
+                <Select value={sort} onChange={(e) => setFilter('sort', e.target.value)} aria-label="Sort projects" className="h-11 w-full min-w-0 flex-1 text-caption sm:w-auto sm:flex-none">
                   {SORTS.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s.label}

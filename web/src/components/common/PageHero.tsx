@@ -130,14 +130,14 @@ export function PageHero({
                     !hasAside && 'justify-center',
                   )}
                 >
-                  <Link to={ROUTES.home} className="transition-colors hover:text-cyan-700 dark:hover:text-cyan-400">
+                  <Link to={ROUTES.home} className="inline-block py-1 transition-colors hover:text-cyan-700 dark:hover:text-cyan-400">
                     Home
                   </Link>
                   {breadcrumbs.map((b) => (
                     <span key={b.label} className="flex items-center gap-2">
                       <ChevronRight className="h-3 w-3" />
                       {b.href ? (
-                        <Link to={b.href} className="transition-colors hover:text-cyan-700 dark:hover:text-cyan-400">
+                        <Link to={b.href} className="inline-block py-1 transition-colors hover:text-cyan-700 dark:hover:text-cyan-400">
                           {b.label}
                         </Link>
                       ) : (

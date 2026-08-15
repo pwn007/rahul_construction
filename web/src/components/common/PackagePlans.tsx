@@ -48,7 +48,7 @@ export function PackagePlans({
         </p>
       </div>
 
-      <div className="mt-12 grid gap-6 lg:grid-cols-3">
+      <div className="mt-12 grid gap-6 [&>*]:min-w-0 lg:grid-cols-3">
         {PACKAGES.map((pkg, i) => (
           <Reveal key={pkg.key} delay={i * 0.08}>
             <PackageCard pkg={pkg} model={model} popular={pkg.key === 'semi-furnished'} />

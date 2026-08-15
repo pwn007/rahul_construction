@@ -384,6 +384,18 @@ export function Tabs({
         'no-scrollbar flex gap-1 overflow-x-auto',
         variant === 'underline' ? 'border-b' : 'rounded-lg bg-[rgb(var(--c-text))]/[0.05] p-1',
         className,
+        /*
+          Containment, last so no caller can override it.
+
+          `overflow-x-auto` does nothing unless the box is actually constrained,
+          and six call sites pass `className="inline-flex"` — which shrink-wraps
+          to content, so the strip grew past the viewport and pushed the whole
+          document sideways instead of scrolling. `max-w-full` re-constrains it
+          whatever the display mode; `min-w-0` covers the other half of the trap,
+          a flex/grid parent where the default `min-width: auto` stops a child
+          shrinking below its content (BlogPage wraps this in a flex row).
+        */
+        'min-w-0 max-w-full',
       )}
     >
       {tabs.map((t) => {
@@ -395,7 +407,7 @@ export function Tabs({
             aria-selected={active}
             onClick={() => onChange(t.value)}
             className={cn(
-              'relative flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors',
+              'relative flex min-h-[44px] items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors',
               variant === 'underline' ? 'pb-3' : 'rounded-md',
               active ? 'text-[rgb(var(--c-text))]' : 'text-subtle hover:text-[rgb(var(--c-text-muted))]',
             )}
