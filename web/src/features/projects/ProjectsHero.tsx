@@ -55,7 +55,6 @@ export function ProjectsHero({
     .sort((a, b) => b.year - a.year)
     .slice(0, 3);
 
-  const [lead, ...rest] = covers;
 
   const stats = [
     { value: projects.length, label: 'Projects', format: (n: number) => String(n) },
@@ -132,28 +131,37 @@ export function ProjectsHero({
             </Reveal>
           </div>
 
-          {/* ── Cover cluster ─────────────────────────────────── */}
+          {/* ── Cover cluster ─────────────────────────────────────
+              One row of three at every width: a snap-scroll strip on phones,
+              a plain three-across grid from `sm` up.
+
+              There used to be a second, desktop-only composition here — a lead
+              card at 3/4 beside two at 4/3, the right column pushed down by
+              `mt-12`, and the two columns drifting at opposing parallax speeds.
+              It was the same "one big, the rest small" arrangement the client
+              asked to be rid of, so it has gone.
+
+              Worth knowing why the ratios differed in the first place: a
+              one-beside-two cluster can only balance its two column heights by
+              giving the single card a taller crop. Equal sizes and that
+              composition are mutually exclusive, which is why the composition is
+              what gave way. One `Parallax` now carries the whole cluster, so it
+              still drifts as a unit rather than shearing against itself. */}
           <div className="lg:col-span-6">
-            {/* Mobile: snap-scroll strip. Desktop: offset editorial cluster. */}
-            <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:hidden">
-              {covers.map((project, i) => (
-                <CoverCard key={project.id} project={project} index={i} className="w-[76%] shrink-0 snap-start sm:w-auto" ratio="aspect-[4/5]" />
-              ))}
-            </div>
-
-            <div className="hidden gap-5 lg:grid lg:grid-cols-2">
-              <Parallax speed={0.06}>
-                {lead && <CoverCard project={lead} index={0} ratio="aspect-[3/4]" priority />}
-              </Parallax>
-
-              <Parallax speed={-0.04}>
-                <div className="mt-12 space-y-5">
-                  {rest.map((project, i) => (
-                    <CoverCard key={project.id} project={project} index={i + 1} ratio="aspect-[4/3]" />
-                  ))}
-                </div>
-              </Parallax>
-            </div>
+            <Parallax speed={0.06}>
+              <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
+                {covers.map((project, i) => (
+                  <CoverCard
+                    key={project.id}
+                    project={project}
+                    index={i}
+                    className="w-[76%] shrink-0 snap-start sm:w-auto"
+                    ratio="aspect-[4/5]"
+                    priority={i === 0}
+                  />
+                ))}
+              </div>
+            </Parallax>
           </div>
         </div>
       </div>

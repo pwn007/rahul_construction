@@ -200,17 +200,16 @@ export function GalleryGrid({ images, onOpen }: { images: ProjectImage[]; onOpen
         <button
           key={image.id}
           onClick={() => onOpen(i)}
-          className={cn('group relative overflow-hidden rounded-lg', i === 0 && 'sm:col-span-2')}
+          className="group relative overflow-hidden rounded-lg"
           aria-label={`View ${image.alt}`}
         >
           <img
             src={image.url}
             alt={image.alt}
             loading="lazy"
-            className={cn(
-              'w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105',
-              i === 0 ? 'aspect-[16/9]' : 'aspect-[4/3]',
-            )}
+            /* Every photo the same. The first used to be double-width at
+               16/9; the set now reads as one even sheet of images. */
+            className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
           />
           <span className="absolute inset-0 flex items-center justify-center bg-ink-950/0 transition-colors duration-500 group-hover:bg-ink-950/30">
             <ZoomIn className="h-8 w-8 scale-90 text-white opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100" />

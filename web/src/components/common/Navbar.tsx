@@ -55,32 +55,57 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
 
             {/* Desktop nav */}
             <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
-              {MAIN_NAV.map((item) => (
-                <div key={item.label} className="relative" onMouseEnter={() => setOpenMenu(item.children ? item.label : null)}>
-                  <NavLink
-                    to={item.href}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex items-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium transition-colors',
-                        isActive || openMenu === item.label
-                          ? overDark
-                            ? 'text-cyan-400'
-                            : 'text-cyan-700 dark:text-cyan-400'
-                          : overDark
-                            ? 'text-white/85 hover:text-cyan-300'
-                            : 'text-[rgb(var(--c-text))] hover:text-cyan-700 dark:hover:text-cyan-400',
-                      )
-                    }
-                  >
-                    {item.label}
-                    {item.children && (
-                      <ChevronDown
-                        className={cn('h-3.5 w-3.5 transition-transform duration-300', openMenu === item.label && 'rotate-180')}
-                      />
+              {MAIN_NAV.map((item) => {
+                const triggerClass = (lit: boolean) =>
+                  cn(
+                    'flex items-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium transition-colors',
+                    lit
+                      ? overDark
+                        ? 'text-cyan-400'
+                        : 'text-cyan-700 dark:text-cyan-400'
+                      : overDark
+                        ? 'text-white/85 hover:text-cyan-300'
+                        : 'text-[rgb(var(--c-text))] hover:text-cyan-700 dark:hover:text-cyan-400',
+                  );
+
+                const chevron = item.children && (
+                  <ChevronDown
+                    className={cn('h-3.5 w-3.5 transition-transform duration-300', openMenu === item.label && 'rotate-180')}
+                  />
+                );
+
+                return (
+                  <div key={item.label} className="relative" onMouseEnter={() => setOpenMenu(item.children ? item.label : null)}>
+                    {item.menuOnly ? (
+                      /*
+                        A heading, not a link — its page is deliberately unreachable.
+
+                        It stays a real <button> rather than a styled <span> so it
+                        keeps its place in the tab order, and the click *opens* the
+                        menu instead of toggling it: hovering has already opened the
+                        panel by the time a mouse gets here, and a toggle would
+                        dismiss the very thing the pointer came for. Keyboard users
+                        get the only way in — until now the mega menu opened on
+                        hover alone and Enter simply navigated.
+                      */
+                      <button
+                        type="button"
+                        aria-expanded={openMenu === item.label}
+                        onClick={() => setOpenMenu(item.label)}
+                        className={triggerClass(openMenu === item.label)}
+                      >
+                        {item.label}
+                        {chevron}
+                      </button>
+                    ) : (
+                      <NavLink to={item.href} className={({ isActive }) => triggerClass(isActive || openMenu === item.label)}>
+                        {item.label}
+                        {chevron}
+                      </NavLink>
                     )}
-                  </NavLink>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </nav>
 
             {/* Actions */}
@@ -168,15 +193,19 @@ function MegaMenuContent({ item }: { item?: NavLinkType }) {
         <p className="mt-3 max-w-[24ch] text-sm text-muted">
           {item.label === 'Services' && 'Five capabilities, delivered as one accountable system.'}
           {item.label === 'Projects' && 'Work completed across Jaipur, documented properly.'}
-          {item.label === 'Pricing' && 'Published rates and an estimator that shows its working.'}
+          {item.label === 'Pricing' && 'An estimator that shows its working, and the papers to go with it.'}
           {item.label === 'Company' && 'Who we are and how to reach us.'}
         </p>
-        <Link
-          to={item.href}
-          className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-cyan-700 link-underline dark:text-cyan-400"
-        >
-          View all <ArrowUpRight className="h-4 w-4" />
-        </Link>
+        {/* "View all" goes to `item.href`, which is the one thing a menu-only
+            item has no business linking to. */}
+        {!item.menuOnly && (
+          <Link
+            to={item.href}
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-cyan-700 link-underline dark:text-cyan-400"
+          >
+            View all <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        )}
       </div>
       <div className="col-span-9 grid grid-cols-3 gap-2">
         {item.children.map((child) => (

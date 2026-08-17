@@ -274,8 +274,22 @@
 
   .hairline { @apply h-px w-full bg-current opacity-10; }
 
-  /* Kinetic type: each word/line masked */
-  .kinetic-line { display: block; overflow: hidden; }
+  /* Kinetic type: each word/line masked.
+
+     The padding/negative-margin pair is what stops `overflow: hidden` cutting
+     the tail off a descender. Headlines here run at `leading-[0.92]`, so the
+     line box is shorter than the font's descender and the mask was slicing
+     through the "g" of "Building". The padding moves the clip edge below the
+     glyph; the negative margin takes the space straight back, so line spacing
+     and the block's measured height are unchanged. The reveal is unaffected —
+     each line still masks only its own content, and an incoming line sitting at
+     `y: 108%` is still outside the padded box. */
+  .kinetic-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.18em;
+    margin-bottom: -0.18em;
+  }
 
   .link-underline {
     background-image: linear-gradient(currentColor, currentColor);

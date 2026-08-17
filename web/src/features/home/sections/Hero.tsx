@@ -4,7 +4,8 @@ import { Counter } from '@/components/motion';
 import { SITE, ACHIEVEMENTS } from '@/constants/site';
 import { usePrefersReducedMotion } from '@/hooks';
 import { useRegisterHeroTone } from '@/app/hero-tone';
-import { HeroSite } from './HeroSite';
+import { cn } from '@/lib/cn';
+import { HeroScene } from './HeroScene';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -41,7 +42,26 @@ export function Hero() {
         stat rail, which lets the site's linework stay dark and legible the
         whole way down instead of having to invert somewhere in the middle.
       */
-      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-gradient-to-b from-[rgb(var(--c-bg))] via-[#EEF2F7] to-[#D8E3EF]"
+      /*
+        `--hero-scene-h` and `--hero-scene-a` are declared here, on the one
+        element that owns both the scene and its captions, because the two have
+        to agree exactly.
+
+        `preserveAspectRatio="…meet"` renders the scene at
+        `min(containerWidth, containerHeight × aspect)` and centres it. So once
+        the height is capped and the container can be wider than the drawing,
+        anything sized against the *container* — the caption row — drifts off
+        the stations it labels. Both figures are already known in CSS, so the
+        captions derive their width from them rather than being measured at
+        runtime: `min(100%, h × a)`, which is the same number the browser used.
+
+        The height itself is `min(max(…), 58svh)`. The `max` is the floor that
+        makes the scene fill the width at ordinary sizes; the `min` is the fix
+        for this bug. Unbounded, that floor asked for 514px of a 575px-tall
+        window while the hero had 334px to give it — and because the scene is
+        bottom-anchored, the surplus grew upward straight through the copy.
+      */
+      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-gradient-to-b from-[rgb(var(--c-bg))] via-[#EEF2F7] to-[#D8E3EF] [--hero-scene-a:2.3] [--hero-scene-h:max(26svh,calc(100vw/2.25))] [--hero-step-3:83.333%] lg:[--hero-scene-a:3] lg:[--hero-scene-h:min(max(46svh,calc(100vw/2.95)),58svh)] lg:[--hero-step-3:85.8%]"
       style={{ paddingTop: 'var(--nav-h)' }}
     >
 
@@ -78,51 +98,49 @@ export function Hero() {
       */}
       <div className="relative flex flex-1 flex-col justify-start">
         {/*
-          The site itself. Full-bleed and anchored to the bottom so the ground
-          line runs the whole width of the viewport, and behind everything —
-          this is the environment the copy sits inside, not a picture beside it.
+          The site itself: full-bleed, bottom-anchored, and running up behind the
+          copy, so the copy sits in its sky rather than beside it.
 
-          It parallaxes a little slower than the copy, which is what stops the
-          two layers reading as one flat image.
+          Its height is `--hero-scene-h`, declared on the section — see the note
+          there for why it is both floored and capped, and why the captions
+          derive their width from the same variable.
         */}
         <motion.div
           style={{ y: reduced ? 0 : siteY }}
-          className="absolute inset-x-0 bottom-0 h-[34%] lg:h-[74%]"
+          /*
+            In flow below `lg`, absolute above it.
+
+            On a wide screen there is sky to spare, so the scene is pinned to the
+            bottom and the copy sits *in* it. On a 360×640 phone there is not: the
+            copy runs to within 40px of where the scene has to start, and pinning
+            it there put the crane through the promise line. Below `lg` the scene
+            is therefore an ordinary block, ordered last and pushed down by
+            `mt-auto`, so a short viewport simply makes the hero taller — `min-h-[100svh]` is a floor,
+            not a ceiling — and the stat rail moves a scroll away, which is what
+            it already did on those phones.
+
+            `order-last` rather than moving it down the markup: it has to stay
+            *first* in the DOM so that on desktop the later, positioned copy
+            paints over it. Reordering the source would put the scene on top of
+            the headline at every width above `lg`.
+          */
+          className="relative order-last mt-auto h-[var(--hero-scene-h)] w-full lg:absolute lg:inset-x-0 lg:bottom-0 lg:order-none lg:mt-0"
           aria-hidden
         >
-          <HeroSite sectionRef={ref} className="h-full w-full" />
+          <HeroScene sectionRef={ref} className="h-full w-full" />
         </motion.div>
 
-        {/*
-          Readability scrim. The copy column overlaps the left third of the
-          site, and material stacks behind body text is exactly the kind of
-          thing that reads as "busy" rather than "immersive". Left-anchored and
-          transparent by half-width, so it never dulls the building or crane.
-        */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[70%] bg-gradient-to-b from-[rgb(var(--c-bg))] via-[rgb(var(--c-bg))]/85 to-transparent lg:hidden"
-          aria-hidden
-        />
-        {/*
-          Fades on both axes: to the right by colour, downward by mask.
+        <div className="container relative pt-[5svh] lg:pt-[7svh]">
+          {/*
+            One column, kept left, and deliberately narrow.
 
-          The original band was sized for the old copy stack — full height at 62%
-          wide — and once the copy shrank to a headline and two lines it was
-          covering ground the copy no longer occupied, erasing the finished house
-          in the lower left. Simply shortening it traded that for a hard
-          horizontal seam where the rectangle stopped. `mask-fade-b` ends it
-          gradually instead, so the copy still gets its backing and the site
-          below emerges with no visible edge anywhere.
-        */}
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 hidden w-[58%] mask-fade-b bg-gradient-to-r from-[rgb(var(--c-bg))] via-[rgb(var(--c-bg))]/80 to-transparent lg:block"
-          aria-hidden
-        />
-
-        <div className="container relative pb-10 pt-[7svh] sm:pb-14 lg:pb-20 lg:pt-[9svh]">
-        <div className="grid w-full gap-10 lg:grid-cols-12 lg:items-center lg:gap-12">
-          {/* Copy */}
-          <motion.div className="lg:col-span-6" style={{ y: reduced ? 0 : copyY }}>
+            A second column against the headline's baseline was tried and had to
+            go: the scene is tall enough that its crane reaches into the upper
+            right, and the supporting lines were landing across the jib. The
+            right half of this hero is not empty space needing type — it is
+            where the site is. Copy left, picture right.
+          */}
+          <motion.div className="max-w-xl" style={{ y: reduced ? 0 : copyY }}>
             {/*
               Straight from the portfolio cover (Port1.pdf p.1): BUILDING in navy
               over DREAMS in cyan, with "From idea to reality, without the
@@ -130,7 +148,7 @@ export function Hero() {
               hero and neither outlasted a review; the one the firm already
               prints on its own front page did.
             */}
-            <h1 className="font-semibold leading-[0.92] tracking-[-0.035em] text-[clamp(3rem,11vw,4.75rem)] text-navy-800 lg:text-[clamp(3.5rem,6vw,6.5rem)] dark:text-white">
+            <h1 className="font-semibold leading-[0.92] tracking-[-0.035em] text-[clamp(3rem,11vw,4.75rem)] text-navy-800 [@media(max-height:680px)]:text-[clamp(2.5rem,3.6vw,3.25rem)] lg:text-[clamp(3.5rem,5.4vw,5.75rem)] dark:text-white">
               {lines.map((line, i) => (
                 <span key={line} className="kinetic-line">
                   {/*
@@ -152,35 +170,85 @@ export function Hero() {
               ))}
             </h1>
 
-            <motion.p
+            {/*
+              The supporting column, set to the headline's baseline with a
+              hairline above it — the job a rule does on a printed cover, tying
+              two unequal blocks of type into one band.
+
+              The Devanagari stays here; its English counterpart has moved out
+              from beside it and become the three captions under the scene,
+              where each step sits under the part of the site that shows it. A
+              run-on "Design · Build · Deliver" next to a picture of design,
+              build and deliver was saying the same thing twice.
+            */}
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
-              className="mt-6 max-w-lead text-body-lg text-muted"
+              className="mt-6"
             >
-              {SITE.promise}
-            </motion.p>
-
-            {/*
-              The two lines that close the portfolio cover. They carry the
-              offering now that the value-proposition paragraph and both CTAs
-              have gone — the nav keeps a standing "Get Estimate" above the fold.
-            */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.9, delay: 0.72 }}
-              className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2"
-            >
-              <p className="font-deva text-lg text-cyan-700 dark:text-cyan-400">{SITE.taglineHi}</p>
-              <span className="hidden h-4 w-px bg-[rgb(var(--c-border))] sm:block" aria-hidden />
-              <p className="text-caption uppercase tracking-[0.22em] text-subtle">{SITE.tagline}</p>
+              <p className="max-w-lead text-body-lg text-muted">{SITE.promise}</p>
+              <p className="mt-3 font-deva text-lg text-cyan-700 dark:text-cyan-400">{SITE.taglineHi}</p>
             </motion.div>
           </motion.div>
         </div>
 
-        </div>
       </div>
+
+        {/*
+          The three steps, captioned under the stations that show them.
+
+          Real text rather than lettering inside the SVG — selectable,
+          translatable, and read out by a screen reader, which the illustration
+          itself deliberately is not. An equal three-column grid puts each one
+          under its station because the scene's stations are composed on exactly
+          one sixth, one half and five sixths of its width.
+
+          The row is sized to the *scene's* rendered box rather than to the
+          container, because once the scene's height is capped the two stop
+          being the same thing: `meet` centres the drawing at
+          `min(width, height × aspect)`, and a caption row spanning the full
+          container would slide off its station by half the letterbox.
+        */}
+        <motion.ul
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.9, delay: 1.3 }}
+          /*
+            Each caption is placed at its own station's centre rather than in an
+            equal three-column grid.
+
+            The grid was simpler and pinned the stations to 1/6, 1/2 and 5/6 —
+            which in turn fixed the bare ground right of the house at
+            `W/6 − stationWidth/2`, with no way to reduce it that did not cost
+            something worse elsewhere. DELIVER now sits a little past its third
+            (`--hero-step-3`) and its caption follows it.
+
+            The row's width is still the scene's *rendered* box rather than the
+            container's, so the captions stay under their stations when the
+            drawing letterboxes on a short window. Its height is explicit because
+            the items are absolute — it is a 3px rule over one line of small
+            caps, and this is the one number here that would need revisiting if
+            that ever changed.
+          */
+          className="relative mx-auto h-[3.5rem] w-[min(100%,calc(var(--hero-scene-h)*var(--hero-scene-a)))] lg:h-[4rem]"
+        >
+          {SITE.taglineSteps.map((step, i) => (
+            <li
+              key={step}
+              style={{ left: i === 2 ? 'var(--hero-step-3)' : `${(i * 2 + 1) * 16.6667}%` }}
+              className="absolute top-4 flex -translate-x-1/2 flex-col items-center gap-2 whitespace-nowrap text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-navy-800 sm:text-caption sm:tracking-[0.2em] dark:text-white"
+            >
+              {/* A short rule over each caption, cyan on the middle one, so the
+                  row reads as three marked stops rather than as three words. */}
+              <span
+                className={cn('h-[3px] w-7 rounded-full', i === 1 ? 'bg-cyan-500' : 'bg-navy-800/25 dark:bg-white/30')}
+                aria-hidden
+              />
+              {step}
+            </li>
+          ))}
+        </motion.ul>
 
       {/* ── Achievement rail ─────────────────────────────────────────
           Anchors the hero with a horizontal line and hands off cleanly to the

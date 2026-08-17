@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowRight, CalendarCheck, Check, Clock, FileDown, IndianRup
 import { Seo } from '@/components/seo/Seo';
 import { Button } from '@/components/ui';
 import { PageHero } from '@/components/common';
-import { ROUTES } from '@/constants/routes';
+// Only consumer was the "See published rates" button, commented out below.
+// import { ROUTES } from '@/constants/routes';
 import { scrollToTarget } from '@/hooks/useLenis';
 import { cn } from '@/lib/cn';
 import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
@@ -178,9 +179,11 @@ export default function EstimatorPage() {
             >
               Start my estimate
             </Button>
-            <Button href={ROUTES.pricing} variant="secondary" size="lg">
+            {/* "See published rates" is commented out for now — published rates
+                are hidden; see the Pricing entry in MAIN_NAV (constants/routes.ts). */}
+            {/* <Button href={ROUTES.pricing} variant="secondary" size="lg">
               See published rates
-            </Button>
+            </Button> */}
           </>
         }
         aside={

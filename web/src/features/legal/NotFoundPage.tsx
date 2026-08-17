@@ -52,7 +52,9 @@ export default function NotFoundPage() {
   const suggestions = [
     { label: 'Cost Estimator', href: ROUTES.estimator, description: 'Get a costed range in two minutes.' },
     { label: 'Our Projects', href: ROUTES.projects, description: 'Completed work across Jaipur.' },
-    { label: 'Pricing & Packages', href: ROUTES.pricing, description: 'Published rates, no hidden costs.' },
+    // Pricing & Packages is commented out for now — published rates are hidden;
+    // see the Pricing entry in MAIN_NAV (constants/routes.ts).
+    // { label: 'Pricing & Packages', href: ROUTES.pricing, description: 'Published rates, no hidden costs.' },
     { label: 'Contact Us', href: ROUTES.contact, description: 'Talk to a person.' },
   ];
 

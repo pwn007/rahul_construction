@@ -5,6 +5,16 @@ export const SITE = {
   legalName: 'Neetu Archstone',
   wordmark: { primary: 'Neetu', secondary: 'ARCHSTONE' },
   tagline: 'Design · Build · Deliver',
+  /**
+   * The three steps, as the firm says them out loud.
+   *
+   * The hero prints these as captions, one under each station of its
+   * illustrated site, so it needs them as items. "We" is deliberate and is not
+   * padding: "Design · Build · Deliver" is a list of services, while "We Design
+   * · We Build · We Deliver" is a claim about who does them — which is the whole
+   * point of showing all three under one roof.
+   */
+  taglineSteps: ['We Design', 'We Build', 'We Deliver'],
   taglineHi: 'नक़्शे से निर्माण तक',
   headline: 'Building Dreams',
   promise: 'From idea to reality, without the hassle.',

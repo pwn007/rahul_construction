@@ -53,7 +53,7 @@ export default function GalleryPage() {
                 key={item.id}
                 type="button"
                 onClick={() => setActive(item)}
-                className={cn('group relative overflow-hidden rounded-xl shadow-md ring-1 ring-navy-800/[0.06]', i % 3 === 0 && 'row-span-1')}
+                className="group relative overflow-hidden rounded-xl shadow-md ring-1 ring-navy-800/[0.06]"
                 aria-label={`Open ${item.title}`}
               >
                 <img
@@ -78,7 +78,15 @@ export default function GalleryPage() {
           {items.length === 0 ? (
             <EmptyState icon={<Camera className="h-6 w-6" />} title="Nothing here yet" description="We are adding media for this category shortly." className="mt-10" />
           ) : (
-            <motion.div layout className="mt-10 columns-1 gap-5 sm:columns-2 lg:columns-3 [&>*]:mb-5">
+            /* A plain grid, not CSS multi-column masonry.
+
+                Masonry sized every tile differently by design — the container
+                flowed them into columns and the crop cycled by position
+                (`i % 5`, `i % 3`), so no two neighbours matched. A uniform frame
+                is the point now. Portrait photographs are centre-cropped to
+                landscape as a result; the lightbox still opens the full image,
+                so nothing is lost, but the thumbnail is a crop. */
+            <motion.div layout className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence mode="popLayout">
                 {items.map((item, i) => {
                   const Meta = KIND_META[item.kind];
@@ -91,17 +99,14 @@ export default function GalleryPage() {
                       exit={{ opacity: 0, scale: 0.97 }}
                       transition={{ duration: 0.4, delay: Math.min(i * 0.03, 0.25), ease: [0.16, 1, 0.3, 1] }}
                       onClick={() => setActive(item)}
-                      className="group relative block w-full break-inside-avoid overflow-hidden rounded-xl"
+                      className="group relative block w-full overflow-hidden rounded-xl"
                       aria-label={`Open ${item.title}`}
                     >
                       <img
                         src={item.thumbnail}
                         alt={item.title}
                         loading="lazy"
-                        className={cn(
-                          'w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105',
-                          i % 5 === 0 ? 'aspect-[3/4]' : i % 3 === 0 ? 'aspect-square' : 'aspect-[4/3]',
-                        )}
+                        className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
                       />
                       <span className="absolute inset-0 bg-gradient-to-t from-ink-950/85 via-transparent to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-95" />
 

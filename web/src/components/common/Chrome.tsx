@@ -108,7 +108,9 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
     const pages: Command[] = [
       { id: 'p-home', label: 'Home', group: 'Pages', href: ROUTES.home, icon: LayoutDashboard },
       { id: 'p-estimator', label: 'Cost Estimator', group: 'Pages', href: ROUTES.estimator, icon: Calculator, keywords: 'calculator price budget cost' },
-      { id: 'p-pricing', label: 'Pricing & Packages', group: 'Pages', href: ROUTES.pricing, icon: FileText, keywords: 'rates sqft turnkey' },
+      // Pricing & Packages is commented out for now — published rates are hidden;
+      // see the Pricing entry in MAIN_NAV (constants/routes.ts).
+      // { id: 'p-pricing', label: 'Pricing & Packages', group: 'Pages', href: ROUTES.pricing, icon: FileText, keywords: 'rates sqft turnkey' },
       { id: 'p-projects', label: 'All Projects', group: 'Pages', href: ROUTES.projects, icon: Building2 },
       { id: 'p-about', label: 'About Us', group: 'Pages', href: ROUTES.about, icon: Users },
       { id: 'p-vastu', label: 'Vastu Planning', group: 'Pages', href: ROUTES.vastu, icon: Layers },

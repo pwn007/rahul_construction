@@ -262,7 +262,7 @@ export const projects: Project[] = [
     durationMonths: 13,
     packageType: 'fully-furnished',
     client: 'Dr. A. A. Pathan',
-    featured: false,
+    featured: true,
     order: 6,
     coverImage: IMG.wide('malviya-cover'),
     images: [

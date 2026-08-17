@@ -120,7 +120,15 @@ export function StatTile({
 /* ProjectCard                                                           */
 /* ==================================================================== */
 
-export function ProjectCard({ project, index = 0, size = 'md' }: { project: Project; index?: number; size?: 'md' | 'lg' }) {
+/*
+  Every project card is the same size, everywhere.
+
+  There used to be a `size?: 'md' | 'lg'` prop whose only effect was to swap the
+  image ratio to `aspect-[16/11]`, and whose only caller was the featured card in
+  the home page's bento. Both are gone: the prop is removed rather than merely
+  left unused so that a differently-sized project card cannot quietly reappear.
+*/
+export function ProjectCard({ project, index = 0 }: { project: Project; index?: number }) {
   return (
     <TiltCard max={3} className="h-full">
       <Link to={ROUTES.project(project.slug)} className="group block h-full">
@@ -128,7 +136,7 @@ export function ProjectCard({ project, index = 0, size = 'md' }: { project: Proj
           <MaskImage
             src={project.coverImage}
             alt={project.title}
-            ratio={size === 'lg' ? 'aspect-[16/11]' : 'aspect-[4/3]'}
+            ratio="aspect-[4/3]"
             delay={index * 0.06}
             imgClassName="transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.06]"
           />

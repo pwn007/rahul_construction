@@ -17,8 +17,16 @@ import { cn } from '@/lib/cn';
 /* ==================================================================== */
 
 export function FeaturedProjects() {
-  const featured = projects.filter((p) => p.featured).slice(0, 5);
-  const [hero, ...rest] = featured;
+  /*
+    Six, not five, and that is a layout constraint rather than an editorial one.
+
+    This used to be a bento — one project at `lg:col-span-7` with a wider crop
+    and the rest arranged around it — and the client did not want one card
+    bigger than its neighbours. In a plain three-across grid the count decides
+    whether the last row is complete: six fills 2+2+2 on tablet and 3+3 on
+    desktop with no empty cell, where five leaves a hole at both.
+  */
+  const featured = projects.filter((p) => p.featured).slice(0, 6);
 
   return (
     <section className="section-sm">
@@ -34,21 +42,11 @@ export function FeaturedProjects() {
           }
         />
 
-        <div className="mt-10 grid gap-5 lg:grid-cols-12">
-          {hero && (
-            <div className="lg:col-span-7">
-              <ProjectCard project={hero} size="lg" />
-            </div>
-          )}
-          <div className="grid gap-5 sm:grid-cols-2 lg:col-span-5">
-            {rest.slice(0, 2).map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i + 1} />
-            ))}
-          </div>
-          {rest.slice(2).map((project, i) => (
-            <div key={project.id} className="lg:col-span-4">
-              <ProjectCard project={project} index={i + 3} />
-            </div>
+        {/* The same grid as /projects, so a project looks identical wherever it
+            is listed. `index` still drives the staggered image reveal. */}
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map((project, i) => (
+            <ProjectCard key={project.id} project={project} index={i} />
           ))}
         </div>
       </div>

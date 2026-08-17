@@ -34,6 +34,14 @@ export interface NavLink {
   description?: string;
   badge?: string;
   children?: NavLink[];
+  /**
+   * A heading for its dropdown rather than a link to a page.
+   *
+   * The desktop navbar renders every top-level item as a link, so an item whose
+   * own page should not be reachable needs saying so explicitly — `href` stays
+   * put, and setting this flag is what stops it being rendered. See `Pricing`.
+   */
+  menuOnly?: boolean;
 }
 
 export const MAIN_NAV: NavLink[] = [
@@ -59,9 +67,22 @@ export const MAIN_NAV: NavLink[] = [
   },
   {
     label: 'Pricing',
+    /*
+      Published rates are hidden for now, so nothing here may reach `/pricing`.
+
+      Commenting out the "Packages & Rates" child alone would have achieved
+      nothing: it pointed at the same `href` as this parent, which the navbar
+      renders as a link. Hence `menuOnly` — the label still opens the dropdown,
+      it just no longer navigates, and the mega menu drops its "View all" link
+      too. `href` is left in place so restoring the page is one deleted flag.
+
+      Landing-page section: features/home/HomePage.tsx.
+    */
     href: ROUTES.pricing,
+    menuOnly: true,
     children: [
-      { label: 'Packages & Rates', href: ROUTES.pricing, description: 'Labour-only and turnkey models compared.' },
+      // Packages & Rates is commented out for now — see the note above.
+      // { label: 'Packages & Rates', href: ROUTES.pricing, description: 'Labour-only and turnkey models compared.' },
       { label: 'Cost Estimator', href: ROUTES.estimator, description: 'Get an instant costed estimate + PDF.', badge: 'New' },
       { label: 'Downloads', href: ROUTES.downloads, description: 'Company profile, brochure, rate card.' },
     ],
@@ -105,7 +126,9 @@ export const FOOTER_NAV = [
     heading: 'Resources',
     links: [
       { label: 'Cost Estimator', href: ROUTES.estimator },
-      { label: 'Pricing & Packages', href: ROUTES.pricing },
+      // Pricing & Packages is commented out for now — published rates are hidden;
+      // see the Pricing entry in MAIN_NAV above.
+      // { label: 'Pricing & Packages', href: ROUTES.pricing },
       { label: 'Gallery', href: ROUTES.gallery },
       { label: 'Downloads', href: ROUTES.downloads },
       // Client Portal is commented out for now — see app/router.tsx.
