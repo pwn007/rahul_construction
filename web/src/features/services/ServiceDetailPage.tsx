@@ -2,14 +2,16 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Icon } from '@/lib/icons';
 import { Seo } from '@/components/seo/Seo';
-import { BuildingSystems, CtaBand, PageHero, ProjectCard, SectionHeader } from '@/components/common';
-import { Accordion, Badge, Button } from '@/components/ui';
+import { CtaBand, PageHero, ProjectCard, SectionHeader } from '@/components/common';
+import { MepfTwin } from '@/features/mepf/MepfTwin';
+import { Accordion, Button } from '@/components/ui';
 import { Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
 import { services } from '@/data/services';
 import { faqs } from '@/data/content';
 import { projects } from '@/data/projects';
-import { MEPF_DISCIPLINES, MEPF_MATTERS, MEPF_SEGMENTS } from '@/constants/site';
+import { MEPF_SEGMENTS } from '@/constants/site';
+import { MEPF_EXPANSION } from '@/data/mepf';
 
 export default function ServiceDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -105,35 +107,46 @@ export default function ServiceDetailPage() {
         </div>
       </section>
 
-      {/* The four routes, drawn — sets up the discipline-by-discipline detail below. */}
-      {isMepf && <BuildingSystems showLink={false} />}
+      {/*
+        The house itself, and the argument it makes.
 
-      {/* MEPF disciplines deep-dive */}
+        This band used to be `MepfTeaser` — the same house holding still, above a
+        link to `/mepf`, where the interactive version lived. That page is gone
+        and the twin is here instead, because the split was costing more than it
+        bought: a visitor who wanted to understand MEPF had to leave the page
+        that sells it, and a visitor who landed on `/mepf` had to leave again to
+        find the scope and the price.
+
+        The intro below came from that page's opening. It is what makes the
+        drawing legible to somebody who does not yet know what the letters mean,
+        so it travels with it.
+
+        Cost of the move: `MepfTwin` lazy-loads three.js (~150 KB gzipped), so
+        this page now pulls it — but only this page, and only for `isMepf`. The
+        home page keeps the flat teaser for exactly that reason.
+      */}
       {isMepf && (
-        <section className="on-dark grain relative overflow-hidden bg-ink-950 py-20 text-white md:py-28">
-          <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
-          <div className="container relative">
-            <SectionHeader overline="Four disciplines" title="Designed in-house, supervised on site" tone="light" align="center" />
-            <div className="mt-14 space-y-4">
-              {MEPF_DISCIPLINES.map((d, i) => (
-                <Reveal key={d.key} delay={i * 0.06}>
-                  <div className="grid items-start gap-5 rounded-xl border border-white/10 bg-white/[0.03] p-7 md:grid-cols-12">
-                    <div className="flex items-center gap-4 md:col-span-4">
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-                        <Icon name={d.icon} className="h-6 w-6" />
-                      </span>
-                      <h3 className="font-display text-heading-lg font-semibold">{d.title}</h3>
-                    </div>
-                    <div className="md:col-span-8">
-                      <p className="text-white/70">{d.description}</p>
-                      <p className="mt-2 text-caption leading-relaxed text-white/45">{d.detail}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
+        <>
+          {/* `pb-0` hands the gap to the twin below: `MepfTwin` is itself a
+              `.section-sm`, so leaving both paddings in place would stack them. */}
+          <section className="section-sm pb-0">
+            <div className="container">
+              <Reveal>
+                <p className="overline">MEPF engineering</p>
+                <h2 className="mt-4 max-w-[22ch] font-display text-display-sm font-semibold text-balance">
+                  Most of a house is the part you never see.
+                </h2>
+                <p className="mt-6 max-w-lead text-body-lg text-muted">
+                  <strong className="font-semibold text-[rgb(var(--c-text))]">MEPF</strong> is the air, water, power and
+                  fire safety inside a building. It runs through the walls and above the ceilings, so you never see any
+                  of it. You only notice it when one of the four was done badly — and by then the walls are closed.
+                </p>
+                <p className="mt-3 text-caption text-subtle">{MEPF_EXPANSION}.</p>
+              </Reveal>
             </div>
-          </div>
-        </section>
+          </section>
+          <MepfTwin className="pt-10 md:pt-12" />
+        </>
       )}
 
       {/* MEPF by segment — PDF p.16 (residential) and p.17 (commercial) */}
@@ -168,33 +181,6 @@ export default function ServiceDetailPage() {
                   </div>
                 </Reveal>
               ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Why MEPF matters — PDF p.19 */}
-      {isMepf && (
-        <section className="on-dark grain relative overflow-hidden bg-ink-950 py-20 text-white md:py-28">
-          <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
-          <div className="container relative">
-            <div className="grid gap-12 lg:grid-cols-12">
-              <div className="lg:col-span-5">
-                <SectionHeader overline="Why MEPF matters" title="The heartbeat of every building" tone="light" />
-                <Reveal delay={0.15}>
-                  <p className="mt-6 max-w-lead text-body-lg text-white/60">{MEPF_MATTERS.statement}</p>
-                </Reveal>
-              </div>
-              <div className="lg:col-span-7 lg:pl-8">
-                <StaggerGroup stagger={0.06} className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
-                  {MEPF_MATTERS.benefits.map((benefit) => (
-                    <div key={benefit} className="flex items-start gap-3 border-b border-white/10 pb-4">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" strokeWidth={2.5} />
-                      <span className="text-[0.9375rem] leading-snug text-white/80">{benefit}</span>
-                    </div>
-                  ))}
-                </StaggerGroup>
-              </div>
             </div>
           </div>
         </section>

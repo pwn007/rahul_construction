@@ -8,7 +8,7 @@ const base = (id: string) => ({
   status: 'published' as const,
 });
 
-/** The five service pillars from the portfolio PDF (page 5). */
+/** The four service pillars from the portfolio PDF (page 5). */
 export const services: Service[] = [
   {
     ...base('svc_arch'),
@@ -103,59 +103,13 @@ export const services: Service[] = [
     ],
   },
   {
-    ...base('svc_turnkey'),
-    slug: 'turnkey-construction',
-    title: 'Turnkey Construction',
-    shortTitle: 'Turnkey',
-    tagline: 'One contract. One team. One point of responsibility.',
-    icon: 'KeyRound',
-    order: 3,
-    featured: true,
-    heroImage: IMG.hero('service-turnkey'),
-    summary:
-      'We take the plot and hand back the keys — design, materials, labour, services and finishes, all under a single agreement with a single accountable party.',
-    description:
-      'The traditional way to build in India is to hire an architect, then a contractor, then an electrician, then a plumber, then a carpenter — and to spend the next eighteen months translating between them. Turnkey removes that entirely. One agreement covers everything, and when something goes wrong there is exactly one person to call.',
-    features: [
-      { title: 'Fixed scope & rate', description: 'A rate card and a BOQ agreed before we break ground, not discovered during construction.', icon: 'ReceiptIndianRupee' },
-      { title: 'Material procurement', description: 'We buy at trade rates and you get the benefit, with brands locked in writing.', icon: 'Truck' },
-      { title: 'Skilled labour', description: 'Our own supervised crews rather than a chain of subcontracted gangs.', icon: 'Users' },
-      { title: 'Stage-wise quality checks', description: 'Documented sign-off at each stage by a qualified site engineer.', icon: 'BadgeCheck' },
-      { title: 'Milestone-linked payments', description: 'You pay for work that is finished, verified and photographed.', icon: 'CalendarCheck' },
-      { title: '1 year free maintenance', description: 'A full year of complimentary service and support after handover.', icon: 'Wrench' },
-    ],
-    deliverables: [
-      'Signed BOQ and rate card',
-      'Milestone-linked payment schedule',
-      'Weekly progress reports with photographs',
-      'Live site camera access',
-      'Stage-wise quality sign-off sheets',
-      'Material brand and warranty documentation',
-      'Snag list and closure report',
-      'One-year maintenance cover',
-    ],
-    process: [
-      { step: 1, title: 'Costing & BOQ', description: 'Detailed quantity take-off and a rate you can hold us to.' },
-      { step: 2, title: 'Agreement & schedule', description: 'Scope, rate, milestones and payment terms signed before mobilisation.' },
-      { step: 3, title: 'Mobilisation', description: 'Site setup, labour deployment and material scheduling.' },
-      { step: 4, title: 'Construction', description: 'Weekly reporting, camera access and stage-wise quality checks throughout.' },
-      { step: 5, title: 'Handover', description: 'Snagging, closure, documentation and the start of your maintenance year.' },
-    ],
-    faqIds: ['faq_pricing_1', 'faq_pricing_2', 'faq_process_1'],
-    stats: [
-      { label: 'Turnkey rate', value: '₹1,200 – 3,000/sq ft' },
-      { label: 'Free maintenance', value: '12 months' },
-      { label: 'Projects delivered', value: '80+' },
-    ],
-  },
-  {
     ...base('svc_interior'),
     slug: 'interior-design',
     title: 'Interior Design & Execution',
     shortTitle: 'Interiors',
     tagline: 'Designed and built by the same team',
     icon: 'Sofa',
-    order: 4,
+    order: 3,
     featured: true,
     heroImage: IMG.hero('service-interior'),
     summary:
@@ -201,7 +155,7 @@ export const services: Service[] = [
     shortTitle: 'Project Management',
     tagline: 'You always know exactly where your project stands',
     icon: 'ClipboardList',
-    order: 5,
+    order: 4,
     featured: true,
     heroImage: IMG.hero('service-pm'),
     summary:

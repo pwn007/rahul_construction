@@ -1,7 +1,7 @@
 import { Seo } from '@/components/seo/Seo';
 import { Hero } from './sections/Hero';
 import { TrustBar, OneSystem, WhyChooseUs } from './sections/Narrative';
-import { BuildingSystems } from '@/components/common';
+import { MepfTeaser } from '@/features/mepf/MepfTeaser';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
 import { FeaturedProjects, ProcessSection, Testimonials } from './sections/Showcase';
@@ -54,7 +54,7 @@ export default function HomePage() {
       <OneSystem />
       {/* Expands the "Engineering" leg OneSystem just named — MEPF is the firm's
           core discipline and the one a visitor is least likely to picture. */}
-      <BuildingSystems />
+      <MepfTeaser />
       <FeaturedProjects />
       <ProcessSection />
       <WhyChooseUs />

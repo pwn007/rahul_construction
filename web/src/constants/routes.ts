@@ -50,8 +50,7 @@ export const MAIN_NAV: NavLink[] = [
     href: ROUTES.services,
     children: [
       { label: 'Architectural Design', href: ROUTES.service('architectural-design'), description: 'Concept to working drawings, Vastu-aligned.' },
-      { label: 'MEPF Consultancy', href: ROUTES.service('mepf-consultancy'), description: 'Mechanical, electrical, plumbing & fire.' },
-      { label: 'Turnkey Construction', href: ROUTES.service('turnkey-construction'), description: 'One contract, from foundation to keys.' },
+      { label: 'MEPF Consultancy', href: ROUTES.service('mepf-consultancy'), description: 'Mechanical, electrical, plumbing & fire — see what it actually does.', badge: 'New' },
       { label: 'Interior Design & Execution', href: ROUTES.service('interior-design'), description: 'Modular kitchens, wardrobes, ceilings.' },
       { label: 'Project Management & Tracking', href: ROUTES.service('project-management'), description: 'Live monitoring and milestone control.' },
     ],
@@ -107,7 +106,6 @@ export const FOOTER_NAV = [
     links: [
       { label: 'Architectural Design', href: ROUTES.service('architectural-design') },
       { label: 'MEPF Consultancy', href: ROUTES.service('mepf-consultancy') },
-      { label: 'Turnkey Construction', href: ROUTES.service('turnkey-construction') },
       { label: 'Interior Design', href: ROUTES.service('interior-design') },
       { label: 'Project Management', href: ROUTES.service('project-management') },
     ],

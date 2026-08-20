@@ -70,7 +70,7 @@ const ROUTES: [RegExp, ImagePool][] = [
   [/^(vaishali-|service-interior|update-kitchen|update-ceiling|post-turnkey|dl-)/, 'interior'],
 
   // Live building work — process, site updates, before shots, camera feeds
-  [/^(update-|process-|camera-feed|service-turnkey|post-timeline|post-monsoon|post-cost)/, 'construction'],
+  [/^(update-|process-|camera-feed|post-timeline|post-monsoon|post-cost)/, 'construction'],
   [/-before$/, 'construction'],
 
   // Building services

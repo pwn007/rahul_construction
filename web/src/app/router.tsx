@@ -84,6 +84,11 @@ export function AppRouter() {
           {/* Legacy paths from the previous site — preserve inbound links. */}
           <Route path="calculator" element={<Navigate to="/estimator" replace />} />
           <Route path="services/mep" element={<Navigate to="/services/mepf-consultancy" replace />} />
+          {/* `/mepf` was a real page carrying the interactive house. The house
+              moved onto the service page rather than being deleted, so this is a
+              redirect and not a 404 — the destination still has what the URL
+              promised. */}
+          <Route path="mepf" element={<Navigate to="/services/mepf-consultancy" replace />} />
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>

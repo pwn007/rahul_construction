@@ -122,13 +122,20 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       // { id: 'p-portal', label: 'Client Portal', group: 'Pages', href: ROUTES.portal, icon: LayoutDashboard },
       { id: 'p-admin', label: 'Admin Panel', group: 'Pages', href: ROUTES.admin, icon: LayoutDashboard },
     ];
+    /*
+      The `Inside a Building — MEPF` page entry used to sit above, pointing at
+      `/mepf`. That page is gone and its house now sits on the MEPF service page,
+      which this list already generates — so the entry would have been a second
+      row to the same URL. Its search terms are folded into the keywords below
+      instead, which is why they are not just `s.tagline`.
+    */
     const svc: Command[] = services.map((s) => ({
       id: `s-${s.id}`,
       label: s.title,
       group: 'Services',
       href: ROUTES.service(s.slug),
       icon: Layers,
-      keywords: s.tagline,
+      keywords: s.slug === 'mepf-consultancy' ? `${s.tagline} inside a building hvac plumbing electrical fire` : s.tagline,
     }));
     const prj: Command[] = projects.map((p) => ({
       id: `pr-${p.id}`,

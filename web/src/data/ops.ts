@@ -93,7 +93,7 @@ export const navItems: NavItem[] = [
 ];
 
 export const footerColumns: FooterColumn[] = [
-  { ...meta('fc_1', '2026-01-01T09:00:00.000Z'), heading: 'Services', order: 1, links: [ { label: 'Architectural Design', href: '/services/architectural-design' }, { label: 'MEPF Consultancy', href: '/services/mepf-consultancy' }, { label: 'Turnkey Construction', href: '/services/turnkey-construction' }, { label: 'Interior Design', href: '/services/interior-design' }, { label: 'Project Management', href: '/services/project-management' } ] },
+  { ...meta('fc_1', '2026-01-01T09:00:00.000Z'), heading: 'Services', order: 1, links: [ { label: 'Architectural Design', href: '/services/architectural-design' }, { label: 'MEPF Consultancy', href: '/services/mepf-consultancy' }, { label: 'Interior Design', href: '/services/interior-design' }, { label: 'Project Management', href: '/services/project-management' } ] },
   { ...meta('fc_2', '2026-01-01T09:00:00.000Z'), heading: 'Company', order: 2, links: [ { label: 'About Us', href: '/about' }, { label: 'Projects', href: '/projects' }, { label: 'Vastu Planning', href: '/vastu' }, { label: 'Careers', href: '/careers' }, { label: 'Insights', href: '/blog' } ] },
   { ...meta('fc_3', '2026-01-01T09:00:00.000Z'), heading: 'Resources', order: 3, links: [ { label: 'Cost Estimator', href: '/estimator' }, { label: 'Pricing & Packages', href: '/pricing' }, { label: 'Gallery', href: '/gallery' }, { label: 'Downloads', href: '/downloads' } ] /* Client Portal is commented out for now — see app/router.tsx. */ },
 ];

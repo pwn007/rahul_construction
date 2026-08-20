@@ -88,7 +88,6 @@
     ],
     "services": [
       "architectural-design",
-      "turnkey-construction",
       "interior-design",
       "mepf-consultancy"
     ],
@@ -180,7 +179,6 @@
     ],
     "services": [
       "architectural-design",
-      "turnkey-construction",
       "mepf-consultancy"
     ],
     "tags": [
@@ -270,7 +268,6 @@
     ],
     "services": [
       "architectural-design",
-      "turnkey-construction",
       "interior-design"
     ],
     "tags": [
@@ -361,7 +358,6 @@
     ],
     "services": [
       "architectural-design",
-      "turnkey-construction",
       "interior-design",
       "project-management"
     ],
@@ -453,8 +449,7 @@
     ],
     "services": [
       "architectural-design",
-      "mepf-consultancy",
-      "turnkey-construction"
+      "mepf-consultancy"
     ],
     "tags": [
       "Mixed use",
@@ -536,7 +531,6 @@
     ],
     "services": [
       "architectural-design",
-      "turnkey-construction",
       "interior-design"
     ],
     "tags": [
@@ -701,7 +695,6 @@
     "services": [
       "architectural-design",
       "mepf-consultancy",
-      "turnkey-construction",
       "project-management"
     ],
     "tags": [
@@ -834,7 +827,6 @@
     ],
     "services": [
       "architectural-design",
-      "turnkey-construction",
       "project-management"
     ],
     "tags": [

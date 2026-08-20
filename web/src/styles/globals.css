@@ -195,14 +195,12 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Travelling dash along an MEPF service route (Living Systems band). */
-  @keyframes systems-flow {
-    from { stroke-dashoffset: 0; }
-    to { stroke-dashoffset: -128; }
-  }
-  .systems-flow {
-    animation: systems-flow 3.2s linear infinite both;
-  }
+  /* `systems-flow` lived here — a CSS travelling dash for the MEPF section
+     drawing that has since been replaced by the isometric house. That house
+     drives its flow from the one requestAnimationFrame loop in
+     features/mepf/MepfTwin, which can stop when the figure scrolls out of view
+     and can respond to a system being switched off. A CSS animation can do
+     neither, so nothing here replaces it. */
 
   /* ----------------------------------------------------------------
      Project Atlas — district hover/selection.

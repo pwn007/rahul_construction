@@ -18,13 +18,13 @@ export default function ServicesPage() {
     <>
       <Seo
         title="Services — Architecture, MEPF, Turnkey Construction & Interiors"
-        description="Five capabilities delivered as one accountable system: architectural design, MEPF consultancy, turnkey construction, interior design and project management."
+        description="Four capabilities delivered as one accountable system: architectural design, MEPF consultancy, interior design and project management."
       />
 
       <PageHero
         overline="What we offer"
         title="Comprehensive construction solutions"
-        lead="Five capabilities, delivered as one system with a single point of responsibility — from concept design to final execution and a year of maintenance beyond it."
+        lead="Four capabilities, delivered as one system with a single point of responsibility — from concept design to final execution and a year of maintenance beyond it."
         breadcrumbs={[{ label: 'Services' }]}
         aside={
           <div className="surface rounded-2xl border p-2 shadow-lg">
@@ -120,26 +120,38 @@ export default function ServicesPage() {
             align="center"
           />
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/*
+            Names the four, and then gets out of the way.
+
+            This used to be a four-card grid repeating `MEPF_DISCIPLINES.detail`
+            in full — the third place on the site those same four paragraphs
+            appeared. An index page's job is to say what exists and point at it,
+            so it now does exactly that, and the argument for why any of it
+            matters is made once, on the MEPF service page, where the house you
+            can look inside now lives alongside the scope.
+          */}
+          <div className="mt-12 flex flex-wrap justify-center gap-3">
             {MEPF_DISCIPLINES.map((d, i) => (
               <Reveal key={d.key} delay={i * 0.07}>
-                <div className="group h-full rounded-xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-500 hover:border-cyan-500/40 hover:bg-cyan-500/[0.06]">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-                    <Icon name={d.icon} className="h-5 w-5" />
+                <span className="inline-flex items-center gap-2.5 rounded-full border border-white/12 bg-white/[0.04] py-2.5 pl-3 pr-5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-400">
+                    <Icon name={d.icon} className="h-4 w-4" />
                   </span>
-                  <h3 className="mt-5 font-display text-heading-md font-semibold">{d.title}</h3>
-                  <p className="mt-2 text-caption leading-relaxed text-white/50">{d.detail}</p>
-                </div>
+                  <span className="font-display text-[0.95rem] font-semibold">{d.title}</span>
+                </span>
               </Reveal>
             ))}
           </div>
 
-          <Reveal delay={0.3} className="mt-10 text-center">
+          {/* One link, not two: "See what MEPF actually does" and "Scope &
+              deliverables" were separate destinations until the house moved onto
+              the service page. Two links to one URL is a choice that isn't. */}
+          <Reveal delay={0.3} className="mt-10 flex justify-center">
             <Link
               to={ROUTES.service('mepf-consultancy')}
               className="inline-flex items-center gap-2 font-medium text-cyan-400 link-underline"
             >
-              Full MEPF capability <ArrowUpRight className="h-4 w-4" />
+              See what MEPF actually does <ArrowUpRight className="h-4 w-4" />
             </Link>
           </Reveal>
         </div>

@@ -191,7 +191,7 @@ function MegaMenuContent({ item }: { item?: NavLinkType }) {
       <div className="col-span-3">
         <p className="overline">{item.label}</p>
         <p className="mt-3 max-w-[24ch] text-sm text-muted">
-          {item.label === 'Services' && 'Five capabilities, delivered as one accountable system.'}
+          {item.label === 'Services' && 'Four capabilities, delivered as one accountable system.'}
           {item.label === 'Projects' && 'Work completed across Jaipur, documented properly.'}
           {item.label === 'Pricing' && 'An estimator that shows its working, and the papers to go with it.'}
           {item.label === 'Company' && 'Who we are and how to reach us.'}

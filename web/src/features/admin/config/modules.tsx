@@ -205,7 +205,7 @@ export const MODULES: ResourceConfig<never>[] = [
     key: 'services',
     label: 'Services',
     singular: 'Service',
-    description: 'The five service pillars, their capabilities and process steps.',
+    description: 'The four service pillars, their capabilities and process steps.',
     icon: 'Layers',
     group: 'Content',
     service: servicesService as never,

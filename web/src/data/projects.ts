@@ -58,7 +58,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '14 months' },
       { label: 'Completed', value: 'November 2024' },
     ],
-    services: ['architectural-design', 'turnkey-construction', 'interior-design', 'mepf-consultancy'],
+    services: ['architectural-design', 'interior-design', 'mepf-consultancy'],
     tags: ['Vastu-aligned', 'Terraces', 'Timber soffit', 'Four floors'],
   },
   {
@@ -105,7 +105,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '12 months' },
       { label: 'Completed', value: 'June 2024' },
     ],
-    services: ['architectural-design', 'turnkey-construction', 'mepf-consultancy'],
+    services: ['architectural-design', 'mepf-consultancy'],
     tags: ['Narrow plot', 'Stone cladding', 'Daylight strategy'],
   },
   {
@@ -150,7 +150,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '9 months' },
       { label: 'Completed', value: 'December 2023' },
     ],
-    services: ['architectural-design', 'turnkey-construction', 'interior-design'],
+    services: ['architectural-design', 'interior-design'],
     tags: ['Jali screen', 'West-facing', 'Vastu-aligned'],
   },
   {
@@ -196,7 +196,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '11 months' },
       { label: 'Completed', value: 'September 2024' },
     ],
-    services: ['architectural-design', 'turnkey-construction', 'interior-design', 'project-management'],
+    services: ['architectural-design', 'interior-design', 'project-management'],
     tags: ['Stone base', 'Laser-cut screen', 'On-schedule'],
   },
   {
@@ -242,7 +242,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '15 months' },
       { label: 'Completed', value: 'February 2025' },
     ],
-    services: ['architectural-design', 'mepf-consultancy', 'turnkey-construction'],
+    services: ['architectural-design', 'mepf-consultancy'],
     tags: ['Mixed use', 'Retail', 'Dual MEPF', 'Acoustic separation'],
   },
   {
@@ -285,7 +285,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '13 months' },
       { label: 'Completed', value: 'May 2025' },
     ],
-    services: ['architectural-design', 'turnkey-construction', 'interior-design'],
+    services: ['architectural-design', 'interior-design'],
     tags: ['Corner plot', 'Courtyard', 'Acoustic strategy'],
   },
   {
@@ -369,7 +369,7 @@ export const projects: Project[] = [
       { label: 'Duration', value: '18 months (in progress)' },
       { label: 'Target', value: 'Q4 2026' },
     ],
-    services: ['architectural-design', 'mepf-consultancy', 'turnkey-construction', 'project-management'],
+    services: ['architectural-design', 'mepf-consultancy', 'project-management'],
     tags: ['Commercial', 'Centralised HVAC', 'Fire compliance', 'In progress'],
   },
   {
@@ -445,7 +445,7 @@ export const projects: Project[] = [
       { label: 'Package', value: 'Turnkey — Semi Furnished' },
       { label: 'Status', value: 'Design stage' },
     ],
-    services: ['architectural-design', 'turnkey-construction', 'project-management'],
+    services: ['architectural-design', 'project-management'],
     tags: ['Row housing', 'Repetition', 'Upcoming'],
   },
 ];

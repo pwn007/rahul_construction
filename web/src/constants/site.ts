@@ -115,20 +115,15 @@ export const WHAT_MAKES_US_DIFFERENT = [
   'Commitment to quality and durability',
 ] as const;
 
-/** Why MEPF Matters — PDF page 19. */
-export const MEPF_MATTERS = {
-  statement:
-    'MEPF systems form the heartbeat of every building, ensuring functionality, safety, and comfort. Properly designed systems enhance efficiency and long-term value.',
-  benefits: [
-    'Cost efficiency through optimized energy use',
-    'Safety and regulatory compliance',
-    'Sustainable and eco-friendly systems',
-    'Improved comfort and health',
-    'Future-ready infrastructure',
-    'Increased property value',
-    'Improved productivity',
-  ],
-} as const;
+/*
+  MEPF_MATTERS — the PDF's page 19 benefit list — was removed rather than moved.
+
+  Seven bullets of the "cost efficiency through optimized energy use" kind. All
+  defensible and none of them specific, and they were sitting directly beneath
+  the `without` copy in data/mepf.ts, which says the same things in terms of a
+  bedroom at 34°C and a stack that gurgles. Against that, generalities read as
+  padding. If a benefit list is ever wanted again, it is on page 19 of the PDF.
+*/
 
 /** MEPF by segment — PDF pages 16 (residential) and 17 (commercial). */
 export const MEPF_SEGMENTS = [
