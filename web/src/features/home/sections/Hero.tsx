@@ -165,8 +165,8 @@ export function Hero() {
                     Solid cyan-600, not `text-gradient-ink`. That ramp bottoms out in
                     navy, so the "accent" line was barely distinguishable from line 1 —
                     a gradient nobody can see is just a flat colour with extra steps.
-                    #0089BF is ~4:1 on paper, clear of the 3:1 large-text floor, and
-                    `text-gradient-brand` could not be used: it measures 2.4:1.
+                    #0096BF is ~3.2:1 on paper, still clear of the 3:1 large-text floor, and
+                    `text-gradient-brand` could not be used: its lightest stop measures 1.6:1.
                   */}
                   <motion.span
                     className={i === 1 ? 'inline-block text-cyan-600 dark:text-cyan-400' : 'inline-block'}

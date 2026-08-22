@@ -176,8 +176,8 @@ export function ProcessSection() {
                 <div className="min-w-0">
                   {/* Up from `text-caption`/cyan-500. It carries the sequence and the
                       timeline — the two things a reader scans this section for — and at
-                      13px it was the first thing to disappear. cyan-400 is 8.9:1 on
-                      ink-950 against cyan-500's 7.4:1.
+                      13px it was the first thing to disappear. cyan-400 is 9.9:1 on
+                      ink-950 against cyan-500's 9.0:1.
 
                       No top margin on mobile: the number sits on the node's own line,
                       which is what ties a row to its point on the spine. */}

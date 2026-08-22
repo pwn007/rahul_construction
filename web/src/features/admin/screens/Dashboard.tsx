@@ -46,9 +46,9 @@ const ESTIMATOR_USAGE = [
 ];
 
 const SOURCE_SPLIT = [
-  { name: 'Estimator', value: 42, color: '#00AEEF' },
-  { name: 'Contact form', value: 26, color: '#0A1B4D' },
-  { name: 'Service pages', value: 18, color: '#4FC8F6' },
+  { name: 'Estimator', value: 42, color: '#00BBEE' },
+  { name: 'Contact form', value: 26, color: '#03094E' },
+  { name: 'Service pages', value: 18, color: '#4FD2F6' },
   { name: 'Downloads', value: 14, color: '#B99465' },
 ];
 
@@ -188,19 +188,19 @@ export function AdminDashboard() {
               <AreaChart data={TRAFFIC} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="visitsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00AEEF" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#00AEEF" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#00BBEE" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#00BBEE" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.08} vertical={false} />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'currentColor', opacity: 0.5 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'currentColor', opacity: 0.5 }} />
                 <Tooltip content={<ChartTooltip />} />
-                <Area type="monotone" dataKey="visits" stroke="#00AEEF" strokeWidth={2} fill="url(#visitsGrad)" />
-                <Area type="monotone" dataKey="leads" stroke="#0A1B4D" strokeWidth={2} fill="none" />
+                <Area type="monotone" dataKey="visits" stroke="#00BBEE" strokeWidth={2} fill="url(#visitsGrad)" />
+                <Area type="monotone" dataKey="leads" stroke="#03094E" strokeWidth={2} fill="none" />
               </AreaChart>
             </ResponsiveContainer>
-            <Legend items={[{ label: 'Visits', color: '#00AEEF' }, { label: 'Leads', color: '#0A1B4D' }]} />
+            <Legend items={[{ label: 'Visits', color: '#00BBEE' }, { label: 'Leads', color: '#03094E' }]} />
           </ChartCard>
         </Reveal>
 
@@ -236,11 +236,11 @@ export function AdminDashboard() {
                 <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'currentColor', opacity: 0.5 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: 'currentColor', opacity: 0.5 }} />
                 <Tooltip content={<ChartTooltip />} cursor={{ fill: 'currentColor', opacity: 0.04 }} />
-                <Bar dataKey="starts" fill="#C2ECFC" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="completions" fill="#00AEEF" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="starts" fill="#C2F0FC" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="completions" fill="#00BBEE" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-            <Legend items={[{ label: 'Started', color: '#C2ECFC' }, { label: 'Completed', color: '#00AEEF' }]} />
+            <Legend items={[{ label: 'Started', color: '#C2F0FC' }, { label: 'Completed', color: '#00BBEE' }]} />
             <p className="mt-3 text-caption text-subtle">
               Completion rate <span className="num font-medium text-[rgb(var(--c-text))]">61%</span> — well above the 30–40% typical
               of multi-step calculators, because the live cost meter keeps value visible at every step.

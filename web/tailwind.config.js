@@ -10,7 +10,24 @@ export default {
     },
     extend: {
       colors: {
-        /* ---- Brand (from portfolio PDF) ---- */
+        /* ----------------------------------------------------------------
+           Brand.
+
+           The two brand colours are `navy.800` (#03094E) and `cyan.500`
+           (#00BBEE). Everything else on these two ramps exists to serve them,
+           and nothing else in the codebase may hardcode a brand hex — the CSS
+           custom properties in globals.css mirror these and are what components
+           should reach for.
+
+           Navy is changed at the anchor only. Propagating its hue and
+           saturation (225°/77% → 235°/93%) through the whole ramp turns every
+           mid-tone violet — a far larger change than adopting the brand colour,
+           so stops 50–700 and 900–950 keep their existing values.
+
+           Cyan is regenerated end to end: the shift is 3°, invisible at any
+           single step, and leaving it at one stop would put a visible kink in
+           an otherwise even ramp.
+           ---------------------------------------------------------------- */
         navy: {
           50: '#EEF1F9',
           100: '#D6DEF0',
@@ -20,22 +37,22 @@ export default {
           500: '#2B4491',
           600: '#1B3273',
           700: '#12265C',
-          800: '#0A1B4D',
+          800: '#03094E',
           900: '#071338',
           950: '#040B21',
         },
         cyan: {
-          50: '#E6F7FE',
-          100: '#C2ECFC',
-          200: '#8CDCFA',
-          300: '#4FC8F6',
-          400: '#22B8F2',
-          500: '#00AEEF',
-          600: '#0089BF',
-          700: '#026C97',
-          800: '#075979',
-          900: '#0B4A64',
-          950: '#052F42',
+          50: '#E6F9FE',
+          100: '#C2F0FC',
+          200: '#8CE2FA',
+          300: '#4FD2F6',
+          400: '#22C5F2',
+          500: '#00BBEE',
+          600: '#0096BF',
+          700: '#027797',
+          800: '#076179',
+          900: '#0B5164',
+          950: '#053542',
         },
         /* ---- Material warmth ---- */
         sand: {
@@ -91,12 +108,12 @@ export default {
         '3xl': '40px',
       },
       boxShadow: {
-        xs: '0 1px 2px rgb(10 27 77 / 0.06)',
-        sm: '0 2px 8px rgb(10 27 77 / 0.06)',
-        md: '0 12px 32px -8px rgb(10 27 77 / 0.12)',
-        lg: '0 32px 64px -16px rgb(10 27 77 / 0.18)',
-        xl: '0 48px 96px -24px rgb(10 27 77 / 0.24)',
-        glow: '0 0 0 1px rgb(0 174 239 / 0.30), 0 8px 32px rgb(0 174 239 / 0.18)',
+        xs: '0 1px 2px rgb(3 9 78 / 0.06)',
+        sm: '0 2px 8px rgb(3 9 78 / 0.06)',
+        md: '0 12px 32px -8px rgb(3 9 78 / 0.12)',
+        lg: '0 32px 64px -16px rgb(3 9 78 / 0.18)',
+        xl: '0 48px 96px -24px rgb(3 9 78 / 0.24)',
+        glow: '0 0 0 1px rgb(0 187 238 / 0.30), 0 8px 32px rgb(0 187 238 / 0.18)',
         inset: 'inset 0 1px 0 0 rgb(255 255 255 / 0.08)',
       },
       transitionTimingFunction: {
@@ -112,7 +129,7 @@ export default {
         'grid-blueprint':
           'linear-gradient(to right, rgb(255 255 255 / 0.06) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.06) 1px, transparent 1px)',
         'grid-light':
-          'linear-gradient(to right, rgb(10 27 77 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(10 27 77 / 0.05) 1px, transparent 1px)',
+          'linear-gradient(to right, rgb(3 9 78 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(3 9 78 / 0.05) 1px, transparent 1px)',
       },
       backgroundSize: {
         grid: '64px 64px',

@@ -149,7 +149,7 @@
     "status": "published",
     "key": "theme.brandColor",
     "label": "Brand accent colour",
-    "value": "#00AEEF",
+    "value": "#00BBEE",
     "group": "theme",
     "type": "color"
   },
@@ -160,7 +160,7 @@
     "status": "published",
     "key": "theme.primaryColor",
     "label": "Primary dark colour",
-    "value": "#0A1B4D",
+    "value": "#03094E",
     "group": "theme",
     "type": "color"
   },

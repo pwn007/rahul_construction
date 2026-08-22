@@ -13,7 +13,7 @@ import { usePrefersReducedMotion } from '@/hooks';
  * so adding it costs no vertical space. Absolutely positioned, so the caller
  * only has to make the element wrapping the digits `relative`.
  *
- * Coloured from --c-brand-text, not raw brand cyan: #00AEEF is 2.3:1 on paper,
+ * Coloured from --c-brand-text, not raw brand cyan: #00BBEE is 2.1:1 on paper,
  * under the 3:1 floor a graphic element needs to clear to count as visible.
  * Wrap the tile in `group` to get the hover emphasis.
  */

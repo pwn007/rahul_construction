@@ -191,7 +191,7 @@ export function HouseIso({ reg, focus, off, live, reduced, compact = false }: Ho
       {live && !reduced && (
         <g fill="none" strokeLinecap="round">
           <g ref={reg('water')} opacity={off.plumbing ? 0 : dim('plumbing')} style={{ transition: 'opacity .35s ease' }}>
-            <path d={run(...ROUTES.plumbing.riser)} stroke="#8CDCFA" strokeWidth={2.4} strokeDasharray={`8 ${WATER_SPACING - 8}`} />
+            <path d={run(...ROUTES.plumbing.riser)} stroke="#8CE2FA" strokeWidth={2.4} strokeDasharray={`8 ${WATER_SPACING - 8}`} />
           </g>
           <g ref={reg('waste')} opacity={off.plumbing ? 0 : dim('plumbing') * 0.8} style={{ transition: 'opacity .35s ease' }}>
             <path d={run(...WASTE)} stroke="#7F94CB" strokeWidth={2} strokeDasharray={`7 ${WATER_SPACING - 7}`} />

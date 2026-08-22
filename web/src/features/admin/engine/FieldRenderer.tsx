@@ -127,7 +127,7 @@ export function FieldRenderer({
           <input
             type="color"
             id={id}
-            value={String(value ?? '#00AEEF')}
+            value={String(value ?? '#00BBEE')}
             onChange={(e) => onChange(e.target.value)}
             className="h-11 w-14 cursor-pointer rounded-md border bg-transparent p-1"
             aria-label={field.label}

@@ -57,9 +57,9 @@ export interface EnhancementOption {
 export type CostHeadKey = 'structure' | 'finishing' | 'mep' | 'interior' | 'misc';
 
 export const COST_HEADS: { key: CostHeadKey; label: string; description: string; color: string }[] = [
-  { key: 'structure', label: 'Structure', description: 'Foundation, RCC frame, brickwork, roofing', color: '#0A1B4D' },
-  { key: 'finishing', label: 'Finishing', description: 'Plaster, flooring, painting, doors & windows', color: '#00AEEF' },
-  { key: 'mep', label: 'MEPF', description: 'Electrical, plumbing, HVAC, fire safety', color: '#4FC8F6' },
+  { key: 'structure', label: 'Structure', description: 'Foundation, RCC frame, brickwork, roofing', color: '#03094E' },
+  { key: 'finishing', label: 'Finishing', description: 'Plaster, flooring, painting, doors & windows', color: '#00BBEE' },
+  { key: 'mep', label: 'MEPF', description: 'Electrical, plumbing, HVAC, fire safety', color: '#4FD2F6' },
   { key: 'interior', label: 'Interiors', description: 'Kitchen, wardrobes, ceilings, fixtures', color: '#B99465' },
   { key: 'misc', label: 'Approvals & Site', description: 'Approvals, supervision, contingency', color: '#828A9C' },
 ];
@@ -168,13 +168,13 @@ export const COMMERCIAL_HEADS: {
     key: 'materials',
     label: 'Materials',
     description: 'Everything that ends up in the building — cement, steel, tiles, wiring, fittings.',
-    color: '#0A1B4D',
+    color: '#03094E',
   },
   {
     key: 'labour',
     label: 'Labour',
     description: 'Masons, bar-benders, carpenters, electricians, plumbers, painters.',
-    color: '#00AEEF',
+    color: '#00BBEE',
   },
   {
     key: 'design',

@@ -131,11 +131,11 @@ export const IMG = {
 /* ------------------------------------------------------------------ */
 
 const MONOGRAM_TONES = [
-  ['#0A1B4D', '#E6F7FE'],
-  ['#026C97', '#EEF1F9'],
+  ['#03094E', '#E6F9FE'],
+  ['#027797', '#EEF1F9'],
   ['#12265C', '#F7F3EC'],
   ['#8A6241', '#FAF8F4'],
-  ['#075979', '#E6F7FE'],
+  ['#076179', '#E6F9FE'],
 ] as const;
 
 /**
@@ -187,7 +187,7 @@ export function monogram(nameOrSeed: string): string {
 /* ------------------------------------------------------------------ */
 
 /** Inline SVG wordmark for mock client/supplier logos — keeps the marquee dependency-free. */
-export function logoMark(label: string, tone = '#0A1B4D'): string {
+export function logoMark(label: string, tone = '#03094E'): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56">
     <rect width="200" height="56" fill="none"/>
     <circle cx="22" cy="28" r="11" fill="${tone}" opacity="0.9"/>

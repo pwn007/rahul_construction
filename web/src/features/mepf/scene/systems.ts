@@ -31,8 +31,8 @@ export interface SystemStyle {
 
 export const SYSTEM_STYLES: Record<SystemKey, SystemStyle> = {
   hvac: { key: 'hvac', label: 'Mechanical · HVAC', colour: '#2B4491', weight: 7, lane: 0 },
-  plumbing: { key: 'plumbing', label: 'Plumbing', colour: '#026C97', weight: 4.4, lane: 1 },
-  electrical: { key: 'electrical', label: 'Electrical', colour: '#00AEEF', weight: 3, lane: 2 },
+  plumbing: { key: 'plumbing', label: 'Plumbing', colour: '#027797', weight: 4.4, lane: 1 },
+  electrical: { key: 'electrical', label: 'Electrical', colour: '#00BBEE', weight: 3, lane: 2 },
   fire: { key: 'fire', label: 'Fire Fighting', colour: '#D97706', weight: 2.6, lane: 3 },
 };
 
@@ -66,6 +66,6 @@ export const WALL = '#E9E5DB';
 export const SLAB = '#DDD8CC';
 export const WALL_SIDE = '#D2CCBE';
 export const SLAB_DARK = '#BCB6A6';
-export const INK = '#0A1B4D';
+export const INK = '#03094E';
 export const FURNITURE = '#C6C0B1';
 export const GLOW = '#FFCB6B';

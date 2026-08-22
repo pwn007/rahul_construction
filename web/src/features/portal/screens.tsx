@@ -110,7 +110,7 @@ export function PortalOverview({ project }: { project: PortalProject }) {
                     cy="60"
                     r="52"
                     fill="none"
-                    stroke="#00AEEF"
+                    stroke="#00BBEE"
                     strokeWidth="12"
                     strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * 52}

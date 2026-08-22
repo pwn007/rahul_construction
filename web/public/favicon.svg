@@ -8,9 +8,9 @@
   tailwind.config.js — if the brand palette moves, move them here too.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
-  <rect width="44" height="44" rx="9" fill="#0A1B4D" />
+  <rect width="44" height="44" rx="9" fill="#03094E" />
   <g transform="translate(4 4) scale(0.818)">
-    <path d="M4 4h13v20L4 30V4Z" fill="#00AEEF" />
+    <path d="M4 4h13v20L4 30V4Z" fill="#00BBEE" />
     <path d="M21 10h13v20a10 10 0 0 1-10 10h-3V10Z" fill="#FFFFFF" />
   </g>
 </svg>

@@ -8,21 +8,24 @@
    ============================================================ */
 @layer base {
   :root {
-    --brand-h: 197;
+    /* HSL of brand cyan #00BBEE, for the few places that interpolate the hue. */
+    --brand-h: 193;
     --brand-s: 100%;
     --brand-l: 47%;
 
-    --c-brand: 0 174 239;
-    --c-brand-deep: 0 137 191;
-    --c-navy: 10 27 77;
+    /* The two brand colours, and the deep cyan derived from them.
+       cyan-500 #00BBEE · cyan-600 #0096BF · navy-800 #03094E */
+    --c-brand: 0 187 238;
+    --c-brand-deep: 0 150 191;
+    --c-navy: 3 9 78;
 
     /**
      * Accent for *text and focus rings*, which need contrast rather than vibrancy.
-     * Brand cyan #00AEEF is only 2.3:1 on a light ground — fine as a fill, far
-     * below the 4.5:1 that small uppercase eyebrows need. cyan-700 gives 5.6:1.
+     * Brand cyan #00BBEE is only 2.1:1 on a light ground — fine as a fill, far
+     * below the 4.5:1 that small uppercase eyebrows need. cyan-700 gives 5.1:1.
      * Dark grounds flip it back to a bright cyan via `.dark` / `.on-dark`.
      */
-    --c-brand-text: 2 108 151;
+    --c-brand-text: 2 119 151;
 
     --c-bg: 247 246 242;
     --c-surface: 255 255 255;
@@ -45,7 +48,7 @@
   .dark,
   /* Sections that are dark regardless of the active theme (hero, footer, CTA bands). */
   .on-dark {
-    --c-brand-text: 79 200 246;
+    --c-brand-text: 79 210 246;
   }
 
   .dark {
@@ -64,21 +67,21 @@
    * Only the *static* cartography lives here. Every stateful colour (a district
    * with projects, hovered, selected, focused) is derived from `--c-brand` in
    * the component, so the runtime brand override at /admin/theme flows through
-   * the map. Never hard-code #00AEEF in the atlas.
+   * the map. Never hard-code #00BBEE in the atlas.
    *
    * Light reads as drafting paper, dark as a blueprint.
    */
   :root {
     --c-atlas-land: 235 232 224;    /* a resting district */
     --c-atlas-line: 205 200 189;    /* borders between districts */
-    --c-atlas-outline: 10 27 77;    /* the JMC limit — navy-800 */
+    --c-atlas-outline: 3 9 78;      /* the JMC limit — navy-800 */
     --c-atlas-void: 243 241 235;    /* ground beyond the municipal limit */
   }
 
   .dark {
     --c-atlas-land: 26 32 50;
     --c-atlas-line: 52 61 84;
-    --c-atlas-outline: 79 200 246;
+    --c-atlas-outline: 79 210 246;
     --c-atlas-void: 5 7 13;
   }
 
@@ -169,7 +172,7 @@
     backdrop-filter: blur(20px) saturate(1.6);
     -webkit-backdrop-filter: blur(20px) saturate(1.6);
     border: 1px solid rgb(255 255 255 / 0.5);
-    box-shadow: 0 8px 32px -12px rgb(10 27 77 / 0.18), inset 0 1px 0 0 rgb(255 255 255 / 0.6);
+    box-shadow: 0 8px 32px -12px rgb(3 9 78 / 0.18), inset 0 1px 0 0 rgb(255 255 255 / 0.6);
   }
   .dark .glass {
     background-color: rgb(15 20 32 / 0.72);
@@ -228,7 +231,7 @@
 
   /* Safari renders `outline` on SVG <g> inconsistently, so the focus indicator
      is drawn as a dashed stroke on the district's own path instead. It uses
-     --c-brand-text rather than --c-brand: raw brand cyan is only 2.3:1 on
+     --c-brand-text rather than --c-brand: raw brand cyan is only 2.1:1 on
      paper, well under the 3:1 that a focus indicator needs. */
   .atlas [role='radio'] { cursor: pointer; }
   .atlas [role='radio']:focus { outline: none; }
@@ -321,7 +324,7 @@
 
 @layer utilities {
   .text-gradient-brand {
-    background: linear-gradient(100deg, rgb(var(--c-brand)) 0%, #4FC8F6 50%, rgb(var(--c-brand-deep)) 100%);
+    background: linear-gradient(100deg, rgb(var(--c-brand)) 0%, #4FD2F6 50%, rgb(var(--c-brand-deep)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -329,17 +332,17 @@
 
   /**
    * Display gradient for LIGHT grounds.
-   * `text-gradient-brand` bottoms out at 2.4:1 on paper — below the 3:1 large-text
-   * floor. This ramp stays navy→cyan-700, so its lightest stop is still 5.5:1.
+   * `text-gradient-brand` bottoms out at 1.6:1 on paper — below the 3:1 large-text
+   * floor. This ramp stays navy→cyan-700, so its lightest stop is still 4.8:1.
    */
   .text-gradient-ink {
-    background: linear-gradient(100deg, #0a1b4d 0%, #12265c 38%, #026c97 100%);
+    background: linear-gradient(100deg, #03094e 0%, #12265c 38%, #027797 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .dark .text-gradient-ink {
-    background: linear-gradient(100deg, #ffffff 0%, #8cdcfa 55%, #22b8f2 100%);
+    background: linear-gradient(100deg, #ffffff 0%, #8ce2fa 55%, #22c5f2 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

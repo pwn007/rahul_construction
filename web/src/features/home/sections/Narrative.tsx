@@ -111,8 +111,8 @@ export function OneSystem() {
               are each their own `inline-block`, the fragmented inline background
               only landed on the second line — so "One point of" rendered fully
               invisible, every word computing to rgba(0,0,0,0). globals.css also
-              records the class at 2.4:1, under the 3:1 large-text floor. Solid
-              cyan-600 is ~4:1 and cannot fail this way.
+              records the class at 1.6:1, under the 3:1 large-text floor. Solid
+              cyan-600 is ~3.2:1 and cannot fail this way.
             */}
             <h2 className="mt-4 text-display-md">
               <span className="block">

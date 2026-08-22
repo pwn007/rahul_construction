@@ -120,8 +120,8 @@ export const settings: Setting[] = [
   { ...meta('set_li', '2026-01-01T09:00:00.000Z'), key: 'social.linkedin', label: 'LinkedIn', value: 'https://linkedin.com/company/neetuarchstone', group: 'social', type: 'url' },
   { ...meta('set_yt', '2026-01-01T09:00:00.000Z'), key: 'social.youtube', label: 'YouTube', value: 'https://youtube.com/@neetuarchstone', group: 'social', type: 'url' },
   { ...meta('set_ga', '2026-01-01T09:00:00.000Z'), key: 'analytics.ga4', label: 'GA4 Measurement ID', value: 'G-XXXXXXXXXX', group: 'analytics', type: 'text' },
-  { ...meta('set_brand', '2026-01-01T09:00:00.000Z'), key: 'theme.brandColor', label: 'Brand accent colour', value: '#00AEEF', group: 'theme', type: 'color' },
-  { ...meta('set_navy', '2026-01-01T09:00:00.000Z'), key: 'theme.primaryColor', label: 'Primary dark colour', value: '#0A1B4D', group: 'theme', type: 'color' },
+  { ...meta('set_brand', '2026-01-01T09:00:00.000Z'), key: 'theme.brandColor', label: 'Brand accent colour', value: '#00BBEE', group: 'theme', type: 'color' },
+  { ...meta('set_navy', '2026-01-01T09:00:00.000Z'), key: 'theme.primaryColor', label: 'Primary dark colour', value: '#03094E', group: 'theme', type: 'color' },
   { ...meta('set_radius', '2026-01-01T09:00:00.000Z'), key: 'theme.radius', label: 'Base corner radius (px)', value: '16', group: 'theme', type: 'number' },
 ];
 

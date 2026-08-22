@@ -23,7 +23,7 @@ export function QrCard() {
         errorCorrectionLevel: 'M',
         margin: 1,
         width: 320,
-        color: { dark: '#0A1B4DFF', light: '#00000000' },
+        color: { dark: '#03094EFF', light: '#00000000' },
       });
       if (!cancelled) setDataUrl(url);
     })();

@@ -107,8 +107,8 @@ export default function VastuPage() {
                 <div className="relative mx-auto aspect-square w-full max-w-sm">
                   <svg viewBox="0 0 200 200" className="h-full w-full" role="img" aria-label="Vastu direction compass">
                     <circle cx="100" cy="100" r="92" fill="none" stroke="rgb(255 255 255 / 0.1)" strokeWidth="1" />
-                    <circle cx="100" cy="100" r="66" fill="none" stroke="rgb(0 174 239 / 0.25)" strokeWidth="1" />
-                    <circle cx="100" cy="100" r="34" fill="rgb(0 174 239 / 0.07)" stroke="rgb(0 174 239 / 0.3)" strokeWidth="1" />
+                    <circle cx="100" cy="100" r="66" fill="none" stroke="rgb(0 187 238 / 0.25)" strokeWidth="1" />
+                    <circle cx="100" cy="100" r="34" fill="rgb(0 187 238 / 0.07)" stroke="rgb(0 187 238 / 0.3)" strokeWidth="1" />
 
                     {DIRECTIONS.map((d) => {
                       const rad = ((d.angle - 90) * Math.PI) / 180;
@@ -121,8 +121,8 @@ export default function VastuPage() {
                       return (
                         <g key={d.dir}>
                           <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgb(255 255 255 / 0.09)" strokeWidth="0.8" />
-                          <circle cx={lx} cy={ly} r="12" fill="rgb(5 7 13)" stroke="rgb(0 174 239 / 0.4)" strokeWidth="0.8" />
-                          <text x={lx} y={ly + 3} textAnchor="middle" fill="rgb(0 174 239)" fontSize="8" fontFamily="JetBrains Mono, monospace">
+                          <circle cx={lx} cy={ly} r="12" fill="rgb(5 7 13)" stroke="rgb(0 187 238 / 0.4)" strokeWidth="0.8" />
+                          <text x={lx} y={ly + 3} textAnchor="middle" fill="rgb(0 187 238)" fontSize="8" fontFamily="JetBrains Mono, monospace">
                             {d.dir.split('-').map((p) => p[0]).join('')}
                           </text>
                         </g>

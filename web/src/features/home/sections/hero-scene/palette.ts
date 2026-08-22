@@ -24,7 +24,7 @@
 /** Brand navies — structure, outlines, denim, night glazing. */
 export const NAVY = {
   900: '#071338',
-  800: '#0A1B4D',
+  800: '#03094E',
   700: '#12265C',
   600: '#1B3273',
   400: '#4F68B0',
@@ -36,11 +36,11 @@ export const NAVY = {
 
 /** Brand cyans — glazing, the crane, the mark, anything that should read new. */
 export const CYAN = {
-  700: '#026C97',
-  600: '#0089BF',
-  500: '#00AEEF',
-  300: '#4FC8F6',
-  100: '#C2ECFC',
+  700: '#027797',
+  600: '#0096BF',
+  500: '#00BBEE',
+  300: '#4FD2F6',
+  100: '#C2F0FC',
 } as const;
 
 /** Material warmth — ground, timber, brick, boots. */

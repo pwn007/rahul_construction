@@ -94,15 +94,15 @@ export function AdminAnalytics() {
               <AreaChart data={CONVERSION} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="funnelGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00AEEF" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#00AEEF" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#00BBEE" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#00BBEE" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.08} vertical={false} />
                 <XAxis dataKey="step" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.5 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.5 }} />
                 <Tooltip />
-                <Area type="monotone" dataKey="users" stroke="#00AEEF" strokeWidth={2.5} fill="url(#funnelGrad)" />
+                <Area type="monotone" dataKey="users" stroke="#00BBEE" strokeWidth={2.5} fill="url(#funnelGrad)" />
               </AreaChart>
             </ResponsiveContainer>
             <p className="mt-3 text-caption text-subtle">
@@ -121,8 +121,8 @@ export function AdminAnalytics() {
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.5 }} />
                 <Tooltip />
                 <RLegend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="mobile" stroke="#00AEEF" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="desktop" stroke="#0A1B4D" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="mobile" stroke="#00BBEE" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="desktop" stroke="#03094E" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="tablet" stroke="#B99465" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -461,7 +461,7 @@ export function AdminRoles() {
 
 export function AdminTheme() {
   const { resolved, setMode, setBrandColor } = useTheme();
-  const [brand, setBrand] = useState('#00AEEF');
+  const [brand, setBrand] = useState('#00BBEE');
   const [radius, setRadius] = useState(16);
   const [density, setDensity] = useState('comfortable');
   const [glass, setGlass] = useState(true);
@@ -474,7 +474,7 @@ export function AdminTheme() {
   };
 
   const reset = () => {
-    applyBrand('#00AEEF');
+    applyBrand('#00BBEE');
     setRadius(16);
     setDensity('comfortable');
     setGlass(true);
@@ -538,7 +538,7 @@ export function AdminTheme() {
             </div>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              {['#00AEEF', '#0A1B4D', '#B99465', '#16A34A', '#DC2626', '#7C3AED'].map((swatch) => (
+              {['#00BBEE', '#03094E', '#B99465', '#16A34A', '#DC2626', '#7C3AED'].map((swatch) => (
                 <button
                   key={swatch}
                   onClick={() => applyBrand(swatch)}
@@ -553,7 +553,7 @@ export function AdminTheme() {
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               The accent drives fills, highlights and selection. Accent <em>text</em> and focus rings use a
               contrast-locked variant so small labels stay above 4.5:1 on light backgrounds — brand cyan itself
-              is only 2.3:1 there.
+              is only 2.1:1 there.
             </p>
           </div>
 
