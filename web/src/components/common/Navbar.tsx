@@ -206,7 +206,11 @@ function MegaMenuContent({ item }: { item?: NavLinkType }) {
       <div className="col-span-3">
         <p className="overline">{item.label}</p>
         <p className="mt-3 max-w-[24ch] text-sm text-muted">
-          {item.label === 'Services' && 'Four capabilities, delivered as one accountable system.'}
+          {/* Deliberately no count. This read "Four capabilities" while the menu
+              beside it listed five, because Real Estate is a standalone page and
+              not one of the four `services` entries. A blurb that counts its own
+              siblings goes stale every time one is added. */}
+          {item.label === 'Services' && 'Our capabilities, delivered as one accountable system.'}
           {item.label === 'Projects' && 'Work completed across Jaipur, documented properly.'}
           {item.label === 'Pricing' && 'An estimator that shows its working, and the papers to go with it.'}
           {item.label === 'Company' && 'Who we are and how to reach us.'}

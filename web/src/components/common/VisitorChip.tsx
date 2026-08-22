@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { useVisitor, forgetVisitor } from '@/lib/visitor';
+import { resetLeadOffer } from '@/features/lead/useLeadOffer';
 import { useOnClickOutside } from '@/hooks';
 
 /**
@@ -33,8 +34,21 @@ export function VisitorChip({
 
   if (!name) return null;
 
+  /*
+   * Clear both keys, not just the name.
+   *
+   * This used to call `forgetVisitor()` alone, which removed
+   * `archstone.visitor` and left `archstone.leadoffer` holding
+   * `{converted:true}`. The greeting vanished, so the control looked like it
+   * had worked — but the previous visitor's state was still in localStorage,
+   * and the site went on treating whoever was sitting there as a known lead
+   * who must never be asked for a number again.
+   *
+   * "Not you?" means a different person. A different person is new.
+   */
   const clear = () => {
     forgetVisitor();
+    resetLeadOffer();
     setMenuOpen(false);
   };
 

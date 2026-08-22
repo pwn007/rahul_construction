@@ -8,6 +8,7 @@ const HomePage = lazy(() => import('@/features/home/HomePage'));
 const AboutPage = lazy(() => import('@/features/about/AboutPage'));
 const ServicesPage = lazy(() => import('@/features/services/ServicesPage'));
 const ServiceDetailPage = lazy(() => import('@/features/services/ServiceDetailPage'));
+const RealEstatePage = lazy(() => import('@/features/realestate/RealEstatePage'));
 const ProjectsPage = lazy(() => import('@/features/projects/ProjectsPage'));
 const ProjectDetailPage = lazy(() => import('@/features/projects/ProjectDetailPage'));
 const EstimatorPage = lazy(() => import('@/features/estimator/EstimatorPage'));
@@ -59,6 +60,17 @@ export function AppRouter() {
           <Route path="about" element={<AboutPage />} />
 
           <Route path="services" element={<ServicesPage />} />
+          {/*
+            Ahead of `services/:slug`, and it has to win.
+
+            Real Estate is a standalone page, not a `services` data entry, so
+            falling through to `ServiceDetailPage` would find no matching slug
+            and redirect straight back to /services. React Router ranks static
+            segments above dynamic ones regardless of declaration order, so this
+            resolves correctly — but it is listed first so the precedence is
+            visible to the next reader rather than implied.
+          */}
+          <Route path="services/real-estate" element={<RealEstatePage />} />
           <Route path="services/:slug" element={<ServiceDetailPage />} />
 
           <Route path="projects" element={<ProjectsPage />} />

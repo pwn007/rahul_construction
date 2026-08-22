@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
+import { readStore, writeStore, removeStore, STORAGE_KEYS } from '@/lib/storage';
 import { track } from '@/lib/analytics';
 
 /**
@@ -61,6 +61,22 @@ export function markLeadCaptured(): void {
 }
 
 /**
+ * Forget that anyone here has converted.
+ *
+ * Called by the navbar's "Not you? Clear name". That control exists for a
+ * *different* person picking up the same browser, and a different person has
+ * not given us their number — so leaving `converted: true` behind meant the
+ * site went on treating them as a known lead and never offered again.
+ *
+ * It also made the control look broken: clearing the name removed one key
+ * while this one sat in localStorage still holding the previous visitor's
+ * state. Whoever clears the name gets the whole front-end memory cleared.
+ */
+export function resetLeadOffer(): void {
+  removeStore(STORAGE_KEYS.leadOffer);
+}
+
+/**
  * True while the visitor is typing into something.
  *
  * Eight seconds of stillness part-way through the contact form or the
@@ -92,13 +108,21 @@ export function useLeadOffer(): LeadOffer {
     if (suppressedRoute) return;
     /* Already showing — the timer stops rather than firing against itself. */
     if (open) return;
-    if (readState().converted) return;
 
     let timer: number | undefined;
 
     const arm = () => {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
+        /*
+         * `converted` is read here, at fire time, not once when the effect set
+         * up. "Not you? Clear name" removes that flag mid-page, and an early
+         * return up top meant the listeners were never attached for a converted
+         * visitor — so after clearing, the next person got no offer until they
+         * happened to navigate. Reading it here costs one localStorage lookup
+         * every eight idle seconds and keeps the two in step.
+         */
+        if (readState().converted) return;
         /* Mid-form is not idle. Wait for them to finish, then resume counting. */
         if (isTyping()) {
           arm();

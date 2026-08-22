@@ -3,6 +3,14 @@ export const ROUTES = {
   about: '/about',
   services: '/services',
   service: (slug: string) => `/services/${slug}`,
+  /**
+   * Real Estate is not a `services` data entry, so it needs its own constant
+   * rather than `service('real-estate')` — that helper implies a slug the
+   * shared ServiceDetailPage can resolve, and this one it cannot. The path
+   * still sits under /services because that is where the menu puts it; see
+   * features/realestate/RealEstatePage.tsx.
+   */
+  realEstate: '/services/real-estate',
   projects: '/projects',
   project: (slug: string) => `/projects/${slug}`,
   estimator: '/estimator',
@@ -53,6 +61,9 @@ export const MAIN_NAV: NavLink[] = [
       { label: 'MEPF Consultancy', href: ROUTES.service('mepf-consultancy'), description: 'Mechanical, electrical, plumbing & fire — see what it actually does.', badge: 'New' },
       { label: 'Interior Design & Execution', href: ROUTES.service('interior-design'), description: 'Modular kitchens, wardrobes, ceilings.' },
       { label: 'Project Management & Tracking', href: ROUTES.service('project-management'), description: 'Live monitoring and milestone control.' },
+      /* Not a `services` entry — a standalone page. `ROUTES.realEstate`, not
+         `ROUTES.service(...)`, for the reason given on that constant. */
+      { label: 'Real Estate', href: ROUTES.realEstate, description: 'Plot sourcing, title checks and valuation.' },
     ],
   },
   {
