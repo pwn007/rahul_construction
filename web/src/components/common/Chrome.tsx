@@ -257,7 +257,9 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search pages, services, projects…"
-                className="h-14 flex-1 bg-transparent text-[0.95rem] outline-none placeholder:text-[rgb(var(--c-text-subtle))]"
+                /* 16px on phones for the same reason as `ui/Field.tsx`: below it,
+                   iOS zooms the viewport the moment the field takes focus. */
+                className="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-[rgb(var(--c-text-subtle))] lg:text-[0.95rem]"
               />
               <kbd className="num rounded bg-[rgb(var(--c-text))]/[0.07] px-1.5 py-0.5 text-[0.65rem] text-subtle">ESC</kbd>
             </div>

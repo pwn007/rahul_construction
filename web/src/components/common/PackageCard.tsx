@@ -39,7 +39,7 @@ export function PackageCard({
       )}
     >
       {popular && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-navy-800 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-white">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-navy-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
           Most chosen
         </span>
       )}

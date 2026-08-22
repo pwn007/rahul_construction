@@ -132,7 +132,21 @@ export default function ProjectsPage() {
             <div className="flex flex-wrap items-center gap-3">
               <SlidersHorizontal className="hidden h-4 w-4 shrink-0 text-subtle sm:block" />
 
-              <div className="no-scrollbar flex flex-1 gap-1.5 overflow-x-auto">
+              {/*
+                Wraps at every width, and no longer competes for space.
+
+                As a `flex-1` scroller this row was squeezed by the three selects
+                beside it: measured client width was 72px at 768, 204px at 900 and
+                328px at 1024 against the 563px the six chips need — so anywhere
+                from a small phone to a laptop, most of the categories sat behind a
+                sideways scroll with nothing to indicate it. 468px was hidden at
+                320px, 491px at 768px.
+
+                Wrapping removes the scroller outright, and dropping `flex-1` stops
+                the selects starving it. The chips take the rows they need; the
+                parent already wraps, so the selects fall below when space runs out.
+              */}
+              <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map((c) => (
                   <button
                     key={c.value}
@@ -153,7 +167,7 @@ export default function ProjectsPage() {
               {/* A native select with `w-auto` sizes to its longest option — the locality
                   list pushed this row to 559px and took the document with it. */}
               <div className="flex flex-wrap items-center gap-2">
-                <Select value={locality} onChange={(e) => setFilter('locality', e.target.value)} aria-label="Filter by locality" className="h-11 w-full min-w-0 flex-1 text-caption sm:w-auto sm:flex-none">
+                <Select value={locality} onChange={(e) => setFilter('locality', e.target.value)} aria-label="Filter by locality" className="h-11 w-full min-w-0 flex-1 sm:w-auto sm:flex-none lg:text-caption">
                   <option value="all">All localities</option>
                   {localities.map((l) => (
                     <option key={l} value={l}>
@@ -161,14 +175,14 @@ export default function ProjectsPage() {
                     </option>
                   ))}
                 </Select>
-                <Select value={stage} onChange={(e) => setFilter('stage', e.target.value)} aria-label="Filter by status" className="h-11 w-full min-w-0 flex-1 text-caption sm:w-auto sm:flex-none">
+                <Select value={stage} onChange={(e) => setFilter('stage', e.target.value)} aria-label="Filter by status" className="h-11 w-full min-w-0 flex-1 sm:w-auto sm:flex-none lg:text-caption">
                   {STAGES.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s.label}
                     </option>
                   ))}
                 </Select>
-                <Select value={sort} onChange={(e) => setFilter('sort', e.target.value)} aria-label="Sort projects" className="h-11 w-full min-w-0 flex-1 text-caption sm:w-auto sm:flex-none">
+                <Select value={sort} onChange={(e) => setFilter('sort', e.target.value)} aria-label="Sort projects" className="h-11 w-full min-w-0 flex-1 sm:w-auto sm:flex-none lg:text-caption">
                   {SORTS.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s.label}

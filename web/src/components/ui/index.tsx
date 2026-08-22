@@ -430,7 +430,16 @@ export function Tabs({
     <div
       role="tablist"
       className={cn(
-        'no-scrollbar flex gap-1 overflow-x-auto',
+        /*
+          Wraps below `sm`, scrolls from `sm` up.
+
+          As a single scrolling row this hid most of its own options on a phone:
+          measured at 320px, /downloads hid 529px of six tabs (2.9 screens),
+          /about 443px, /blog 375px. A tab the visitor cannot see is a category
+          they do not know exists, and nothing signalled the row was swipeable.
+          Wrapping costs one or two rows of height and hides nothing.
+        */
+        'no-scrollbar flex flex-wrap gap-1 sm:flex-nowrap sm:overflow-x-auto',
         variant === 'underline' ? 'border-b' : 'rounded-lg bg-[rgb(var(--c-text))]/[0.05] p-1',
         className,
         /*

@@ -53,10 +53,10 @@ export function Footer() {
             <p className="mt-3 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
 
             <div className="mt-6 space-y-2.5">
-              <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 py-1 text-sm text-white/70 transition-colors hover:text-cyan-400">
+              <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 py-2 text-sm text-white/70 transition-colors hover:text-cyan-400">
                 <Phone className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.phone}
               </a>
-              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 py-1 text-sm text-white/70 transition-colors hover:text-cyan-400">
+              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 py-2 text-sm text-white/70 transition-colors hover:text-cyan-400">
                 <Mail className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.email}
               </a>
               <p className="flex items-start gap-3 text-sm text-white/70">
@@ -77,7 +77,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-2">
                   {col.links.map((link) => (
                     <li key={link.href}>
-                      <Link to={link.href} className="link-underline inline-block py-1 text-sm text-white/70 transition-colors hover:text-white">
+                      <Link to={link.href} className="link-underline inline-block py-2 text-sm text-white/70 transition-colors hover:text-white">
                         {link.label}
                       </Link>
                     </li>
@@ -209,13 +209,13 @@ export function Footer() {
           {/* `md:pr-16` keeps the last link clear of the fixed FloatingRail button,
               which sits over the bottom-right of the viewport. */}
           <div className="order-2 flex items-center gap-6 md:order-3 md:pr-16">
-            <Link to={ROUTES.privacy} className="inline-block py-1 transition-colors hover:text-white">
+            <Link to={ROUTES.privacy} className="inline-block py-2 transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link to={ROUTES.terms} className="inline-block py-1 transition-colors hover:text-white">
+            <Link to={ROUTES.terms} className="inline-block py-2 transition-colors hover:text-white">
               Terms & Conditions
             </Link>
-            <Link to={ROUTES.admin} className="inline-block py-1 transition-colors hover:text-white">
+            <Link to={ROUTES.admin} className="inline-block py-2 transition-colors hover:text-white">
               Admin
             </Link>
           </div>

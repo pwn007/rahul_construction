@@ -2,8 +2,20 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAt
 import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
+/**
+ * `text-base lg:text-sm` — 16px on phones and tablets, 14px from `lg` up.
+ *
+ * Not a style preference. iOS Safari zooms the viewport whenever a form control
+ * smaller than 16px receives focus, and never zooms back out: at the previous
+ * flat `text-sm` every field on the site — contact, estimator, the lead popup,
+ * the downloads gate, the newsletter — jerked the page larger on tap and left
+ * the visitor pinching to recover. 16px is the threshold that suppresses it, so
+ * this is the one breakpoint that exists for behaviour rather than for looks.
+ *
+ * Any new field must go through these primitives, or repeat the pair.
+ */
 const base =
-  'w-full rounded-md border bg-[rgb(var(--c-surface))] px-3.5 text-sm text-[rgb(var(--c-text))] placeholder:text-[rgb(var(--c-text-subtle))] transition-colors duration-200 focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/12 disabled:cursor-not-allowed disabled:opacity-60';
+  'w-full rounded-md border bg-[rgb(var(--c-surface))] px-3.5 text-base text-[rgb(var(--c-text))] placeholder:text-[rgb(var(--c-text-subtle))] transition-colors duration-200 focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/12 disabled:cursor-not-allowed disabled:opacity-60 lg:text-sm';
 
 /* ------------------------------- Label ------------------------------- */
 

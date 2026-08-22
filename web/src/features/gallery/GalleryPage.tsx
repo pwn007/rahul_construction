@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Camera, Play, Rotate3d, X, Plane } from 'lucide-react';
 import { Seo } from '@/components/seo/Seo';
 import { CtaBand, PageHero } from '@/components/common';
 import { Badge, EmptyState, Tabs } from '@/components/ui';
 import { cn } from '@/lib/cn';
+import { useLockBodyScroll } from '@/hooks';
 import { gallery } from '@/data/content';
 import type { GalleryItem, GalleryKind } from '@/types/domain';
 
@@ -18,6 +19,29 @@ const KIND_META: Record<GalleryKind, { label: string; icon: typeof Camera }> = {
 export default function GalleryPage() {
   const [kind, setKind] = useState<'all' | GalleryKind>('all');
   const [active, setActive] = useState<GalleryItem | null>(null);
+
+  /*
+   * The viewer is a fullscreen `aria-modal` overlay, and it was doing neither of
+   * the two things that makes one behave: the page kept scrolling underneath it,
+   * so on a phone a swipe moved the gallery behind the image instead of doing
+   * nothing, and Escape did not close it.
+   *
+   * The projects `Lightbox` in features/projects/components.tsx has always had
+   * both. The two viewers are *not* the same component — this one shows a title,
+   * a category and a 360°/video affordance, that one shows an index and
+   * prev/next arrows — so the duplication worth removing is the behaviour, not
+   * the markup. Hence the shared hook here rather than one component with modes.
+   */
+  useLockBodyScroll(active !== null);
+
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActive(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [active]);
 
   const items = useMemo(() => (kind === 'all' ? gallery : gallery.filter((g) => g.kind === kind)), [kind]);
 
@@ -162,7 +186,7 @@ export default function GalleryPage() {
                   {KIND_META[active.kind].label} · {active.category.replace('-', ' ')}
                 </p>
               </div>
-              <button onClick={() => setActive(null)} aria-label="Close" className="rounded-md p-2 hover:bg-white/10">
+              <button onClick={() => setActive(null)} aria-label="Close" className="rounded-md p-3 hover:bg-white/10">
                 <X className="h-5 w-5" />
               </button>
             </div>

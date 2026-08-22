@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, MapPin, MoveHorizontal, X, ZoomIn } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Badge } from '@/components/ui';
+import { useLockBodyScroll } from '@/hooks';
 import type { Project, ProjectImage } from '@/types/domain';
 
 /* ==================================================================== */
@@ -121,6 +122,10 @@ export function Lightbox({
   onClose: () => void;
   onNavigate: (i: number) => void;
 }) {
+  /* The same lock the gallery viewer uses. It was hand-rolled here and absent
+     there; sharing the hook is what stops the two drifting apart again. */
+  useLockBodyScroll(index !== null);
+
   useEffect(() => {
     if (index === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -129,12 +134,7 @@ export function Lightbox({
       if (e.key === 'ArrowLeft') onNavigate((index - 1 + images.length) % images.length);
     };
     document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
-    };
+    return () => document.removeEventListener('keydown', onKey);
   }, [index, images.length, onClose, onNavigate]);
 
   if (index === null) return null;

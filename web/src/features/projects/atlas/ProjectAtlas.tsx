@@ -137,7 +137,7 @@ export function ProjectAtlas({
 
         <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full border bg-[rgb(var(--c-surface))]/85 px-2.5 py-1 backdrop-blur-sm">
           <MapPin className="h-3 w-3 text-cyan-600 dark:text-cyan-400" />
-          <span className="text-[0.68rem] leading-none text-muted">Jaipur, Rajasthan</span>
+          <span className="text-xs leading-none text-muted sm:text-[0.68rem]">Jaipur, Rajasthan</span>
         </div>
       </div>
 
@@ -163,7 +163,7 @@ export function ProjectAtlas({
           : `Showing all ${model.total} projects.`}
       </p>
 
-      <figcaption className={cn(cap, 'mt-3 space-y-1.5 text-[0.7rem] leading-relaxed text-subtle')}>
+      <figcaption className={cn(cap, 'mt-3 space-y-1.5 text-xs leading-relaxed text-subtle sm:text-[0.7rem]')}>
         <p id={captionId}>
           Project Atlas — our work across Jaipur's municipal zones.{' '}
           {model.outside.length > 0 && (
@@ -186,7 +186,7 @@ export function ProjectAtlas({
             href={ATLAS_SOURCE.url}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className="link-underline hover:text-[rgb(var(--c-brand-text))]"
+            className="link-underline inline-block py-1 hover:text-[rgb(var(--c-brand-text))]"
           >
             {ATLAS_SOURCE.title} © {ATLAS_SOURCE.publisher}
           </a>{' '}
@@ -194,7 +194,7 @@ export function ProjectAtlas({
             href={ATLAS_SOURCE.licenceUrl}
             target="_blank"
             rel="noopener noreferrer nofollow license"
-            className="link-underline hover:text-[rgb(var(--c-brand-text))]"
+            className="link-underline inline-block py-1 hover:text-[rgb(var(--c-brand-text))]"
           >
             {ATLAS_SOURCE.licence}
           </a>

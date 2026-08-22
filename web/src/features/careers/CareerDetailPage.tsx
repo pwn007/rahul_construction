@@ -108,7 +108,7 @@ export default function CareerDetailPage() {
           <div className="grid gap-12 lg:grid-cols-12">
             {/* Role */}
             <div className="lg:col-span-7">
-              <Link to={ROUTES.careers} className="inline-flex items-center gap-2 text-caption text-subtle transition-colors hover:text-cyan-700">
+              <Link to={ROUTES.careers} className="inline-flex items-center gap-2 py-1.5 text-caption text-subtle transition-colors hover:text-cyan-700">
                 <ArrowLeft className="h-3.5 w-3.5" /> All open roles
               </Link>
 

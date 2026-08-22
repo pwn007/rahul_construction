@@ -134,7 +134,7 @@ export default function PostDetailPage() {
       <article>
         <header className="pt-32 md:pt-40">
           <div className="container max-w-4xl">
-            <Link to={ROUTES.blog} className="inline-flex items-center gap-2 text-caption text-subtle transition-colors hover:text-cyan-700">
+            <Link to={ROUTES.blog} className="inline-flex items-center gap-2 py-1.5 text-caption text-subtle transition-colors hover:text-cyan-700">
               <ArrowLeft className="h-3.5 w-3.5" /> All insights
             </Link>
 
