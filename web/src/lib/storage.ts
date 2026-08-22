@@ -46,5 +46,14 @@ export const STORAGE_KEYS = {
   adminUser: 'archstone.admin.user',
   adminUnlocked: 'archstone.admin.unlocked',
   adminOverrides: 'archstone.admin.overrides',
-  exitIntent: 'archstone.exitintent.seen',
+  /**
+   * Whether this browser has already given us a phone number.
+   *
+   * The one thing that stops the idle popup — there is no frequency cap to
+   * store, because it reopens on every pause by design. Clearing this key is
+   * how you get the popup back while testing. See `features/lead/useLeadOffer`.
+   */
+  leadOffer: 'archstone.leadoffer',
+  /** First-touch campaign attribution, held for the length of the visit. */
+  attribution: 'archstone.attribution',
 } as const;

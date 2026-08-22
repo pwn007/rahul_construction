@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CalendarCheck, Check, Clock, FileDown, IndianRupee, PieChart, ShieldCheck } from 'lucide-react';
@@ -10,6 +10,7 @@ import { PageHero } from '@/components/common';
 import { scrollToTarget } from '@/hooks/useLenis';
 import { cn } from '@/lib/cn';
 import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
+import { track } from '@/lib/analytics';
 import { SITE } from '@/constants/site';
 import { IMG } from '@/lib/media';
 import { usePrefersReducedMotion } from '@/hooks';
@@ -119,8 +120,37 @@ export default function EstimatorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input]);
 
+  /*
+   * The funnel, reported as three events.
+   *
+   * `estimator_start` fires once per mount rather than on the first
+   * interaction, because the drop-off worth knowing about is between arriving
+   * and answering anything — the step someone never reaches is invisible if
+   * the funnel only starts once they engage.
+   */
+  const started = useRef(false);
+  useEffect(() => {
+    /*
+     * Latched. StrictMode double-invokes effects in development, which sent two
+     * `estimator_start` events per visit — a funnel whose first step is
+     * inflated makes every downstream conversion rate look half as good as it
+     * is, and the discrepancy only shows up once someone compares it to the
+     * session count.
+     */
+    if (started.current) return;
+    started.current = true;
+    track('estimator_start', { entryStep: step });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const goTo = (next: number) => {
-    setStep(Math.max(0, Math.min(steps.length - 1, next)));
+    const clamped = Math.max(0, Math.min(steps.length - 1, next));
+    /* Forward only. Going back to change an answer is not funnel progress. */
+    if (clamped > step) {
+      const key = steps[clamped]?.key;
+      track(key === 'result' ? 'estimator_result' : 'estimator_step', { step: clamped, key });
+    }
+    setStep(clamped);
     const anchor = document.getElementById('wizard');
     if (anchor) {
       const top = anchor.getBoundingClientRect().top + window.scrollY - 100;

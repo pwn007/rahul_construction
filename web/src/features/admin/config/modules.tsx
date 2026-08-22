@@ -673,7 +673,10 @@ export const MODULES: ResourceConfig<never>[] = [
     canCreate: false,
     filters: [
       { key: 'stage', label: 'Stage', options: ['new', 'contacted', 'qualified', 'proposal', 'won', 'lost'].map((v) => ({ value: v, label: v })) },
-      { key: 'source', label: 'Source', options: ['contact-form', 'estimator', 'download', 'newsletter'].map((v) => ({ value: v, label: v })) },
+      /* Must match the `source` union on `Enquiry` — an option here that no code
+         path writes is a filter that can never match a row. `idle-popup` was
+         missing, so popup leads could not be filtered at all. */
+      { key: 'source', label: 'Source', options: ['contact-form', 'estimator', 'idle-popup', 'download', 'newsletter'].map((v) => ({ value: v, label: v })) },
     ],
     badge: (rows: never[]) => (rows as unknown as { stage: string }[]).filter((r) => r.stage === 'new').length || undefined,
     columns: [

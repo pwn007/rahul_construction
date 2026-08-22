@@ -13,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { ArrowUpRight, Building2, Calculator, Inbox, TrendingUp, Users } from 'lucide-react';
+import { ArrowUpRight, Building2, Calculator, Clock, Inbox, TrendingUp, Users } from 'lucide-react';
 import { Badge, Progress } from '@/components/ui';
 import { Counter, Reveal } from '@/components/motion';
 import { cn } from '@/lib/cn';
@@ -63,7 +63,7 @@ export function AdminDashboard() {
    * above it still reported the seeded total. `useLeadCounts` runs each module's
    * own badge rule against the same data the tables show.
    */
-  const { badges, totals } = useLeadCounts();
+  const { badges, totals, oldestNewLeadHours } = useLeadCounts();
   const { data: estimateRows } = useResourceList(estimatesService, { pageSize: 500 });
   const { data: enquiryRows } = useResourceList(enquiriesService, { pageSize: 500 });
 
@@ -89,6 +89,43 @@ export function AdminDashboard() {
           Everything happening across the site — leads, estimator usage and content health.
         </p>
       </div>
+
+      {/*
+        Response time, above the counts.
+
+        The tiles below say how many leads there are. This says how long the
+        oldest one has been waiting, which is the number that moves revenue:
+        the MIT/InsideSales study puts a five-minute callback at 21× the
+        qualification rate of a thirty-minute one. A queue that is hours old is
+        a problem the count alone cannot show.
+      */}
+      {oldestNewLeadHours !== null && oldestNewLeadHours > 1 && (
+        <Reveal>
+          <div
+            className={cn(
+              'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border p-4 text-sm',
+              oldestNewLeadHours >= 24
+                ? 'border-danger/30 bg-danger/[0.07] text-danger'
+                : 'border-warning/30 bg-warning/[0.07] text-warning',
+            )}
+            role="status"
+          >
+            <Clock className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="font-medium">
+              Oldest uncontacted lead has been waiting{' '}
+              <span className="num">
+                {oldestNewLeadHours >= 24
+                  ? `${Math.floor(oldestNewLeadHours / 24)} day${Math.floor(oldestNewLeadHours / 24) === 1 ? '' : 's'}`
+                  : `${Math.floor(oldestNewLeadHours)} hour${Math.floor(oldestNewLeadHours) === 1 ? '' : 's'}`}
+              </span>
+              .
+            </span>
+            <Link to="/admin/enquiries" className="underline underline-offset-2">
+              Open the queue
+            </Link>
+          </div>
+        </Reveal>
+      )}
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

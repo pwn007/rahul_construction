@@ -25,7 +25,23 @@ export interface LeadCounts {
   badges: Record<string, number>;
   /** module key → total rows in that collection. */
   totals: Record<string, number>;
+  /**
+   * Hours since the oldest untouched lead arrived, or null when the queue is clear.
+   *
+   * A count of new leads says how much work there is; this says how late it is.
+   * They are different questions and only the second one predicts revenue —
+   * contacting within five minutes rather than thirty is worth 21× on
+   * qualification, so a queue of two that is a day old is a worse position than
+   * a queue of ten that is a minute old.
+   */
+  oldestNewLeadHours: number | null;
   isLoading: boolean;
+}
+
+/** A row that has been captured but not yet acted on. */
+interface StaleCandidate {
+  stage?: string;
+  createdAt?: string;
 }
 
 /** The modules that declare a badge rule — enquiries, estimates, applications. */
@@ -42,13 +58,27 @@ export function useLeadCounts(): LeadCounts {
 
   const badges: Record<string, number> = {};
   const totals: Record<string, number> = {};
+  let oldest: number | null = null;
 
   BADGED.forEach((module, i) => {
     const rows = (queries[i]?.data?.items ?? []) as never[];
     totals[module.key] = rows.length;
     const count = module.badge?.(rows);
     if (count) badges[module.key] = count;
+
+    for (const row of rows as StaleCandidate[]) {
+      if (row.stage !== 'new' || !row.createdAt) continue;
+      const at = Date.parse(row.createdAt);
+      /* Seed data carries future-dated timestamps; a negative age is not "urgent". */
+      if (Number.isNaN(at) || at > Date.now()) continue;
+      oldest = oldest === null ? at : Math.min(oldest, at);
+    }
   });
 
-  return { badges, totals, isLoading: queries.some((q) => q.isLoading) };
+  return {
+    badges,
+    totals,
+    oldestNewLeadHours: oldest === null ? null : (Date.now() - oldest) / 3_600_000,
+    isLoading: queries.some((q) => q.isLoading),
+  };
 }

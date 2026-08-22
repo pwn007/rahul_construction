@@ -3,8 +3,22 @@ import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Youtube } from 'lucide-react';
 import { Button, Input, useToast } from '@/components/ui';
 import { Logo } from './Logo';
+import { ConsentCheckbox } from './ConsentCheckbox';
+import { leadMeta } from '@/lib/consent';
+import { track } from '@/lib/analytics';
 import { FOOTER_NAV, ROUTES } from '@/constants/routes';
 import { SITE } from '@/constants/site';
+
+/**
+ * The newsletter's own consent wording, stored verbatim on the record.
+ *
+ * Narrower than the shared one in `lib/consent.ts`, and deliberately: that
+ * sentence promises a phone call about an enquiry, which is not what this box
+ * is for. Consent has to be specific to the purpose under the DPDP Act, so a
+ * different purpose gets a different sentence rather than a broader one.
+ */
+const NEWSLETTER_CONSENT = `I agree to receive occasional project updates from ${SITE.name} by email.`;
+const NEWSLETTER_CONSENT_REQUIRED = 'Please tick this so we can email you.';
 
 const SOCIALS = [
   { label: 'Instagram', href: SITE.socials.instagram, icon: Instagram },
@@ -15,6 +29,8 @@ const SOCIALS = [
 
 export function Footer() {
   const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [consentError, setConsentError] = useState<string | undefined>();
   const { push } = useToast();
   const year = new Date().getFullYear();
 
@@ -91,6 +107,11 @@ export function Footer() {
                   push({ kind: 'warning', title: 'Enter a valid email address' });
                   return;
                 }
+                if (!consent) {
+                  setConsentError(NEWSLETTER_CONSENT_REQUIRED);
+                  return;
+                }
+                setConsentError(undefined);
                 try {
                   /*
                    * Imported on submit, not at module scope.
@@ -110,9 +131,13 @@ export function Footer() {
                     message: 'Subscribed to the newsletter from the site footer.',
                     source: 'newsletter',
                     stage: 'new',
+                    ...leadMeta(),
+                    consentText: NEWSLETTER_CONSENT,
                   });
+                  track('lead_submit', { source: 'newsletter', fields: 1 });
                   push({ kind: 'success', title: 'Subscribed', description: 'You will hear from us once a month at most.' });
                   setEmail('');
+                  setConsent(false);
                 } catch {
                   push({ kind: 'error', title: 'That did not go through', description: 'Please try again, or email us directly.' });
                 }
@@ -130,6 +155,26 @@ export function Footer() {
                 <Send className="h-4 w-4" />
               </Button>
             </form>
+
+            {/*
+              This form has always written a real lead record, which means it has
+              always needed consent — an email address collected for marketing is
+              personal data under the DPDP Act exactly as a phone number is. It
+              is the one capture surface whose wording differs, because nobody is
+              being telephoned: `consentText` on the record says so.
+            */}
+            <ConsentCheckbox
+              className="mt-3"
+              tone="light"
+              checked={consent}
+              onChange={(next) => {
+                setConsent(next);
+                if (next) setConsentError(undefined);
+              }}
+              error={consentError}
+            >
+              {NEWSLETTER_CONSENT}
+            </ConsentCheckbox>
 
           </div>
         </div>

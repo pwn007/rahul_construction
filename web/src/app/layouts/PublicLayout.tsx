@@ -1,7 +1,8 @@
 import { Suspense, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Navbar, Footer, FloatingRail, CommandPalette, useCommandPalette } from '@/components/common';
+import { Navbar, Footer, FloatingRail, StickyContactBar, CommandPalette, useCommandPalette } from '@/components/common';
+import { LeadOfferModal } from '@/features/lead/LeadOfferModal';
 import { ScrollProgress } from '@/components/motion';
 import { Spinner } from '@/components/ui';
 import { useLenisScroll, getLenis } from '@/hooks/useLenis';
@@ -89,6 +90,10 @@ export function PublicLayout() {
 
       <Footer />
       <FloatingRail />
+      <StickyContactBar />
+      {/* Mounted once, above the router, so the offer survives navigation and
+          can never be rendered twice. See features/lead/useLeadOffer.ts. */}
+      <LeadOfferModal />
     </HeroToneProvider>
   );
 }

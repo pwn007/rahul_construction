@@ -4,8 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowRight, Check, Clock, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
 import { Seo } from '@/components/seo/Seo';
-import { PageHero, SectionHeader } from '@/components/common';
+import { PageHero, SectionHeader, ConsentCheckbox, CONSENT_REQUIRED } from '@/components/common';
 import { Accordion, Button, FormField, Input, Select, Textarea, useToast } from '@/components/ui';
+import { leadMeta } from '@/lib/consent';
+import { track } from '@/lib/analytics';
+import { markLeadCaptured } from '@/features/lead/useLeadOffer';
 import { Reveal, SplitText } from '@/components/motion';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
@@ -28,7 +31,16 @@ const contactSchema = z.object({
    * something the team can actually act on.
    */
   callbackWindow: z.string().optional(),
+  /**
+   * The ten-character floor lives here, not on the API.
+   *
+   * It is a quality bar for this form — the one surface where the visitor came
+   * specifically to explain something — and not a property of an enquiry. The
+   * short capture surfaces post two fields and no prose, which the server
+   * schema now permits.
+   */
   message: z.string().min(10, 'Tell us a little more — at least 10 characters'),
+  consent: z.literal(true, { errorMap: () => ({ message: CONSENT_REQUIRED }) }),
 });
 
 type ContactForm = z.infer<typeof contactSchema>;
@@ -60,11 +72,23 @@ export default function ContactPage() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { name: '', phone: '', email: '', serviceInterest: '', budget: '', callbackWindow: CALLBACK_WINDOWS[0], message: '' },
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: '',
+      serviceInterest: '',
+      budget: '',
+      callbackWindow: CALLBACK_WINDOWS[0],
+      message: '',
+      /* Never pre-ticked. Consent has to be an affirmative action under the DPDP Act. */
+      consent: false as unknown as true,
+    },
   });
 
   const onSubmit = async (data: ContactForm) => {
@@ -78,7 +102,11 @@ export default function ContactPage() {
       city: 'Jaipur',
       source: 'contact-form',
       stage: 'new',
+      ...leadMeta(),
     });
+    track('lead_submit', { source: 'contact-form', fields: 7 });
+    /* They have just given us their number. Nothing should pop up asking for it. */
+    markLeadCaptured();
     setSubmitted(true);
     reset();
     push({ kind: 'success', title: 'Enquiry received', description: 'We respond within one working day.' });
@@ -290,7 +318,14 @@ export default function ContactPage() {
                     </FormField>
                   </div>
 
-                  <div className="mt-7 flex flex-wrap items-center gap-4">
+                  <ConsentCheckbox
+                    className="mt-6"
+                    checked={watch('consent') === true}
+                    onChange={(next) => setValue('consent', next as true, { shouldValidate: true })}
+                    error={errors.consent?.message}
+                  />
+
+                  <div className="mt-6 flex flex-wrap items-center gap-4">
                     <Button type="submit" variant="accent" size="lg" loading={isSubmitting} leftIcon={<Send className="h-4 w-4" />}>
                       Send enquiry
                     </Button>

@@ -230,26 +230,65 @@ export interface Application extends BaseEntity {
 /* Leads                                                               */
 /* ------------------------------------------------------------------ */
 
-export interface Enquiry extends BaseEntity {
+/**
+ * What we know about a lead beyond what they typed.
+ *
+ * Shared by every captured record so consent and attribution are answerable for
+ * any lead in the system, not just the ones that came through the contact page.
+ */
+export interface LeadMeta {
+  /**
+   * When consent to be contacted was given, and the exact wording it was given
+   * against.
+   *
+   * The DPDP Act makes the business prove consent was informed, so a boolean is
+   * not enough: the wording changes over time and a stored `true` cannot say
+   * which version a given person agreed to. Optional because records captured
+   * before this shipped genuinely have no answer — absent is honest, `false`
+   * would be a claim we cannot support either way.
+   */
+  consentAt?: string;
+  consentText?: string;
+
+  /** First-touch campaign attribution. See `lib/attribution.ts`. */
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  referrer?: string;
+  landingPage?: string;
+}
+
+export interface Enquiry extends BaseEntity, LeadMeta {
   name: string;
   phone: string;
   email?: string;
   serviceInterest: string;
   city?: string;
   budget?: string;
-  message: string;
+  /**
+   * Optional because the short capture surfaces — the offer modal, the footer
+   * callback, the per-page enquiry bands — ask for a name and a number and
+   * nothing else. Requiring prose here is what would force those forms to
+   * either grow a textarea or invent filler to satisfy the type.
+   */
+  message?: string;
   /**
    * Where the lead came from. Only values the site actually produces.
-   * `service-page`, `project-page` and `exit-intent` were removed — they were
-   * in the union and in the admin filter dropdown, but no code path ever set
-   * them, so the filter offered three options that could never match a row.
+   *
+   * This union has now been trimmed twice for the same reason, so the rule is
+   * worth stating plainly: nothing belongs here without a code path that writes
+   * it, because the admin filter is built from this list and an option that can
+   * never match a row is worse than a missing one. `service-page`,
+   * `project-page`, `estimator-result` and `footer-callback` went when those
+   * capture surfaces were removed; `exit-offer` became `idle-popup` when the
+   * popup stopped being exit-triggered.
    */
-  source: 'contact-form' | 'estimator' | 'download' | 'newsletter';
+  source: 'contact-form' | 'estimator' | 'idle-popup' | 'download' | 'newsletter';
   stage: 'new' | 'contacted' | 'qualified' | 'proposal' | 'won' | 'lost';
   assignedTo?: string;
 }
 
-export interface EstimateRequest extends BaseEntity {
+export interface EstimateRequest extends BaseEntity, LeadMeta {
   name: string;
   phone: string;
   email?: string;

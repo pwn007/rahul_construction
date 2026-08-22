@@ -13,6 +13,8 @@ export { Logo, LogoMark } from './Logo';
 export { Navbar } from './Navbar';
 export { Footer } from './Footer';
 export { FloatingRail, CommandPalette, useCommandPalette } from './Chrome';
+export { StickyContactBar } from './StickyContactBar';
+export { ConsentCheckbox, CONSENT_REQUIRED } from './ConsentCheckbox';
 /* BuildingSystems is gone — the isometric house at features/mepf/MepfTeaser is
    now the site's only MEP illustration. Two drawings of the same four services
    meant two files to keep in step and a visitor learning the notation twice. */

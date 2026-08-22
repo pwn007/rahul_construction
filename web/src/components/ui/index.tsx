@@ -229,15 +229,60 @@ export function Dialog({
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+
+    /*
+     * Focus has to be moved in and kept in.
+     *
+     * The dialog announced itself as `aria-modal` while leaving focus on the
+     * page behind it, so a keyboard or screen-reader user was told the rest of
+     * the page was inert and then tabbed straight into it. That is worse than
+     * an unlabelled dialog: the promise is what makes it disorienting.
+     */
+    const opener = document.activeElement as HTMLElement | null;
+
+    const focusable = () =>
+      Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null);
+
+    const id = window.setTimeout(() => (focusable()[0] ?? panelRef.current)?.focus(), 0);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const items = focusable();
+      if (!items.length) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
     return () => {
+      window.clearTimeout(id);
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
+      opener?.focus?.();
     };
   }, [open, onClose]);
 
@@ -257,9 +302,11 @@ export function Dialog({
             onClick={onClose}
           />
           <motion.div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-label={title}
+            tabIndex={-1}
             initial={{ opacity: 0, y: 24, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.99 }}
@@ -275,10 +322,12 @@ export function Dialog({
                   {title && <h2 className="text-heading-md">{title}</h2>}
                   {description && <p className="mt-1 text-sm text-muted">{description}</p>}
                 </div>
+                {/* p-3 around a 20px icon is a 44px target — the floor for a
+                    control whose whole job is letting someone out. */}
                 <button
                   onClick={onClose}
                   aria-label="Close dialog"
-                  className="-mr-1 rounded-md p-1.5 text-[rgb(var(--c-text-subtle))] transition-colors hover:bg-[rgb(var(--c-text))]/[0.06]"
+                  className="-mr-2 -mt-1.5 rounded-md p-3 text-[rgb(var(--c-text-subtle))] transition-colors hover:bg-[rgb(var(--c-text))]/[0.06]"
                 >
                   <X className="h-5 w-5" />
                 </button>

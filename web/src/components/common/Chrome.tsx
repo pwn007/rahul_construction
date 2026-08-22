@@ -22,28 +22,55 @@ import { projects } from '@/data/projects';
 import { services } from '@/data/services';
 import { posts } from '@/data/content';
 import { useHotkey, useLockBodyScroll } from '@/hooks';
+import { track, type AnalyticsEvent } from '@/lib/analytics';
 
 /* ==================================================================== */
 /* Floating action rail                                                  */
 /* ==================================================================== */
 
+/**
+ * Desktop only.
+ *
+ * Its Call and WhatsApp actions are the same two the mobile `StickyContactBar`
+ * pins to the bottom of the viewport, so below `md` both rendered at once —
+ * two components offering the same two things, one of them behind an extra tap.
+ * The rail keeps the pointer-driven viewport, where a collapsed FAB is the
+ * right trade; the bar keeps the thumb-driven one, where it isn't.
+ */
 export function FloatingRail() {
   const [expanded, setExpanded] = useState(false);
 
-  const actions = [
+  const actions: {
+    label: string;
+    href: string;
+    icon: typeof MessageCircle;
+    className: string;
+    external: boolean;
+    event?: AnalyticsEvent;
+  }[] = [
     {
       label: 'WhatsApp',
       href: `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent('Hi, I would like to discuss a construction project.')}`,
       icon: MessageCircle,
       className: 'bg-[#25D366] text-white',
       external: true,
+      event: 'whatsapp_click',
     },
-    { label: 'Call', href: `tel:${SITE.phoneRaw}`, icon: Phone, className: 'bg-navy-800 text-white', external: true },
+    {
+      label: 'Call',
+      href: `tel:${SITE.phoneRaw}`,
+      icon: Phone,
+      className: 'bg-navy-800 text-white',
+      external: true,
+      event: 'call_click',
+    },
+    /* No event: an internal navigation to the estimator is already measured by
+       `estimator_start` when the page it lands on begins. */
     { label: 'Estimate', href: ROUTES.estimator, icon: Calculator, className: 'bg-cyan-500 text-white', external: false },
   ];
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-7 sm:right-7">
+    <div className="fixed bottom-5 right-5 z-40 hidden flex-col items-end gap-3 md:flex sm:bottom-7 sm:right-7">
       <AnimatePresence>
         {expanded &&
           actions.map((action, i) => (
@@ -52,6 +79,7 @@ export function FloatingRail() {
               href={action.href}
               target={action.external ? '_blank' : undefined}
               rel={action.external ? 'noopener noreferrer' : undefined}
+              onClick={() => action.event && track(action.event, { placement: 'floating-rail' })}
               initial={{ opacity: 0, y: 12, scale: 0.85 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.85 }}

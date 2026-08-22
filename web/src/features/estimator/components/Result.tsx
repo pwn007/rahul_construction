@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Check, Download, Info, MessageCircle, Plus, RotateCcw, Ruler, Share2 } from 'lucide-react';
 import { Badge, Button, Dialog, FormField, Input, Switch, useToast } from '@/components/ui';
+import { ConsentCheckbox, CONSENT_REQUIRED } from '@/components/common';
+import { leadMeta } from '@/lib/consent';
+import { track } from '@/lib/analytics';
+import { markLeadCaptured } from '@/features/lead/useLeadOffer';
 import { Counter, Reveal } from '@/components/motion';
 import { formatCurrency, formatCurrencyCompact, formatDuration, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/cn';
@@ -62,6 +66,15 @@ function CostDonut({ heads }: { heads: EstimateResult['heads'] }) {
 /* Lead-capture gate for the PDF                                        */
 /* ------------------------------------------------------------------ */
 
+/**
+ * The one thing gated on this page, and deliberately the only one.
+ *
+ * The estimate itself stays free — that is the site's differentiator against
+ * Brick&Bolt, whose calculator holds the number back until you hand over a
+ * phone number, and gating it here would also put an interstitial on our best
+ * organic landing page. What is worth a name and a number is the itemised PDF,
+ * so the button names *that* rather than saying "Submit".
+ */
 function LeadDialog({
   open,
   onClose,
@@ -74,12 +87,14 @@ function LeadDialog({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+  const [consent, setConsent] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; consent?: string }>({});
 
   const submit = () => {
     const next: typeof errors = {};
     if (name.trim().length < 2) next.name = 'Please enter your name';
     if (!/^[+]?[\d\s-]{10,15}$/.test(phone.trim())) next.phone = 'Enter a valid 10-digit mobile number';
+    if (!consent) next.consent = CONSENT_REQUIRED;
     setErrors(next);
     if (Object.keys(next).length) return;
     onSubmit({ name: name.trim(), phone: phone.trim(), email: email.trim() || undefined });
@@ -98,7 +113,7 @@ function LeadDialog({
             Cancel
           </Button>
           <Button variant="accent" onClick={submit} leftIcon={<Download className="h-4 w-4" />}>
-            Download PDF
+            Get my detailed PDF
           </Button>
         </>
       }
@@ -120,6 +135,7 @@ function LeadDialog({
         <FormField label="Email" htmlFor="lead-email" hint="Optional">
           <Input id="lead-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </FormField>
+        <ConsentCheckbox checked={consent} onChange={setConsent} error={errors.consent} />
         <p className="text-caption text-subtle">
           We use this only to follow up on your estimate. No marketing lists, no sharing.
         </p>
@@ -352,6 +368,9 @@ export function ResultScreen({
     const { generateEstimatePdf } = await import('../pdf');
     generateEstimatePdf(result, lead);
     setLeadOpen(false);
+    track('lead_submit', { source: 'estimator-pdf', fields: 3 });
+    /* They have given us a number. The behavioural offer must never ask again. */
+    markLeadCaptured();
 
     /**
      * The PDF is already on their machine, so the capture never blocks it — but
@@ -386,6 +405,7 @@ export function ResultScreen({
         totalMax: Math.round(result.max),
         timelineWeeks: result.timelineWeeks,
         stage: 'new',
+        ...leadMeta(),
       })
       .then(() =>
         push({
@@ -394,13 +414,14 @@ export function ResultScreen({
           description: 'We will call you within one working day.',
         }),
       )
-      .catch(() =>
+      .catch(() => {
+        track('lead_submit_failed', { source: 'estimator-pdf' });
         push({
           kind: 'error',
           title: 'Your estimate is downloading',
           description: 'We could not save your details, so nobody will call. Send it on WhatsApp and we will pick it up.',
-        }),
-      );
+        });
+      });
   };
 
   const whatsappText = encodeURIComponent(
@@ -434,7 +455,15 @@ export function ResultScreen({
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="accent" size="lg" onClick={() => setLeadOpen(true)} leftIcon={<Download className="h-4 w-4" />}>
+                <Button
+                  variant="accent"
+                  size="lg"
+                  onClick={() => {
+                    track('lead_gate_open', { source: 'estimator-pdf' });
+                    setLeadOpen(true);
+                  }}
+                  leftIcon={<Download className="h-4 w-4" />}
+                >
                   Download PDF estimate
                 </Button>
                 <Button
@@ -444,6 +473,7 @@ export function ResultScreen({
                   size="lg"
                   className="border-white/25 text-white hover:bg-white/10"
                   leftIcon={<MessageCircle className="h-4 w-4" />}
+                  onClick={() => track('whatsapp_click', { placement: 'estimator-result' })}
                 >
                   Send on WhatsApp
                 </Button>
