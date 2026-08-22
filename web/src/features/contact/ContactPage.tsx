@@ -9,6 +9,7 @@ import { Accordion, Button, FormField, Input, Select, Textarea, useToast } from 
 import { leadMeta } from '@/lib/consent';
 import { track } from '@/lib/analytics';
 import { markLeadCaptured } from '@/features/lead/useLeadOffer';
+import { getVisitor, rememberVisitor } from '@/lib/visitor';
 import { Reveal, SplitText } from '@/components/motion';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
@@ -79,7 +80,12 @@ export default function ContactPage() {
   } = useForm<ContactForm>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
-      name: '',
+      /*
+       * Prefilled for someone who has already told us their name, so they are
+       * not retyping what they gave the popup ten minutes ago. Name only —
+       * the phone is deliberately never stored on the device.
+       */
+      name: getVisitor() ?? '',
       phone: '',
       email: '',
       serviceInterest: '',
@@ -107,6 +113,7 @@ export default function ContactPage() {
     track('lead_submit', { source: 'contact-form', fields: 7 });
     /* They have just given us their number. Nothing should pop up asking for it. */
     markLeadCaptured();
+    rememberVisitor(data.name);
     setSubmitted(true);
     reset();
     push({ kind: 'success', title: 'Enquiry received', description: 'We respond within one working day.' });

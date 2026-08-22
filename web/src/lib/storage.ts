@@ -54,6 +54,14 @@ export const STORAGE_KEYS = {
    * how you get the popup back while testing. See `features/lead/useLeadOffer`.
    */
   leadOffer: 'archstone.leadoffer',
+  /**
+   * The visitor's first name, for the greeting. Expires after 30 days.
+   *
+   * Separate from `leadOffer` on purpose — that flag must never expire, or the
+   * popup would return to someone who has already given us their number. Same
+   * event, two different lifetimes. See `lib/visitor.ts`.
+   */
+  visitor: 'archstone.visitor',
   /** First-touch campaign attribution, held for the length of the visit. */
   attribution: 'archstone.attribution',
 } as const;

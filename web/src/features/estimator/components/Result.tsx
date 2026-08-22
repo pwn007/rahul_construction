@@ -7,6 +7,7 @@ import { ConsentCheckbox, CONSENT_REQUIRED } from '@/components/common';
 import { leadMeta } from '@/lib/consent';
 import { track } from '@/lib/analytics';
 import { markLeadCaptured } from '@/features/lead/useLeadOffer';
+import { getVisitor, rememberVisitor } from '@/lib/visitor';
 import { Counter, Reveal } from '@/components/motion';
 import { formatCurrency, formatCurrencyCompact, formatDuration, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/cn';
@@ -84,7 +85,8 @@ function LeadDialog({
   onClose: () => void;
   onSubmit: (lead: { name: string; phone: string; email?: string }) => void;
 }) {
-  const [name, setName] = useState('');
+  /* Prefilled for a returning visitor downloading a second PDF. Name only. */
+  const [name, setName] = useState(() => getVisitor() ?? '');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -341,6 +343,15 @@ export function ResultScreen({
   const { push } = useToast();
   const { copied, copy } = useCopy();
 
+  /*
+   * Read once on mount, not on every render.
+   *
+   * `handleLead` writes the name partway through this screen's life; re-reading
+   * would make the headline change under the visitor while the PDF downloads,
+   * which is a jarring thing for a heading to do.
+   */
+  const [visitorName] = useState(getVisitor);
+
 
   /**
    * A partial selection has priced partial work, and the screen has to say so.
@@ -369,8 +380,9 @@ export function ResultScreen({
     generateEstimatePdf(result, lead);
     setLeadOpen(false);
     track('lead_submit', { source: 'estimator-pdf', fields: 3 });
-    /* They have given us a number. The behavioural offer must never ask again. */
+    /* They have given us a number. The popup must never ask again. */
     markLeadCaptured();
+    rememberVisitor(lead.name);
 
     /**
      * The PDF is already on their machine, so the capture never blocks it — but
@@ -438,9 +450,18 @@ export function ResultScreen({
 
           <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
+              {/*
+                The same badge, one word warmer for someone who has told us
+                their name. A substitution rather than an added element, so the
+                unpersonalized screen is unchanged down to the pixel.
+              */}
               <Badge variant="brand" size="lg" className="bg-cyan-500 text-white">
                 <Check className="h-3.5 w-3.5" />
-                {complete ? 'Your estimate is ready' : 'Cost of the work you selected'}
+                {complete
+                  ? visitorName
+                    ? `Hi ${visitorName} — your estimate is ready`
+                    : 'Your estimate is ready'
+                  : 'Cost of the work you selected'}
               </Badge>
 
               <p className="num mt-6 text-[clamp(2.25rem,5vw,3.75rem)] font-semibold leading-none tracking-tight">

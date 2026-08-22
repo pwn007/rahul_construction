@@ -5,6 +5,7 @@ import { ArrowUpRight, Calculator, ChevronDown, Menu, Moon, Phone, Search, Sun, 
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui';
 import { Logo } from './Logo';
+import { VisitorChip } from './VisitorChip';
 import { MAIN_NAV, ROUTES, type NavLink as NavLinkType } from '@/constants/routes';
 import { SITE } from '@/constants/site';
 import { useScrollInfo, useLockBodyScroll } from '@/hooks';
@@ -110,6 +111,20 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
+              {/*
+                `xl`, not `lg`, and measured rather than guessed.
+
+                This row is search + theme + the primary CTA. At 1152px the CTA's
+                right edge already sits at 1132px, so a 14-character name pushed
+                it to 1203px and clipped it clean off the viewport — the greeting
+                was costing the site its main call to action. From 1280px up the
+                longest name we store still leaves the CTA at 1260px.
+
+                Between `lg` and `xl` there is no chip: the hero greeting still
+                personalizes that band, and the drawer covers everything below.
+              */}
+              <VisitorChip overDark={overDark} className="hidden xl:block" />
+
               <button
                 onClick={onOpenPalette}
                 aria-label="Search (Command K)"
@@ -253,7 +268,12 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
             className="surface absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l"
           >
             <div className="flex items-center justify-between border-b px-5 py-4">
-              <Logo compact />
+              <div className="flex items-center gap-2">
+                <Logo compact />
+                {/* The mobile home for the greeting. Renders nothing without a name,
+                    so the drawer header is unchanged for everyone else. */}
+                <VisitorChip variant="drawer" className="-ml-0.5" />
+              </div>
               <button onClick={onClose} aria-label="Close menu" className="rounded-md p-2 hover:bg-[rgb(var(--c-text))]/[0.06]">
                 <X className="h-5 w-5" />
               </button>

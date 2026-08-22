@@ -6,6 +6,7 @@ import { leadMeta } from '@/lib/consent';
 import { track, type LeadSource } from '@/lib/analytics';
 import { enquiriesService } from '@/services';
 import { markLeadCaptured } from './useLeadOffer';
+import { rememberVisitor } from '@/lib/visitor';
 import type { Enquiry } from '@/types/domain';
 import { cn } from '@/lib/cn';
 
@@ -73,6 +74,8 @@ export function ShortLeadForm({
       track('lead_submit', { source, fields: 2 });
       /* They have given us a number. Nothing on this site should ask again. */
       markLeadCaptured();
+      /* And we can greet them by name from here on. First name only — see lib/visitor. */
+      rememberVisitor(name.trim());
       setDone(true);
       onDone?.();
     } catch {

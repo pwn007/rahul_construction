@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Counter } from '@/components/motion';
 import { SITE, ACHIEVEMENTS } from '@/constants/site';
 import { usePrefersReducedMotion } from '@/hooks';
+import { useVisitor } from '@/lib/visitor';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { cn } from '@/lib/cn';
 import { HeroScene } from './HeroScene';
@@ -12,6 +13,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const reduced = usePrefersReducedMotion();
+  const visitorName = useVisitor();
 
   useRegisterHeroTone('light');
 
@@ -141,6 +143,31 @@ export function Hero() {
             where the site is. Copy left, picture right.
           */}
           <motion.div className="max-w-xl" style={{ y: reduced ? 0 : copyY }}>
+            {/*
+              The greeting, for someone who has already given us their name.
+
+              Hidden under `[@media(max-height:680px)]` — the same query the
+              headline below uses to shrink itself on short viewports. That is
+              the whole safety argument for putting anything above the h1: on a
+              laptop or a landscape phone, where vertical space is the binding
+              constraint, this line simply is not there, so it can never push
+              the headline down or squeeze the scene. Everywhere else it costs
+              one line of overline-sized type.
+
+              Delay 0.1 puts it one step ahead of the headline's 0.18, so it
+              reads as the first beat of the existing entrance rather than a
+              separate animation arriving late.
+            */}
+            {visitorName && (
+              <motion.p
+                initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
+                className="overline mb-3 text-cyan-700 [@media(max-height:680px)]:hidden dark:text-cyan-400"
+              >
+                Hi, {visitorName}
+              </motion.p>
+            )}
             {/*
               Straight from the portfolio cover (Port1.pdf p.1): BUILDING in navy
               over DREAMS in cyan, with "From idea to reality, without the
