@@ -106,7 +106,15 @@ export function ProcessSection() {
             className="pointer-events-none absolute left-5 top-5 hidden h-px right-[calc((100%-6.25rem)/6-1.25rem)] lg:block"
             aria-hidden
           >
-            <div className="h-full w-full bg-white/12" />
+            {/*
+              `/15`, not `/12`. Tailwind's opacity scale here has no 12 step, so
+              `bg-white/12` compiled to no rule at all and this track has been
+              invisible since it was written — the line visible on desktop is the
+              cyan progress fill in front of it, not the track. 21 other `/12`
+              colour utilities across the codebase are dead the same way; see the
+              handover note.
+            */}
+            <div className="h-full w-full bg-white/15" />
             <motion.div
               className="absolute inset-y-0 left-0 origin-left bg-cyan-500"
               style={{ width: reduced ? '100%' : progressWidth }}
@@ -114,37 +122,75 @@ export function ProcessSection() {
           </div>
 
           {/*
-            Below `md` the cards bleed to the screen edge and snap-scroll, which
-            reads as "there is more to the right" without needing arrows.
-            `scroll-px` matters: without it the first card snaps to the scrollport
-            edge and eats the container's own left padding.
+            Three layouts, one list.
+
+            Below `md` this was a snap-scrolling swipe row. It measured 4.36 screens
+            wide with 1310px hidden, no dots, no counter and no arrows — five of the
+            six stages were off-screen behind a gesture nothing invited, and the only
+            hint was the second card sliced mid-word. Worse, a horizontal scroller
+            inside a vertical page fights the thumb on any diagonal swipe, which is
+            what made the page feel like it was sliding sideways.
+
+            It is now a vertical timeline: nodes on a spine, read by scrolling the way
+            the rest of the page scrolls. Taller — about 950px against 543px — and
+            that is the trade the original rail was avoiding, but a section that can
+            be read beats a compact one that cannot. `ServicesPage` already stacks
+            these same six steps on mobile, so this also stops the home page being the
+            odd one out.
+
+            `md` (3×2) and `lg` (six across) are untouched.
           */}
-          <ol className="-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-5 overflow-x-auto px-5 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-12 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-6 lg:gap-x-5">
+          <ol className="flex flex-col gap-6 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-12 lg:grid-cols-6 lg:gap-x-5">
             {PROCESS_STEPS.map((step, i) => (
               <Reveal
                 key={step.step}
                 as="li"
                 delay={i * 0.06}
                 y={30}
-                className="w-[68vw] max-w-[260px] shrink-0 snap-start md:w-auto md:max-w-none"
+                className="relative grid grid-cols-[2rem_1fr] items-start gap-x-4 md:block"
               >
-                <span className="relative flex h-10 w-10 items-center justify-center rounded-full border border-cyan-500/40 bg-ink-950">
-                  <Icon name={step.icon} className="h-[18px] w-[18px] text-cyan-500" />
+                {/*
+                  The spine, drawn per row rather than as one absolute line down
+                  the list.
+
+                  A single line spanning the wrapper cannot know where the last
+                  node is — it would run past it to the bottom of the last
+                  description, which is the same trailing-off problem the
+                  horizontal rail's `calc()` exists to solve. A segment per row,
+                  omitted on the final one, terminates itself.
+
+                  `top-8` starts it below the 2rem node; `-bottom-6` carries it
+                  across the `gap-6` to the next node's top edge. The two must
+                  stay in step — a mismatch leaves a visible break in the spine.
+                */}
+                {i < PROCESS_STEPS.length - 1 && (
+                  <span className="pointer-events-none absolute -bottom-6 left-4 top-8 w-px bg-white/15 md:hidden" aria-hidden />
+                )}
+
+                {/* 2rem on mobile so the spine reads as a spine rather than a margin;
+                    back to 2.5rem from `md`, where the node sits above its own column. */}
+                <span className="relative flex h-8 w-8 items-center justify-center rounded-full border border-cyan-500/40 bg-ink-950 md:h-10 md:w-10">
+                  <Icon name={step.icon} className="h-4 w-4 text-cyan-500 md:h-[18px] md:w-[18px]" />
                 </span>
 
-                {/* Up from `text-caption`/cyan-500. It carries the sequence and the
-                    timeline — the two things a reader scans this section for — and at
-                    13px it was the first thing to disappear. cyan-400 is 8.9:1 on
-                    ink-950 against cyan-500's 7.4:1. */}
-                <p className="num mt-5 text-sm font-medium text-cyan-400">
-                  {String(step.step).padStart(2, '0')} · {step.duration}
-                </p>
-                {/* Titles run to two lines in a sixth-width column; the min-height keeps
-                    every description starting on the same baseline across the rail. */}
-                <h3 className="mt-1.5 font-display text-heading-md font-semibold text-white lg:min-h-[3.5rem]">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-[0.9375rem] leading-relaxed text-white/70">{step.description}</p>
+                <div className="min-w-0">
+                  {/* Up from `text-caption`/cyan-500. It carries the sequence and the
+                      timeline — the two things a reader scans this section for — and at
+                      13px it was the first thing to disappear. cyan-400 is 8.9:1 on
+                      ink-950 against cyan-500's 7.4:1.
+
+                      No top margin on mobile: the number sits on the node's own line,
+                      which is what ties a row to its point on the spine. */}
+                  <p className="num text-sm font-medium text-cyan-400 md:mt-5">
+                    {String(step.step).padStart(2, '0')} · {step.duration}
+                  </p>
+                  {/* The min-height aligns descriptions across a six-across row. In a
+                      stack there is no row to align to, so it would only add dead space. */}
+                  <h3 className="mt-1.5 font-display text-heading-md font-semibold text-white lg:min-h-[3.5rem]">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[0.9375rem] leading-relaxed text-white/70">{step.description}</p>
+                </div>
               </Reveal>
             ))}
           </ol>

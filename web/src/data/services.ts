@@ -159,13 +159,13 @@ export const services: Service[] = [
     featured: true,
     heroImage: IMG.hero('service-pm'),
     summary:
-      'Live site cameras, weekly reporting, milestone tracking and a client portal — so distance, travel or a busy job never means losing visibility.',
+      'Live site cameras, daily reporting, milestone tracking and a client portal — so distance, travel or a busy job never means losing visibility.',
     description:
-      'Most construction anxiety is really an information problem. You cannot see the site, so you assume the worst. We fix that with real infrastructure: cameras on site, a weekly photo report, a milestone plan you can check against, and a portal that shows progress, documents and payments in one place.',
+      'Most construction anxiety is really an information problem. You cannot see the site, so you assume the worst. We fix that with real infrastructure: cameras on site, a daily photo report, a milestone plan you can check against, and a portal that shows progress, documents and payments in one place.',
     features: [
       { title: 'Live site monitoring', description: 'Camera access to your site from anywhere, at any hour.', icon: 'Video' },
       { title: 'Milestone tracking', description: 'Planned versus actual on every stage, with delays flagged early.', icon: 'GanttChartSquare' },
-      { title: 'Weekly reports', description: 'Photographs, work done, work planned, and anything blocking progress.', icon: 'FileBarChart' },
+      { title: 'Daily reports', description: 'Photographs, work done, work planned, and anything blocking progress.', icon: 'FileBarChart' },
       { title: 'Quality checkpoints', description: 'Engineer sign-off at every stage, recorded and shared.', icon: 'BadgeCheck' },
       { title: 'Document vault', description: 'Drawings, approvals, invoices and warranties in one organised place.', icon: 'FolderOpen' },
       { title: 'Single point of contact', description: 'One project manager who knows your project and answers the phone.', icon: 'Headset' },
@@ -173,7 +173,7 @@ export const services: Service[] = [
     deliverables: [
       'Baseline milestone programme',
       'Live camera access credentials',
-      'Weekly progress report with photographs',
+      'Daily progress report with photographs',
       'Planned vs actual variance tracking',
       'Stage-wise quality sign-off records',
       'Client portal access',
@@ -183,13 +183,13 @@ export const services: Service[] = [
     process: [
       { step: 1, title: 'Baseline plan', description: 'The milestone programme everything is measured against.' },
       { step: 2, title: 'Site setup', description: 'Cameras installed and portal access issued.' },
-      { step: 3, title: 'Weekly cadence', description: 'Reports every week, escalation the moment a milestone slips.' },
+      { step: 3, title: 'Daily cadence', description: 'Reports every day, escalation the moment a milestone slips.' },
       { step: 4, title: 'Quality gates', description: 'No stage closes without documented engineer sign-off.' },
       { step: 5, title: 'Closure', description: 'Snagging, documentation handover and warranty registration.' },
     ],
     faqIds: ['faq_process_1', 'faq_process_2'],
     stats: [
-      { label: 'Report frequency', value: 'Weekly' },
+      { label: 'Report frequency', value: 'Daily' },
       { label: 'Camera access', value: '24 × 7' },
       { label: 'On-time delivery', value: '80+ projects' },
     ],

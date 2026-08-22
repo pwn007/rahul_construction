@@ -149,13 +149,21 @@ export function ProjectsHero({
               still drifts as a unit rather than shearing against itself. */}
           <div className="lg:col-span-6">
             <Parallax speed={0.06}>
-              <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0">
+              {/*
+                A three-up grid at every width, not a swipe row below `sm`.
+
+                As a scroller this measured 2.25 screens with 782px hidden, so two
+                of the three covers sat off-screen behind a gesture with no
+                affordance — on a hero whose entire job is showing the work. Three
+                narrow columns fit a 360px phone comfortably at this crop, and the
+                cluster stays one `Parallax` unit either way.
+              */}
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
                 {covers.map((project, i) => (
                   <CoverCard
                     key={project.id}
                     project={project}
                     index={i}
-                    className="w-[76%] shrink-0 snap-start sm:w-auto"
                     ratio="aspect-[4/5]"
                     priority={i === 0}
                   />

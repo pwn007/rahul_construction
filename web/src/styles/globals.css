@@ -351,6 +351,9 @@
     -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
   }
+  /* Both edges, for content that genuinely runs off both sides — the logo
+     marquee and the atlas chips. Not for a filter rail parked at scroll 0:
+     there it dims the first chip, which is the one you most need to read. */
   .mask-fade-x {
     -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
     mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);

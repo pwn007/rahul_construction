@@ -256,7 +256,17 @@ export default function EstimatorPage() {
 
       <section id="wizard" className="section-sm">
         <div className="container">
-          {/* Step indicator */}
+          {/*
+            Step indicator.
+
+            `min-w-max` inside a scroller meant this ran 135px past a 390px phone,
+            so the third step — the one telling you the estimate is coming — was
+            off-screen. A progress indicator you have to scroll to see the end of
+            is not doing its job. It now fits: labels are hidden below `sm` except
+            on the active step, which is the only one whose name you need, and the
+            connectors shrink. The scroller stays as a safety net for very narrow
+            devices rather than as the normal case.
+          */}
           <div className="mb-10 overflow-x-auto no-scrollbar">
             <ol className="flex min-w-max items-center gap-1">
               {steps.map((s, i) => {
@@ -269,7 +279,7 @@ export default function EstimatorPage() {
                       disabled={i > step}
                       aria-current={active ? 'step' : undefined}
                       className={cn(
-                        'flex items-center gap-2.5 rounded-full px-3 py-2 text-sm transition-colors',
+                        'flex items-center gap-2 rounded-full px-2 py-2 text-sm transition-colors sm:gap-2.5 sm:px-3',
                         active && 'bg-cyan-500/10 font-medium text-cyan-700 dark:text-cyan-300',
                         done && 'text-[rgb(var(--c-text-muted))] hover:text-cyan-700',
                         i > step && 'cursor-not-allowed text-subtle',
@@ -284,10 +294,19 @@ export default function EstimatorPage() {
                       >
                         {done ? <Check className="h-3 w-3" strokeWidth={3} /> : i + 1}
                       </span>
-                      {s.label}
+                      {/* The inactive labels are hidden, not removed: a screen reader
+                          still reads "Your materials", it simply does not take up
+                          130px of a 390px viewport to say so. */}
+                      <span className={cn('whitespace-nowrap', !active && 'sr-only sm:not-sr-only')}>{s.label}</span>
                     </button>
                     {i < steps.length - 1 && (
-                      <span className={cn('mx-1 h-px w-6 shrink-0', i < step ? 'bg-cyan-500' : 'bg-[rgb(var(--c-border))]')} aria-hidden />
+                      <span
+                        className={cn(
+                          'mx-0.5 h-px w-3 shrink-0 sm:mx-1 sm:w-6',
+                          i < step ? 'bg-cyan-500' : 'bg-[rgb(var(--c-border))]',
+                        )}
+                        aria-hidden
+                      />
                     )}
                   </li>
                 );

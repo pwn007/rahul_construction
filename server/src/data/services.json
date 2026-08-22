@@ -323,8 +323,8 @@
     "order": 4,
     "featured": true,
     "heroImage": "https://picsum.photos/seed/service-pm/1920/1080",
-    "summary": "Live site cameras, weekly reporting, milestone tracking and a client portal — so distance, travel or a busy job never means losing visibility.",
-    "description": "Most construction anxiety is really an information problem. You cannot see the site, so you assume the worst. We fix that with real infrastructure: cameras on site, a weekly photo report, a milestone plan you can check against, and a portal that shows progress, documents and payments in one place.",
+    "summary": "Live site cameras, daily reporting, milestone tracking and a client portal — so distance, travel or a busy job never means losing visibility.",
+    "description": "Most construction anxiety is really an information problem. You cannot see the site, so you assume the worst. We fix that with real infrastructure: cameras on site, a daily photo report, a milestone plan you can check against, and a portal that shows progress, documents and payments in one place.",
     "features": [
       {
         "title": "Live site monitoring",
@@ -337,7 +337,7 @@
         "icon": "GanttChartSquare"
       },
       {
-        "title": "Weekly reports",
+        "title": "Daily reports",
         "description": "Photographs, work done, work planned, and anything blocking progress.",
         "icon": "FileBarChart"
       },
@@ -360,7 +360,7 @@
     "deliverables": [
       "Baseline milestone programme",
       "Live camera access credentials",
-      "Weekly progress report with photographs",
+      "Daily progress report with photographs",
       "Planned vs actual variance tracking",
       "Stage-wise quality sign-off records",
       "Client portal access",
@@ -380,8 +380,8 @@
       },
       {
         "step": 3,
-        "title": "Weekly cadence",
-        "description": "Reports every week, escalation the moment a milestone slips."
+        "title": "Daily cadence",
+        "description": "Reports every day, escalation the moment a milestone slips."
       },
       {
         "step": 4,
@@ -401,7 +401,7 @@
     "stats": [
       {
         "label": "Report frequency",
-        "value": "Weekly"
+        "value": "Daily"
       },
       {
         "label": "Camera access",
