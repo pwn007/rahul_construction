@@ -29,6 +29,7 @@ import {
 } from '@/services';
 import type { ResourceConfig } from '../types';
 import { JAIPUR_DISTRICTS } from '@/data/jaipur-districts';
+import { projects } from '@/data/projects';
 
 const STATUS_OPTIONS = [
   { value: 'published', label: 'Published' },
@@ -395,8 +396,25 @@ export const MODULES: ResourceConfig<never>[] = [
         defaultValue: 'en',
       },
       { name: 'rating', label: 'Rating', type: 'rating', span: 8, section: 'Basics', defaultValue: 5 },
+      /* What the card's "See the project" link points at. `span: 12` because
+         Basics' rows are already full at 6+6 / 12 / 4+8 — a 6 here would leave
+         the last row 14 columns wide and wrap it. */
+      {
+        name: 'projectId',
+        label: 'Linked project',
+        type: 'select',
+        span: 12,
+        section: 'Basics',
+        options: projects.map((p) => ({ value: p.id, label: `${p.title} — ${p.locality}` })),
+      },
       { name: 'avatar', label: 'Client photo', type: 'image', span: 6, section: 'Media' },
       { name: 'image', label: 'Project image', type: 'image', span: 6, section: 'Media' },
+      /* Paste a YouTube/Vimeo link or a direct file URL — VideoLightbox works
+         out which player to use. Leave blank and the card shows its poster with
+         no play button, which is the normal case. */
+      { name: 'videoUrl', label: 'Video URL (YouTube, Vimeo or file)', type: 'url', span: 12, section: 'Media' },
+      { name: 'videoPoster', label: 'Video poster (falls back to project image)', type: 'image', span: 6, section: 'Media' },
+      { name: 'videoDuration', label: 'Video length', type: 'text', span: 6, section: 'Media', placeholder: '1:24' },
       { name: 'featured', label: 'Show on homepage', type: 'boolean', span: 6, section: 'Publishing' },
       orderField,
       statusField,

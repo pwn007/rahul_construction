@@ -56,6 +56,31 @@ const PINNED: Record<string, string> = {
   'estimator-hero': 'detail-03.webp',
   'about-studio': 'detail-04.webp',
   'careers-team': 'construction-05.webp',
+
+  /*
+   * MEPF.
+   *
+   * `home-mepf` is the home-page band: a line drawing of a cutaway house, then a
+   * photograph of an empty services ceiling, now a photograph of that ceiling
+   * with someone working in it. A new filename each time, never an overwrite —
+   * `/images/*` is served `immutable` for a year, so a reused name would keep
+   * showing the old picture to anyone who had already loaded it. It has to
+   * be pinned: no `ROUTES` pattern matches it, so the catch-all would send it to
+   * the residential pool.
+   *
+   * The other two are pinned defensively, not to change anything. Adding
+   * `mepf-08` took the pool from seven files to eight, and the file a seed lands
+   * on is `hash(seed) % pool.length` — so without these, `service-mepf` would
+   * have slid from mepf-07 to mepf-04 and `post-mepf` from mepf-05 to mepf-07,
+   * silently, on an unrelated commit. `PINNED` is read before `poolFor`, so this
+   * holds them where they already were.
+   */
+  'home-mepf': 'mepf-09.webp',
+  /* The inset beside it: people reading the drawing the services were set out
+     from. Free stock has no single frame with both, so the band uses two. */
+  'home-mepf-team': 'mepf-10.webp',
+  'service-mepf': 'mepf-07.webp',
+  'post-mepf': 'mepf-05.webp',
 };
 
 /** Explicit routes win. Ordered: first matching pattern decides. */

@@ -56,10 +56,23 @@ export function Reveal({
 }) {
   const reduced = usePrefersReducedMotion();
 
+  /*
+   * Both variants must always declare the SAME properties — only the values may
+   * differ on `reduced`.
+   *
+   * `usePrefersReducedMotion()` reads `matchMedia`, which the server cannot, so it
+   * reports `false` on the first render and flips on the client a tick later. If
+   * the two variants disagree about *which* properties they animate, framer has
+   * already written the first render's property inline by then, and the new
+   * variants — not mentioning it — never clear it. The element is stranded at its
+   * `initial` value for good: a `MaskImage` clipped to `inset(100%)`, i.e.
+   * invisible, or a `Reveal` frozen 24px low. Keeping the shape identical makes
+   * that impossible.
+   */
   const props = {
     className,
-    initial: reduced ? { opacity: 0 } : { opacity: 0, y, x },
-    whileInView: reduced ? { opacity: 1 } : { opacity: 1, y: 0, x: 0 },
+    initial: { opacity: 0, y: reduced ? 0 : y, x: reduced ? 0 : x },
+    whileInView: { opacity: 1, y: 0, x: 0 },
     viewport: { once, margin: '0px 0px -10% 0px' },
     transition: { duration: reduced ? 0.2 : duration, delay, ease: EASE },
   } as const;
@@ -103,9 +116,10 @@ export function StaggerGroup({
       {Children.map(children, (child, i) => (
         <motion.div
           key={i}
+          /* Same rule as Reveal above: identical property shape in both variants. */
           variants={{
-            hidden: reduced ? { opacity: 0 } : { opacity: 0, y },
-            show: reduced ? { opacity: 1 } : { opacity: 1, y: 0 },
+            hidden: { opacity: 0, y: reduced ? 0 : y },
+            show: { opacity: 1, y: 0 },
           }}
           transition={{ duration: reduced ? 0.2 : 0.75, ease: EASE }}
         >
@@ -202,8 +216,10 @@ export function MaskImage({
     <motion.div
       ref={ref}
       className={cn('relative overflow-hidden', ratio, className)}
-      initial={reduced ? { opacity: 0 } : { clipPath: 'inset(100% 0% 0% 0%)' }}
-      whileInView={reduced ? { opacity: 1 } : { clipPath: 'inset(0% 0% 0% 0%)' }}
+      /* Same rule as Reveal above. Reduced motion fades an already-open frame;
+         full motion wipes an opaque one. Both name opacity and clipPath. */
+      initial={{ opacity: reduced ? 0 : 1, clipPath: reduced ? 'inset(0% 0% 0% 0%)' : 'inset(100% 0% 0% 0%)' }}
+      whileInView={{ opacity: 1, clipPath: 'inset(0% 0% 0% 0%)' }}
       viewport={{ once: true, margin: '0px 0px -8% 0px' }}
       transition={{ duration: reduced ? 0.2 : 1.1, delay, ease: EASE }}
     >

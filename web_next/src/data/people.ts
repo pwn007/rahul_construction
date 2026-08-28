@@ -21,6 +21,23 @@ export const testimonials: Testimonial[] = [
     projectId: 'prj_mansarovar',
     avatar: monogram('Dr. Ashok Verma'),
     image: IMG.card('mansarovar-cover'),
+    /*
+     * ⚠️ PLACEHOLDER — must not go live.
+     *
+     * This is 24 seconds of drone b-roll over earthworks. It is here so the
+     * video card can be seen working, and for no other reason.
+     *
+     * It is deliberately NOT footage of a person talking. Dr. Ashok Verma is a
+     * real, named client; putting a stranger's talking head under his name would
+     * fabricate testimony from an identifiable individual — the same objection
+     * `monogram()` in lib/media.ts documents for stock faces, only worse,
+     * because a video reads as evidence.
+     *
+     * Replace with the client's own recorded testimonial before launch, or
+     * delete this line and the file at public/video/.
+     */
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    videoDuration: '0:24',
     featured: true,
     order: 1,
   },
@@ -34,6 +51,19 @@ export const testimonials: Testimonial[] = [
       'Hamein ek aise partner ki talash thi jo quality aur transparency dono ka dhyaan rakhe. Neetu Archstone ne har mod par hamara bharosa banaye rakha. Kaam ki finishing aur professionalism lajawab hai.',
     avatar: monogram('Uday Singh Chauhan'),
     image: IMG.card('jagatpura-cover'),
+    /*
+     * ⚠️ DEMO LINK — a guess, not a record.
+     *
+     * This is the one testimonial that was written without a `projectId`. Its
+     * cover image is already Jagatpura's, so that is very likely what the author
+     * meant — but the locality on the card reads "Mansarovar", so the two do not
+     * agree and neither of them is evidence.
+     *
+     * It is here so the fourth card has a working link to demonstrate. Ask the
+     * client which project is actually his and set it from Admin → Testimonials
+     * → Linked project.
+     */
+    projectId: 'prj_jagatpura',
     featured: true,
     order: 2,
   },

@@ -171,7 +171,6 @@ export function ServicesView() {
                   </div>
                   <h3 className="mt-4 font-display text-heading-md font-semibold">{step.title}</h3>
                   <p className="mt-2 text-caption leading-relaxed text-muted">{step.description}</p>
-                  <p className="mt-4 border-t pt-3 text-caption text-cyan-700 dark:text-cyan-400">{step.duration}</p>
                 </div>
               </Reveal>
             ))}

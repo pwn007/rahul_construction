@@ -6,7 +6,7 @@ import { IMG } from '@/lib/media';
 
 export const metadata: Metadata = buildMetadata(
   {
-    title: 'Turnkey Construction & Architecture in Jaipur',
+    title: 'Design & Construction Company',
     description: SITE.description,
     image: IMG.wide('og-home'),
   },

@@ -1,13 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowUpRight, ChevronRight, Quote, Star } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, ChevronRight, Play, Quote, Star } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Badge, Button } from '@/components/ui';
 import { MaskImage, Reveal, SplitText, TiltCard } from '@/components/motion';
 import { DimensionLine } from './DimensionLine';
+import { VideoLightbox, resolveVideo } from './VideoLightbox';
 import { ROUTES } from '@/constants/routes';
 import { formatNumber } from '@/lib/format';
+import { projects } from '@/data/projects';
 import type { Project, Testimonial } from '@/types/domain';
 import type { ReactNode } from 'react';
 
@@ -17,12 +20,15 @@ export { Footer } from './Footer';
 export { FloatingRail, CommandPalette, useCommandPalette } from './Chrome';
 export { StickyContactBar } from './StickyContactBar';
 export { ConsentCheckbox, CONSENT_REQUIRED } from './ConsentCheckbox';
-/* BuildingSystems is gone — the isometric house at features/mepf/MepfTeaser is
-   now the site's only MEP illustration. Two drawings of the same four services
-   meant two files to keep in step and a visitor learning the notation twice. */
+/* BuildingSystems is gone — the isometric house at features/mepf/scene/HouseIso
+   is now the site's only MEP illustration. Two drawings of the same four
+   services meant two files to keep in step and a visitor learning the notation
+   twice. The house lives on /services/mepf-consultancy only; the home-page band
+   shows a photograph of a real services ceiling instead. */
 export { PageHero, type PageHeroProps, type HeroStat } from './PageHero';
 export { PackageCard } from './PackageCard';
 export { PackagePlans } from './PackagePlans';
+export { TestimonialBand } from './TestimonialBand';
 
 /* ==================================================================== */
 /* SectionHeader                                                         */
@@ -190,33 +196,158 @@ export function ProjectCard({ project, index = 0 }: { project: Project; index?: 
 
 export function TestimonialCard({ testimonial, className }: { testimonial: Testimonial; className?: string }) {
   const isDevanagari = testimonial.language === 'hi';
+  const [playing, setPlaying] = useState(false);
+
+  /*
+   * The media panel.
+   *
+   * `image` has held each client's own project cover since the data was written
+   * and was never rendered anywhere — so the panel had its content waiting for
+   * it. A project photograph is also the honest thing to put here: these are
+   * real, named clients with no portraits on file, and a stock face under a real
+   * name is the exact failure `monogram()` in lib/media.ts exists to avoid.
+   * Their house, not a stranger's face.
+   *
+   * When a real recorded testimonial arrives, `videoPoster` overrides it and the
+   * same panel becomes the video's poster frame. The layout does not change —
+   * that is the whole point of building it this way now.
+   */
+  const poster = testimonial.videoPoster ?? testimonial.image ?? testimonial.avatar;
+  const hasVideo = Boolean(testimonial.videoUrl && resolveVideo(testimonial.videoUrl));
+
+  /*
+   * `projectId` has been on this type since the data was written and nothing has
+   * ever read it. Now it earns its keep: the visitor reads what a client said,
+   * then goes and looks at the work being described.
+   *
+   * `ROUTES.project` takes a slug, not an id, so the record has to be resolved
+   * first. Optional throughout — a testimonial with no project simply has no
+   * link, which is the honest outcome rather than a guessed one.
+   */
+  const project = testimonial.projectId
+    ? projects.find((p) => p.id === testimonial.projectId)
+    : undefined;
+
   return (
     <figure
       className={cn(
-        'surface flex h-full flex-col rounded-xl border p-7 shadow-sm transition-all duration-500 ease-out-expo hover:border-cyan-500/40 hover:shadow-md',
+        /*
+          Side by side only from `lg`.
+
+          It was `sm:flex-row`, which turned on at 640px — but from `md` the band
+          is already two columns, so each card was ~350px wide and a 38% media
+          split left barely 220px for the quote. The photographs stretched into
+          tall narrow strips and the client names ran out of the card. Below
+          `lg` the media goes back on top, where it has the full card width.
+        */
+        'surface group/t flex h-full flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-500 ease-out-expo hover:border-cyan-500/40 hover:shadow-md lg:flex-row',
         className,
       )}
     >
-      <Quote className="h-7 w-7 shrink-0 text-cyan-500/30" aria-hidden />
-      <blockquote
-        className={cn('mt-4 flex-1 text-[0.9375rem] leading-relaxed text-[rgb(var(--c-text-muted))]', isDevanagari && 'font-deva')}
-      >
-        {testimonial.quote}
-      </blockquote>
-      <div className="mt-6 flex items-center gap-1" aria-label={`${testimonial.rating} out of 5 stars`}>
-        {Array.from({ length: testimonial.rating }).map((_, i) => (
-          <Star key={i} className="h-4 w-4 fill-warning text-warning" aria-hidden />
-        ))}
-      </div>
-      <figcaption className="mt-4 flex items-center gap-3 border-t pt-4">
-        {testimonial.avatar && (
-          <img src={testimonial.avatar} alt="" className="h-10 w-10 rounded-full object-cover" loading="lazy" />
-        )}
-        <div>
-          <p className="text-sm font-semibold">{testimonial.name}</p>
-          <p className="text-caption text-subtle">{testimonial.locality}</p>
+      {poster && (
+        <div className="relative h-48 shrink-0 lg:h-auto lg:w-[34%] xl:w-[38%]">
+          <img
+            src={poster}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover lg:absolute lg:inset-0"
+          />
+
+          {/*
+            A photograph of someone's project that does nothing when clicked is a
+            small lie about what it is. So it links — but only where the panel is
+            not already the play button, which cannot share the space.
+
+            `tabIndex={-1}` and `aria-hidden` because this goes exactly where the
+            caption link goes. A mouse gets a bigger target; a keyboard or screen
+            reader gets one link per card instead of the same destination twice.
+          */}
+          {project && !hasVideo && (
+            <Link
+              href={ROUTES.project(project.slug)}
+              tabIndex={-1}
+              aria-hidden
+              className="absolute inset-0"
+            />
+          )}
+
+          {hasVideo && (
+            <>
+              <button
+                type="button"
+                onClick={() => setPlaying(true)}
+                aria-label={`Play video testimonial from ${testimonial.name}`}
+                className="absolute inset-0 flex items-center justify-center bg-ink-950/20 transition-colors duration-500 hover:bg-ink-950/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
+              >
+                {/* `ml-0.5` optically centres a triangle in a circle; `fill-current`
+                    makes it solid. Lifted from the gallery so the site has one
+                    play button, not two. */}
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-navy-800 shadow-md transition-transform duration-500 ease-out-expo group-hover/t:scale-105">
+                  <Play className="ml-0.5 h-5 w-5 fill-current" />
+                </span>
+              </button>
+              {testimonial.videoDuration && (
+                <span className="num pointer-events-none absolute right-3 top-3 rounded bg-ink-950/70 px-2 py-0.5 text-[0.7rem] text-white backdrop-blur-sm">
+                  {testimonial.videoDuration}
+                </span>
+              )}
+            </>
+          )}
         </div>
-      </figcaption>
+      )}
+
+      <div className="flex flex-1 flex-col p-6 lg:p-7">
+        <Quote className="h-7 w-7 shrink-0 text-cyan-500/30" aria-hidden />
+        <blockquote
+          className={cn('mt-4 flex-1 text-[0.9375rem] leading-relaxed text-[rgb(var(--c-text-muted))]', isDevanagari && 'font-deva')}
+        >
+          {testimonial.quote}
+        </blockquote>
+        <div className="mt-6 flex items-center gap-1" aria-label={`${testimonial.rating} out of 5 stars`}>
+          {Array.from({ length: testimonial.rating }).map((_, i) => (
+            <Star key={i} className="h-4 w-4 fill-warning text-warning" aria-hidden />
+          ))}
+        </div>
+        <figcaption className="mt-4 flex items-center gap-3 border-t pt-4">
+          {testimonial.avatar && (
+            <img src={testimonial.avatar} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" loading="lazy" />
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">{testimonial.name}</p>
+            <p className="truncate text-caption text-subtle">{testimonial.locality}</p>
+          </div>
+        </figcaption>
+
+        {/*
+          Outside the figcaption: that element is the attribution of the quote,
+          and a link to a project page is not part of who said it.
+
+          The project is named rather than hidden behind "View project" — the
+          point of this link is that a visitor can check the claim, so it should
+          say what they are about to be shown. Naming it also means the visible
+          text is the whole accessible name, with no aria-label to keep in step.
+        */}
+        {project && (
+          <Link
+            href={ROUTES.project(project.slug)}
+            className="mt-4 inline-flex items-center gap-1.5 self-start text-caption font-medium text-cyan-700 link-underline dark:text-cyan-400"
+          >
+            See the project · {project.title}
+            <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+          </Link>
+        )}
+      </div>
+
+      {testimonial.videoUrl && (
+        <VideoLightbox
+          open={playing}
+          onClose={() => setPlaying(false)}
+          url={testimonial.videoUrl}
+          title={`${testimonial.name} — ${testimonial.locality}`}
+          poster={poster}
+        />
+      )}
     </figure>
   );
 }

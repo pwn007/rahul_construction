@@ -1,12 +1,23 @@
 # Image attribution
 
 All imagery in `public/images` is curated from **Wikimedia Commons**, including its
-Unsplash CC0 imports. Files were downsized to 1500 px and recompressed for the web, and
-are served from this project’s own origin (no hotlinking).
+Unsplash CC0 imports — with two exceptions — `mepf-09.webp` from Unsplash direct and `mepf-10.webp` from Pexels. Files
+were downsized to 1500 px and recompressed for the web, and are served from this project’s
+own origin (no hotlinking).
 
 > **Before commercial launch:** verify each licence. CC BY and CC BY-SA require visible
 > attribution; CC0 and public-domain files do not. Replacing these with the client’s own
 > project photography removes the obligation entirely.
+
+> **The `mepf-*` block is the one that needs attention.** Every other pool is CC0. All seven
+> sprinkler photos (`mepf-01`–`mepf-07`) are CC BY or CC BY-SA, which require attribution the
+> reader can see — and no photograph on this site currently renders a credit anywhere. Two of
+> them ship today: `mepf-07` on `/services/mepf-consultancy`, `mepf-05` on the MEPF blog post.
+> Either add a visible credit, or replace those two the way `mepf-09` was sourced.
+>
+> `mepf-01`, `-02`, `-03`, `-04` and `-06` are in the pool but no seed resolves to them, so
+> they ship ~289 KB and are never requested. Safe to delete once the two live ones are dealt
+> with.
 
 | File | Source title | Licence | Author |
 | --- | --- | --- | --- |
@@ -55,6 +66,8 @@ are served from this project’s own origin (no hotlinking).
 | `mepf-05.jpg` | [Sprinkler mit Druckbehälter.jpg](https://commons.wikimedia.org/wiki/File:Sprinkler_mit_Druckbeh%C3%A4lter.jpg) | CC BY 4.0 | Gerd Fahrenhorst |
 | `mepf-06.jpg` | [Sprinkler head NH.agr.jpg](https://commons.wikimedia.org/wiki/File:Sprinkler_head_NH.agr.jpg) | CC BY-SA 4.0 | ArnoldReinhold |
 | `mepf-07.jpg` | [UMN-WalterSESprinkler.jpg](https://commons.wikimedia.org/wiki/File:UMN-WalterSESprinkler.jpg) | CC BY-SA 4.0 | SavagePanda845 (Elliot F) |
+| `mepf-09.webp` | [Construction worker on a lift installing ceiling services](https://unsplash.com/photos/5l991aLrCJ8) | Unsplash License — no attribution required | Valentin Lacoste |
+| `mepf-10.webp` | [Engineering team analyzing blueprints at a construction site](https://www.pexels.com/photo/man-and-woman-looking-at-a-blueprint-8961133/) | Pexels License — no attribution required | Mikael Blomkvist |
 | `residential-01.jpg` | [Urban Facades (Unsplash fpReukH1Y5s).jpg](https://commons.wikimedia.org/wiki/File:Urban_Facades_(Unsplash_fpReukH1Y5s).jpg) | CC0 | Eric Stein ericste_in |
 | `residential-02.jpg` | [What's on the other side? We may never know (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:What%27s_on_the_other_side%3F_We_may_never_know_(Unsplash).jpg) | CC0 | Melanie Wasser melwasser |
 | `residential-03.jpg` | [Blue hotel building (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Blue_hotel_building_(Unsplash).jpg) | CC0 | Francesca Saraco fransaraco |

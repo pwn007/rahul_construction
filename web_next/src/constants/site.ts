@@ -52,7 +52,15 @@ export const ACHIEVEMENTS = [
   { value: 98, suffix: '%', label: 'Client Satisfaction', icon: 'Sparkles' },
 ] as const;
 
-/** Differentiators — PDF page 4. */
+/**
+ * Differentiators — PDF page 4.
+ *
+ * ⚠️ Not rendered anywhere. These four were the `WhyChooseUs` cards on the home
+ * page; that section was merged into `OneSystem`, where each claim now hangs off
+ * the discipline that actually owns it (quality → Engineering, transparency →
+ * Execution, on-time → Handover) and "Zero Chaos" is the headline itself. Kept
+ * because it is PDF-sourced copy, not because anything reads it.
+ */
 export const DIFFERENTIATORS = [
   {
     key: 'transparency',
@@ -106,7 +114,14 @@ export const APPROACH = {
   ],
 } as const;
 
-/** What Makes Us Different — PDF page 22. Distinct from the four differentiators on page 4. */
+/**
+ * What Makes Us Different — PDF page 22. Distinct from the four differentiators
+ * on page 4.
+ *
+ * ⚠️ Not rendered anywhere, for the same reason as `DIFFERENTIATORS` above —
+ * these five were the chips in `WhyChooseUs`, and each of them restated a claim
+ * the page already made somewhere else.
+ */
 export const WHAT_MAKES_US_DIFFERENT = [
   'Single point of responsibility',
   'Integrated MEPF solutions',
@@ -182,43 +197,36 @@ export const PROCESS_STEPS = [
     title: 'Understanding Your Vision',
     description: 'Your requirements, lifestyle and goals — mapped before a single line is drawn.',
     icon: 'Target',
-    duration: 'Week 1',
   },
   {
     step: 2,
     title: 'Design & Planning',
-    description: 'Aesthetics, function and Vastu balanced, with structure and MEPF coordinated from day one.',
+    description: 'Aesthetics, function and Vastu resolved together, and signed off before anything is issued to site.',
     icon: 'PencilRuler',
-    duration: 'Weeks 2–6',
   },
   {
     step: 3,
     title: 'Integrated Execution',
     description: 'Civil, MEPF and interiors under one system, so nothing falls between the gaps.',
     icon: 'Hammer',
-    duration: 'Month 2 onward',
   },
   {
     step: 4,
     title: 'Regular Updates',
     description: 'Progress every week, plus live camera access to your site from anywhere.',
     icon: 'RefreshCw',
-    duration: 'Weekly',
   },
   {
     step: 5,
     title: 'On-Time Delivery',
-    description: 'Handover on schedule, against a quality checklist signed off stage by stage.',
+    description: 'Snagging closed and every item on the checklist cleared before you are given the keys.',
     icon: 'CircleCheck',
-    duration: 'Handover',
   },
   {
     step: 6,
     title: 'Free Maintenance',
-    description: 'Twelve months of complimentary service after delivery — our name stays on the building.',
+    description: 'Twelve months of service after you move in, at no cost, on the same phone number.',
     icon: 'Wrench',
-    /* Short enough to stay on one line beside the step number in the six-across rail. */
-    duration: '12 months',
   },
 ] as const;
 

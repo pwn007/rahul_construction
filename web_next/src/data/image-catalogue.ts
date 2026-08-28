@@ -47,7 +47,9 @@ export const IMAGE_POOLS = {
     "mepf-04.webp",
     "mepf-05.webp",
     "mepf-06.webp",
-    "mepf-07.webp"
+    "mepf-07.webp",
+    "mepf-09.webp",
+    "mepf-10.webp"
   ],
   "jaipur": [
     "jaipur-01.webp",

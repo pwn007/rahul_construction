@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Award, Check, Heart, Mail, Linkedin, Shield, Target, Users } from 'lucide-react';
-import { CtaBand, PageHero, SectionHeader, StatTile, TestimonialCard } from '@/components/common';
+import { CtaBand, PageHero, SectionHeader, StatTile, TestimonialBand } from '@/components/common';
 import { Badge, Tabs } from '@/components/ui';
 import { Counter, MaskImage, Reveal, SplitText, StaggerGroup } from '@/components/motion';
 import { ACHIEVEMENTS, DIFFERENTIATORS, SITE } from '@/constants/site';
@@ -286,19 +286,14 @@ export function AboutView() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="section-sm bg-[rgb(var(--c-surface-2))]">
-        <div className="container">
-          <SectionHeader overline="In their words" title="What our clients say" align="center" />
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {testimonials.map((t, i) => (
-              <Reveal key={t.id} delay={i * 0.07}>
-                <TestimonialCard testimonial={t} />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Testimonials — same band as the home page. The overline/title pair is
+          swapped here on purpose: on /about the section IS "what our clients
+          say", where on home that phrase is the label above a broader claim. */}
+      <TestimonialBand
+        overline="In their words"
+        title="What our clients say"
+        items={testimonials}
+      />
 
       {/* Certifications */}
       <section className="section-sm">

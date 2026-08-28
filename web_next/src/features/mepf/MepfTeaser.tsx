@@ -1,51 +1,38 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { Reveal, SplitText } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
 import { SYSTEMS, SYSTEM_ORDER } from '@/data/mepf';
-import { useIsDesktop, usePrefersReducedMotion } from '@/hooks';
-import { HouseIso } from './scene/HouseIso';
-import type { Reg } from './scene/refs';
 import { SYSTEM_STYLES } from './scene/systems';
-
-const ALL_ON = { hvac: false, plumbing: false, electrical: false, fire: false } as const;
+import { MepfFigure } from './MepfFigure';
 
 /**
- * The same house, at rest, wherever MEPF needs to be pointed at.
+ * MEPF on the home page — a photograph of the real thing.
  *
- * ── One drawing, not two ────────────────────────────────────────────────────
- * This replaces `BuildingSystems`, a separately-authored section drawing that
- * made the same argument in a different visual language on the home page and
- * the service page. Two drawings of four services meant two files to keep in
- * step and a visitor learning the notation twice. The house is now the only MEP
- * illustration on the site, and this is it holding still.
+ * ── Why this is a photo and the service page is a drawing ───────────────────
+ * This used to be the isometric cutaway house, holding still. The client's
+ * objection was that it did not look like MEPF: a line drawing explains the
+ * idea, but it does not show a visitor what they are buying. The photograph that
+ * replaced it was closer but still mute — an empty ceiling, nobody working, and
+ * no way to tell which of the things overhead was which.
  *
- * Nothing here animates or responds: no frame loop, no selection, no switches.
- * A teaser that invited interaction would be competing with the thing it exists
- * to send people to — which is now the live twin on the MEPF service page.
+ * So the figure now does both jobs at once. It is a real electrician on a lift
+ * pulling cable into a ceiling that is still open, and the services around him
+ * are named where they hang. See `MepfFigure` for why three are labelled and
+ * not four.
  *
- * ── Why the home page still gets the flat one ───────────────────────────────
- * `MepfTwin` lazy-loads three.js, ~150 KB gzipped. The service page pays that
- * because the drawing *is* its argument; the home page must not, so this stays
- * exactly one static SVG and a link.
+ * The interactive twin stays on `/services/mepf-consultancy` and is still where
+ * this links. The two are not competing: the photograph says "this is MEPF", the
+ * twin says "this is how it works", and that is the right order to meet them in.
+ *
+ * ── Cost ────────────────────────────────────────────────────────────────────
+ * The old rule was that the home page must never pay for three.js (~150 KB
+ * gzipped) and so got the flat SVG rather than the twin. The photograph honours
+ * the same rule for less: 47 KB of WebP, and no scene graph to hydrate.
  */
 export function MepfTeaser() {
-  const reduced = usePrefersReducedMotion();
-  // Same rule as the twin: the labels and furniture only earn their space once
-  // there is space. Below `lg` the panel is half the width and they turn to mush.
-  const isDesktop = useIsDesktop();
-  const nodes = useRef(new Map<string, SVGGraphicsElement>());
-  const reg = useCallback<Reg>(
-    (key) => (el) => {
-      if (el) nodes.current.set(key, el);
-      else nodes.current.delete(key);
-    },
-    [],
-  );
-
   return (
     <section className="section-sm">
       <div className="container">
@@ -75,6 +62,9 @@ export function MepfTeaser() {
                 </p>
               </Reveal>
 
+              {/* These were the drawing's key. With a photograph they read as
+                  category markers instead — and the colours are the same ones the
+                  twin uses on the service page, so the vocabulary holds. */}
               <Reveal delay={0.2}>
                 <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
                   {SYSTEM_ORDER.map((key) => (
@@ -97,16 +87,7 @@ export function MepfTeaser() {
             </div>
 
             <div className="lg:col-span-7">
-              <svg
-                viewBox="-307 -464 1150 948"
-                preserveAspectRatio="xMidYMid meet"
-                className="block h-auto w-full"
-                role="img"
-                aria-label="Cutaway of a two-storey house showing where air, water, power and fire safety run through it."
-                focusable="false"
-              >
-                <HouseIso reg={reg} focus={null} off={ALL_ON} live={false} reduced={reduced} compact={!isDesktop} />
-              </svg>
+              <MepfFigure />
             </div>
           </div>
         </div>

@@ -116,6 +116,16 @@ export interface Testimonial extends BaseEntity {
   projectId?: string;
   avatar?: string;
   image?: string;
+  /**
+   * A recorded testimonial. YouTube, Vimeo or a direct file — `VideoLightbox`
+   * reads the URL and picks the player. Absent on most: the card simply shows
+   * its poster with no play affordance, which is the normal case.
+   */
+  videoUrl?: string;
+  /** Poster frame. Falls back to `image`, the client's own project cover. */
+  videoPoster?: string;
+  /** "1:24". Shown as a chip on the poster, same as the gallery. */
+  videoDuration?: string;
   featured: boolean;
   order: number;
 }

@@ -1,16 +1,10 @@
 'use client';
 
-import { useRef } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Marquee, Reveal, SplitText, StaggerGroup } from '@/components/motion';
-import { SectionHeader } from '@/components/common';
-import { DIFFERENTIATORS, WHAT_MAKES_US_DIFFERENT } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { clientLogos } from '@/data/people';
-import { Icon } from '@/lib/icons';
-import { usePrefersReducedMotion } from '@/hooks';
 
 /* ==================================================================== */
 /* Trust bar                                                             */
@@ -89,18 +83,27 @@ const DISCIPLINES = [
 ] as const;
 
 export function OneSystem() {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduced = usePrefersReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const lineHeight = useTransform(scrollYProgress, [0.15, 0.75], ['0%', '100%']);
-
   return (
-    <section id="intro" ref={ref} className="section-sm relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-grid-light bg-grid opacity-40 dark:opacity-[0.07]" aria-hidden />
+    /*
+      `.section`, not `.section-sm`, and this is the page's only call site.
+      Seven of the eight bands were the same height, which is a large part of
+      why the page read flat. This one is the page's central claim, so it is the
+      one that earns the room.
+
+      `navy-800` rather than `ink-950`: the page had exactly one dark break
+      (`ProcessSection`) against seven near-identical paper grounds — `--c-bg`
+      and `--c-surface-2` differ by 3/255, so the "tint" was never visible. Two
+      different darks give the scroll an actual rhythm, and navy is already the
+      house's second dark ground (`CtaBand`), so nothing new is invented.
+    */
+    <section id="intro" className="section on-dark grain relative overflow-hidden bg-navy-800 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
+      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-cyan-500/20 blur-[120px]" aria-hidden />
+      <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-cyan-500/10 blur-[120px]" aria-hidden />
 
       <div className="container relative">
-        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-5">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
             <Reveal>
               <p className="overline">About Neetu Archstone</p>
             </Reveal>
@@ -112,196 +115,90 @@ export function OneSystem() {
               element's own background. Wrapped around `SplitText`, whose words
               are each their own `inline-block`, the fragmented inline background
               only landed on the second line — so "One point of" rendered fully
-              invisible, every word computing to rgba(0,0,0,0). globals.css also
-              records the class at 1.6:1, under the 3:1 large-text floor. Solid
-              cyan-600 is ~3.2:1 and cannot fail this way.
+              invisible, every word computing to rgba(0,0,0,0). Solid cyan-300 on
+              navy is well clear of the 3:1 large-text floor and cannot fail this
+              way.
             */}
-            <h2 className="mt-4 text-display-md">
+            <h2 className="mt-4 text-display-md text-white">
               <span className="block">
                 <SplitText text="One system." />
               </span>
-              <span className="block text-cyan-600 dark:text-cyan-400">
+              <span className="block text-cyan-300">
                 <SplitText text="One point of responsibility." delay={0.15} />
               </span>
             </h2>
 
             <Reveal delay={0.2}>
-              <p className="mt-6 max-w-lead text-body-lg text-muted">
+              <p className="mt-6 max-w-lead text-body-lg text-white/60">
                 Most projects fail in the gaps — between the architect and the contractor, the contractor and
                 the electrician. We removed the gaps by putting all four disciplines under one roof.
               </p>
             </Reveal>
 
-            {/* The payoff. Without this the list above is a capability boast; with
+            {/* The payoff. Without this the list below is a capability boast; with
                 it, it is the reason the capability matters to the reader. */}
             <Reveal delay={0.3}>
-              <p className="mt-5 max-w-lead font-medium text-[rgb(var(--c-text))]">
+              <p className="mt-5 max-w-lead font-medium text-white">
                 One team owns all four, so there is nobody to chase and nobody to blame.
               </p>
             </Reveal>
+          </div>
 
-            <Reveal delay={0.4}>
-              <Link
-                href={ROUTES.about}
-                className="mt-8 inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400"
-              >
+          {/*
+            Both destinations, kept together deliberately. `/about` and `/vastu`
+            have no other in-content link anywhere on the home page — they were
+            one per section before the merge, and dropping either would leave a
+            page reachable only from the nav.
+          */}
+          <Reveal delay={0.4} className="shrink-0">
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:items-end">
+              <Link href={ROUTES.about} className="inline-flex items-center gap-2 font-medium text-cyan-300 link-underline">
                 Read our story <ArrowUpRight className="h-4 w-4" />
               </Link>
-            </Reveal>
-          </div>
-
-          <div className="lg:col-span-7">
-            <div className="relative pl-10">
-              {/* Progress spine — the visual argument that these are one
-                  continuous system rather than four separate engagements. */}
-              <div className="absolute left-[13px] top-2 h-[calc(100%-1rem)] w-px bg-[rgb(var(--c-border))]" aria-hidden />
-              <motion.div
-                className="absolute left-[13px] top-2 w-px origin-top bg-cyan-500"
-                style={{ height: reduced ? '100%' : lineHeight }}
-                aria-hidden
-              />
-
-              <StaggerGroup stagger={0.1} className="space-y-9">
-                {DISCIPLINES.map((item, i) => (
-                  <div key={item.label} className="relative">
-                    <span className="absolute -left-10 top-1 flex h-[27px] w-[27px] items-center justify-center rounded-full border-2 border-[rgb(var(--c-border))] bg-[rgb(var(--c-bg))]">
-                      <span className="num text-[0.65rem] font-semibold text-subtle">{i + 1}</span>
-                    </span>
-
-                    {/* Discipline left, governing rule right: "what" and "how"
-                        become two columns the eye can run down separately. */}
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b pb-3">
-                      <h3 className="font-display text-heading-lg font-semibold">{item.label}</h3>
-                      <p className="text-caption uppercase tracking-[0.14em] text-cyan-700 dark:text-cyan-400">
-                        {item.focus}
-                      </p>
-                    </div>
-                    <p className="mt-2.5 text-muted">{item.scope}</p>
-                  </div>
-                ))}
-              </StaggerGroup>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/*
- * `Approach` used to be its own section here. It made the same argument as
- * `OneSystem` immediately above it — "every step under one system" versus "one
- * system, one point of responsibility" — so the page said the same thing twice
- * before a visitor had seen a single service. Its focus grid now closes
- * `OneSystem`, and has since been absorbed again into the per-stage `focus`
- * lines there. `APPROACH` stays in site.ts as PDF-sourced reference copy.
- */
-
-/*
- * The "What we offer" services grid used to sit here — five cards under
- * "Comprehensive construction solutions". Removed from the home page at the
- * client's request; /services still carries all five in full, and both the nav
- * and the footer link straight to it.
- */
-
-/* ==================================================================== */
-/* Why choose us                                                         */
-/* ==================================================================== */
-
-/**
- * The single "why us" moment on the page.
- *
- * This section used to be one of four making overlapping claims — it sat between
- * a standalone Vastu teaser, a standalone live-camera section and a standalone
- * testimonial band, all of which were arguing for the same decision. Vastu and
- * the site cameras stay folded in here as proof links into the pages that
- * actually cover them.
- *
- * Social proof was folded in too, as a three-card row, and has since been split
- * back out into its own `Testimonials` band — it was competing with the
- * commitment cards for the same column rather than supporting them.
- */
-export function WhyChooseUs() {
-  return (
-    <section className="section-sm">
-      <div className="container">
-        <div className="grid gap-14 lg:grid-cols-12 lg:items-center">
-          <div className="lg:col-span-5">
-            <SectionHeader
-              overline="Why choose us"
-              title="Built on trust. Driven by excellence."
-              lead="Four commitments we make on every project, written into the agreement — not the marketing."
-            />
-
-            {/* What makes us different — PDF page 22. Chips rather than stacked
-                rows: five short phrases do not each need their own line. */}
-            <StaggerGroup stagger={0.07} className="mt-8 flex flex-wrap gap-2">
-              {WHAT_MAKES_US_DIFFERENT.map((item) => (
-                <span
-                  key={item}
-                  className="surface inline-flex items-center gap-2 rounded-full border py-1.5 pl-2 pr-3.5 text-caption font-medium"
-                >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
-                    <Check className="h-3 w-3" strokeWidth={3} />
-                  </span>
-                  {item}
-                </span>
-              ))}
-            </StaggerGroup>
-
-            <Reveal delay={0.3} className="mt-8">
-              <div className="surface flex items-start gap-4 rounded-xl border border-cyan-500/30 bg-cyan-500/[0.05] p-6">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-white">
-                  <Check className="h-5 w-5" strokeWidth={3} />
-                </span>
-                <div>
-                  <p className="font-display text-heading-md font-semibold">1 year free maintenance</p>
-                  <p className="mt-1.5 text-sm text-muted">
-                    Twelve months of complimentary service and support after delivery. Our name stays on the
-                    building, so we stay responsible for it.
-                  </p>
-                </div>
-              </div>
-            </Reveal>
-
-            {/* The deep-dives that used to be full sections of their own. */}
-            <Reveal delay={0.35} className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-              <Link
-                href={ROUTES.vastu}
-                className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400"
-              >
+              <Link href={ROUTES.vastu} className="inline-flex items-center gap-2 font-medium text-cyan-300 link-underline">
                 Vastu-aligned planning <ArrowUpRight className="h-4 w-4" />
               </Link>
-              {/* Client Portal is commented out for now — see features/portal/PortalLayout.tsx.
-              <Link
-                href={ROUTES.portal}
-                className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400"
-              >
-                Watch your site live <ArrowUpRight className="h-4 w-4" />
-              </Link>
-              */}
-            </Reveal>
-          </div>
-
-          <div className="lg:col-span-7">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {DIFFERENTIATORS.map((item, i) => (
-                <Reveal key={item.key} delay={i * 0.08}>
-                  <div className="group relative h-full overflow-hidden rounded-xl bg-cyan-500 p-6 text-white transition-transform duration-500 ease-out-expo hover:-translate-y-1">
-                    <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl transition-transform duration-700 group-hover:scale-150" />
-                    <Icon name={item.icon} className="relative h-7 w-7" />
-                    <h3 className="relative mt-4 font-display text-heading-md font-semibold">{item.title}</h3>
-                    <p className="relative mt-2 text-sm leading-relaxed text-white/80">{item.description}</p>
-                  </div>
-                </Reveal>
-              ))}
             </div>
-          </div>
+          </Reveal>
+        </div>
+
+        {/*
+          One frame, four columns, dividers instead of gaps.
+
+          This is the merge made visible. `WhyChooseUs` used to restate this same
+          argument as four separate floating cards; four separate cards is also
+          what `ProcessSection` does further down. A single enclosure divided
+          into four says the thing the copy says — four disciplines, one roof —
+          and cannot be mistaken for the six-stage rail.
+
+          `divide-*` rather than borders on each cell: it draws the internal
+          lines only, so the outer frame stays unbroken. The axis flips with the
+          layout, which is why both `divide-y` and `lg:divide-x` are declared.
+        */}
+        <div className="mt-14 overflow-hidden rounded-2xl border border-white/15 bg-white/[0.03] shadow-inset">
+          <StaggerGroup stagger={0.08} className="grid divide-y divide-white/10 sm:grid-cols-2 sm:divide-x lg:grid-cols-4">
+            {DISCIPLINES.map((item) => (
+              <div key={item.label} className="flex h-full flex-col p-6 lg:p-7">
+                <h3 className="font-display text-heading-lg font-semibold text-white">{item.label}</h3>
+                <p className="mt-3 flex-1 text-[0.9375rem] leading-relaxed text-white/60">{item.scope}</p>
+
+                {/* The guarantee. These four lines are what the four
+                    `DIFFERENTIATORS` cards used to say on their own: quality,
+                    transparency, on-time delivery. Said once, attached to the
+                    discipline that actually owns each one. */}
+                <p className="mt-6 flex items-start gap-2 border-t border-white/10 pt-4 text-caption uppercase tracking-[0.14em] text-cyan-300">
+                  <Check className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden />
+                  {item.focus}
+                </p>
+              </div>
+            ))}
+          </StaggerGroup>
         </div>
       </div>
     </section>
   );
 }
+
 
 /*
  * `VastuTeaser` used to close out this file — a full section with a parallax
