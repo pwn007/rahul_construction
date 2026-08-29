@@ -13,7 +13,7 @@ import { readStore, writeStore, removeStore, STORAGE_KEYS } from '@/lib/storage'
  * Passcode gate for /admin.
  *
  * ── What this is, and what it is not ────────────────────────────────────────
- * This is a **demo gate, not access control.** Vite inlines NEXT_PUBLIC_ADMIN_PASSCODE
+ * This is a **demo gate, not access control.** Next.js inlines NEXT_PUBLIC_ADMIN_PASSCODE
  * into the bundle at build time, and the admin chunk stays publicly
  * fetchable regardless — anyone determined enough reads both out of the
  * JavaScript. It exists to stop a client, a colleague or a crawler from landing
