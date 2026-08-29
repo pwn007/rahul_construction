@@ -60,25 +60,29 @@ const PINNED: Record<string, string> = {
   /*
    * MEPF.
    *
-   * `home-mepf` is the home-page band: a line drawing of a cutaway house, then a
-   * photograph of an empty services ceiling, now a photograph of that ceiling
-   * with someone working in it. A new filename each time, never an overwrite —
-   * `/images/*` is served `immutable` for a year, so a reused name would keep
-   * showing the old picture to anyone who had already loaded it. It has to
-   * be pinned: no `ROUTES` pattern matches it, so the catch-all would send it to
-   * the residential pool.
+   * The home-page band used to be one seed: a line drawing of a cutaway house,
+   * then a photograph of an empty services ceiling, then that ceiling with
+   * someone working in it — with a second photo (`home-mepf-team`) stamped over
+   * its corner. It is now **four** seeds, one per system, because the heading
+   * has always said "Four systems" while the picture showed one. `SYSTEM_ORDER`
+   * in data/mepf.ts fixes the order; the seed is `home-mepf-${key}`.
    *
-   * The other two are pinned defensively, not to change anything. Adding
-   * `mepf-08` took the pool from seven files to eight, and the file a seed lands
-   * on is `hash(seed) % pool.length` — so without these, `service-mepf` would
-   * have slid from mepf-07 to mepf-04 and `post-mepf` from mepf-05 to mepf-07,
-   * silently, on an unrelated commit. `PINNED` is read before `poolFor`, so this
-   * holds them where they already were.
+   * A new filename each time, never an overwrite — `/images/*` is served
+   * `immutable` for a year, so a reused name would keep showing the old picture
+   * to anyone who had already loaded it.
+   *
+   * `service-mepf` and `post-mepf` are pinned defensively, not to change
+   * anything. Adding `mepf-08` took the pool from seven files to eight, and the
+   * file a seed lands on is `hash(seed) % pool.length` — so without these,
+   * `service-mepf` would have slid from mepf-07 to mepf-04 and `post-mepf` from
+   * mepf-05 to mepf-07, silently, on an unrelated commit. That is why adding
+   * mepf-11…14 here is safe: `PINNED` is read before `poolFor`, and every seed
+   * that can reach the mepf pool is in this list.
    */
-  'home-mepf': 'mepf-09.webp',
-  /* The inset beside it: people reading the drawing the services were set out
-     from. Free stock has no single frame with both, so the band uses two. */
-  'home-mepf-team': 'mepf-10.webp',
+  'home-mepf-hvac': 'mepf-11.webp',
+  'home-mepf-plumbing': 'mepf-12.webp',
+  'home-mepf-electrical': 'mepf-13.webp',
+  'home-mepf-fire': 'mepf-14.webp',
   'service-mepf': 'mepf-07.webp',
   'post-mepf': 'mepf-05.webp',
 };
@@ -99,7 +103,7 @@ const ROUTES: [RegExp, ImagePool][] = [
   [/-before$/, 'construction'],
 
   // Building services
-  [/^(service-mepf|post-mepf)/, 'mepf'],
+  [/^(service-mepf|post-mepf|home-mepf)/, 'mepf'],
 
   // Drawings, materials, abstract brand surfaces
   [/^(service-architecture|about-studio|banner-promo|og-estimator|post-vastu)/, 'detail'],

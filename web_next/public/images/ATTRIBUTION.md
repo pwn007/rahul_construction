@@ -1,7 +1,8 @@
 # Image attribution
 
 All imagery in `public/images` is curated from **Wikimedia Commons**, including its
-Unsplash CC0 imports — with two exceptions — `mepf-09.webp` from Unsplash direct and `mepf-10.webp` from Pexels. Files
+Unsplash CC0 imports — with six exceptions, all in the `mepf-*` block: `mepf-09` and
+`mepf-11`–`mepf-14` from Unsplash and Pexels direct, and `mepf-10` from Pexels. Files
 were downsized to 1500 px and recompressed for the web, and are served from this project’s
 own origin (no hotlinking).
 
@@ -13,11 +14,16 @@ own origin (no hotlinking).
 > sprinkler photos (`mepf-01`–`mepf-07`) are CC BY or CC BY-SA, which require attribution the
 > reader can see — and no photograph on this site currently renders a credit anywhere. Two of
 > them ship today: `mepf-07` on `/services/mepf-consultancy`, `mepf-05` on the MEPF blog post.
-> Either add a visible credit, or replace those two the way `mepf-09` was sourced.
+> Either add a visible credit, or replace those two the way `mepf-09` and `mepf-11`–`-14`
+> were sourced.
 >
 > `mepf-01`, `-02`, `-03`, `-04` and `-06` are in the pool but no seed resolves to them, so
 > they ship ~289 KB and are never requested. Safe to delete once the two live ones are dealt
 > with.
+>
+> `mepf-09` and `mepf-10` also no longer resolve from any seed — the home-page band moved to
+> the four system photographs below. Both are clean-licence files, so they are harmless where
+> they sit, but nothing on the site requests them either.
 
 | File | Source title | Licence | Author |
 | --- | --- | --- | --- |
@@ -68,6 +74,10 @@ own origin (no hotlinking).
 | `mepf-07.jpg` | [UMN-WalterSESprinkler.jpg](https://commons.wikimedia.org/wiki/File:UMN-WalterSESprinkler.jpg) | CC BY-SA 4.0 | SavagePanda845 (Elliot F) |
 | `mepf-09.webp` | [Construction worker on a lift installing ceiling services](https://unsplash.com/photos/5l991aLrCJ8) | Unsplash License — no attribution required | Valentin Lacoste |
 | `mepf-10.webp` | [Engineering team analyzing blueprints at a construction site](https://www.pexels.com/photo/man-and-woman-looking-at-a-blueprint-8961133/) | Pexels License — no attribution required | Mikael Blomkvist |
+| `mepf-11.webp` | [Industrial interior with exposed HVAC ductwork](https://www.pexels.com/photo/industrial-interior-with-exposed-hvac-ductwork-30749458/) | Pexels License — no attribution required | Jakub Zerdzicki |
+| `mepf-12.webp` | [Manifold with pressure gauges and connected pipes](https://www.pexels.com/photo/steel-underground-heating-manifolds-7937299/) | Pexels License — no attribution required | Pavel Danilyuk |
+| `mepf-13.webp` | [Electrician in a hard hat and face shield testing an electrical panel](https://unsplash.com/photos/LMb98OOtoYU) | Unsplash License — no attribution required | colsan ltda |
+| `mepf-14.webp` | [Concrete ceiling with red sprinkler pipes and cable trays](https://unsplash.com/photos/KsLbHArxEuU) | Unsplash License — no attribution required | Valentin Lacoste |
 | `residential-01.jpg` | [Urban Facades (Unsplash fpReukH1Y5s).jpg](https://commons.wikimedia.org/wiki/File:Urban_Facades_(Unsplash_fpReukH1Y5s).jpg) | CC0 | Eric Stein ericste_in |
 | `residential-02.jpg` | [What's on the other side? We may never know (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:What%27s_on_the_other_side%3F_We_may_never_know_(Unsplash).jpg) | CC0 | Melanie Wasser melwasser |
 | `residential-03.jpg` | [Blue hotel building (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Blue_hotel_building_(Unsplash).jpg) | CC0 | Francesca Saraco fransaraco |

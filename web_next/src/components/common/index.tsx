@@ -26,7 +26,7 @@ export { ConsentCheckbox, CONSENT_REQUIRED } from './ConsentCheckbox';
    is now the site's only MEP illustration. Two drawings of the same four
    services meant two files to keep in step and a visitor learning the notation
    twice. The house lives on /services/mepf-consultancy only; the home-page band
-   shows a photograph of a real services ceiling instead. */
+   shows four photographs instead, one per system. */
 export { PageHero, type PageHeroProps, type HeroStat } from './PageHero';
 export { PackageCard } from './PackageCard';
 export { PackagePlans } from './PackagePlans';

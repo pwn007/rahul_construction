@@ -28,8 +28,9 @@ import { useMepfScene } from './useMepfScene';
 /*
   three.js is ~150 KB gzipped, so it is imported exactly here and nowhere else.
   Rollup follows the dynamic import and gives it its own chunk: the entry bundle
-  does not move, and neither `/` nor `/services/mepf-consultancy` — which show
-  the flat house through `MepfTeaser` — ever download a byte of it.
+  does not move. `/` never touches it at all — the home-page band is four
+  photographs — and `/services/mepf-consultancy` gets `HouseIso`, the flat SVG
+  poster, until a visitor asks for the turnable one.
 */
 const HouseThree = dynamic(() => import('./scene/HouseThree'), {
   /* WebGL has no server-side equivalent: three.js reaches for a canvas the
