@@ -16,16 +16,12 @@ import { formatNumber } from '@/lib/format';
 import { IMG } from '@/lib/media';
 import { OUTSIDE_DISTRICT, districtLabel, resolveDistrictId } from '@/lib/geo';
 import { ProjectAtlas } from './components';
+import { PROJECT_CATEGORIES } from '@/data/projects';
 import type { Project } from '@/types/domain';
 
-const CATEGORIES = [
-  { value: 'all', label: 'All work' },
-  { value: 'residential', label: 'Residential' },
-  { value: 'commercial', label: 'Commercial' },
-  { value: 'mixed-use', label: 'Mixed use' },
-  { value: 'interior', label: 'Interiors' },
-  { value: 'mepf', label: 'MEPF' },
-];
+/* "All work" is a filter affordance, not a category, so it is prepended here
+   rather than living in the shared vocabulary. */
+const CATEGORIES = [{ value: 'all', label: 'All work' }, ...PROJECT_CATEGORIES];
 
 const STAGES = [
   { value: 'all', label: 'Any status' },

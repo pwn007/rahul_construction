@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
 import { Reveal, SplitText } from '@/components/motion';
+import { CtaLink } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
 import { SYSTEMS, SYSTEM_ORDER } from '@/data/mepf';
 import { SYSTEM_STYLES } from './scene/systems';
@@ -77,12 +76,9 @@ export function MepfTeaser() {
               </Reveal>
 
               <Reveal delay={0.25}>
-                <Link
-                  href={ROUTES.service('mepf-consultancy')}
-                  className="mt-7 inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400"
-                >
-                  Look inside the house <ArrowUpRight className="h-4 w-4" />
-                </Link>
+                <CtaLink href={ROUTES.service('mepf-consultancy')} className="mt-7">
+                  Look inside the house
+                </CtaLink>
               </Reveal>
             </div>
 

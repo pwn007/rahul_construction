@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Icon } from '@/lib/icons';
-import { CtaBand, PageHero, SectionHeader } from '@/components/common';
+import { CtaBand, PageHero, SectionHeader, CtaLink } from '@/components/common';
 import { Accordion, Badge } from '@/components/ui';
 import { MaskImage, Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
@@ -82,12 +82,7 @@ export function ServicesView() {
 
                   <Reveal delay={0.25}>
                     <div className="mt-7 flex flex-wrap items-center gap-4">
-                      <Link
-                        href={ROUTES.service(service.slug)}
-                        className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400"
-                      >
-                        Explore this service <ArrowUpRight className="h-4 w-4" />
-                      </Link>
+                      <CtaLink href={ROUTES.service(service.slug)}>Explore this service</CtaLink>
                       <span className="flex gap-1.5">
                         {service.stats.map((s) => (
                           <Badge key={s.label} variant="default" size="sm">
@@ -143,12 +138,9 @@ export function ServicesView() {
               deliverables" were separate destinations until the house moved onto
               the service page. Two links to one URL is a choice that isn't. */}
           <Reveal delay={0.3} className="mt-10 flex justify-center">
-            <Link
-              href={ROUTES.service('mepf-consultancy')}
-              className="inline-flex items-center gap-2 font-medium text-cyan-400 link-underline"
-            >
-              See what MEPF actually does <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <CtaLink href={ROUTES.service('mepf-consultancy')} tone="light">
+              See what MEPF actually does
+            </CtaLink>
           </Reveal>
         </div>
       </section>

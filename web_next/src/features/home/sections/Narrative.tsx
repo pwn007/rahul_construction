@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowUpRight, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Marquee, Reveal, SplitText, StaggerGroup } from '@/components/motion';
+import { CtaLink } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
 import { clientLogos } from '@/data/people';
 
@@ -152,12 +152,12 @@ export function OneSystem() {
           */}
           <Reveal delay={0.4} className="shrink-0">
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:items-end">
-              <Link href={ROUTES.about} className="inline-flex items-center gap-2 font-medium text-cyan-300 link-underline">
-                Read our story <ArrowUpRight className="h-4 w-4" />
-              </Link>
-              <Link href={ROUTES.vastu} className="inline-flex items-center gap-2 font-medium text-cyan-300 link-underline">
-                Vastu-aligned planning <ArrowUpRight className="h-4 w-4" />
-              </Link>
+              <CtaLink href={ROUTES.about} tone="light">
+                Read our story
+              </CtaLink>
+              <CtaLink href={ROUTES.vastu} tone="light">
+                Vastu-aligned planning
+              </CtaLink>
             </div>
           </Reveal>
         </div>

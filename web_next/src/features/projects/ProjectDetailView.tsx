@@ -8,7 +8,7 @@ import { Badge, Button } from '@/components/ui';
 import { CtaBand, ProjectCard, SectionHeader } from '@/components/common';
 import { MaskImage, Reveal, SplitText } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { projects } from '@/data/projects';
+import { projects, CATEGORY_LABEL } from '@/data/projects';
 import { services } from '@/data/services';
 import { formatNumber } from '@/lib/format';
 import { useRegisterHeroTone } from '@/app/hero-tone';
@@ -60,7 +60,7 @@ export function ProjectDetailView({ slug }: { slug: string }) {
 
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="brand" size="md" className="bg-cyan-500 text-white">
-                {project.category.replace('-', ' ')}
+                {CATEGORY_LABEL[project.category]}
               </Badge>
               {project.stage !== 'completed' && (
                 // Solid rather than the default tinted warning badge: this sits
@@ -237,7 +237,7 @@ export function ProjectDetailView({ slug }: { slug: string }) {
       {related.length > 0 && (
         <section className="section-sm">
           <div className="container">
-            <SectionHeader overline="More like this" title={`Other ${project.category.replace('-', ' ')} work`} />
+            <SectionHeader overline="More like this" title={`Other ${CATEGORY_LABEL[project.category].toLowerCase()} work`} />
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p, i) => (
                 <ProjectCard key={p.id} project={p} index={i} />

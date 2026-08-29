@@ -29,7 +29,8 @@ import {
 } from '@/services';
 import type { ResourceConfig } from '../types';
 import { JAIPUR_DISTRICTS } from '@/data/jaipur-districts';
-import { projects } from '@/data/projects';
+import { projects, CATEGORY_LABEL } from '@/data/projects';
+import { services } from '@/data/services';
 
 const STATUS_OPTIONS = [
   { value: 'published', label: 'Published' },
@@ -60,6 +61,22 @@ const statusField = {
 
 const orderField = { name: 'order', label: 'Display order', type: 'number' as const, span: 6 as const, section: 'Publishing', help: 'Lower numbers appear first.' };
 
+/*
+ * Project vocabulary — see the note above `CATEGORY_LABEL` in data/projects.ts.
+ *
+ * Both the category dropdowns and the table column printed raw slugs, so the
+ * panel said "mixed-use" where the site says "Mixed use". Derived from the map
+ * rather than hand-listed, so a category added to the type cannot be silently
+ * missed here — which is exactly what happened to `turnkey` on the public side.
+ */
+const CATEGORY_OPTIONS = Object.entries(CATEGORY_LABEL).map(([value, label]) => ({ value, label }));
+
+const STAGE_OPTIONS = [
+  { value: 'completed', label: 'Completed' },
+  { value: 'ongoing', label: 'In progress' },
+  { value: 'upcoming', label: 'Upcoming' },
+];
+
 const truncate = (v: unknown, n = 48) => {
   const s = String(v ?? '');
   return s.length > n ? `${s.slice(0, n - 1)}…` : s || '—';
@@ -82,12 +99,8 @@ export const MODULES: ResourceConfig<never>[] = [
     searchPlaceholder: 'Search by title…',
     publicHref: (row: never) => ROUTES.project((row as { slug: string }).slug),
     filters: [
-      {
-        key: 'category',
-        label: 'Category',
-        options: ['residential', 'commercial', 'interior', 'mepf', 'mixed-use', 'turnkey'].map((v) => ({ value: v, label: v })),
-      },
-      { key: 'stage', label: 'Stage', options: ['completed', 'ongoing', 'upcoming'].map((v) => ({ value: v, label: v })) },
+      { key: 'category', label: 'Category', options: CATEGORY_OPTIONS },
+      { key: 'stage', label: 'Stage', options: STAGE_OPTIONS },
       { key: 'status', label: 'Status', options: STATUS_OPTIONS },
     ],
     columns: [
@@ -107,7 +120,12 @@ export const MODULES: ResourceConfig<never>[] = [
           );
         },
       },
-      { key: 'category', label: 'Category', width: '130px' },
+      {
+        key: 'category',
+        label: 'Category',
+        width: '130px',
+        render: (row: never) => CATEGORY_LABEL[(row as unknown as { category: keyof typeof CATEGORY_LABEL }).category],
+      },
       { key: 'year', label: 'Year', width: '80px' },
       {
         key: 'areaSqft',
@@ -130,16 +148,8 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'slug', label: 'URL slug', type: 'slug', required: true, span: 4, section: 'Basics', help: '/projects/your-slug' },
       { name: 'subtitle', label: 'Subtitle', type: 'text', span: 12, section: 'Basics' },
       { name: 'excerpt', label: 'Excerpt', type: 'textarea', required: true, span: 12, section: 'Basics' },
-      {
-        name: 'category',
-        label: 'Category',
-        type: 'select',
-        required: true,
-        span: 4,
-        section: 'Classification',
-        options: ['residential', 'commercial', 'interior', 'mepf', 'mixed-use', 'turnkey'].map((v) => ({ value: v, label: v })),
-      },
-      { name: 'stage', label: 'Stage', type: 'select', span: 4, section: 'Classification', options: ['completed', 'ongoing', 'upcoming'].map((v) => ({ value: v, label: v })) },
+      { name: 'category', label: 'Category', type: 'select', required: true, span: 4, section: 'Classification', options: CATEGORY_OPTIONS },
+      { name: 'stage', label: 'Stage', type: 'select', span: 4, section: 'Classification', options: STAGE_OPTIONS },
       {
         name: 'packageType',
         label: 'Package',
@@ -151,6 +161,20 @@ export const MODULES: ResourceConfig<never>[] = [
           { value: 'semi-furnished', label: 'Semi furnished' },
           { value: 'fully-furnished', label: 'Fully furnished' },
         ],
+      },
+      {
+        /* Which disciplines the firm actually ran on this site. The panel had no
+           field for it at all, so a project created here could never get one —
+           and this is now printed on every project card, not just buried in the
+           detail page's sidebar. Chip order on the card comes from services.ts,
+           so the order these are clicked in does not matter. */
+        name: 'services',
+        label: 'Services used',
+        type: 'multiselect',
+        span: 12,
+        section: 'Classification',
+        options: services.map((sv) => ({ value: sv.slug, label: sv.shortTitle })),
+        help: 'Shown as chips on the project card and in “Services used” on the detail page.',
       },
       { name: 'locality', label: 'Locality', type: 'text', required: true, span: 6, section: 'Location' },
       { name: 'city', label: 'City', type: 'text', span: 6, section: 'Location', defaultValue: 'Jaipur' },

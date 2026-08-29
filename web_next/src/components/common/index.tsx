@@ -8,9 +8,11 @@ import { Badge, Button } from '@/components/ui';
 import { MaskImage, Reveal, SplitText, TiltCard } from '@/components/motion';
 import { DimensionLine } from './DimensionLine';
 import { VideoLightbox, resolveVideo } from './VideoLightbox';
+import { CtaLink } from './CtaLink';
 import { ROUTES } from '@/constants/routes';
 import { formatNumber } from '@/lib/format';
-import { projects } from '@/data/projects';
+import { projects, CATEGORY_LABEL } from '@/data/projects';
+import { services } from '@/data/services';
 import type { Project, Testimonial } from '@/types/domain';
 import type { ReactNode } from 'react';
 
@@ -29,6 +31,7 @@ export { PageHero, type PageHeroProps, type HeroStat } from './PageHero';
 export { PackageCard } from './PackageCard';
 export { PackagePlans } from './PackagePlans';
 export { TestimonialBand } from './TestimonialBand';
+export { CtaLink } from './CtaLink';
 
 /* ==================================================================== */
 /* SectionHeader                                                         */
@@ -167,7 +170,7 @@ export function ProjectCard({ project, index = 0 }: { project: Project; index?: 
 
           <div className="absolute inset-x-0 bottom-0 p-5 text-white">
             <p className="text-caption uppercase tracking-wider text-white/60">
-              {project.category.replace('-', ' ')} · {project.year}
+              {CATEGORY_LABEL[project.category]} · {project.year}
             </p>
             <h3 className="mt-1.5 font-display text-heading-lg font-semibold">{project.title}</h3>
             <div className="grid max-h-0 grid-rows-[0fr] overflow-hidden opacity-0 transition-all duration-500 ease-out-expo group-hover:max-h-24 group-hover:grid-rows-[1fr] group-hover:opacity-100">
@@ -180,7 +183,38 @@ export function ProjectCard({ project, index = 0 }: { project: Project; index?: 
           </span>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-4 text-caption text-muted">
+        {/*
+          What was actually done on this site.
+
+          Deliberately outside the image block. The overlay above it holds the
+          hover-reveal (`max-h-24 overflow-hidden`), so anything placed in there
+          is invisible until hover and clipped after two lines — and "which work
+          was done" is the question a visitor is scanning to answer, not one they
+          hunt for.
+
+          Filtering `services` by the project (rather than mapping the project's
+          own array) is the same direction `ProjectDetailView` takes, and it is
+          the point: order comes from services.ts, so every card lists them in
+          the same sequence — Architecture → MEPF → Interiors → Project
+          Management — instead of whichever order that record happened to be
+          typed in.
+
+          Not links. The card is already one big `<Link>` and an anchor inside an
+          anchor is invalid HTML — but it would also be a lie: the /projects
+          filters are `category`, where "MEPF" means a project that was *only*
+          MEPF (one), not one of the five that included MEPF work.
+        */}
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {services
+            .filter((s) => project.services.includes(s.slug))
+            .map((s) => (
+              <Badge key={s.slug} variant="default" size="sm">
+                {s.shortTitle}
+              </Badge>
+            ))}
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-4 text-caption text-muted">
           <span className="num">{formatNumber(project.areaSqft)} sq ft</span>
           <span>{project.floors}</span>
           <span className="num">{project.durationMonths} mo</span>
@@ -329,13 +363,9 @@ export function TestimonialCard({ testimonial, className }: { testimonial: Testi
           text is the whole accessible name, with no aria-label to keep in step.
         */}
         {project && (
-          <Link
-            href={ROUTES.project(project.slug)}
-            className="mt-4 inline-flex items-center gap-1.5 self-start text-caption font-medium text-cyan-700 link-underline dark:text-cyan-400"
-          >
+          <CtaLink href={ROUTES.project(project.slug)} size="sm" className="mt-4 self-start">
             See the project · {project.title}
-            <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
-          </Link>
+          </CtaLink>
         )}
       </div>
 

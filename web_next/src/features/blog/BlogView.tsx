@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUpRight, Search } from 'lucide-react';
-import { CtaBand, PageHero } from '@/components/common';
+import { CtaBand, PageHero, CtaLink } from '@/components/common';
 import { Badge, EmptyState, Input, Tabs } from '@/components/ui';
 import { MaskImage, Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
@@ -112,9 +112,9 @@ export function BlogView() {
                       <p className="text-caption text-subtle">{featured.authorRole}</p>
                     </div>
                   </div>
-                  <span className="mt-6 inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400">
-                    Read article <ArrowUpRight className="h-4 w-4" />
-                  </span>
+                  <CtaLink as="span" className="mt-6">
+                    Read article
+                  </CtaLink>
                 </Reveal>
               </div>
             </Link>

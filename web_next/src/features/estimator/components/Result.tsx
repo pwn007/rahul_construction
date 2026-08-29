@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Check, Download, Info, MessageCircle, Plus, RotateCcw, Ruler, Share2 } from 'lucide-react';
 import { Badge, Button, Dialog, FormField, Input, Switch, useToast } from '@/components/ui';
-import { ConsentCheckbox, CONSENT_REQUIRED } from '@/components/common';
+import { ConsentCheckbox, CONSENT_REQUIRED, CtaLink } from '@/components/common';
 import { leadMeta } from '@/lib/consent';
 import { track } from '@/lib/analytics';
 import { markLeadCaptured } from '@/features/lead/useLeadOffer';
@@ -766,9 +766,9 @@ export function ResultScreen({
             <p className="overline">Proof</p>
             <h3 className="mt-2 text-display-sm">What we have built nearby</h3>
           </div>
-          <Link href={ROUTES.projects} className="hidden items-center gap-2 text-sm font-medium text-cyan-700 link-underline sm:inline-flex dark:text-cyan-400">
-            All projects <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <CtaLink href={ROUTES.projects} className="hidden sm:inline-flex">
+            All projects
+          </CtaLink>
         </div>
 
         <div className="mt-6 grid gap-5 sm:grid-cols-3">

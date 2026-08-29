@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Icon } from '@/lib/icons';
-import { CtaBand, PageHero, ProjectCard, SectionHeader } from '@/components/common';
+import { CtaBand, PageHero, ProjectCard, SectionHeader, CtaLink } from '@/components/common';
 import { MepfTwin } from '@/features/mepf/MepfTwin';
 import { Accordion, Button } from '@/components/ui';
 import { Reveal, StaggerGroup } from '@/components/motion';
@@ -205,9 +205,7 @@ export function ServiceDetailView({ slug }: { slug: string }) {
               overline="Proof"
               title="Where we have done this"
               action={
-                <Link href={ROUTES.projects} className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400">
-                  All projects <ArrowUpRight className="h-4 w-4" />
-                </Link>
+                <CtaLink href={ROUTES.projects}>All projects</CtaLink>
               }
             />
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

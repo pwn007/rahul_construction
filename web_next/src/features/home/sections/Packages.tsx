@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
-import { PackagePlans, SectionHeader } from '@/components/common';
+import { PackagePlans, SectionHeader, CtaLink } from '@/components/common';
 import { Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
 import type { ServiceModel } from '@/constants/estimator';
@@ -39,12 +39,7 @@ export function Packages() {
 
         <Reveal delay={0.2}>
           <div className="mt-10 text-center">
-            <Link
-              href={ROUTES.pricing}
-              className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400"
-            >
-              Compare the full inclusion matrix <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <CtaLink href={ROUTES.pricing}>Compare the full inclusion matrix</CtaLink>
           </div>
         </Reveal>
       </div>

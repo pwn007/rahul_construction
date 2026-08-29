@@ -1,5 +1,37 @@
-import type { Project } from '@/types/domain';
+import type { Project, ProjectCategory } from '@/types/domain';
 import { IMG } from '@/lib/media';
+
+/**
+ * The one place a category becomes a word a visitor reads.
+ *
+ * There wasn't one. `ProjectsView` held a private `CATEGORIES` const for its
+ * filter chips, while `ProjectCard` and `ProjectDetailView` each printed
+ * `category.replace('-', ' ')` — so the same project read "Interiors" in the
+ * filter, "INTERIOR" on the card (the eyebrow is uppercase) and "interior" on
+ * its own detail page. Three spellings of one value.
+ *
+ * `turnkey` is in the type union and the admin dropdown but not in the filter
+ * list, and no project uses it. It is given a label anyway so the map stays
+ * exhaustive over `ProjectCategory` and a future turnkey project cannot render
+ * as a raw slug.
+ */
+export const CATEGORY_LABEL: Record<ProjectCategory, string> = {
+  residential: 'Residential',
+  commercial: 'Commercial',
+  'mixed-use': 'Mixed use',
+  interior: 'Interiors',
+  mepf: 'MEPF',
+  turnkey: 'Turnkey',
+};
+
+/** The five offered as filters, in the order the chips appear. */
+export const PROJECT_CATEGORIES: { value: ProjectCategory; label: string }[] = [
+  'residential',
+  'commercial',
+  'mixed-use',
+  'interior',
+  'mepf',
+].map((v) => ({ value: v as ProjectCategory, label: CATEGORY_LABEL[v as ProjectCategory] }));
 
 const base = (id: string, createdAt: string) => ({
   id,

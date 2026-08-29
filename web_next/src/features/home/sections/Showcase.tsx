@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { motion, useMotionValueEvent, useScroll, useTransform } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
 import { Icon } from '@/lib/icons';
 import { Counter, Reveal, SplitText } from '@/components/motion';
-import { ProjectCard, SectionHeader, StatTile, TestimonialBand } from '@/components/common';
+import { ProjectCard, SectionHeader, StatTile, TestimonialBand, CtaLink } from '@/components/common';
 import { ACHIEVEMENTS, PROCESS_STEPS } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { projects } from '@/data/projects';
@@ -38,9 +36,7 @@ export function FeaturedProjects() {
           title="Built across Jaipur"
           lead="From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly."
           action={
-            <Link href={ROUTES.projects} className="inline-flex items-center gap-2 font-medium text-cyan-700 link-underline dark:text-cyan-400">
-              All projects <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <CtaLink href={ROUTES.projects}>All projects</CtaLink>
           }
         />
 
