@@ -1,8 +1,8 @@
 # Image attribution
 
 All imagery in `public/images` is curated from **Wikimedia Commons**, including its
-Unsplash CC0 imports — with six exceptions, all in the `mepf-*` block: `mepf-09` and
-`mepf-11`–`mepf-14` from Unsplash and Pexels direct, and `mepf-10` from Pexels. Files
+Unsplash CC0 imports — with seven exceptions, all in the `mepf-*` block: `mepf-09`,
+`mepf-11`–`mepf-15` from Unsplash and Pexels direct, and `mepf-10` from Pexels. Files
 were downsized to 1500 px and recompressed for the web, and are served from this project’s
 own origin (no hotlinking).
 
@@ -13,17 +13,19 @@ own origin (no hotlinking).
 > **The `mepf-*` block is the one that needs attention.** Every other pool is CC0. All seven
 > sprinkler photos (`mepf-01`–`mepf-07`) are CC BY or CC BY-SA, which require attribution the
 > reader can see — and no photograph on this site currently renders a credit anywhere. Two of
-> them ship today: `mepf-07` on `/services/mepf-consultancy`, `mepf-05` on the MEPF blog post.
-> Either add a visible credit, or replace those two the way `mepf-09` and `mepf-11`–`-14`
-> were sourced.
+> **One of the two now does not.** `mepf-07` was the `/services/mepf-consultancy` hero and has
+> been replaced by `mepf-15` (Pexels, no credit required). That leaves exactly one CC-licensed
+> photograph live anywhere on the site: **`mepf-05`, the MEPF blog post cover.** Either add a
+> visible credit for it, or replace it the way `mepf-09` and `mepf-11`–`-15` were sourced.
 >
-> `mepf-01`, `-02`, `-03`, `-04` and `-06` are in the pool but no seed resolves to them, so
-> they ship ~289 KB and are never requested. Safe to delete once the two live ones are dealt
-> with.
+> **Dead files, ~570 KB in total.** `mepf-01`, `-02`, `-03`, `-04`, `-06`, `-07` and `-10` are
+> in the pool but no seed resolves to any of them, so they ship and are never requested. The
+> six CC-licensed ones among them can be deleted outright — nothing renders them and nothing
+> credits them. `mepf-10` (engineers with a blueprint) is clean-licence and harmless, kept in
+> case a future band wants it.
 >
-> `mepf-09` and `mepf-10` also no longer resolve from any seed — the home-page band moved to
-> the four system photographs below. Both are clean-licence files, so they are harmless where
-> they sit, but nothing on the site requests them either.
+> `mepf-09` is no longer dead: it went back to work as the electrical photograph on the MEPF
+> service page, where the wide crop needs a landscape frame that `mepf-13` cannot give.
 
 | File | Source title | Licence | Author |
 | --- | --- | --- | --- |
@@ -78,6 +80,7 @@ own origin (no hotlinking).
 | `mepf-12.webp` | [Manifold with pressure gauges and connected pipes](https://www.pexels.com/photo/steel-underground-heating-manifolds-7937299/) | Pexels License — no attribution required | Pavel Danilyuk |
 | `mepf-13.webp` | [Electrician in a hard hat and face shield testing an electrical panel](https://unsplash.com/photos/LMb98OOtoYU) | Unsplash License — no attribution required | colsan ltda |
 | `mepf-14.webp` | [Concrete ceiling with red sprinkler pipes and cable trays](https://unsplash.com/photos/KsLbHArxEuU) | Unsplash License — no attribution required | Valentin Lacoste |
+| `mepf-15.webp` | [High-angle view of an industrial ceiling — cable tray, conduit and lighting](https://www.pexels.com/photo/lamps-in-warehouse-26753121/) | Pexels License — no attribution required | Muharrem Alper |
 | `residential-01.jpg` | [Urban Facades (Unsplash fpReukH1Y5s).jpg](https://commons.wikimedia.org/wiki/File:Urban_Facades_(Unsplash_fpReukH1Y5s).jpg) | CC0 | Eric Stein ericste_in |
 | `residential-02.jpg` | [What's on the other side? We may never know (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:What%27s_on_the_other_side%3F_We_may_never_know_(Unsplash).jpg) | CC0 | Melanie Wasser melwasser |
 | `residential-03.jpg` | [Blue hotel building (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Blue_hotel_building_(Unsplash).jpg) | CC0 | Francesca Saraco fransaraco |

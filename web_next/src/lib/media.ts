@@ -83,7 +83,26 @@ const PINNED: Record<string, string> = {
   'home-mepf-plumbing': 'mepf-12.webp',
   'home-mepf-electrical': 'mepf-13.webp',
   'home-mepf-fire': 'mepf-14.webp',
-  'service-mepf': 'mepf-07.webp',
+  /* The service page carries the same four systems beside the interactive twin,
+     so it pins the same four photographs — three of them byte-identical to the
+     home page's, which are already in the visitor's cache by the time they get
+     here. `electrical` is the exception: home shows mepf-13, a portrait frame,
+     and this page crops its photographs into a wide band where a portrait would
+     reduce to a slice of one man's chest. mepf-09 is the landscape shot of the
+     same work (a worker on a lift running services into an open ceiling), it is
+     Unsplash-licensed, and until now it was shipping unreferenced. */
+  'service-mepf-hvac': 'mepf-11.webp',
+  'service-mepf-plumbing': 'mepf-12.webp',
+  'service-mepf-electrical': 'mepf-09.webp',
+  'service-mepf-fire': 'mepf-14.webp',
+
+  /* The page hero. Was mepf-07 — a photograph of a painted, ornate ceiling with
+     a sprinkler head somewhere in it, which read as heritage plasterwork rather
+     than as building services, and which is CC BY-SA 4.0 requiring a visible
+     credit this site has never rendered. mepf-15 is Pexels-licensed and shows
+     cable tray, conduit and lighting under a slab. New filename, never an
+     overwrite: /images/* is immutable for a year. */
+  'service-mepf': 'mepf-15.webp',
   'post-mepf': 'mepf-05.webp',
 };
 

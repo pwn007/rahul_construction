@@ -5,6 +5,25 @@ import { cn } from '@/lib/cn';
 import { Icon } from '@/lib/icons';
 import { SYSTEMS, SYSTEM_ORDER, type SystemKey } from '@/data/mepf';
 import { SYSTEM_STYLES } from './scene/systems';
+import { IMG } from '@/lib/media';
+
+/**
+ * What each photograph shows, for the alt text.
+ *
+ * Deliberately not shared with the home page's `MepfSystemStrip`, which keeps
+ * its own table. Three of the four files are the same, but `electrical` is not —
+ * home uses a portrait frame of an electrician at a distribution board, and this
+ * page crops into a wide band where that would come out as a slice of his chest.
+ * So the electrical photograph here is a different one and needs a different
+ * description. Two tables that agree three times out of four is the honest
+ * shape; one shared table would have needed an exception anyway.
+ */
+const ALT: Record<SystemKey, string> = {
+  hvac: 'Insulated supply ducting running along an open services ceiling.',
+  plumbing: 'A water manifold: one main feeding a row of separate distribution lines.',
+  electrical: 'An electrician on a lift running cable into a ceiling that is still open.',
+  fire: 'Red sprinkler pipework and cable trays under a concrete slab.',
+};
 
 /**
  * The four systems, said in full.
@@ -62,7 +81,17 @@ export function SystemList({
         </button>
       </div>
 
-      <ul className="mt-3 space-y-3">
+      {/*
+        Two up between `sm` and `lg`, one column either side of that.
+
+        Not a style choice — a measurement. Below `lg` this list has the band's
+        whole width, so at 768px a card is 728px across, and the photograph band
+        on top of it would be a 6.5:1 slit nothing is recognisable in. Two up
+        puts the card back at ~340px, which is where it sits at every other
+        width. From `lg` the list is the 5-column half beside the drawing, so it
+        goes back to one.
+      */}
+      <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
         {SYSTEM_ORDER.map((key) => {
           const s = SYSTEMS[key];
           const style = SYSTEM_STYLES[key];
@@ -73,7 +102,9 @@ export function SystemList({
             <li key={key}>
               <div
                 className={cn(
-                  'surface rounded-xl border transition-all duration-300',
+                  /* `overflow-hidden` so the photograph clips into the top two
+                     corners; `h-full` so the pair in an `sm` row match. */
+                  'surface flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-300',
                   selected && 'border-cyan-500/50 shadow-sm',
                   dead && 'border-dashed',
                 )}
@@ -86,27 +117,66 @@ export function SystemList({
                   onMouseLeave={() => setFocus(null)}
                   onFocus={() => setFocus(key)}
                   onBlur={() => setFocus(null)}
-                  className="flex min-h-11 w-full items-start gap-3.5 p-4 text-left"
+                  className="flex w-full flex-col text-left"
                 >
-                  <span
-                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors"
-                    style={{
-                      backgroundColor: dead ? 'rgb(var(--c-text) / 0.06)' : `${style.colour}1F`,
-                      color: dead ? 'rgb(var(--c-text-subtle))' : style.colour,
-                    }}
-                    aria-hidden
-                  >
-                    <Icon name={s.icon} className="h-[18px] w-[18px]" />
+                  {/*
+                    The photograph, inside the button rather than above it.
+
+                    The drawing beside this list answers "where does it run in my
+                    house". It cannot answer "what does the thing actually look
+                    like" — which is the objection that rebuilt the home-page
+                    band. One real frame per system answers it here too, without
+                    taking a single pixel from the text: the band is full width
+                    and on top, so nothing below it gets narrower. That matters,
+                    because at 1024px this column is only 387px wide and the copy
+                    already uses 303px of it; a thumbnail beside the text would
+                    have cut it to 193px.
+
+                    Inside the button, so hovering the photograph focuses that
+                    system in the drawing exactly as hovering the words does. It
+                    is part of the control rather than decoration stuck on top of
+                    it — which is also why it greys out with everything else when
+                    the system is switched off.
+
+                    Fixed height, not an aspect ratio: the card runs from ~316px
+                    to ~526px wide across the breakpoints, and a fixed ratio would
+                    swing the band from a stripe to a slab. This holds it between
+                    about 3:1 and 4:1 everywhere.
+                  */}
+                  <span className="relative block h-24 w-full overflow-hidden sm:h-28 xl:h-32">
+                    <img
+                      src={IMG.card(`service-mepf-${key}`)}
+                      alt={ALT[key]}
+                      loading="lazy"
+                      decoding="async"
+                      className={cn(
+                        'h-full w-full object-cover transition-all duration-300',
+                        dead && 'opacity-45 grayscale',
+                      )}
+                    />
                   </span>
 
-                  <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-baseline gap-x-2.5">
-                      <span className="font-display text-heading-md font-semibold">{s.name}</span>
-                      <span className="text-caption text-subtle">{s.discipline}</span>
+                  <span className="flex min-h-11 w-full items-start gap-3.5 p-4">
+                    <span
+                      className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors"
+                      style={{
+                        backgroundColor: dead ? 'rgb(var(--c-text) / 0.06)' : `${style.colour}1F`,
+                        color: dead ? 'rgb(var(--c-text-subtle))' : style.colour,
+                      }}
+                      aria-hidden
+                    >
+                      <Icon name={s.icon} className="h-[18px] w-[18px]" />
                     </span>
-                    <span className="mt-1 block text-muted">{s.what}</span>
-                    <span className="mt-2.5 block text-caption text-subtle">
-                      <span className="font-semibold uppercase tracking-wide">Where</span> · {s.where}
+
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-baseline gap-x-2.5">
+                        <span className="font-display text-heading-md font-semibold">{s.name}</span>
+                        <span className="text-caption text-subtle">{s.discipline}</span>
+                      </span>
+                      <span className="mt-1 block text-muted">{s.what}</span>
+                      <span className="mt-2.5 block text-caption text-subtle">
+                        <span className="font-semibold uppercase tracking-wide">Where</span> · {s.where}
+                      </span>
                     </span>
                   </span>
                 </button>
