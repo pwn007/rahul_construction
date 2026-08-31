@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowUpRight, Check, Download, Info, MessageCircle, Plus, RotateCcw, Ruler, Share2 } from 'lucide-react';
+import { ArrowUpRight, Check, Download, Info, MessageCircle, RotateCcw, Ruler, Share2 } from 'lucide-react';
 import { Badge, Button, Dialog, FormField, Input, Switch, useToast } from '@/components/ui';
 import { ConsentCheckbox, CONSENT_REQUIRED, CtaLink } from '@/components/common';
 import { leadMeta } from '@/lib/consent';
@@ -11,17 +11,19 @@ import { track } from '@/lib/analytics';
 import { markLeadCaptured } from '@/features/lead/useLeadOffer';
 import { getVisitor, rememberVisitor } from '@/lib/visitor';
 import { Counter, Reveal } from '@/components/motion';
-import { formatCurrency, formatCurrencyCompact, formatDuration, formatNumber } from '@/lib/format';
+import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import { ROUTES } from '@/constants/routes';
 import { SITE } from '@/constants/site';
 import { projects } from '@/data/projects';
 import { estimatesService } from '@/services';
 import { COST_HEADS } from '@/constants/estimator';
-import { MATERIAL_GROUPS, QUANTITY_UNIT_LABEL } from '@/constants/materials';
 import type { EstimateResult, EstimatorInput } from '../model';
 import { missingEssentials, specSummary } from '../model';
 import { StepEnhancements } from './Steps';
+import { WorkHeadBreakdown } from './WorkHeadBreakdown';
+import { RefinePanel } from './RefinePanel';
+import { FurniturePicker } from './FurniturePicker';
 import { useCopy } from '@/hooks';
 
 /* ------------------------------------------------------------------ */
@@ -149,182 +151,6 @@ function LeadDialog({
 }
 
 /* ------------------------------------------------------------------ */
-/* Commercial split — "what am I actually paying for?"                  */
-/* ------------------------------------------------------------------ */
-
-/**
- * The first thing on the result screen after the number itself.
- *
- * Materials / labour / design / approvals is a different axis from structure /
- * finishing / MEPF / interiors, and it is the one a homeowner asks about. The
- * construction heads are still here, one disclosure down, for anyone comparing
- * against a contractor's quotation.
- *
- * Each row expands into its own detail: materials into the itemised list,
- * the rest into an explanation of what the money covers. Nothing is a black box,
- * and nothing arrives before it is asked for.
- */
-function CommercialSplit({
-  result,
-  children,
-}: {
-  result: EstimateResult;
-  /** Rendered inside the materials row when it is expanded. */
-  children?: ReactNode;
-}) {
-  const [open, setOpen] = useState<string | null>(null);
-
-  return (
-    <div className="surface rounded-xl border">
-      <div className="border-b p-6">
-        <h3 className="font-display text-heading-lg font-semibold">Where the money goes</h3>
-        <p className="mt-1.5 text-caption text-muted">
-          Every line adds up to the total above — tap any row to see what it covers.
-        </p>
-      </div>
-
-      <div className="divide-y">
-        {result.commercial.map((head) => {
-          const isOpen = open === head.key;
-          const expandable = head.key === 'materials' && Boolean(children);
-
-          return (
-            <div key={head.key}>
-              <button
-                type="button"
-                onClick={() => setOpen(isOpen ? null : head.key)}
-                aria-expanded={isOpen}
-                className="flex w-full items-center gap-4 p-5 text-left transition-colors hover:bg-[rgb(var(--c-surface-2))]"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium">{head.label}</span>
-                    <span className="num shrink-0 font-semibold">{formatCurrency(head.amount)}</span>
-                  </span>
-
-                  <span className="mt-2 flex items-center gap-3">
-                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-[rgb(var(--c-text))]/[0.07]">
-                      <motion.span
-                        className="block h-full rounded-full"
-                        style={{ background: head.color }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${head.percent}%` }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                      />
-                    </span>
-                    <span className="num w-11 shrink-0 text-right text-caption text-subtle">
-                      {head.percent.toFixed(0)}%
-                    </span>
-                  </span>
-                </span>
-
-                <Plus
-                  className={cn('h-4 w-4 shrink-0 text-subtle transition-transform', isOpen && 'rotate-45')}
-                  aria-hidden
-                />
-              </button>
-
-              {isOpen && (
-                <div className="border-t bg-[rgb(var(--c-surface-2))] p-5">
-                  <p className="text-caption leading-relaxed text-muted">{head.description}</p>
-                  {expandable && <div className="mt-5">{children}</div>}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Itemised materials                                                   */
-/* ------------------------------------------------------------------ */
-
-/**
- * Quantity, rate and amount for every material line.
- *
- * The quantities are the point. "₹3,97,900 of cement" is a claim; "994 bags at
- * ₹400" is something a visitor can take to a supplier and check, and checking is
- * what turns an estimate into an argument. No competitor in this market shows
- * quantities at all — the closest, Brick&Bolt, shows brand names per tier.
- *
- * Rates shown here are delivered rates: the catalogue rate after the tier,
- * locality and normalisation scaling, so quantity × rate = amount holds exactly
- * on screen. A reader who multiplies two columns gets the third.
- */
-function MaterialBreakdown({ result }: { result: EstimateResult }) {
-  const pool = result.commercial.find((c) => c.key === 'materials')?.amount ?? 0;
-
-  if (!result.materialLines.length) {
-    return (
-      <p className="text-caption leading-relaxed text-muted">
-        You have chosen to buy the materials yourself, so there is no material cost in this estimate —
-        only labour, design and site costs.
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-5">
-      {MATERIAL_GROUPS.map((group) => {
-        const lines = result.materialLines.filter((l) => l.group === group.key);
-        if (!lines.length) return null;
-        const subtotal = lines.reduce((sum, l) => sum + l.amount, 0);
-
-        return (
-          <div key={group.key}>
-            <div className="flex items-baseline justify-between gap-3 border-b pb-2">
-              <p className="text-[0.8125rem] font-semibold">{group.label}</p>
-              <p className="num text-caption font-medium">{formatCurrency(subtotal)}</p>
-            </div>
-
-            <ul className="mt-1 divide-y divide-dashed">
-              {lines.map((line) => (
-                <li key={line.key} className="flex items-baseline justify-between gap-4 py-2.5">
-                  <span className="min-w-0">
-                    <span className="flex flex-wrap items-baseline gap-x-2">
-                      <span className="text-caption font-medium">{line.label}</span>
-                      <span className="text-caption text-subtle">
-                        {line.spec}
-                        {line.provisional && ' *'}
-                      </span>
-                    </span>
-                    <span className="num block text-caption text-subtle">
-                      {formatNumber(line.quantity)} {QUANTITY_UNIT_LABEL[line.unit]} @ ₹
-                      {formatNumber(Math.round(line.unitRate))}
-                    </span>
-                  </span>
-                  <span className="num shrink-0 text-caption font-medium">{formatCurrency(line.amount)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
-
-      <div className="flex items-baseline justify-between gap-3 border-t pt-3">
-        <p className="text-[0.8125rem] font-semibold">Total materials</p>
-        <p className="num font-semibold">{formatCurrency(pool)}</p>
-      </div>
-
-      <p className="flex items-start gap-2 text-caption leading-relaxed text-subtle">
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <span>
-          Quantities use published thumb rules — 0.4 bags of cement and 4 kg of steel per sq ft, and so on. They
-          are close enough to plan and budget against, and they are not a take-off: final quantities come from
-          approved drawings and a bar-bending schedule.
-          {result.materialLines.some((l) => l.provisional) && (
-            <> Rates marked <span className="font-medium">*</span> have an indicative grade spread.</>
-          )}
-        </span>
-      </p>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Result screen                                                        */
 /* ------------------------------------------------------------------ */
 
@@ -407,6 +233,10 @@ export function ResultScreen({
         floors: input.floors,
         // Scope is derived, not chosen — sales still sees rate-card language.
         packageType: result.scope,
+        /* What they asked for, kept alongside what they configured — the two
+           differ whenever a material choice promoted the build past the package
+           they tapped, and that gap is a sales fact worth having. */
+        ...(input.packageKey && { packageChosen: input.packageKey }),
         qualityTier: specSummary(input),
         location: input.location,
         enhancements: input.enhancements,
@@ -414,6 +244,10 @@ export function ResultScreen({
         // The exact material and brand set, so an estimator can rebuild the quote line by line.
         materials: input.materials,
         materialsCost: Math.round(result.materialsCost),
+        ...(Object.keys(input.furniture).length && {
+          furniture: input.furniture,
+          furnitureCost: Math.round(result.furnitureCost),
+        }),
         builtUpArea: Math.round(result.builtUpArea),
         totalMin: Math.round(result.min),
         totalMax: Math.round(result.max),
@@ -473,8 +307,7 @@ export function ResultScreen({
 
               <p className="mt-4 text-white/60">
                 <span className="num text-white">{formatCurrency(result.perSqft)}</span> per sq ft ·{' '}
-                <span className="num text-white">{formatNumber(result.chargeableArea)}</span> sq ft chargeable ·{' '}
-                <span className="num text-white">{formatDuration(result.timelineWeeks)}</span>
+                <span className="num text-white">{formatNumber(result.chargeableArea)}</span> sq ft chargeable
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -545,7 +378,21 @@ export function ResultScreen({
                 <p className="text-caption uppercase tracking-wide text-white/45">Your configuration</p>
                 <dl className="mt-4 space-y-2.5 text-sm">
                   {[
-                    ['Finish', result.labels.packageLabel],
+                    /*
+                      Named as what it is, and honest about how we know.
+                      "Semi Furnished · 2 changes" beats inventing a fourth
+                      package name for a deviated selection — the rate band that
+                      checks this estimate is published per package, and there is
+                      nothing to check a made-up scope against.
+                    */
+                    [
+                      'Package',
+                      result.labels.packageChosen
+                        ? result.labels.packageDeviation
+                          ? `${result.labels.packageLabel} · ${result.labels.packageDeviation}`
+                          : result.labels.packageLabel
+                        : `${result.labels.packageLabel} (from your selection)`,
+                    ],
                     ['Built-up area', `${formatNumber(Math.round(result.builtUpArea))} sq ft`],
                     ['Floors', result.labels.floors],
                     ['Location', result.labels.location],
@@ -571,18 +418,21 @@ export function ResultScreen({
       </Reveal>
 
       {/*
-        The commercial split, immediately under the number.
+        The work, head by head — a third view of the same total.
 
-        This answers "what am I paying for?" in four rows using words a homeowner
-        already owns, and every row expands. Materials expands all the way down to
-        quantities — 994 bags of cement at ₹400 — which is the level at which an
-        estimate stops being a claim and becomes something you can check.
+        Its own card rather than a row inside the split above, because the two
+        foot to different denominators: the material breakdown sums to the
+        Materials head, this sums to the whole total. Nesting them would put two
+        totals in one panel, which is the arithmetic-that-contradicts-itself
+        failure this estimator was built to avoid.
+
+        This is also the screen that answers the question the client is asked most
+        often and the old calculator could not answer at all: is khudai included,
+        who pays for the shuttering, is the staircase in this number.
       */}
-      <Reveal delay={0.06}>
-        <div className="mt-6">
-          <CommercialSplit result={result}>
-            <MaterialBreakdown result={result} />
-          </CommercialSplit>
+      <Reveal delay={0.08}>
+        <div className="mt-4">
+          <WorkHeadBreakdown result={result} />
         </div>
       </Reveal>
 
@@ -620,7 +470,7 @@ export function ResultScreen({
         (solar, lift, HVAC) that sit outside the material model, and they are
         purely additive, so they never block the number.
       */}
-      <div className="mt-4">
+      <div className="mt-4 space-y-4">
         <RefinePanel
           title="Add extras"
           summary={
@@ -632,6 +482,28 @@ export function ResultScreen({
         >
           <StepEnhancements input={input} patch={patch} chargeableArea={result.chargeableArea} embedded />
         </RefinePanel>
+
+        {/*
+          Furniture, and only on a finished build.
+
+          Offering a sofa on a Civil Work estimate is offering to furnish a
+          building with no floor in it. It appears once the scope carries
+          interiors, which is also the point at which the client's own upsell
+          conversation starts.
+        */}
+        {result.scope === 'fully-furnished' && (
+          <RefinePanel
+            title="Furniture & decor"
+            summary={
+              Object.keys(input.furniture).length
+                ? `${Object.keys(input.furniture).length} added · ${formatCurrencyCompact(result.furnitureCost)}`
+                : 'Beds, sofa, dining, TV unit, curtains, lighting and appliances'
+            }
+            count={Object.keys(input.furniture).length}
+          >
+            <FurniturePicker input={input} patch={patch} chargeableArea={result.chargeableArea} />
+          </RefinePanel>
+        )}
       </div>
 
       {/* Breakdown */}
@@ -664,40 +536,8 @@ export function ResultScreen({
         </Reveal>
 
         <div className="space-y-6 lg:col-span-7">
-          {/* Timeline */}
-          <Reveal delay={0.16}>
-            <div className="surface rounded-xl border p-7 shadow-sm">
-              <div className="flex items-baseline justify-between gap-4">
-                <h3 className="font-display text-heading-lg font-semibold">Estimated programme</h3>
-                <span className="num text-sm text-cyan-700 dark:text-cyan-400">{result.timelineWeeks} weeks</span>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {result.phases.map((phase, i) => (
-                  <div key={phase.key}>
-                    <div className="flex items-baseline justify-between text-caption">
-                      <span className="font-medium">{phase.label}</span>
-                      <span className="num text-subtle">
-                        wk {phase.startWeek + 1}–{phase.startWeek + phase.weeks}
-                      </span>
-                    </div>
-                    <div className="relative mt-1.5 h-2 overflow-hidden rounded-full bg-[rgb(var(--c-text))]/[0.06]">
-                      <motion.div
-                        className="absolute h-full rounded-full bg-cyan-500"
-                        style={{ left: `${(phase.startWeek / result.timelineWeeks) * 100}%` }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(phase.weeks / result.timelineWeeks) * 100}%` }}
-                        transition={{ duration: 0.7, delay: 0.2 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-
           {/* Payments */}
-          <Reveal delay={0.22}>
+          <Reveal delay={0.16}>
             <div className="surface overflow-hidden rounded-xl border shadow-sm">
               <div className="border-b p-7 pb-5">
                 <h3 className="font-display text-heading-lg font-semibold">Milestone payment schedule</h3>
@@ -900,18 +740,12 @@ export function LiveCostMeter({ result, compact }: { result: EstimateResult; com
               <dt className="text-muted">Applied rate</dt>
               <dd className="num">{formatCurrency(result.effectiveRate)}/sq ft</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">Timeline</dt>
-              <dd className="num">{result.timelineWeeks} weeks</dd>
-            </div>
           </dl>
         </>
       )}
 
       {compact && (
-        <p className="num shrink-0 text-caption text-subtle">
-          {formatNumber(result.chargeableArea)} sq ft · {result.timelineWeeks} wk
-        </p>
+        <p className="num shrink-0 text-caption text-subtle">{formatNumber(result.chargeableArea)} sq ft</p>
       )}
     </div>
   );
@@ -930,38 +764,3 @@ export function LiveCostMeter({ result, compact }: { result: EstimateResult; com
  * while shut — a visitor should be able to see that they have added four
  * enhancements without opening anything.
  */
-function RefinePanel({
-  title,
-  summary,
-  count,
-  children,
-}: {
-  title: string;
-  summary: string;
-  count: number;
-  children: ReactNode;
-}) {
-  return (
-    <details className="surface group rounded-xl border shadow-sm open:shadow-md">
-      <summary className="flex cursor-pointer list-none items-center gap-4 p-6">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
-          <Plus className="h-5 w-5 transition-transform duration-300 group-open:rotate-45" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-2">
-            <span className="font-display text-heading-md font-semibold">{title}</span>
-            {count > 0 && (
-              <Badge variant="brand" size="sm">
-                {count}
-              </Badge>
-            )}
-          </span>
-          <span className="mt-0.5 block truncate text-caption text-muted">{summary}</span>
-        </span>
-        <span className="shrink-0 text-caption text-subtle group-open:hidden">Open</span>
-        <span className="hidden shrink-0 text-caption text-subtle group-open:block">Close</span>
-      </summary>
-      <div className="border-t p-6 pt-7">{children}</div>
-    </details>
-  );
-}

@@ -332,6 +332,23 @@ export const MATERIAL_LINES: MaterialLine[] = [
     note: 'Roughly one door per 250 sq ft.',
   },
   {
+    key: 'grills',
+    label: 'Grills & safety railings',
+    group: 'finishing',
+    head: 'finishing',
+    coefficient: 0.08,
+    unit: 'sqft',
+    blurb: 'Window grills and balcony railings, fitted and painted',
+    packages: FINISHED,
+    essential: true,
+    options: [
+      { key: 'ms-plain', label: 'MS plain', detail: 'Painted mild steel', rate: 300, provisional: true },
+      { key: 'ms-design', label: 'MS decorative', detail: 'Fabricated pattern', rate: 350, isDefault: true, provisional: true },
+      { key: 'ss', label: 'SS 304', detail: 'Brushed stainless', rate: 600, provisional: true },
+    ],
+    note: 'Priced against the same window area as the glazing — about 8% of floor area.',
+  },
+  {
     key: 'windows',
     label: 'Windows',
     group: 'finishing',
@@ -451,6 +468,34 @@ export const MATERIAL_LINES: MaterialLine[] = [
       { key: 'basic', label: 'Basic', detail: 'About ₹1 L for a typical kitchen', rate: 5000 },
       { key: 'premium', label: 'Premium', detail: 'About ₹1.5 L', rate: 7500, isDefault: true },
       { key: 'classic', label: 'Classic', detail: 'About ₹2 L', rate: 10000 },
+    ],
+    note: 'Quoted per running foot of platform, as the trade does. About 20 rft in a 2,500 sq ft home.',
+  },
+  {
+    key: 'kitchen-counter',
+    label: 'Kitchen counter & sink',
+    group: 'fixtures',
+    head: 'interior',
+    coefficient: 0.008,
+    unit: 'rft',
+    blurb: 'Granite platform, dado and sink — without the modular cabinetry',
+    /*
+     * Semi-furnished only, and that is what keeps it from colliding with the
+     * modular kitchen rather than an exclusivity rule.
+     *
+     * A modular kitchen already contains its own counter and sink; pricing both
+     * charges for one worktop twice. Expressing that through `packages` rather
+     * than `exclusiveWith` is both simpler and safer: `activeLines` already drops
+     * out-of-scope lines, so a hand-crafted URL naming both can never price both,
+     * and neither line has to be marked `isAlternative` — which would have taken
+     * the modular kitchen out of `packageDefaults('fully-furnished')`, i.e. out of
+     * the very package it defines.
+     */
+    packages: ['semi-furnished'],
+    essential: true,
+    options: [
+      { key: 'granite', label: 'Granite platform', detail: 'With SS sink', rate: 1800, isDefault: true, provisional: true },
+      { key: 'quartz', label: 'Quartz platform', detail: 'With quartz sink', rate: 3200, provisional: true },
     ],
     note: 'Quoted per running foot of platform, as the trade does. About 20 rft in a 2,500 sq ft home.',
   },

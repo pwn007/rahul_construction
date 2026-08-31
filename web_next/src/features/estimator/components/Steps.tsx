@@ -6,7 +6,7 @@ import { Check, ChevronDown, ChevronLeft, ChevronRight, Info, Minus, Plus } from
 import { Icon } from '@/lib/icons';
 import { cn } from '@/lib/cn';
 import { Button, FormField, Input, Select, Switch } from '@/components/ui';
-import { AREA_UNITS, ENHANCEMENTS, LOCATIONS, PROPERTY_TYPES } from '@/constants/estimator';
+import { AREA_UNITS, ENHANCEMENTS, LOCATIONS, PACKAGES, PROPERTY_TYPES, type PackageKey } from '@/constants/estimator';
 import {
   MATERIAL_GROUPS,
   MATERIAL_LINES,
@@ -15,10 +15,11 @@ import {
   defaultOption,
   optionOf,
 } from '@/constants/materials';
-import { formatCurrency, formatNumber } from '@/lib/format';
+import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/lib/format';
 import type { EstimatorInput } from '../model';
-import { activeLines, calculateEstimate, deriveScope, toSqft } from '../model';
+import { activeLines, calculateEstimate, effectiveScope, packageDefaults, toSqft } from '../model';
 import { MaterialIcon } from './MaterialIcon';
+import { OptInGrid } from './OptInGrid';
 
 type Patch = (patch: Partial<EstimatorInput>) => void;
 
@@ -392,7 +393,7 @@ export function StepMaterialSelect({
   stepLabel: string;
   chargeableArea: number;
 }) {
-  const scope = deriveScope(input);
+  const scope = effectiveScope(input);
   const chosen = input.materials;
 
   const activeKeys = useMemo(
@@ -400,14 +401,51 @@ export function StepMaterialSelect({
     [input, scope],
   );
 
-  /* Everything valid at this scope, plus anything already chosen — so a
-     selection never vanishes when the scope shifts under it. */
-  const visible = useMemo(
-    () => MATERIAL_LINES.filter((l) => l.packages.includes(scope) || l.key in chosen),
-    [scope, chosen],
-  );
+  /**
+   * Everything in the chosen scope first, then everything above it.
+   *
+   * The strip used to stop at the scope boundary, which made the screen safe and
+   * also made it a dead end: a visitor on Semi Furnished could not see the modular
+   * kitchen at all, so the one upsell the client actually asks for was invisible,
+   * and the promotion path below could never fire. The upgrades are shown, marked
+   * as upgrades, and priced when tapped — which is the same "add it and watch the
+   * number move" loop that makes the rest of this screen work.
+   *
+   * Anything already chosen stays visible regardless, so a selection never
+   * vanishes when the scope shifts under it.
+   */
+  const visible = useMemo(() => {
+    const inScope = MATERIAL_LINES.filter((l) => l.packages.includes(scope) || l.key in chosen);
+    const upgrades = MATERIAL_LINES.filter((l) => !l.packages.includes(scope) && !(l.key in chosen));
+    return [...inScope, ...upgrades];
+  }, [scope, chosen]);
+
+  const isUpgrade = (key: string) => {
+    const line = MATERIAL_LINE_BY_KEY[key];
+    return Boolean(line && !line.packages.includes(scope));
+  };
 
   const [activeKey, setActiveKey] = useState<string>(() => visible[0]?.key ?? '');
+
+  /**
+   * A scope promotion that has just happened, held so it can be announced and undone.
+   *
+   * Adding a modular kitchen to a Semi Furnished build makes it a fully furnished
+   * build — the model cannot pretend otherwise, because the commercial split and
+   * the rate band that check it are per-scope. But a package silently changing
+   * under someone who tapped it two screens ago is the kind of thing that turns
+   * into "your calculator quoted me ₹46 L". So it is stated, priced, and reversible.
+   */
+  const [promotion, setPromotion] = useState<{
+    from: PackageKey;
+    to: PackageKey;
+    lineKey: string;
+    /** What this one choice actually changed the estimate by. */
+    delta: number;
+    /** What the rest of the new package would add on top, and how many lines. */
+    restDelta: number;
+    restCount: number;
+  } | null>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const tileRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -443,7 +481,52 @@ export function StepMaterialSelect({
       if (conflicts) delete next[other.key];
     }
 
+    /* Did this choice move the build into a larger scope than the one the visitor
+       asked for two screens ago? Only worth saying when they asked for one. */
+    const after = effectiveScope({ ...input, materials: next });
+    if (input.packageKey && after !== input.packageKey) {
+      /*
+       * Two numbers, because they are two different things and conflating them
+       * is how a calculator ends up lying.
+       *
+       * `delta` is what this one tap changed — the item, plus the reprice that
+       * follows from the build now sitting in a larger scope with a different
+       * commercial split. `restDelta` is what the rest of that scope would cost
+       * if they wanted it. An earlier draft showed only the first under copy that
+       * promised "and it brings the rest of that scope with it", which read as
+       * "upgrading to Fully Furnished costs ₹11,058" — off by two orders of
+       * magnitude, and exactly the kind of number someone quotes back to you.
+       */
+      const promoted = { ...input, materials: next, packageKey: after };
+      const base = calculateEstimate(input).total;
+      const delta = calculateEstimate(promoted).total - base;
+
+      const rest = { ...packageDefaults(after), ...next };
+      const restCount = Object.keys(rest).length - Object.keys(next).length;
+      const restDelta = calculateEstimate({ ...promoted, materials: rest }).total - calculateEstimate(promoted).total;
+
+      setPromotion({ from: input.packageKey, to: after, lineKey: line.key, delta, restDelta, restCount });
+      patch({ materials: next, packageKey: after });
+      return;
+    }
+
     patch({ materials: next });
+  };
+
+  /** Take the rest of the package the build has just moved into. */
+  const acceptPromotion = () => {
+    if (!promotion) return;
+    patch({ materials: { ...packageDefaults(promotion.to), ...chosen }, packageKey: promotion.to });
+    setPromotion(null);
+  };
+
+  /** Put the package back and take out the line that moved it. */
+  const undoPromotion = () => {
+    if (!promotion) return;
+    const next = { ...chosen };
+    delete next[promotion.lineKey];
+    patch({ materials: next, packageKey: promotion.from });
+    setPromotion(null);
   };
 
   /** What the active material displaced, so the swap can be stated rather than inferred. */
@@ -458,6 +541,12 @@ export function StepMaterialSelect({
   const remove = (lineKey: string) => {
     const next = { ...chosen };
     delete next[lineKey];
+    /* Removing the line that caused the promotion is an undo by another route. */
+    if (promotion?.lineKey === lineKey) {
+      patch({ materials: next, packageKey: promotion.from });
+      setPromotion(null);
+      return;
+    }
     patch({ materials: next });
   };
 
@@ -487,6 +576,45 @@ export function StepMaterialSelect({
         lead="Pick a material, choose its brand, and it is added to your build. Move along the row for the next one."
       />
 
+      {promotion && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-cyan-500/40 bg-cyan-500/[0.07] p-4">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-400" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.9375rem] leading-relaxed">
+              <span className="font-medium">{MATERIAL_LINE_BY_KEY[promotion.lineKey]?.label}</span> is a{' '}
+              <span className="font-medium">{PACKAGES.find((p) => p.key === promotion.to)?.label}</span> item, so
+              your build has moved to that package and is now priced at its rate —{' '}
+              <span className="num font-medium">{formatCurrencyCompact(Math.abs(promotion.delta))}</span>{' '}
+              {promotion.delta >= 0 ? 'more' : 'less'} than before.
+              {promotion.restCount > 0 && (
+                <>
+                  {' '}The rest of that scope is not in your build yet.
+                </>
+              )}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5">
+              {promotion.restCount > 0 && (
+                <button
+                  type="button"
+                  onClick={acceptPromotion}
+                  className="link-underline text-caption font-medium text-cyan-700 dark:text-cyan-400"
+                >
+                  Add the other {promotion.restCount} {PACKAGES.find((p) => p.key === promotion.to)?.label} items
+                  {promotion.restDelta > 0 && <> (+{formatCurrencyCompact(promotion.restDelta)})</>}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={undoPromotion}
+                className="link-underline text-caption font-medium text-muted"
+              >
+                Keep {PACKAGES.find((p) => p.key === promotion.from)?.label} instead
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ---- Material strip ---- */}
       <div className="relative">
         <button
@@ -513,6 +641,8 @@ export function StepMaterialSelect({
                longer produce this — `pick` removes conflicts outright — but a
                shared URL still can, and it must not render as "never chosen". */
             const isGhost = line.key in chosen && !isLive;
+            /* Above the chosen scope: available, but it changes the package. */
+            const upgrade = isUpgrade(line.key);
 
             return (
               <button
@@ -531,7 +661,9 @@ export function StepMaterialSelect({
                       ? 'surface border-cyan-500/45'
                       : isGhost
                         ? 'surface border-dashed opacity-60'
-                        : 'surface hover:border-cyan-500/40',
+                        : upgrade
+                          ? 'surface border-dashed border-sand-400/70 hover:border-cyan-500/40'
+                          : 'surface hover:border-cyan-500/40',
                 )}
               >
                 <span className="flex h-full flex-col items-center justify-center p-2">
@@ -563,6 +695,13 @@ export function StepMaterialSelect({
                 {isGhost && (
                   <span className="absolute inset-x-1 bottom-1 rounded bg-[rgb(var(--c-text))]/[0.06] text-[0.5625rem] uppercase tracking-wide text-subtle">
                     Replaced
+                  </span>
+                )}
+                {/* Named, not hidden. A tile that quietly changes your package
+                    when tapped is worse than one that says it will. */}
+                {upgrade && !isLive && (
+                  <span className="absolute inset-x-1 bottom-1 rounded bg-sand-300/40 text-[0.5625rem] uppercase tracking-wide text-subtle dark:bg-sand-500/20">
+                    Upgrade
                   </span>
                 )}
               </button>
@@ -655,6 +794,25 @@ export function StepMaterialSelect({
               );
             })}
           </div>
+
+          {/* Said before the tap, not after it. The banner above explains what
+              happened; this explains what is about to. */}
+          {activeLine && isUpgrade(activeLine.key) && !activeIsChosen && input.packageKey && (
+            <div className="mb-6 flex items-start gap-2.5 rounded-lg border border-dashed border-sand-400/70 bg-sand-100/60 p-3.5 dark:bg-sand-500/[0.07]">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-subtle" />
+              <p className="text-caption leading-relaxed text-muted">
+                {activeLine.label} is not part of{' '}
+                <span className="font-medium">
+                  {PACKAGES.find((p) => p.key === input.packageKey)?.label}
+                </span>
+                . Adding it moves your build to{' '}
+                <span className="font-medium">
+                  {PACKAGES.find((p) => activeLine.packages.includes(p.key))?.label}
+                </span>
+, and reprices the build at that package's rate. You can undo it straight after.
+              </p>
+            </div>
+          )}
 
           {activeIsChosen && replaces.length > 0 && (
             <p className="mb-4 flex items-start gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.06] p-3 text-caption leading-relaxed text-muted">
@@ -804,46 +962,21 @@ export function StepEnhancements({
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {available.map((e) => {
-          const selected = input.enhancements.includes(e.key);
-          return (
-            <button
-              key={e.key}
-              type="button"
-              onClick={() => toggle(e.key)}
-              aria-pressed={selected}
-              className={cn(
-                'flex items-start gap-4 rounded-lg border p-5 text-left transition-all duration-300',
-                selected ? 'border-cyan-500 bg-cyan-500/[0.05]' : 'surface hover:border-cyan-500/50',
-              )}
-            >
-              <span
-                className={cn(
-                  'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors',
-                  selected ? 'bg-cyan-500 text-white' : 'bg-[rgb(var(--c-text))]/[0.05] text-[rgb(var(--c-text-muted))]',
-                )}
-              >
-                <Icon name={e.icon} className="h-[18px] w-[18px]" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{e.label}</span>
-                  <span className={cn('shrink-0', selected ? 'text-cyan-500' : 'text-subtle')}>
-                    {selected ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                  </span>
-                </span>
-                <span className="mt-1 block text-caption leading-relaxed text-muted">{e.description}</span>
-                <span className={cn('num mt-2 block text-caption font-medium', labourOnly && 'line-through opacity-50')}>
-                  + {formatCurrency(priceFor(e))}
-                  {e.pricingModel === 'per-sqft' && <span className="font-normal text-subtle"> (₹{e.unitPrice}/sq ft)</span>}
-                  {e.pricingModel === 'per-floor' && <span className="font-normal text-subtle"> (per floor served)</span>}
-                </span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* One grid, shared with the furniture picker — see OptInGrid. */}
+      <OptInGrid
+        items={available.map((e) => ({
+          key: e.key,
+          label: e.label,
+          description: e.description,
+          icon: e.icon,
+          amount: priceFor(e),
+          ...(e.pricingModel === 'per-sqft' && { basis: `₹${e.unitPrice}/sq ft` }),
+          ...(e.pricingModel === 'per-floor' && { basis: 'per floor served' }),
+        }))}
+        selected={(key) => input.enhancements.includes(key)}
+        onToggle={toggle}
+        muted={labourOnly}
+      />
 
       {input.enhancements.length > 0 && (
         <motion.p

@@ -23,6 +23,8 @@ import { formatCurrency, formatNumber } from '@/lib/format';
 import { roles } from '@/data/ops';
 import { PACKAGES, LOCATIONS, ENHANCEMENTS } from '@/constants/estimator';
 import { MATERIAL_GROUPS, MATERIAL_LINES, QUANTITY_UNIT_LABEL, defaultOption } from '@/constants/materials';
+import { WORK_HEADS } from '@/constants/work-heads';
+import { FURNITURE_LINES, furnitureOptionOf } from '@/constants/furniture';
 import { resetOverlay } from '@/services/adapters/mock.adapter';
 import type { PermissionAction } from '@/types/domain';
 
@@ -214,6 +216,8 @@ export function AdminEstimatorConfig() {
           { value: 'locations', label: 'Localities', count: locations.length },
           { value: 'enhancements', label: 'Enhancements', count: enhancements.length },
           { value: 'materials', label: 'Materials', count: MATERIAL_LINES.length },
+          { value: 'work', label: 'Work heads', count: WORK_HEADS.length },
+          { value: 'furniture', label: 'Furniture', count: FURNITURE_LINES.length },
         ]}
         value={tab}
         onChange={setTab}
@@ -249,12 +253,88 @@ export function AdminEstimatorConfig() {
         </div>
       )}
 
+      {tab === 'work' && (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.05] p-4">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" />
+            <p className="text-caption leading-relaxed text-muted">
+              Work heads are how the estimate is <strong>presented</strong>, not how it is priced. They
+              re-partition the total — materials each head owns, plus a share of the labour, design and site
+              costs — so excavation, shuttering and the staircase are visible without being charged twice. The
+              weights are <strong>relative and normalised over whatever is active</strong>, so adding a head
+              never adds a rupee and editing one silently reweights the others; they stay read-only here until
+              they have been calibrated against a Jaipur BOQ. Heads with no materials are labour and plant.
+            </p>
+          </div>
+
+          <div className="surface overflow-hidden rounded-xl border">
+            <ConfigTable
+              headers={['Work', 'From package', 'Cost head', 'Materials priced under it', 'Weight']}
+              rows={WORK_HEADS.map((h) => [
+                <span key="l">
+                  <span className="block font-medium">{h.label}</span>
+                  {h.hindi && <span className="block font-deva text-caption text-subtle">{h.hindi}</span>}
+                </span>,
+                <Badge key="p" variant="default" size="sm">{h.minPackage}</Badge>,
+                h.costHead,
+                <span key="m" className="flex flex-wrap gap-1">
+                  {h.materialKeys.length ? (
+                    h.materialKeys.map((k) => (
+                      <Badge key={k} variant="default" size="sm">{k}</Badge>
+                    ))
+                  ) : (
+                    <Badge variant="warning" size="sm">labour &amp; plant</Badge>
+                  )}
+                </span>,
+                String(h.labourWeight),
+              ])}
+            />
+          </div>
+        </div>
+      )}
+
+      {tab === 'furniture' && (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.05] p-4">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" />
+            <p className="text-caption leading-relaxed text-muted">
+              Loose furniture is priced <strong>on top of</strong> the fully-furnished package, never inside it.
+              The published ₹2,500–3,000/sq ft is the price of fixed joinery — modular kitchen, wardrobes,
+              ceilings — and a sofa is not in that contract; folding one in would restate the price of
+              everything else. Every figure is an allowance at that level rather than a named product. All of these are <Badge variant="warning" size="sm">indicative</Badge> national rates and
+              need calibrating against the client&apos;s own list.
+            </p>
+          </div>
+
+          <div className="surface overflow-hidden rounded-xl border">
+            <ConfigTable
+              headers={['Item', 'Priced', 'Allowance levels', 'Default']}
+              rows={FURNITURE_LINES.map((l) => [
+                <span key="l">
+                  <span className="block font-medium">{l.label}</span>
+                  {l.hindi && <span className="block font-deva text-caption text-subtle">{l.hindi}</span>}
+                </span>,
+                <Badge key="p" variant="default" size="sm">{l.pricingModel}</Badge>,
+                <span key="o" className="flex flex-wrap gap-1">
+                  {l.options.map((o) => (
+                    <Badge key={o.key} variant={o.isDefault ? 'brand' : 'default'} size="sm">
+                      {o.label} · {formatCurrency(o.rate)}
+                    </Badge>
+                  ))}
+                </span>,
+                formatCurrency(furnitureOptionOf(l, undefined).rate),
+              ])}
+            />
+          </div>
+        </div>
+      )}
+
       {tab === 'materials' && (
         <div className="space-y-4">
           <div className="flex items-start gap-3 rounded-lg border border-cyan-500/30 bg-cyan-500/[0.05] p-4">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" />
             <p className="text-caption leading-relaxed text-muted">
-              These seventeen lines <strong>are</strong> the pricing model. The visitor grades each one and the
+              These {MATERIAL_LINES.length} lines <strong>are</strong> the pricing model. The visitor grades each one and the
               estimate is built upward from them: quantity × rate, summed over whatever the visitor selected,
               then divided by the materials share to give the total. Nothing is pre-selected — the visitor picks
               every material and every brand. The <Badge variant="brand" size="sm">highlighted</Badge> brand in

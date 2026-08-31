@@ -5,15 +5,13 @@ import { TrustBar, OneSystem } from './sections/Narrative';
 import { MepfTeaser } from '@/features/mepf/MepfTeaser';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
-import { FeaturedProjects, ProcessSection, Testimonials } from './sections/Showcase';
-import { SITE } from '@/constants/site';
-import { IMG } from '@/lib/media';
+import { FeaturedProjects, Testimonials } from './sections/Showcase';
 
 export function HomeView() {
   return (
     <>
       {/*
-        Seven sections, down from fourteen.
+        Six sections, down from fourteen.
         --------------------------------------------------------------
         The page was not long because any one section was verbose — it was long
         because four of them made the same argument. `Approach` restated
@@ -30,8 +28,14 @@ export function HomeView() {
         the maintenance promise — moved into `OneSystem`, which is why that
         section carries two CTAs.
 
+        `ProcessSection` — the six-stage rail — came out last, also at the
+        client's request, and `OneSystem` moved down into the slot it left. The
+        stages themselves are not lost: `/services` renders all six from the same
+        `PROCESS_STEPS` constant, under the same "How we work" overline. What the
+        landing page no longer says anywhere is stage 04's live-camera line.
+
         What is left is one pass down the funnel with no repetition:
-          who we are → what we have built → how we work → why us →
+          what we engineer → what we have built → who we are →
           who vouches for us.
 
         The pass used to end on "what it costs"; that section is commented out at
@@ -45,12 +49,17 @@ export function HomeView() {
       */}
       <Hero />
       <TrustBar />
-      <OneSystem />
-      {/* Expands the "Engineering" leg OneSystem just named — MEPF is the firm's
-          core discipline and the one a visitor is least likely to picture. */}
+      {/* MEPF opens the argument now rather than expanding one already made: it
+          is the firm's core discipline and the thing a visitor is least able to
+          picture, so it is the strongest evidence to show before any claim about
+          who we are. `OneSystem` names the four disciplines it belongs to
+          further down. */}
       <MepfTeaser />
       <FeaturedProjects />
-      <ProcessSection />
+      {/* The claim, now made after the evidence rather than before it. This is
+          the page's only dark band and its last argument before the people who
+          vouch for it. */}
+      <OneSystem />
       {/* The claims, then the people backing them. This band is `--c-surface-2`,
           and with `Packages` switched off below it is now the page's last one —
           the tint carries straight into the footer, which is fine, but restoring

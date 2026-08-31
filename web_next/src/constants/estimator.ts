@@ -133,8 +133,18 @@ export const PACKAGES: PackageOption[] = [
   },
   {
     key: 'fully-furnished',
-    label: 'Interior Work',
-    headline: 'Fully Furnished',
+    /*
+     * Named for the scope, not for the department that delivers it.
+     *
+     * This card used to read "Interior Work" with "Fully Furnished" demoted to the
+     * overline — the only one of the three where the label and the headline were
+     * the other way round. The three scopes the firm actually sells are Civil
+     * Work, Semi Furnished and Fully Furnished, and a comparison in which the
+     * third column is named after something else is a comparison a visitor has to
+     * decode before they can use it.
+     */
+    label: 'Fully Furnished',
+    headline: 'Keys in hand',
     description: 'Hand over the keys and walk in. Modular kitchen, wardrobes, ceilings, lighting.',
     minRate: 2500,
     maxRate: 3000,
@@ -373,16 +383,6 @@ export const PAYMENT_SCHEDULE = [
   { milestone: 'Brickwork, plaster & MEPF rough-in', percent: 15, trigger: 'Plaster complete' },
   { milestone: 'Flooring, painting & fittings', percent: 15, trigger: 'Finishing complete' },
   { milestone: 'Handover', percent: 5, trigger: 'Snag-free handover' },
-] as const;
-
-/** Construction phases used in the estimator's timeline strip. */
-export const TIMELINE_PHASES = [
-  { key: 'design', label: 'Design & Approvals', share: 0.14 },
-  { key: 'foundation', label: 'Foundation & Plinth', share: 0.12 },
-  { key: 'structure', label: 'Structure & Slabs', share: 0.28 },
-  { key: 'masonry', label: 'Masonry & Plaster', share: 0.16 },
-  { key: 'mepf', label: 'MEPF & Waterproofing', share: 0.12 },
-  { key: 'finishing', label: 'Finishing & Handover', share: 0.18 },
 ] as const;
 
 export const ASSUMPTIONS = [

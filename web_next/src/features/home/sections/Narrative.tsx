@@ -90,11 +90,16 @@ export function OneSystem() {
       why the page read flat. This one is the page's central claim, so it is the
       one that earns the room.
 
-      `navy-800` rather than `ink-950`: the page had exactly one dark break
-      (`ProcessSection`) against seven near-identical paper grounds — `--c-bg`
-      and `--c-surface-2` differ by 3/255, so the "tint" was never visible. Two
-      different darks give the scroll an actual rhythm, and navy is already the
-      house's second dark ground (`CtaBand`), so nothing new is invented.
+      `navy-800` rather than `ink-950`. The original reason was that the page
+      had a second dark band — `ProcessSection` — and two different darks gave
+      the scroll a rhythm the near-identical paper grounds could not (`--c-bg`
+      and `--c-surface-2` differ by 3/255, so the "tint" was never visible).
+      `ProcessSection` has since been removed and this is the page's only dark
+      band, but navy is still the right call for a different reason: the footer
+      is `ink-950`, and this band is two away from it with only the testimonial
+      tint in between. In ink the two would read as one long dark tail. Navy is
+      also already the house's second dark ground (`CtaBand`), so nothing new is
+      invented either way.
     */
     <section id="intro" className="section on-dark grain relative overflow-hidden bg-navy-800 text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
@@ -166,10 +171,11 @@ export function OneSystem() {
           One frame, four columns, dividers instead of gaps.
 
           This is the merge made visible. `WhyChooseUs` used to restate this same
-          argument as four separate floating cards; four separate cards is also
-          what `ProcessSection` does further down. A single enclosure divided
-          into four says the thing the copy says — four disciplines, one roof —
-          and cannot be mistaken for the six-stage rail.
+          argument as four separate floating cards. A single enclosure divided
+          into four says the thing the copy says — four disciplines, one roof.
+          It used to have a second job — not being mistaken for the six-stage
+          rail further down the page — and that rail is gone, but the first
+          reason was always the load-bearing one.
 
           `divide-*` rather than borders on each cell: it draws the internal
           lines only, so the outer frame stays unbroken. The axis flips with the

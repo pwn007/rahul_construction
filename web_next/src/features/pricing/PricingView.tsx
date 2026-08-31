@@ -2,65 +2,70 @@
 
 import { Fragment, useState } from 'react';
 import Link from 'next/link';
-import { Check, Info, Minus } from 'lucide-react';
+import { Check, Info, Minus, Plus } from 'lucide-react';
 import { CtaBand, PackagePlans, PageHero, SectionHeader } from '@/components/common';
 import { Accordion, Badge } from '@/components/ui';
 import { Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { PACKAGES } from '@/constants/estimator';
+import { COST_HEADS, PACKAGES, type PackageKey } from '@/constants/estimator';
+import { WORK_HEADS, headInPackage, type WorkHead } from '@/constants/work-heads';
 import { faqs } from '@/data/content';
 import { formatNumber } from '@/lib/format';
 
-/** Inclusion matrix — derived from the client's published packages (Port1.pdf p.14–15). */
-const MATRIX: { group: string; rows: { label: string; civil: boolean; semi: boolean; full: boolean }[] }[] = [
-  {
-    group: 'Structure',
-    rows: [
-      { label: 'Excavation, foundation & footings', civil: true, semi: true, full: true },
-      { label: 'RCC frame, columns, beams & slabs', civil: true, semi: true, full: true },
-      { label: 'Brickwork & internal partitions', civil: true, semi: true, full: true },
-      { label: 'Roofing & terrace slab', civil: true, semi: true, full: true },
-      { label: 'Waterproofing (terrace & wet areas)', civil: false, semi: true, full: true },
-    ],
-  },
-  {
-    group: 'Finishes',
-    rows: [
-      { label: 'Internal & external plaster', civil: false, semi: true, full: true },
-      { label: 'Flooring & wall tiling', civil: false, semi: true, full: true },
-      { label: 'Doors, windows & frames', civil: false, semi: true, full: true },
-      { label: 'Painting — internal & external', civil: false, semi: true, full: true },
-      { label: 'Premium elevation treatment', civil: false, semi: false, full: true },
-    ],
-  },
-  {
-    group: 'Services (MEPF)',
-    rows: [
-      { label: 'Electrical conduiting & wiring', civil: false, semi: true, full: true },
-      { label: 'Plumbing supply & drainage', civil: false, semi: true, full: true },
-      { label: 'Sanitary ware & CP fittings', civil: false, semi: true, full: true },
-      { label: 'Light fittings & fixtures', civil: false, semi: false, full: true },
-      { label: 'Home automation readiness', civil: false, semi: false, full: true },
-    ],
-  },
-  {
-    group: 'Interiors',
-    rows: [
-      { label: 'Modular kitchen', civil: false, semi: false, full: true },
-      { label: 'Designer wardrobes & joinery', civil: false, semi: false, full: true },
-      { label: 'False ceiling & cove lighting', civil: false, semi: false, full: true },
-      { label: 'Loose furniture & styling', civil: false, semi: false, full: true },
-    ],
-  },
-  {
-    group: 'Service & support',
-    rows: [
-      { label: 'On-site supervision by engineer', civil: true, semi: true, full: true },
-      { label: 'Live camera access & weekly reports', civil: true, semi: true, full: true },
-      { label: 'Stage-wise quality sign-off', civil: true, semi: true, full: true },
-      { label: '1 year free maintenance', civil: true, semi: true, full: true },
-    ],
-  },
+/**
+ * Generated from the estimator's work heads, plus the promises that have no price.
+ *
+ * This used to be a hand-written table of booleans, which meant the page telling
+ * a visitor what each package contains and the calculator pricing those packages
+ * were two independent sources of truth — and they had already drifted: premium
+ * elevation and home automation were ticked here as scope while the estimator
+ * priced them as optional extras, and loose furniture was ticked as included when
+ * it is a paid opt-in. Driving the ticks from `WORK_HEADS` makes what is shown and
+ * what is priced the same thing by construction.
+ *
+ * Three states, not two. A boolean cannot distinguish "in the package" from
+ * "available, and priced separately", and collapsing those two was how the drift
+ * above went unnoticed. `Minus` for excluded, `Check` for included, `Plus` for
+ * available as an extra.
+ */
+type Cell = 'included' | 'optional' | 'excluded';
+
+function CellMark({ state }: { state: Cell }) {
+  if (state === 'included') return <Check className="mx-auto h-4 w-4 text-cyan-500" strokeWidth={3} />;
+  if (state === 'optional') return <Plus className="mx-auto h-4 w-4 text-[rgb(var(--c-text-subtle))]" />;
+  return <Minus className="mx-auto h-4 w-4 text-[rgb(var(--c-text-subtle))]/40" />;
+}
+
+const cellFor = (head: WorkHead, pkg: PackageKey): Cell =>
+  headInPackage(head, pkg) ? 'included' : 'excluded';
+
+/**
+ * What the firm commits to on every package, with no rupee amount attached.
+ *
+ * Deliberately not work heads: supervision has a cost and a weight, but a
+ * ten-year structural warranty is a promise, not a line in a BOQ. Forcing it into
+ * the priced model to make this table symmetric would have put a number on
+ * something that does not have one.
+ */
+const SERVICE_PROMISES = [
+  'On-site supervision by a project engineer',
+  'Live camera access and weekly progress reports',
+  'Stage-wise quality sign-off before payment',
+  'One year of free maintenance after handover',
+];
+
+/**
+ * Optional extras, shown so the table cannot imply they are included.
+ *
+ * These are `ENHANCEMENTS` in the estimator — priced individually, on top of any
+ * package. Loose furniture is the same shape and lives with them.
+ */
+const OPTIONAL_ROWS: { label: string; note: string }[] = [
+  { label: 'Premium elevation treatment', note: 'Priced per sq ft as an extra' },
+  { label: 'Home automation', note: 'Priced as an extra' },
+  { label: 'Rooftop solar, lift, central HVAC', note: 'Priced individually as extras' },
+  { label: 'Boundary wall, gate and landscaping', note: 'Priced per plot as an extra' },
+  { label: 'Loose furniture, curtains and appliances', note: 'Allowance-based, on top of Fully Furnished' },
 ];
 
 export function PricingView() {
@@ -120,7 +125,7 @@ export function PricingView() {
       {/* Inclusion matrix */}
       <section className="section-sm">
         <div className="container">
-          <SectionHeader overline="Compare" title="Exactly what is in each package" lead="No asterisks. If it is not ticked, it is not included." />
+          <SectionHeader overline="Compare" title="Exactly what is in each package" lead="Generated from the same work heads the estimator prices, so what is listed here is what the calculator charges for. A tick is included; a plus is available and priced separately." />
 
           {/*
             Two renderings of one source.
@@ -147,28 +152,68 @@ export function PricingView() {
                 </tr>
               </thead>
               <tbody>
-                {MATRIX.map((group) => (
-                  <Fragment key={group.group}>
-                    <tr className="bg-[rgb(var(--c-text))]/[0.03]">
-                      <td colSpan={4} className="px-1 py-2.5 text-overline uppercase text-subtle">
-                        {group.group}
-                      </td>
-                    </tr>
-                    {group.rows.map((row) => (
-                      <tr key={row.label} className="border-b last:border-0">
-                        <td className="py-3.5 pr-4 text-muted">{row.label}</td>
-                        {[row.civil, row.semi, row.full].map((included, i) => (
-                          <td key={i} className="px-4 py-3.5 text-center">
-                            {included ? (
-                              <Check className="mx-auto h-4 w-4 text-cyan-500" strokeWidth={3} />
-                            ) : (
-                              <Minus className="mx-auto h-4 w-4 text-[rgb(var(--c-text-subtle))]/40" />
+                {COST_HEADS.map((cost) => {
+                  const heads = WORK_HEADS.filter((h) => h.costHead === cost.key);
+                  if (!heads.length) return null;
+                  return (
+                    <Fragment key={cost.key}>
+                      <tr className="bg-[rgb(var(--c-text))]/[0.03]">
+                        <td colSpan={4} className="px-1 py-2.5 text-overline uppercase text-subtle">
+                          {cost.label}
+                        </td>
+                      </tr>
+                      {heads.map((head) => (
+                        <tr key={head.key} className="border-b last:border-0">
+                          <td className="py-3.5 pr-4">
+                            <span className="block text-muted">{head.label}</span>
+                            {head.hindi && (
+                              <span className="block font-deva text-caption text-subtle">{head.hindi}</span>
                             )}
                           </td>
-                        ))}
-                      </tr>
+                          {PACKAGES.map((p) => (
+                            <td key={p.key} className="px-4 py-3.5 text-center">
+                              <CellMark state={cellFor(head, p.key)} />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </Fragment>
+                  );
+                })}
+
+                <tr className="bg-[rgb(var(--c-text))]/[0.03]">
+                  <td colSpan={4} className="px-1 py-2.5 text-overline uppercase text-subtle">
+                    Service &amp; support
+                  </td>
+                </tr>
+                {SERVICE_PROMISES.map((promise) => (
+                  <tr key={promise} className="border-b last:border-0">
+                    <td className="py-3.5 pr-4 text-muted">{promise}</td>
+                    {PACKAGES.map((p) => (
+                      <td key={p.key} className="px-4 py-3.5 text-center">
+                        <CellMark state="included" />
+                      </td>
                     ))}
-                  </Fragment>
+                  </tr>
+                ))}
+
+                <tr className="bg-[rgb(var(--c-text))]/[0.03]">
+                  <td colSpan={4} className="px-1 py-2.5 text-overline uppercase text-subtle">
+                    Available on any package, priced separately
+                  </td>
+                </tr>
+                {OPTIONAL_ROWS.map((row) => (
+                  <tr key={row.label} className="border-b last:border-0">
+                    <td className="py-3.5 pr-4">
+                      <span className="block text-muted">{row.label}</span>
+                      <span className="block text-caption text-subtle">{row.note}</span>
+                    </td>
+                    {PACKAGES.map((p) => (
+                      <td key={p.key} className="px-4 py-3.5 text-center">
+                        <CellMark state="optional" />
+                      </td>
+                    ))}
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -176,41 +221,63 @@ export function PricingView() {
 
           {/* Stacked equivalent, phones and small tablets. */}
           <div className="mt-8 space-y-6 md:hidden">
-            {MATRIX.map((group) => (
-              <div key={group.group}>
-                <p className="text-overline uppercase text-subtle">{group.group}</p>
-                <ul className="mt-3 space-y-3">
-                  {group.rows.map((row) => (
-                    <li key={row.label} className="surface rounded-xl border p-4 shadow-sm">
-                      <p className="font-medium">{row.label}</p>
-                      <dl className="mt-3 space-y-2">
-                        {PACKAGES.map((pkg, i) => {
-                          const included = [row.civil, row.semi, row.full][i];
-                          return (
+            {COST_HEADS.map((cost) => {
+              const heads = WORK_HEADS.filter((h) => h.costHead === cost.key);
+              if (!heads.length) return null;
+              return (
+                <div key={cost.key}>
+                  <p className="text-overline uppercase text-subtle">{cost.label}</p>
+                  <ul className="mt-3 space-y-3">
+                    {heads.map((head) => (
+                      <li key={head.key} className="surface rounded-xl border p-4 shadow-sm">
+                        <p className="font-medium">{head.label}</p>
+                        {head.hindi && <p className="font-deva text-caption text-subtle">{head.hindi}</p>}
+                        <dl className="mt-3 space-y-2">
+                          {PACKAGES.map((pkg) => (
                             <div key={pkg.key} className="flex items-center justify-between gap-3 text-sm">
                               <dt className="text-muted">{pkg.label}</dt>
                               <dd className="flex items-center gap-1.5">
-                                {included ? (
-                                  <>
-                                    <Check className="h-4 w-4 text-cyan-500" strokeWidth={3} />
-                                    <span className="text-caption text-subtle">Included</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Minus className="h-4 w-4 text-[rgb(var(--c-text-subtle))]/50" />
-                                    <span className="text-caption text-subtle">Not included</span>
-                                  </>
-                                )}
+                                <CellMark state={cellFor(head, pkg.key)} />
+                                <span className="text-caption text-subtle">
+                                  {cellFor(head, pkg.key) === 'included' ? 'Included' : 'Not included'}
+                                </span>
                               </dd>
                             </div>
-                          );
-                        })}
-                      </dl>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                          ))}
+                        </dl>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+
+            <div>
+              <p className="text-overline uppercase text-subtle">Service &amp; support</p>
+              <ul className="mt-3 space-y-2">
+                {SERVICE_PROMISES.map((promise) => (
+                  <li key={promise} className="surface flex items-start gap-2.5 rounded-xl border p-4 text-sm shadow-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" strokeWidth={3} />
+                    <span className="text-muted">{promise} — on every package</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-overline uppercase text-subtle">Available on any package, priced separately</p>
+              <ul className="mt-3 space-y-2">
+                {OPTIONAL_ROWS.map((row) => (
+                  <li key={row.label} className="surface flex items-start gap-2.5 rounded-xl border p-4 text-sm shadow-sm">
+                    <Plus className="mt-0.5 h-4 w-4 shrink-0 text-subtle" />
+                    <span className="min-w-0">
+                      <span className="block text-muted">{row.label}</span>
+                      <span className="block text-caption text-subtle">{row.note}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>

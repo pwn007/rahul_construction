@@ -187,9 +187,13 @@ export const SERVICES_INTRO =
 /**
  * Process — PDF page 7.
  *
- * Descriptions are deliberately short (≈80 characters). They render in a
- * six-across rail on the home page, so anything longer turns each column into a
- * paragraph and the process stops being readable at a glance.
+ * Descriptions are deliberately short (≈80 characters). They were written for a
+ * six-across rail on the home page, where anything longer turned each column
+ * into a paragraph and the process stopped being readable at a glance. That rail
+ * has been removed at the client's request; the only renderer left is the
+ * three-across grid on `/services` (`ServicesView.tsx`), which has more room —
+ * but the brevity is worth keeping, and this is now the sole place the six
+ * stages appear on the site.
  */
 export const PROCESS_STEPS = [
   {

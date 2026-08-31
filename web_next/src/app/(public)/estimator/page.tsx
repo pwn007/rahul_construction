@@ -9,7 +9,7 @@ export const metadata: Metadata = buildMetadata(
   {
     title: 'Construction Cost Estimator — Jaipur 2026',
     description:
-      'Get an instant, itemised construction cost estimate for your plot in Jaipur. Head-wise breakdown, milestone payment schedule, estimated timeline and a downloadable PDF in under two minutes.',
+      'Get an instant, itemised construction cost estimate for your plot in Jaipur. Head-wise breakdown, milestone payment schedule and a downloadable PDF in under two minutes.',
     image: IMG.wide('og-estimator'),
   },
   '/estimator',

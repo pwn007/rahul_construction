@@ -46,6 +46,15 @@ export type AnalyticsEvent =
   | 'estimator_start'
   | 'estimator_step'
   | 'estimator_result'
+  /*
+   * Which package a visitor picks, recorded before anyone speaks to them.
+   *
+   * The single most useful new datapoint on the site: the scope people actually
+   * want, at the moment they choose it, separated from what a salesperson later
+   * talks them into.
+   */
+  | 'estimator_package_select'
+  | 'estimator_furniture_toggle'
   /* Lead capture */
   | 'lead_gate_open'
   | 'lead_submit'

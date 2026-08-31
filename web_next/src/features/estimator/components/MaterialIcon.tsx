@@ -3,7 +3,7 @@
 /**
  * Material glyphs.
  *
- * Twenty-one hand-drawn icons rather than a library, because no library has them:
+ * Hand-drawn icons rather than a library, because no library has them:
  * Lucide — which the rest of the product uses — has no cement bag, no rebar, no
  * tile, no transit mixer, no sanitaryware. The obvious fallback was the emoji
  * that used to sit on
@@ -212,6 +212,26 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M12 7.5v4" />
       <path d="M8.5 17a3.5 3.5 0 0 1 7 0Z" />
       <path d="M7 17h10" />
+    </>
+  ),
+
+  /* Kitchen counter — a slab on legs with a sink cut into it. */
+  'kitchen-counter': (
+    <>
+      <path d="M3 10h18" />
+      <path d="M3 10v2h18v-2" />
+      <path d="M5 12v8M19 12v8" />
+      <ellipse cx="9" cy="7" rx="3" ry="1.5" />
+      <path d="M15 7V4.5a1.5 1.5 0 0 0-3 0" />
+    </>
+  ),
+
+  /* Grills — a barred window in its frame. */
+  grills: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="1" />
+      <path d="M8 4v16M12 4v16M16 4v16" />
+      <path d="M3 12h18" />
     </>
   ),
 

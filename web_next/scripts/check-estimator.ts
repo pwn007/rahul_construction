@@ -15,12 +15,17 @@
  *   2. Σ construction heads ≡ total
  *   3. Σ material lines     ≡ the Materials head
  *   4. quantity × rate      ≡ amount, on every line
- *   5. selecting every material at its default brand lands ₹/sq ft inside the
- *      PUBLISHED RATE CARD for the derived scope
+ *   5. tapping each package lands its ₹/sq ft inside that package's PUBLISHED
+ *      RATE CARD
  *   6. mutually exclusive materials are never priced together
  *   7. every material declares exactly one default option, and no option smuggles
  *      structure into a display string
  *   8. an empty selection prices zero without dividing by zero or producing NaN
+ *   9. Sum of work heads     = total
+ *  10. every material line belongs to exactly one work head, and every work head
+ *      names only real material lines
+ *  11. loose furniture reconciles like an enhancement — and takes ₹/sq ft OUTSIDE
+ *      the fully-furnished band, deliberately
  *
  * (1)–(4) are now plain arithmetic rather than something engineered. Pricing runs
  * bottom-up: `total` is *defined* as materialsCost ÷ materials-share, so the
@@ -41,15 +46,46 @@
  * aggregate are the same concrete bought two ways; a competitor's calculator
  * lists both as additive rows and charges for the cubic metre twice.
  *
+ * (9) is what makes the work-head view safe to show. Work heads re-partition the
+ * total rather than adding to it, and the weights are normalised over whatever is
+ * active, so the identity should hold for every selection including the empty one
+ * and the labour-only one. Asserting it is cheaper than reasoning about it.
+ *
+ * (10) is what makes "what is shown is what is priced" true rather than
+ * aspirational. A material that belongs to no work head is money the breakdown
+ * silently drops; a material in two heads is money it counts twice.
+ *
  *   npm run check:estimator
  */
 
-import { calculateEstimate, deriveScope, DEFAULT_INPUT } from '../src/features/estimator/model';
-import { LOCATIONS, PACKAGES, PROPERTY_TYPES } from '../src/constants/estimator';
+import { calculateEstimate, effectiveScope, packageDefaults, DEFAULT_INPUT } from '../src/features/estimator/model';
+import { ENHANCEMENTS, LOCATIONS, PACKAGES, PROPERTY_TYPES } from '../src/constants/estimator';
 import { MATERIAL_LINES, defaultOption } from '../src/constants/materials';
+import { WORK_HEADS, workHeadsFor } from '../src/constants/work-heads';
+import { FURNITURE_LINES } from '../src/constants/furniture';
 
 /** A rupee of slack for floating-point noise on values in the crores. */
 const EPSILON = 0.01;
+
+/**
+ * The commercial modes, swept alongside the geometry.
+ *
+ * These were previously fixed at the defaults, which left two whole branches of
+ * the model unasserted: labour-only, where there are no material lines at all and
+ * the entire total has to land on the work heads, and a selection carrying
+ * enhancements, where an enhancement's material fraction appears in
+ * `materialLines` while its full cost has to reconcile exactly once.
+ */
+const MODES: { label: string; serviceModel: 'turnkey' | 'labour-only'; enhancements: string[] }[] = [
+  { label: 'turnkey', serviceModel: 'turnkey', enhancements: [] },
+  { label: 'turnkey+extras', serviceModel: 'turnkey', enhancements: ENHANCEMENTS.map((e) => e.key) },
+  { label: 'labour-only', serviceModel: 'labour-only', enhancements: [] },
+];
+
+/** Every furnishing at its default allowance — the heaviest selection possible. */
+const ALL_FURNITURE = Object.fromEntries(
+  FURNITURE_LINES.map((l) => [l.key, (l.options.find((o) => o.isDefault) ?? l.options[0]!).key]),
+);
 
 const AREAS = [400, 1200, 2500, 8000];
 const FLOORS = [1, 2, 3, 5];
@@ -92,6 +128,7 @@ const failures: string[] = [];
               ['furnished', SELECTABLE],
               ['empty', []],
             ] as [string, typeof MATERIAL_LINES][]) {
+            for (const mode of MODES) {
               const r = calculateEstimate({
                 ...DEFAULT_INPUT,
                 materials: select(lines),
@@ -101,15 +138,25 @@ const failures: string[] = [];
                 floors,
                 hasBasement,
                 hasStilt,
+                serviceModel: mode.serviceModel,
+                enhancements: mode.enhancements,
+                /* Swept on the extras mode, so the furniture path is covered by
+                   every reconciliation assertion rather than only by its own. */
+                furniture: mode.enhancements.length ? ALL_FURNITURE : {},
               });
               checked++;
 
-              const where = `${label}/${propertyType.key}/${loc.key} ${areaPerFloor}×${floors}`;
+              const where = `${label}/${mode.label}/${propertyType.key}/${loc.key} ${areaPerFloor}×${floors}`;
 
               if (!Number.isFinite(r.total) || r.total < 0) {
                 failures.push(`${where}: total is ${r.total}`);
               }
-              if (!lines.length && r.total !== 0) {
+              /* Turnkey, and nothing added. A labour-only contract prices the work
+                 at the rate card's labour rate, which does not depend on a material
+                 selection; and an enhancement is a priced thing in its own right.
+                 An empty selection is only expected to price zero when there is
+                 genuinely nothing in the build. */
+              if (!lines.length && mode.serviceModel === 'turnkey' && !mode.enhancements.length && r.total !== 0) {
                 failures.push(`${where}: empty selection priced ${r.total}, expected 0`);
               }
 
@@ -134,6 +181,19 @@ const failures: string[] = [];
                   failures.push(`${where}: ${line.key} — quantity × rate ≠ amount`);
                 }
               }
+
+              /* (9) Work heads re-partition the total; they never add to it. */
+              const workSum = r.workHeads.reduce((s, h) => s + h.amount, 0);
+              const expected = r.total > 0 ? r.total : 0;
+              if (Math.abs(workSum - expected) > EPSILON) {
+                failures.push(`${where}: work heads sum to ${workSum}, total is ${expected}`);
+              }
+              for (const head of r.workHeads) {
+                if (!Number.isFinite(head.amount) || head.amount < 0) {
+                  failures.push(`${where}: work head ${head.key} is ${head.amount}`);
+                }
+              }
+            }
             }
           }
         }
@@ -147,41 +207,69 @@ const failures: string[] = [];
 /* -------------------------------------------------------------------- */
 
 console.log(`\nChecked ${checked.toLocaleString('en-IN')} configurations.\n`);
-console.log('Every material at its default brand, vs the published rate card:');
+console.log('Each package at its default selection, vs the published rate card:');
 
-/* Baseline geometry — a plain 2,400 sq ft build with no basement or stilt, since
-   those deliberately move the chargeable area away from the card's assumptions. */
-const SCENARIOS: { label: string; lines: typeof MATERIAL_LINES }[] = [
-  { label: 'Structure only', lines: STRUCTURE_ONLY },
-  { label: 'Finished', lines: FINISHED },
-  { label: 'With fixtures', lines: SELECTABLE },
-];
-
-for (const scenario of SCENARIOS) {
+/*
+ * Baseline geometry — a plain 2,400 sq ft build with no basement or stilt, since
+ * those deliberately move the chargeable area away from the card's assumptions.
+ *
+ * The scenarios used to be three hand-built proxies (structure-only, everything
+ * bar the fixtures, everything) chosen to *land on* each derived scope. They are
+ * now the literal selections `packageDefaults` fills in, which is what a visitor
+ * gets by tapping a package — so this asserts the thing that is actually shipped
+ * rather than a stand-in for it. The two agree today, which is how we know the
+ * swap changed the strength of the test and not the product.
+ */
+for (const pkg of PACKAGES) {
+  const materials = packageDefaults(pkg.key);
   const input = {
     ...DEFAULT_INPUT,
-    materials: select(scenario.lines),
+    packageKey: pkg.key,
+    materials,
     areaPerFloor: 1200,
     floors: 2,
   };
   const r = calculateEstimate(input);
-  const scope = deriveScope(input);
-  const pkg = PACKAGES.find((p) => p.key === scope)!;
+  const scope = effectiveScope(input);
   const rate = r.perSqft;
   const ok = rate >= pkg.minRate && rate <= pkg.maxRate;
 
   console.log(
-    `  ${scenario.label.padEnd(15)} → ${scope.padEnd(16)} ₹${Math.round(rate)
+    `  ${pkg.label.padEnd(15)} → ${scope.padEnd(16)} ₹${Math.round(rate)
       .toLocaleString('en-IN')
       .padStart(6)}/sq ft   card ₹${pkg.minRate.toLocaleString('en-IN')}–${pkg.maxRate.toLocaleString('en-IN')}  ${ok ? '✓' : '✗'}`,
   );
 
+  if (scope !== pkg.key) {
+    failures.push(
+      `${pkg.label}: tapping this package derives scope "${scope}". The defaults it fills in imply a ` +
+        'different scope than the one the visitor asked for, so the commercial split applied to their ' +
+        'estimate is not the one on the card they tapped.',
+    );
+  }
+
   if (!ok) {
     failures.push(
-      `${scenario.label}: bottom-up rate ₹${Math.round(rate)}/sq ft falls outside the published ` +
-        `${scope} band of ₹${pkg.minRate}–${pkg.maxRate}. The quantity coefficients and the rate card ` +
+      `${pkg.label}: bottom-up rate ₹${Math.round(rate)}/sq ft falls outside the published ` +
+        `${pkg.key} band of ₹${pkg.minRate}–${pkg.maxRate}. The quantity coefficients and the rate card ` +
         `have drifted apart — the breakdown will still add up, but it no longer prices the product we sell.`,
     );
+  }
+}
+
+/*
+ * The selection a visitor gets and the selection the band is asserted against
+ * have to be the same array, not two filters that happen to agree. `SELECTABLE`
+ * is this file's calibration set; `packageDefaults` is the product's.
+ */
+{
+  const expected = new Set(SELECTABLE.filter((l) => l.packages.includes('fully-furnished')).map((l) => l.key));
+  const actual = new Set(Object.keys(packageDefaults('fully-furnished')));
+  for (const key of expected) {
+    if (!actual.has(key)) failures.push(`packageDefaults(fully-furnished): missing ${key}, which SELECTABLE includes`);
+  }
+  for (const key of actual) {
+    if (!expected.has(key)) failures.push(`packageDefaults(fully-furnished): includes ${key}, which SELECTABLE excludes`);
   }
 }
 
@@ -265,6 +353,104 @@ if (provisional.length) {
   );
 }
 
+/* -------------------------------------------------------------------- */
+/* 10. Work-head coverage                                                 */
+/* -------------------------------------------------------------------- */
+
+{
+  const owner = new Map<string, string>();
+
+  for (const head of WORK_HEADS) {
+    for (const key of head.materialKeys) {
+      if (!MATERIAL_LINES.some((l) => l.key === key)) {
+        failures.push(`work head ${head.key}: names material "${key}", which does not exist`);
+        continue;
+      }
+      const existing = owner.get(key);
+      if (existing) {
+        failures.push(`material ${key}: claimed by both ${existing} and ${head.key} — it would be counted twice`);
+      } else {
+        owner.set(key, head.key);
+      }
+    }
+  }
+
+  for (const line of MATERIAL_LINES) {
+    if (!owner.has(line.key)) {
+      failures.push(`material ${line.key}: belongs to no work head — its cost would vanish from the breakdown`);
+    }
+  }
+
+  /* A head has to be reachable, or it is documentation rather than a head. */
+  for (const head of WORK_HEADS) {
+    if (!workHeadsFor(head.minPackage).some((h) => h.key === head.key)) {
+      failures.push(`work head ${head.key}: not returned by workHeadsFor(${head.minPackage})`);
+    }
+  }
+
+  const duplicates = WORK_HEADS.length - new Set(WORK_HEADS.map((h) => h.key)).size;
+  if (duplicates) failures.push(`WORK_HEADS: ${duplicates} duplicate key(s)`);
+
+  for (const head of WORK_HEADS) {
+    if (!(head.labourWeight > 0)) {
+      failures.push(`work head ${head.key}: labourWeight is ${head.labourWeight}, expected a positive number`);
+    }
+  }
+}
+
+/* -------------------------------------------------------------------- */
+/* 11. Furniture is additive, and deliberately outside the band            */
+/* -------------------------------------------------------------------- */
+
+{
+  const base = {
+    ...DEFAULT_INPUT,
+    packageKey: 'fully-furnished' as const,
+    materials: packageDefaults('fully-furnished'),
+    areaPerFloor: 1200,
+    floors: 2,
+  };
+  const without = calculateEstimate(base);
+  const furnished = calculateEstimate({ ...base, furniture: ALL_FURNITURE });
+
+  if (!(furnished.furnitureCost > 0)) {
+    failures.push('furniture: every item selected priced nothing');
+  }
+  if (Math.abs(furnished.total - without.total - furnished.furnitureCost) > EPSILON) {
+    failures.push('furniture: the total did not move by exactly the furniture cost — it is not purely additive');
+  }
+  /*
+   * Asserted so that nobody later "fixes" it.
+   *
+   * ₹2,500–3,000/sq ft is the price of a fully furnished *contract*: fixed
+   * joinery, not a sofa. A build carrying loose furniture is expected to sit
+   * above that band, and a future change that quietly brings it back inside would
+   * mean furniture had been folded into the package rate — restating the price of
+   * everything else to make room for it.
+   */
+  const card = PACKAGES.find((p) => p.key === 'fully-furnished')!;
+  if (furnished.perSqft <= card.maxRate) {
+    failures.push(
+      `furniture: a fully furnished build with every furnishing prices at ₹${Math.round(furnished.perSqft)}/sq ft, ` +
+        `inside the ₹${card.minRate}–${card.maxRate} contract band. Furniture is priced on top of that contract, ` +
+        'not inside it — if this now fits, it has been folded into the package rate.',
+    );
+  }
+
+  console.log(
+    `\n  Fully Furnished + all furnishings → ₹${Math.round(furnished.perSqft).toLocaleString('en-IN')}/sq ft ` +
+      `(₹${Math.round(furnished.furnitureCost).toLocaleString('en-IN')} of furniture, priced above the contract band).`,
+  );
+
+  for (const line of FURNITURE_LINES) {
+    const defaults = line.options.filter((o) => o.isDefault);
+    if (defaults.length !== 1) failures.push(`furniture ${line.key}: has ${defaults.length} defaults, expected 1`);
+    if (new Set(line.options.map((o) => o.key)).size !== line.options.length) {
+      failures.push(`furniture ${line.key}: duplicate option keys`);
+    }
+  }
+}
+
 if (failures.length) {
   console.error(`\n✗ ${failures.length} failure(s):\n`);
   for (const f of failures.slice(0, 20)) console.error(`  ${f}`);
@@ -273,6 +459,7 @@ if (failures.length) {
 }
 
 console.log(
-  `\n✓ ${MATERIAL_LINES.length} materials · ${MATERIAL_LINES.reduce((n, l) => n + l.options.length, 0)} brand options. ` +
+  `\n✓ ${MATERIAL_LINES.length} materials · ${MATERIAL_LINES.reduce((n, l) => n + l.options.length, 0)} brand options · ` +
+    `${WORK_HEADS.length} work heads · ${FURNITURE_LINES.length} furnishings. ` +
     'Every level reconciles exactly, and default brands match the published rate card.\n',
 );

@@ -12,11 +12,11 @@ import {
   PACKAGES,
   PAYMENT_SCHEDULE,
   PROPERTY_TYPES,
-  TIMELINE_PHASES,
   type AreaUnit,
   type CommercialHeadKey,
   type CostHeadKey,
   type PackageKey,
+  type PackageOption,
   type PropertyTypeKey,
   type ServiceModel,
 } from '@/constants/estimator';
@@ -28,6 +28,14 @@ import {
   type MaterialGroupKey,
   type QuantityUnit,
 } from '@/constants/materials';
+import { WORK_HEADS, headInPackage, type WorkHead } from '@/constants/work-heads';
+import {
+  BEDROOM_PER_SQFT,
+  FURNITURE_LINES,
+  FURNITURE_LINE_BY_KEY,
+  furnitureOptionOf,
+  type FurnitureLine,
+} from '@/constants/furniture';
 
 /* ------------------------------------------------------------------ */
 /* Input                                                               */
@@ -62,6 +70,30 @@ export interface EstimatorInput {
    * map says both what is in and which brand it is.
    */
   materials: Record<string, string>;
+  /**
+   * The package the visitor explicitly chose — and `undefined` when they have not
+   * been asked yet.
+   *
+   * The scope used to be *only* derived from the materials, on the reasoning that
+   * "semi-furnished" is a contract term rather than a question a homeowner can
+   * answer. That reasoning still holds for someone who wants to assemble a build
+   * material by material, and `deriveScope` is unchanged for them. But it left the
+   * visitor with no way to see what the three packages cost side by side, which is
+   * the first thing anyone comparing builders wants — so the package is now asked,
+   * with the derived scope as the floor beneath it.
+   *
+   * Deliberately optional rather than defaulted: `undefined` is what makes every
+   * link shared before today decode to exactly the behaviour it had then.
+   */
+  packageKey?: PackageKey;
+  /**
+   * furnitureKey → chosen allowance level. Presence IS selection, like `materials`.
+   *
+   * Priced additively after the package total, never inside it — a sofa is not in
+   * the ₹2,500–3,000/sq ft contract the client publishes, and folding it in would
+   * restate the price of everything else. See `constants/furniture.ts`.
+   */
+  furniture: Record<string, string>;
 }
 
 export const DEFAULT_INPUT: EstimatorInput = {
@@ -101,6 +133,8 @@ export const DEFAULT_INPUT: EstimatorInput = {
    * rather than rendering ₹0 as though it were an estimate.
    */
   materials: {},
+  /** Empty, and it stays empty until the visitor opts in. */
+  furniture: {},
 };
 
 /* ------------------------------------------------------------------ */
@@ -147,9 +181,53 @@ export function deriveScope(input: EstimatorInput): PackageKey {
 /** Cheapest scope first. A line's minimum scope is the first of these it allows. */
 const SCOPE_ORDER: PackageKey[] = ['civil', 'semi-furnished', 'fully-furnished'];
 
+/**
+ * The scope actually priced: never below what the visitor chose, never below what
+ * they selected.
+ *
+ * Taking the max of the two is what makes the promotion honest. Choose Semi
+ * Furnished and then add a modular kitchen and you are building a fully furnished
+ * house, whatever the button you pressed earlier said — pricing it at the semi
+ * rate would apply the wrong commercial split to work that is plainly not
+ * semi-furnished. The UI announces the promotion rather than letting it happen
+ * silently, but the model cannot let it not happen.
+ *
+ * It cannot fall, either: removing flooring from a Semi Furnished build leaves you
+ * on Semi Furnished with flooring missing, which `missingEssentials` already says
+ * out loud. Silently demoting to Civil would reprice the whole estimate because of
+ * one deselected row.
+ */
+export function effectiveScope(input: EstimatorInput): PackageKey {
+  if (input.propertyType === 'interior-only') return 'fully-furnished';
+  const derived = deriveScope(input);
+  if (!input.packageKey) return derived;
+  return SCOPE_ORDER.indexOf(derived) > SCOPE_ORDER.indexOf(input.packageKey)
+    ? derived
+    : input.packageKey;
+}
+
+/**
+ * The material selection a package fills in when it is chosen.
+ *
+ * The filter is deliberately identical to the one `check-estimator.ts` uses to
+ * build its calibration set (`!isAlternative`, then the package's own scope), so
+ * the selection a visitor gets by tapping a package and the selection the rate
+ * card is asserted against are provably the same array rather than two things
+ * that happen to agree today. Alternatives stay out: nobody tapping "Semi
+ * Furnished" has asked for ready-mix.
+ */
+export function packageDefaults(key: PackageKey): Record<string, string> {
+  return Object.fromEntries(
+    MATERIAL_LINES.filter((l) => !l.isAlternative && l.packages.includes(key)).map((l) => [
+      l.key,
+      defaultOption(l).key,
+    ]),
+  );
+}
+
 /** Materials a complete build at this scope needs but the visitor has not picked. */
 export function missingEssentials(input: EstimatorInput): typeof MATERIAL_LINES {
-  const scope = deriveScope(input);
+  const scope = effectiveScope(input);
   const chosen = activeLines(input, scope);
   const chosenKeys = new Set(chosen.map((l) => l.key));
 
@@ -175,13 +253,61 @@ export function missingEssentials(input: EstimatorInput): typeof MATERIAL_LINES 
  * "Signature" was merely convenient.
  */
 export function specSummary(input: EstimatorInput): string {
-  const active = activeLines(input, deriveScope(input));
+  const active = activeLines(input, effectiveScope(input));
   if (!active.length) return 'Nothing selected yet';
 
   /* Counted, not compared against a total. A denominator would have to include
      alternatives like ready-mix, so "15 of 16" would report a material as missing
      when the visitor simply chose the other way of buying it. */
   return `${active.length} material${active.length === 1 ? '' : 's'} selected`;
+}
+
+/**
+ * How far the visitor's selection has moved from the package they chose.
+ *
+ * Reported rather than renamed. A build that is Semi Furnished plus a modular
+ * kitchen is not a fourth package with a fourth rate card — it is Semi Furnished
+ * with a change, and saying so keeps the estimate anchored to a scope the client
+ * actually publishes a price for. Inventing "Semi Furnished Plus" would put a
+ * number on screen with nothing to check it against.
+ */
+export interface PackageDeviation {
+  /** In the build, but not part of the chosen package. */
+  added: string[];
+  /** Part of the chosen package, but taken out. */
+  removed: string[];
+  /** Kept, but at a different brand or specification than the package standard. */
+  respecified: string[];
+  count: number;
+  /** "2 changes" — empty when the selection is the package as we standardly build it. */
+  summary: string;
+}
+
+export function packageDeviation(input: EstimatorInput): PackageDeviation {
+  const scope = effectiveScope(input);
+  const defaults = packageDefaults(scope);
+  const label = (key: string) => MATERIAL_LINE_BY_KEY[key]?.label ?? key;
+
+  /* Compared against what is actually priced, so a line the scope has dropped —
+     a kitchen counter once the build became fully furnished — never reads as
+     something the visitor removed. */
+  const priced = new Set(activeLines(input, scope).map((l) => l.key));
+
+  const added = [...priced].filter((k) => !(k in defaults)).map(label);
+  const removed = Object.keys(defaults).filter((k) => !priced.has(k)).map(label);
+  const respecified = [...priced]
+    .filter((k) => k in defaults && input.materials[k] !== defaults[k])
+    .map(label);
+
+  const count = added.length + removed.length + respecified.length;
+
+  return {
+    added,
+    removed,
+    respecified,
+    count,
+    summary: count === 0 ? '' : `${count} change${count === 1 ? '' : 's'}`,
+  };
 }
 
 export interface CostHeadResult {
@@ -223,18 +349,40 @@ export interface MaterialLineResult {
   note?: string;
 }
 
+/**
+ * One row of the work-head view: the work, as a homeowner names it.
+ *
+ * A different axis again from the commercial split (materials / labour / design /
+ * overhead) and from the construction heads (structure / finishing / MEPF /
+ * interiors). Those two answer "what am I paying for?" and "which trade?"; this
+ * one answers "what will actually happen on my site, and what does each part of
+ * it cost?" — which is the question the client asked for, and the one that makes
+ * excavation and shuttering visible without pricing them twice.
+ */
+export interface WorkHeadResult {
+  key: string;
+  label: string;
+  hindi?: string;
+  blurb: string;
+  costHead: CostHeadKey;
+  amount: number;
+  percent: number;
+  /** The priced material lines under this head. Empty for labour-and-plant work. */
+  lines: MaterialLineResult[];
+  /**
+   * True when this head buys no branded product at all — excavation, plaster,
+   * the site overheads. Surfaced in the UI rather than rendering an empty list,
+   * because "no materials shown" and "we forgot to show the materials" look
+   * identical otherwise.
+   */
+  labourAndPlant: boolean;
+  detail?: string[];
+}
+
 export interface EnhancementResult {
   key: string;
   label: string;
   amount: number;
-}
-
-export interface TimelinePhase {
-  key: string;
-  label: string;
-  weeks: number;
-  startWeek: number;
-  sharePercent: number;
 }
 
 export interface PaymentRow {
@@ -257,22 +405,39 @@ export interface EstimateResult {
   materialsCost: number;
   /** Derived, never asked. Selects the commercial split and the timeline factor. */
   scope: PackageKey;
+  /** The work, head by head. Always sums to `total` exactly. */
+  workHeads: WorkHeadResult[];
   coreCost: number;
   enhancementsCost: number;
   enhancementBreakdown: EnhancementResult[];
+  /** Loose furniture, priced on top of the package. Zero unless opted into. */
+  furnitureCost: number;
+  furnitureBreakdown: EnhancementResult[];
   total: number;
   min: number;
   max: number;
   perSqft: number;
   heads: CostHeadResult[];
+  /**
+   * Still computed, but no longer shown anywhere on the estimator.
+   *
+   * The programme card, the hero line, the meter row and the PDF bars were all
+   * removed at the client's request. This survives because every lead record
+   * carries it — `EstimateRequest.timelineWeeks` is required by the server's Zod
+   * schema and non-null in Prisma, and the estimates module in /admin displays
+   * it — so dropping it would break lead submission, not just hide a number.
+   */
   timelineWeeks: number;
-  phases: TimelinePhase[];
   payments: PaymentRow[];
   assumptions: string[];
   labels: {
     propertyType: string;
     packageLabel: string;
     packageHeadline: string;
+    /** True when the visitor tapped this package rather than it being derived. */
+    packageChosen: boolean;
+    /** "2 changes", or empty when the selection is the package as standard. */
+    packageDeviation: string;
     quality: string;
     location: string;
     locationZone: string;
@@ -408,6 +573,109 @@ function computeMaterials(
   });
 }
 
+/**
+ * Work heads — a re-partition of the total, never an addition to it.
+ *
+ *   pool         = total − Σ(claimed material lines) − enhancementsCost
+ *   amount(head) = Σ(its priced lines) + pool × weight / Σ(active weights)
+ *
+ * Because the weights are normalised over whatever is active, the identity
+ *
+ *   Σ workHeads ≡ Σ claimed lines + pool + enhancementsCost ≡ total
+ *
+ * holds for every selection, every locality and every area. `materialsCost` is
+ * untouched, so `total` is untouched, so the published rate card is untouched —
+ * which is the whole reason excavation and shuttering are heads here rather than
+ * material lines. Their cost is already inside the labour and overhead shares of
+ * the total; adding them as lines would charge for the same work twice and push
+ * ₹/sq ft outside the client's published band.
+ *
+ * Enhancements get their own row rather than being spread across the heads. A
+ * lift is not part of the staircase, and the row then reads the same number the
+ * "Selected enhancements" card does.
+ */
+function computeWorkHeads(args: {
+  materialLines: MaterialLineResult[];
+  total: number;
+  scope: PackageKey;
+  enhancementsCost: number;
+  furnitureCost: number;
+  labourOnly: boolean;
+}): WorkHeadResult[] {
+  const { materialLines, total, scope, enhancementsCost, furnitureCost, labourOnly } = args;
+  if (!(total > 0)) return [];
+
+  const byKey = new Map(materialLines.map((l) => [l.key, l]));
+
+  /**
+   * A head is live when it is in scope and something it covers is actually being
+   * built. Under a labour-only contract there are no material lines at all, so
+   * that test would silently drop brickwork and the RCC frame from a contract
+   * that plainly includes them — every in-scope head stays live instead.
+   */
+  const isActive = (head: WorkHead) =>
+    labourOnly || head.materialKeys.length === 0 || head.materialKeys.some((k) => byKey.has(k));
+
+  const active = WORK_HEADS.filter((h) => headInPackage(h, scope) && isActive(h));
+  const weightSum = active.reduce((sum, h) => sum + h.labourWeight, 0);
+
+  /* Claimed from the lines actually priced, so an unclaimed line — an
+     enhancement's material fraction — never lands inside a construction head. */
+  const claimed = active.flatMap((h) => h.materialKeys.map((k) => byKey.get(k)).filter(Boolean) as MaterialLineResult[]);
+  const claimedCost = claimed.reduce((sum, l) => sum + l.amount, 0);
+  const pool = total - claimedCost - enhancementsCost - furnitureCost;
+
+  const rows: WorkHeadResult[] = active.map((head) => {
+    const lines = head.materialKeys.map((k) => byKey.get(k)).filter(Boolean) as MaterialLineResult[];
+    const amount =
+      lines.reduce((sum, l) => sum + l.amount, 0) +
+      (weightSum > 0 ? (pool * head.labourWeight) / weightSum : 0);
+
+    return {
+      key: head.key,
+      label: head.label,
+      ...(head.hindi && { hindi: head.hindi }),
+      blurb: head.blurb,
+      costHead: head.costHead,
+      amount,
+      percent: (amount / total) * 100,
+      lines,
+      labourAndPlant: head.materialKeys.length === 0,
+      ...(head.detail && { detail: head.detail }),
+    };
+  });
+
+  if (furnitureCost > 0) {
+    rows.push({
+      key: 'furnishing',
+      label: 'Furniture & decor',
+      hindi: 'फ़र्नीचर और सजावट',
+      blurb: 'Loose furniture, curtains, decorative lighting and appliances you chose',
+      costHead: 'interior',
+      amount: furnitureCost,
+      percent: (furnitureCost / total) * 100,
+      lines: [],
+      labourAndPlant: false,
+    });
+  }
+
+  if (enhancementsCost > 0) {
+    rows.push({
+      key: 'extras',
+      label: 'Optional extras',
+      hindi: 'अतिरिक्त काम',
+      blurb: 'Whole systems and works outside the building envelope that you added',
+      costHead: 'misc',
+      amount: enhancementsCost,
+      percent: (enhancementsCost / total) * 100,
+      lines: [],
+      labourAndPlant: false,
+    });
+  }
+
+  return rows;
+}
+
 function enhancementAmount(
   key: string,
   ctx: { chargeableArea: number; floors: number },
@@ -421,6 +689,40 @@ function enhancementAmount(
   else amount = def.unitPrice;
 
   return { key: def.key, label: def.label, amount };
+}
+
+/** Bedrooms, on the same rule the wardrobe line uses, so the two cannot disagree. */
+export function bedroomCount(chargeableArea: number): number {
+  return Math.max(1, Math.round(BEDROOM_PER_SQFT * chargeableArea));
+}
+
+/**
+ * Loose furniture, priced like an enhancement rather than like a material.
+ *
+ * Additive and after the fact, for the reason set out in `constants/furniture.ts`:
+ * the fully-furnished rate card prices fixed joinery, and a bed is not in it.
+ * Everything here is an allowance, so there is no quantity × brand-rate to
+ * itemise — the number the visitor picks IS the number.
+ */
+function computeFurniture(
+  input: EstimatorInput,
+  chargeableArea: number,
+): EnhancementResult[] {
+  /* Under a labour-only contract the client buys the furniture themselves, the
+     same reasoning that excludes enhancements there. */
+  if (input.serviceModel === 'labour-only') return [];
+
+  return FURNITURE_LINES.filter((line) => line.key in input.furniture).map((line: FurnitureLine) => {
+    const option = furnitureOptionOf(line, input.furniture[line.key]);
+    const amount =
+      line.pricingModel === 'per-sqft'
+        ? option.rate * chargeableArea
+        : line.pricingModel === 'per-bedroom'
+          ? option.rate * bedroomCount(chargeableArea)
+          : option.rate;
+
+    return { key: line.key, label: line.label, amount };
+  });
 }
 
 function computeTimeline(input: EstimatorInput, builtUpArea: number, packageKey: PackageKey): number {
@@ -449,7 +751,7 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
 
   const { areaPerFloorSqft, builtUpArea, chargeableArea } = computeAreas(input);
 
-  const scope = deriveScope(input);
+  const scope = effectiveScope(input);
   const pkg = PACKAGES.find((p) => p.key === scope) ?? PACKAGES[1]!;
   const split = COST_SPLIT[scope];
 
@@ -484,18 +786,23 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
 
   const enhancementsCost = enhancementBreakdown.reduce((sum, e) => sum + e.amount, 0);
 
+  const furnitureBreakdown = computeFurniture(input, chargeableArea);
+  const furnitureCost = furnitureBreakdown.reduce((sum, f) => sum + f.amount, 0);
+
   /**
    * Labour-only: the client procures materials, so we charge the rate card's
    * labour-only rate directly and there is no material cost of ours to itemise.
    */
   const labourOnly = input.serviceModel === 'labour-only';
-  const total = labourOnly ? chargeableArea * pkg.labourOnlyRate * rateScale : coreTotal + enhancementsCost;
+  const total = labourOnly
+    ? chargeableArea * pkg.labourOnlyRate * rateScale
+    : coreTotal + enhancementsCost + furnitureCost;
 
   const effectiveRate = chargeableArea > 0 ? total / chargeableArea : 0;
 
   /* Head-wise split: package weights applied to the total, enhancements moved to
      their own declared head, so the breakdown always reconciles. */
-  const headBase = total - enhancementsCost;
+  const headBase = total - enhancementsCost - furnitureCost;
   const headAmounts = COST_HEADS.reduce<Record<CostHeadKey, number>>(
     (acc, head) => {
       acc[head.key] = headBase * (pkg.weights[head.key] ?? 0);
@@ -508,6 +815,9 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
     const def = ENHANCEMENTS.find((e) => e.key === item.key);
     if (def) headAmounts[def.head] += item.amount;
   }
+
+  /* Loose furniture is interiors, wherever the package sits. */
+  headAmounts.interior += furnitureCost;
 
   const heads: CostHeadResult[] = COST_HEADS.map((head) => ({
     ...head,
@@ -543,7 +853,26 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
     optional: true,
   }));
 
-  const allMaterialLines = labourOnly ? [] : [...materialLines, ...enhancementLines];
+  /* Same identity as the enhancement lines above: the Materials head reads
+     `total × split.materials`, and the total now carries furniture too, so the
+     furniture's material fraction has to appear in the itemised column or the
+     column stops equalling the head it belongs to. A sofa really is mostly
+     material. */
+  const furnitureLines: MaterialLineResult[] = furnitureBreakdown.map((item) => ({
+    key: `fur-${item.key}`,
+    label: item.label,
+    group: 'fixtures' as const,
+    head: 'interior' as const,
+    quantity: 1,
+    unit: 'nos' as const,
+    unitRate: item.amount * split.materials,
+    amount: item.amount * split.materials,
+    spec: 'Material content of this furnishing',
+    option: 'included',
+    optional: true,
+  }));
+
+  const allMaterialLines = labourOnly ? [] : [...materialLines, ...enhancementLines, ...furnitureLines];
 
   /**
    * Commercial split. `COST_SPLIT` rows sum to 1, so the four heads always
@@ -567,15 +896,16 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
     percent: shownSplit[head.key] * 100,
   })).filter((h) => h.amount > 0);
 
-  const timelineWeeks = computeTimeline(input, builtUpArea, scope);
-
-  let cursor = 0;
-  const phases: TimelinePhase[] = TIMELINE_PHASES.map((phase) => {
-    const weeks = Math.max(1, Math.round(timelineWeeks * phase.share));
-    const startWeek = cursor;
-    cursor += weeks;
-    return { key: phase.key, label: phase.label, weeks, startWeek, sharePercent: phase.share * 100 };
+  const workHeads = computeWorkHeads({
+    materialLines: allMaterialLines,
+    total,
+    scope,
+    enhancementsCost,
+    furnitureCost,
+    labourOnly,
   });
+
+  const timelineWeeks = computeTimeline(input, builtUpArea, scope);
 
   const payments: PaymentRow[] = PAYMENT_SCHEDULE.map((row) => ({
     milestone: row.milestone,
@@ -593,16 +923,18 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
     materialLines: allMaterialLines,
     materialsCost,
     scope,
+    workHeads,
     coreCost: coreTotal,
     enhancementsCost,
     enhancementBreakdown,
+    furnitureCost,
+    furnitureBreakdown,
     total,
     min: total * MODEL.rangeLow,
     max: total * MODEL.rangeHigh,
     perSqft: chargeableArea > 0 ? total / chargeableArea : 0,
     heads,
     timelineWeeks,
-    phases,
     payments,
     assumptions:
       input.serviceModel === 'labour-only' ? [MODEL.labourOnlyNote, ...ASSUMPTIONS] : ASSUMPTIONS,
@@ -610,6 +942,8 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
       propertyType: propertyType.label,
       packageLabel: pkg.label,
       packageHeadline: pkg.headline,
+      packageChosen: Boolean(input.packageKey),
+      packageDeviation: packageDeviation(input).summary,
       quality: specSummary(input),
       location: location.label,
       locationZone: location.zone,
@@ -617,6 +951,81 @@ export function calculateEstimate(input: EstimatorInput): EstimateResult {
       floors: floorLabel(input.floors, input.hasBasement, input.hasStilt),
     },
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* The three packages, priced side by side                             */
+/* ------------------------------------------------------------------ */
+
+export interface PackageComparison {
+  key: PackageKey;
+  pkg: PackageOption;
+  /** The selection this package fills in when chosen. */
+  defaults: Record<string, string>;
+  result: EstimateResult;
+  /** Hoisted from `result` because the card reads them directly. */
+  total: number;
+  perSqft: number;
+  workHeads: WorkHeadResult[];
+  /** True when this is the package the visitor is on. */
+  current: boolean;
+  /** ₹ against the current package — or against Civil Work before one is chosen. */
+  delta: number;
+}
+
+/**
+ * All three packages, at this visitor's area and locality, at our standard spec.
+ *
+ * Every card is priced from `packageDefaults`, including the one the visitor is
+ * already on, so the three numbers are a like-for-like comparison rather than
+ * three differently-customised builds. Once a package is chosen the result screen
+ * shows their own number; this screen answers the narrower question of what the
+ * three scopes cost as we normally build them.
+ *
+ * Enhancements are held out for the same reason: a lift added on one package
+ * would make it look more expensive as a *scope*, which is not what the
+ * comparison is for. The service model is carried through, because a labour-only
+ * contract has three genuinely different rates.
+ *
+ * Calling `calculateEstimate` three times per render is free — the check script
+ * runs 36,864 of them in well under a second. This exists for cohesion, not
+ * speed: three screens need this identical answer (the package cards, the
+ * locality band on step one, and the upgrade nudge on the result), and computing
+ * it three ways is how they end up disagreeing on screen.
+ */
+export function comparePackages(input: EstimatorInput): PackageComparison[] {
+  const current = input.packageKey;
+
+  const rows = PACKAGES.map((pkg) => {
+    const defaults = packageDefaults(pkg.key);
+    const result = calculateEstimate({
+      ...input,
+      packageKey: pkg.key,
+      materials: defaults,
+      /* Held out for the same reason: a lift or a sofa added on one package would
+         make it look more expensive as a *scope*, which is not the comparison. */
+      enhancements: [],
+      furniture: {},
+    });
+
+    return {
+      key: pkg.key,
+      pkg,
+      defaults,
+      result,
+      total: result.total,
+      perSqft: result.perSqft,
+      workHeads: result.workHeads,
+      current: pkg.key === current,
+      delta: 0,
+    };
+  });
+
+  /* Before a package is chosen, everything reads as "₹X more than Civil Work" —
+     the cheapest scope is the only baseline that needs no explanation. */
+  const base = rows.find((r) => r.current)?.total ?? rows[0]?.total ?? 0;
+
+  return rows.map((r) => ({ ...r, delta: r.total - base }));
 }
 
 /**
@@ -632,6 +1041,17 @@ const LEGACY_PRESETS: Record<string, MaterialGroupKey[]> = {
   signature: ['structure', 'finishing', 'services'],
   'fully-furnished': ['structure', 'finishing', 'services', 'fixtures'],
   bespoke: ['structure', 'finishing', 'services', 'fixtures'],
+};
+
+/** What each legacy link was promising, in the vocabulary the estimator now asks in. */
+const LEGACY_PACKAGES: Record<string, PackageKey> = {
+  civil: 'civil',
+  'grey-structure': 'civil',
+  essential: 'semi-furnished',
+  'semi-furnished': 'semi-furnished',
+  signature: 'semi-furnished',
+  'fully-furnished': 'fully-furnished',
+  bespoke: 'fully-furnished',
 };
 
 function applyLegacyPreset(name: string): Partial<EstimatorInput> | null {
@@ -653,6 +1073,15 @@ export function encodeInput(input: EstimatorInput): string {
     floors: String(input.floors),
     loc: input.location,
   });
+  /* `p`, not `pkg`. The legacy `pkg` key runs applyLegacyPreset, which overwrites
+     the whole material map — and this function's output is fed straight back
+     through history.replaceState on every keystroke, so reusing the key would
+     wipe the visitor's brand choices on the next render. */
+  if (input.packageKey) params.set('p', input.packageKey);
+  const packedFurniture = Object.entries(input.furniture)
+    .map(([k, v]) => `${k}:${v}`)
+    .join(',');
+  if (packedFurniture) params.set('f', packedFurniture);
   if (input.hasBasement) params.set('basement', '1');
   if (input.hasStilt) params.set('stilt', '1');
   if (input.enhancements.length) params.set('add', input.enhancements.join(','));
@@ -702,6 +1131,21 @@ export function decodeInput(search: string): Partial<EstimatorInput> {
   const legacy = params.get('tier') ?? params.get('pkg');
   if (legacy) Object.assign(out, applyLegacyPreset(legacy) ?? {});
 
+  /* A legacy link promised a scope as well as a selection; now that the package is
+     an answerable question, honour the promise by pre-answering it. */
+  const legacyPackage = legacy ? LEGACY_PACKAGES[legacy] : undefined;
+  if (legacyPackage) out.packageKey = legacyPackage;
+
+  /*
+   * Read before `m`, so an explicit material list in the same URL still wins.
+   * A link carrying both is a shared configuration, not a fresh package choice.
+   */
+  const p = params.get('p');
+  if (p && PACKAGES.some((x) => x.key === p)) {
+    out.packageKey = p as PackageKey;
+    out.materials = packageDefaults(p as PackageKey);
+  }
+
   const m = params.get('m');
   if (m) {
     const materials: Record<string, string> = {};
@@ -713,6 +1157,19 @@ export function decodeInput(search: string): Partial<EstimatorInput> {
       }
     }
     if (Object.keys(materials).length) out.materials = materials;
+  }
+
+  const f = params.get('f');
+  if (f) {
+    const furniture: Record<string, string> = {};
+    for (const pair of f.split(',')) {
+      const [key, optionKey] = pair.split(':');
+      const line = key ? FURNITURE_LINE_BY_KEY[key] : undefined;
+      if (line && optionKey && line.options.some((o) => o.key === optionKey)) {
+        furniture[key!] = optionKey;
+      }
+    }
+    if (Object.keys(furniture).length) out.furniture = furniture;
   }
 
   const loc = params.get('loc');

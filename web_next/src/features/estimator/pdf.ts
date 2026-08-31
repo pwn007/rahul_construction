@@ -69,7 +69,16 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
   doc.text('PROJECT', W / 2 + 20, y);
   doc.setFont('helvetica', 'normal').setFontSize(9.5);
   setColor(NAVY);
-  doc.text(`${result.labels.propertyType} · ${result.labels.packageLabel}`, W / 2 + 20, y + 17);
+  doc.text(
+    `${result.labels.propertyType} · ${result.labels.packageLabel}` +
+      (result.labels.packageChosen
+        ? result.labels.packageDeviation
+          ? ` (${result.labels.packageDeviation})`
+          : ''
+        : ' (from your selection)'),
+    W / 2 + 20,
+    y + 17,
+  );
   doc.text(`${result.labels.location} · ${result.labels.floors}`, W / 2 + 20, y + 31);
 
   y += 58;
@@ -91,7 +100,7 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
   doc.setFont('helvetica', 'normal').setFontSize(9);
   setColor(GREY);
   doc.text(
-    `${formatCurrency(result.perSqft)} per sq ft  ·  ${formatNumber(result.chargeableArea)} sq ft chargeable  ·  ${result.timelineWeeks} weeks`,
+    `${formatCurrency(result.perSqft)} per sq ft  ·  ${formatNumber(result.chargeableArea)} sq ft chargeable`,
     M + 22,
     y + 74,
   );
@@ -229,7 +238,85 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
     y += 12;
   }
 
-  /* ---------------- Page 2 — itemised materials ---------------- */
+  /* ---------------- Furniture ---------------- */
+  if (result.furnitureBreakdown.length) {
+    doc.setFont('helvetica', 'bold').setFontSize(11);
+    setColor(NAVY);
+    doc.text('Furniture & decor', M, y);
+    y += 16;
+    result.furnitureBreakdown.forEach((item) => {
+      doc.setFont('helvetica', 'normal').setFontSize(9);
+      setColor(GREY);
+      doc.text(`\u2022  ${item.label}`, M + 6, y + 10);
+      setColor(NAVY);
+      doc.text(formatCurrency(item.amount), W - M - 10, y + 10, { align: 'right' });
+      y += 16;
+    });
+    y += 12;
+  }
+
+  /* ---------------- Scope of work ---------------- */
+  /*
+   * Its own page.
+   *
+   * Nineteen rows will not fit under the head table and the enhancement list on
+   * page one, which is already close to the footer before any extras are added —
+   * and this is the table a client reads line by line to check that excavation,
+   * shuttering and the staircase are in the price. Squeezing it is worse than
+   * paging it.
+   */
+  if (result.workHeads.length) {
+    doc.addPage();
+    y = 60;
+
+    doc.setFont('helvetica', 'bold').setFontSize(11);
+    setColor(NAVY);
+    doc.text('Scope of work', M, y);
+    doc.setFont('helvetica', 'normal').setFontSize(8.5);
+    setColor(GREY);
+    doc.text(
+      'Every stage of the build, and what each costs. These add up to the same total.',
+      M,
+      y + 14,
+    );
+    y += 32;
+
+    setFill(LIGHT);
+    doc.rect(M, y, W - M * 2, 20, 'F');
+    doc.setFont('helvetica', 'bold').setFontSize(8.5);
+    setColor(GREY);
+    doc.text('WORK', M + 10, y + 13.5);
+    doc.text('SHARE', W - M - 150, y + 13.5, { align: 'right' });
+    doc.text('AMOUNT', W - M - 10, y + 13.5, { align: 'right' });
+    y += 20;
+
+    result.workHeads.forEach((head, i) => {
+      if (i % 2 === 1) {
+        setFill([250, 251, 253]);
+        doc.rect(M, y, W - M * 2, 22, 'F');
+      }
+      doc.setFont('helvetica', 'normal').setFontSize(9.5);
+      setColor(NAVY);
+      doc.text(head.label, M + 10, y + 14.5);
+      setColor(GREY);
+      doc.setFontSize(9);
+      doc.text(`${head.percent.toFixed(1)}%`, W - M - 150, y + 14.5, { align: 'right' });
+      doc.setFont('helvetica', 'bold').setFontSize(9.5);
+      setColor(NAVY);
+      doc.text(formatCurrency(head.amount), W - M - 10, y + 14.5, { align: 'right' });
+      y += 22;
+    });
+
+    setFill(NAVY);
+    doc.rect(M, y, W - M * 2, 26, 'F');
+    doc.setFont('helvetica', 'bold').setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Total', M + 10, y + 17);
+    doc.text(formatCurrency(result.total), W - M - 10, y + 17, { align: 'right' });
+    y += 42;
+  }
+
+  /* ---------------- Page 3 — itemised materials ---------------- */
   /* The quantities are the reason this page exists. A client can take "994 bags
      of cement at Rs 400" to a supplier and check it; they cannot check a lump. */
   if (result.materialLines.length) {
@@ -308,42 +395,16 @@ export function generateEstimatePdf(result: EstimateResult, lead: { name: string
     y += 42;
   }
 
-  /* ---------------- Programme & payments ---------------- */
+  /* ---------------- Payment schedule ---------------- */
   doc.addPage();
   y = 60;
 
-  doc.setFont('helvetica', 'bold').setFontSize(11);
-  setColor(NAVY);
-  doc.text('Estimated programme', M, y);
-  y += 18;
-
-  const barX = M;
+  /* `barW` outlived the programme bars it was named for — the payment table is
+     laid out against the same content width. */
   const barW = W - M * 2;
-  result.phases.forEach((phase) => {
-    const w = (phase.weeks / result.timelineWeeks) * barW;
-    const x = barX + (phase.startWeek / result.timelineWeeks) * barW;
 
-    doc.setFont('helvetica', 'normal').setFontSize(9);
-    setColor(NAVY);
-    doc.text(phase.label, M, y + 9);
-    setColor(GREY);
-    doc.setFontSize(8.5);
-    doc.text(`${phase.weeks} wk`, W - M, y + 9, { align: 'right' });
-
-    setFill([236, 239, 244]);
-    doc.roundedRect(barX, y + 14, barW, 7, 3.5, 3.5, 'F');
-    setFill(CYAN);
-    doc.roundedRect(x, y + 14, Math.max(w, 6), 7, 3.5, 3.5, 'F');
-    y += 32;
-  });
-
-  doc.setFont('helvetica', 'bold').setFontSize(9.5);
-  setColor(NAVY);
-  doc.text(`Total: ${result.timelineWeeks} weeks from agreement to handover`, M, y + 4);
-  y += 34;
-
-  /* ---------------- Payment schedule ---------------- */
   doc.setFont('helvetica', 'bold').setFontSize(11);
+  setColor(NAVY);
   doc.text('Milestone payment schedule', M, y);
   y += 18;
 

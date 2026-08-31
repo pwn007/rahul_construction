@@ -1,6 +1,15 @@
-import type { BaseRate, Enhancement, LocationMultiplier, MaterialSpec } from '@/types/domain';
+import type {
+  BaseRate,
+  Enhancement,
+  FurnitureSpec,
+  LocationMultiplier,
+  MaterialSpec,
+  WorkHeadSpec,
+} from '@/types/domain';
 import { ENHANCEMENTS, LOCATIONS, PACKAGES } from '@/constants/estimator';
 import { MATERIAL_LINES, defaultOption } from '@/constants/materials';
+import { WORK_HEADS } from '@/constants/work-heads';
+import { FURNITURE_LINES, furnitureOptionOf } from '@/constants/furniture';
 
 /**
  * Persisted mirror of the estimator constants.
@@ -60,5 +69,29 @@ export const ENHANCEMENT_RECORDS: Enhancement[] = ENHANCEMENTS.map((e, i) => ({
   pricingModel: e.pricingModel,
   unitPrice: e.unitPrice,
   appliesTo: [...e.appliesTo],
+  order: i + 1,
+}));
+
+export const WORK_HEAD_RECORDS: WorkHeadSpec[] = WORK_HEADS.map((h, i) => ({
+  ...meta(`work_${h.key}`),
+  key: h.key,
+  label: h.label,
+  ...(h.hindi && { hindi: h.hindi }),
+  minPackage: h.minPackage,
+  costHead: h.costHead,
+  materials: [...h.materialKeys],
+  labourWeight: h.labourWeight,
+  order: i + 1,
+}));
+
+export const FURNITURE_RECORDS: FurnitureSpec[] = FURNITURE_LINES.map((l, i) => ({
+  ...meta(`fur_${l.key}`),
+  key: l.key,
+  label: l.label,
+  description: l.blurb,
+  icon: l.icon,
+  pricingModel: l.pricingModel,
+  options: l.options.map((o) => `${o.label} — ₹${o.rate}`),
+  defaultRate: furnitureOptionOf(l, undefined).rate,
   order: i + 1,
 }));

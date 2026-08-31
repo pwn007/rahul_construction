@@ -312,7 +312,16 @@ export interface EstimateRequest extends BaseEntity, LeadMeta {
   areaPerFloor: number;
   areaUnit: string;
   floors: number;
+  /** The scope actually priced — derived or chosen. Meaning unchanged, so old rows stay comparable. */
   packageType: string;
+  /**
+   * The package the visitor tapped, when they tapped one.
+   *
+   * Kept separate from `packageType` rather than overwriting it: the two differ
+   * whenever a selection promoted the build past the package that was chosen, and
+   * "what they asked for" is a different sales fact from "what they configured".
+   */
+  packageChosen?: string;
   qualityTier: string;
   location: string;
   enhancements: string[];
@@ -325,6 +334,9 @@ export interface EstimateRequest extends BaseEntity, LeadMeta {
   materials?: Record<string, string>;
   /** Sum of the priced material lines. Everything else derives from it. */
   materialsCost?: number;
+  /** furnitureKey → chosen allowance level, priced on top of the package. */
+  furniture?: Record<string, string>;
+  furnitureCost?: number;
   builtUpArea: number;
   totalMin: number;
   totalMax: number;
@@ -446,6 +458,41 @@ export interface BaseRate extends BaseEntity {
  * per-material grade ladder that briefly replaced it went the same way, because
  * ranking twenty-one materials is not a judgement a homeowner can make.
  */
+/**
+ * A stage of the build, as the estimator's work-head view reports it.
+ *
+ * Read-only in the admin: the weights are relative and normalised at compute
+ * time, so editing one silently reweights every other head in the same package —
+ * not something to expose behind a number input until the client has calibrated
+ * them against their own BOQ.
+ */
+export interface WorkHeadSpec extends BaseEntity {
+  key: string;
+  label: string;
+  hindi?: string;
+  /** The cheapest package this work is part of. */
+  minPackage: string;
+  costHead: string;
+  /** Material keys priced under this head. Empty for labour-and-plant work. */
+  materials: string[];
+  labourWeight: number;
+  order: number;
+}
+
+/** A loose-furniture allowance, priced on top of the package. */
+export interface FurnitureSpec extends BaseEntity {
+  key: string;
+  label: string;
+  description: string;
+  icon: string;
+  pricingModel: string;
+  /** Allowance levels, serialised as "label ₹rate" for the admin table. */
+  options: string[];
+  /** ₹ per unit of the default allowance. */
+  defaultRate: number;
+  order: number;
+}
+
 export interface MaterialSpec extends BaseEntity {
   key: string;
   label: string;

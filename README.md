@@ -78,8 +78,8 @@ Theme editor with live preview.
 ### 1. Construction Cost Estimator — `/estimator`
 The competitive wedge. **Two screens** — where and how big, then a material list you build yourself —
 a **live cost meter**, and a result that discloses progressively: a four-way commercial split, then
-materials itemised down to the bag of cement, then the programme, payment schedule and a **branded,
-vector PDF**.
+materials itemised down to the bag of cement, then the payment schedule and a **branded, vector
+PDF**.
 
 - **Two questions, not seven.** The model needs one required input, the area. Everything else either
   defaults (residential, turnkey, no basement) or moves behind an *Advanced* disclosure.

@@ -17,6 +17,7 @@ import { IMG } from '@/lib/media';
 import { usePrefersReducedMotion } from '@/hooks';
 import { calculateEstimate, decodeInput, encodeInput, DEFAULT_INPUT, type EstimatorInput } from './model';
 import { StepSite, StepMaterialSelect } from './components/Steps';
+import { StepPackage } from './components/StepPackage';
 import { LiveCostMeter, ResultScreen } from './components/Result';
 
 /**
@@ -66,9 +67,16 @@ const DELIVERABLES = [
  * model, building type, basement, stilt and coverage all default; materials and
  * enhancements live on the result screen, where a visitor who has already seen
  * their number is far more willing to spend the effort.
+ *
+ * The package screen is the one addition since, and it does not reopen that
+ * argument: it asks nothing, has no field on it, and answers a question — what do
+ * the three scopes cost — that the wizard previously made unanswerable. Four steps
+ * is also the ceiling; published multi-step data has completion falling off a
+ * cliff beyond it.
  */
 const ALL_STEPS = [
   { key: 'site', label: 'Your building' },
+  { key: 'package', label: 'Your package' },
   { key: 'materials', label: 'Your materials' },
   { key: 'result', label: 'Estimate' },
 ] as const;
@@ -108,7 +116,9 @@ export function EstimatorView() {
   const [step, setStep] = useState(() => {
     const saved = readStore<{ step?: number }>(STORAGE_KEYS.estimator, {}, 'session').step;
     const decoded = decodeInput(search);
-    const initial = saved ?? (decoded.materials ? 1 : 0);
+    /* A link that already answers something should not re-ask it: a package link
+       lands on materials, a full material list lands on the estimate. */
+    const initial = saved ?? (decoded.materials ? 2 : decoded.packageKey ? 1 : 0);
     return Math.max(0, Math.min(ALL_STEPS.length - 1, initial));
   });
 
@@ -186,8 +196,13 @@ export function EstimatorView() {
   const isResult = current === 'result';
   const shareUrl = `${SITE.url}/estimator?${encodeInput(input)}`;
 
-  /** The area is the model's only genuine requirement, and it is asked on step 1. */
-  const canAdvance = input.areaPerFloor > 0;
+  /**
+   * Two gates, one per asking step. The area is the model's only genuine
+   * requirement; the package is the one thing the next screen cannot default,
+   * because arriving at the material picker with nothing chosen is what the
+   * package screen exists to prevent.
+   */
+  const canAdvance = current === 'site' ? input.areaPerFloor > 0 : current !== 'package' || Boolean(input.packageKey);
 
   return (
     <>
@@ -197,8 +212,8 @@ export function EstimatorView() {
         lead={
           <>
             Two questions, about thirty seconds. You get a costed range, an itemised breakdown down to the
-            bag of cement, a milestone payment schedule, an estimated programme and a branded PDF — built on
-            our published rate card, not a number pulled from the air.
+            bag of cement, a milestone payment schedule and a branded PDF — built on our published rate card,
+            not a number pulled from the air.
           </>
         }
         breadcrumbs={[{ label: 'Cost Estimator' }]}
@@ -320,11 +335,19 @@ export function EstimatorView() {
           {isResult ? (
             <ResultScreen result={result} input={input} patch={patch} onRestart={restart} shareUrl={shareUrl} />
           ) : (
-            /* `[&>*]:min-w-0` — a grid item defaults to `min-width: auto`, so it
-               refuses to shrink below its content's min-content width. Any wide
-               child then widens the item, the grid, and the document with it. */
-            <div className="grid gap-8 [&>*]:min-w-0 lg:grid-cols-12">
-              <div className="lg:col-span-8">
+            /*
+              `[&>*]:min-w-0` — a grid item defaults to `min-width: auto`, so it
+              refuses to shrink below its content's min-content width. Any wide
+              child then widens the item, the grid, and the document with it.
+
+              The package screen drops the sticky meter and takes the full width.
+              It carries three prices of its own, so the meter beside it would be
+              a fourth number — and an empty one, since nothing is selected until
+              a card is tapped. "Estimated cost — appears here" sitting next to a
+              live ₹46.2 L reads as a broken widget rather than a hint.
+            */
+            <div className={cn('grid gap-8 [&>*]:min-w-0', current !== 'package' && 'lg:grid-cols-12')}>
+              <div className={cn(current === 'package' ? 'w-full' : 'lg:col-span-8')}>
                 <div className="surface rounded-xl border p-7 shadow-sm md:p-10">
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -335,6 +358,9 @@ export function EstimatorView() {
                       transition={{ duration: reduced ? 0.15 : 0.35, ease: [0.16, 1, 0.3, 1] }}
                     >
                       {current === 'site' && <StepSite input={input} patch={patch} stepLabel={stepLabel} />}
+                      {current === 'package' && (
+                        <StepPackage input={input} patch={patch} stepLabel={stepLabel} />
+                      )}
                       {current === 'materials' && (
                         <StepMaterialSelect
                           input={input}
@@ -378,6 +404,7 @@ export function EstimatorView() {
               </div>
 
               {/* Sticky live meter */}
+              {current !== 'package' && (
               <aside className="lg:col-span-4">
                 <div className="sticky top-24 space-y-4">
                   <LiveCostMeter result={result} />
@@ -389,6 +416,7 @@ export function EstimatorView() {
                   </div>
                 </div>
               </aside>
+              )}
             </div>
           )}
         </div>

@@ -77,7 +77,10 @@ export function PackageCard({
       </ul>
 
       <Button
-        href={`${ROUTES.estimator}?pkg=${pkg.key}&model=${model}`}
+        /* `p`, the estimator's package key — not the legacy `pkg`, which also
+           overwrites the material selection and is now only decoded, never
+           emitted, so links already in the wild keep working. */
+        href={`${ROUTES.estimator}?p=${pkg.key}&model=${model}`}
         variant={popular ? 'secondary' : 'primary'}
         size="lg"
         full
