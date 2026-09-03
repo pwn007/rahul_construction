@@ -32,7 +32,7 @@ import type {
 /**
  * Resource registry. `RESOURCES[key]` is the single name used by:
  *  - the mock adapter's seed map
- *  - the Express route table
+ *  - the Laravel route table
  *  - the admin module configs
  *  - TanStack Query cache keys
  */

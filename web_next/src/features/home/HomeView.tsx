@@ -2,6 +2,7 @@
 
 import { Hero } from './sections/Hero';
 import { TrustBar, OneSystem } from './sections/Narrative';
+import { ServicesIndex } from './sections/ServicesIndex';
 import { MepfTeaser } from '@/features/mepf/MepfTeaser';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
@@ -11,7 +12,7 @@ export function HomeView() {
   return (
     <>
       {/*
-        Six sections, down from fourteen.
+        Seven sections, down from fourteen.
         --------------------------------------------------------------
         The page was not long because any one section was verbose — it was long
         because four of them made the same argument. `Approach` restated
@@ -34,9 +35,14 @@ export function HomeView() {
         `PROCESS_STEPS` constant, under the same "How we work" overline. What the
         landing page no longer says anywhere is stage 04's live-camera line.
 
+        A services index went back in above all of it, at the client's request —
+        but as an index rather than the card grid that was taken out, and
+        without MEPF, which has its own band immediately below it. See the note
+        at the top of `ServicesIndex`.
+
         What is left is one pass down the funnel with no repetition:
-          what we engineer → what we have built → who we are →
-          who vouches for us.
+          what you can hire us for → what we engineer → what we have built →
+          who we are → who vouches for us.
 
         The pass used to end on "what it costs"; that section is commented out at
         the bottom of this file while published rates are hidden.
@@ -44,16 +50,20 @@ export function HomeView() {
         Nothing was deleted from the site. `LivingSystems` moved to
         /services/mepf-consultancy, Vastu and the live cameras are linked from
         `WhyChooseUs`, and the "What we offer" grid came out in favour of the
-        /services page itself. Testimonials were briefly folded into `WhyChooseUs`
-        and are back on their own band.
+        /services page itself — see the services note above for what came back in
+        its place, and why it is not that grid. Testimonials were briefly folded
+        into `WhyChooseUs` and are back on their own band.
       */}
       <Hero />
       <TrustBar />
-      {/* MEPF opens the argument now rather than expanding one already made: it
-          is the firm's core discipline and the thing a visitor is least able to
-          picture, so it is the strongest evidence to show before any claim about
-          who we are. `OneSystem` names the four disciplines it belongs to
-          further down. */}
+      {/* The offer, before any argument about it. Three rows, not four — MEPF is
+          the section immediately below, and listing it here as well would put it
+          on this page three times. */}
+      <ServicesIndex />
+      {/* MEPF expands the one service the index deliberately leaves out: it is
+          the firm's core discipline and the thing a visitor is least able to
+          picture, so it gets a band rather than a line. `OneSystem` names the
+          four disciplines it belongs to further down. */}
       <MepfTeaser />
       <FeaturedProjects />
       {/* The claim, now made after the evidence rather than before it. This is

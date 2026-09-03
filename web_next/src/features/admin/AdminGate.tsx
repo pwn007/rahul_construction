@@ -3,46 +3,56 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
 import { Button, Input, FormField } from '@/components/ui';
 import { Logo } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
-import { readStore, writeStore, removeStore, STORAGE_KEYS } from '@/lib/storage';
+import { authService } from '@/services/auth';
+import type { User } from '@/types/domain';
 
 /**
- * Passcode gate for /admin.
+ * Sign-in gate for /admin — real authentication, against the Laravel API.
  *
- * ── What this is, and what it is not ────────────────────────────────────────
- * This is a **demo gate, not access control.** Next.js inlines NEXT_PUBLIC_ADMIN_PASSCODE
- * into the bundle at build time, and the admin chunk stays publicly
- * fetchable regardless — anyone determined enough reads both out of the
- * JavaScript. It exists to stop a client, a colleague or a crawler from landing
- * in the admin panel by typing a URL.
+ * This replaced a passcode gate whose secret was a NEXT_PUBLIC_ env var —
+ * inlined into the public JavaScript bundle at build time, readable by anyone
+ * with view-source. Its own docblock had to plead "never describe this to a
+ * client as protected data."
  *
- * That trade is only acceptable because the panel guards nothing: in mock mode
- * every edit writes to the visitor's own localStorage (see lib/storage.ts) and
- * touches no shared data. Never describe this to a client as protected data.
- * Real authorisation is Phase 2 server-side work, alongside the portal's mock
- * login in features/portal/PortalLayout.tsx.
+ * Now: email + password → POST /api/auth/login → a JWT held in localStorage
+ * (STORAGE_KEYS.adminToken). The server checks the hash, enforces the account's
+ * `active` flag, and throttles to five attempts a minute. What this gate knows,
+ * the bundle can afford to reveal — there is no secret in it.
  */
-
-/** Falls back so a local `npm run dev` without an .env still opens. */
-const PASSCODE = process.env.NEXT_PUBLIC_ADMIN_PASSCODE ?? 'archstone';
-
-export function isAdminUnlocked(): boolean {
-  return readStore(STORAGE_KEYS.adminUnlocked, false);
-}
-
-export function lockAdmin(): void {
-  removeStore(STORAGE_KEYS.adminUnlocked);
-}
-
-export function AdminGate({ onUnlock }: { onUnlock: () => void }) {
-  const [passcode, setPasscode] = useState('');
+export function AdminGate({ onSignIn }: { onSignIn: (user: User) => void }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      onSignIn(await authService.login(email.trim(), password));
+    } catch (err) {
+      /* The server's own sentence: wrong credentials, deactivated account and
+         throttling each say something different, and it knows which. */
+      setError(err instanceof Error ? err.message : 'Sign-in failed.');
+      setBusy(false);
+    }
+  };
 
   return (
-    <div className="on-dark grain relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-5 py-16 text-white">
+    /*
+      `dark` alongside `on-dark`, and both are doing a job. This screen is
+      hard-coded dark (ink-950) regardless of the visitor's theme — but `on-dark`
+      only flips `--c-brand-text`. Everything that colours itself from the theme
+      tokens — the field labels' `--c-text` above all — kept its *light-theme*
+      values, so in light mode "Email" and "Password" rendered near-black on a
+      near-black card. Scoping the site's own `.dark` token set onto this subtree
+      makes every token-driven component correct here without inventing anything.
+    */
+    <div className="dark on-dark grain relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-5 py-16 text-white">
 
       <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
       <div className="pointer-events-none absolute -left-32 top-1/4 h-[420px] w-[420px] rounded-full bg-cyan-500/12 blur-[110px]" aria-hidden />
@@ -61,48 +71,53 @@ export function AdminGate({ onUnlock }: { onUnlock: () => void }) {
           <Logo tone="light" />
 
           <h1 className="mt-8 font-display text-display-sm font-semibold">Admin Panel</h1>
-          <p className="mt-2 text-sm text-white/55">
-            Enter the passcode to open the content management panel.
-          </p>
+          <p className="mt-2 text-sm text-white/55">Sign in with your team account.</p>
 
           <form
             className="mt-8 space-y-5"
             onSubmit={(e) => {
               e.preventDefault();
-              if (passcode !== PASSCODE) {
-                setError('Incorrect passcode.');
-                return;
-              }
-              writeStore(STORAGE_KEYS.adminUnlocked, true);
-              onUnlock();
+              void submit();
             }}
           >
-            <FormField label="Passcode" htmlFor="admin-passcode" error={error}>
+            <FormField label="Email" htmlFor="admin-email">
               <Input
-                id="admin-passcode"
-                type="password"
+                id="admin-email"
+                type="email"
                 autoFocus
-                autoComplete="off"
-                value={passcode}
+                autoComplete="username"
+                placeholder="you@neetuarchstone.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="border-white/15 bg-white/5 text-white placeholder:text-white/30"
+              />
+            </FormField>
+
+            <FormField label="Password" htmlFor="admin-password" error={error}>
+              <Input
+                id="admin-password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                value={password}
                 onChange={(e) => {
-                  setPasscode(e.target.value);
+                  setPassword(e.target.value);
                   if (error) setError('');
                 }}
                 className="border-white/15 bg-white/5 text-white placeholder:text-white/30"
               />
             </FormField>
 
-            <Button type="submit" variant="accent" size="lg" full>
-              Open admin panel
+            <Button type="submit" variant="accent" size="lg" full disabled={busy}>
+              {busy ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
 
           <div className="mt-6 flex items-start gap-2.5 rounded-lg border border-cyan-500/25 bg-cyan-500/[0.07] p-4">
-            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" />
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" />
             <p className="text-caption leading-relaxed text-white/60">
-              <span className="font-medium text-white/85">Prototype panel.</span> This passcode is a demo gate,
-              not authentication — edits are stored in this browser only and are never shared. Phase 2 replaces
-              it with server-side roles and permissions.
+              <span className="font-medium text-white/85">Server-side sign-in.</span> Your session is a signed
+              token that expires after a day; signing out revokes it immediately.
             </p>
           </div>
         </div>

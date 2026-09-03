@@ -423,8 +423,8 @@ export interface EstimateResult {
    *
    * The programme card, the hero line, the meter row and the PDF bars were all
    * removed at the client's request. This survives because every lead record
-   * carries it — `EstimateRequest.timelineWeeks` is required by the server's Zod
-   * schema and non-null in Prisma, and the estimates module in /admin displays
+   * carries it — `EstimateRequest.timelineWeeks` is required by the API and
+   * non-null in the database, and the estimates module in /admin displays
    * it — so dropping it would break lead submission, not just hide a number.
    */
   timelineWeeks: number;

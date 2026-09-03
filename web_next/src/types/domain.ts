@@ -1,6 +1,6 @@
 /**
- * Domain model — single source of truth for the frontend, the mock JSON,
- * the Express API and `prisma/schema.prisma`.
+ * Domain model — single source of truth for the frontend, the mock seed data
+ * and the Laravel API's migrations.
  *
  * Conventions on every persisted entity:
  *   id, createdAt, updatedAt, status, and `order` where sortable.

@@ -11,3 +11,8 @@ build/
 coverage/
 .vercel
 .env*
+
+# Deploy bundles — env.server carries the production DB password and JWT
+# secret, and lives inside backend.zip too. Rebuilt on demand; never committed.
+/deploy
+backend/env.server

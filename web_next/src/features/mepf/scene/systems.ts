@@ -46,6 +46,10 @@ export const SYSTEM_STYLES: Record<SystemKey, SystemStyle> = {
  * here, it was just never designed. Grey, still drawn, still in the way.
  */
 export const DEAD = '#8C93A3';
+/* The same value, for the same idea — "this one is not active" — also lives in
+   constants/estimator.ts as the chart colour for overheads. Neither is a step on
+   any ramp because the config has no mid-grey ramp; they were two different
+   greys until they were made one. */
 
 /**
  * The house's own ground, so it reads identically in both themes.

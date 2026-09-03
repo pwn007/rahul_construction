@@ -18,7 +18,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-ink-950 px-6 text-center text-white">
-      <p className="text-overline uppercase tracking-[0.18em] text-cyan-500">Something went wrong</p>
+      <p className="text-overline uppercase text-cyan-500">Something went wrong</p>
       <h1 className="mt-4 max-w-xl font-display text-4xl font-semibold">We hit an unexpected error.</h1>
       <p className="mt-4 max-w-md text-sm text-white/50">
         The page failed to render. Reloading usually resolves it — if it does not, please let us know.

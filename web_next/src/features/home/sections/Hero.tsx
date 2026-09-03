@@ -63,7 +63,24 @@ export function Hero() {
         window while the hero had 334px to give it — and because the scene is
         bottom-anchored, the surplus grew upward straight through the copy.
       */
-      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-gradient-to-b from-[rgb(var(--c-bg))] via-[#EEF2F7] to-[#D8E3EF] [--hero-scene-a:2.3] [--hero-scene-h:max(26svh,calc(100vw/2.25))] [--hero-step-3:83.333%] lg:[--hero-scene-a:3] lg:[--hero-scene-h:min(max(46svh,calc(100vw/2.95)),58svh)] lg:[--hero-step-3:85.8%]"
+      /*
+        The ground, and the one part of this hero that used to forget the theme.
+
+        Only the `from-` stop was tokenised; `via-` and `to-` were raw hexes
+        (#EEF2F7 / #D8E3EF), so in dark mode the gradient ran near-black at the
+        top into pale blue at the bottom — night into day down one screen. Both
+        literals also sat one to five RGB points off navy-50 and navy-100, which
+        reads as values nobody converted rather than values anybody picked.
+
+        Both alternatives were tried in the browser rather than argued about.
+        Keeping the hero pale in both themes fails: the navbar takes its colour
+        from the theme, not from `useRegisterHeroTone`, so white nav links, a
+        white wordmark and a white "Building" all land on a pale ground and
+        disappear. Taking the whole gradient dark works — every other element in
+        this hero already has a `dark:` variant, and the illustration's pale
+        buildings read as a night skyline against it.
+      */
+      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-gradient-to-b from-[rgb(var(--c-bg))] via-navy-50 to-navy-100 dark:via-ink-900 dark:to-navy-700 [--hero-scene-a:2.3] [--hero-scene-h:max(26svh,calc(100vw/2.25))] [--hero-step-3:83.333%] lg:[--hero-scene-a:3] lg:[--hero-scene-h:min(max(46svh,calc(100vw/2.95)),58svh)] lg:[--hero-step-3:85.8%]"
       style={{ paddingTop: 'var(--nav-h)' }}
     >
 
@@ -79,9 +96,15 @@ export function Hero() {
           className="absolute -left-40 -top-24 h-[620px] w-[620px] rounded-full bg-cyan-400/25 blur-[130px] dark:bg-cyan-500/10"
           aria-hidden
         />
-        {/* Amber low on the left, so the site reads as lit by a low sun. */}
+        {/* Warm low on the left, so the site reads as lit by a low sun.
+
+            `sand-300`, not `amber-300`. Amber is Tailwind's own palette, which
+            `theme.extend` leaves reachable — so this was the only colour in the
+            hero that came from neither palette.ts nor the brand config. The dark
+            variant beside it was already `sand`, so the intent was never in
+            doubt; the light half had just been left behind. */}
         <div
-          className="absolute -bottom-40 left-1/4 h-[460px] w-[460px] rounded-full bg-amber-300/25 blur-[130px] dark:bg-sand-500/10"
+          className="absolute -bottom-40 left-1/4 h-[460px] w-[460px] rounded-full bg-sand-300/25 blur-[130px] dark:bg-sand-500/10"
           aria-hidden
         />
       </motion.div>

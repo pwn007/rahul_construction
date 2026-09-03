@@ -99,7 +99,7 @@ function mutate(resource: string, fn: (o: { upserts: Row[]; deletes: string[] })
 }
 
 /* ------------------------------------------------------------------ */
-/* Query engine — mirrors what the Express/Prisma layer will do         */
+/* Query engine — mirrors what the Laravel API does                     */
 /* ------------------------------------------------------------------ */
 
 const SEARCHABLE = ['title', 'name', 'question', 'label', 'heading', 'filename', 'email', 'key', 'excerpt', 'summary'];

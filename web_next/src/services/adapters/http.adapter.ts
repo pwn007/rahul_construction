@@ -1,20 +1,18 @@
 import type { ApiAdapter } from './types';
 import { ApiError } from './types';
+import { readStore, STORAGE_KEYS } from '@/lib/storage';
 
 /**
- * Phase 2 transport. Already written and wired — enabling it is a single env var:
+ * HTTP transport — talks to the Laravel API in `../backend`.
  *
- *   NEXT_PUBLIC_API_MODE=http
- *   NEXT_PUBLIC_API_URL=http://localhost:4000/api
- *
- * The Express server in `/server` implements exactly these routes with exactly
- * the shapes the mock adapter returns, so nothing above this layer changes.
+ * Enabled with NEXT_PUBLIC_API_MODE=http. The API returns exactly the routes and
+ * shapes `mockAdapter` does, so nothing above this layer changes.
  */
 export function httpAdapter(baseUrl: string): ApiAdapter {
   /*
-   * `VITE_API_URL` was allowed to be relative (`/api`), which needs an origin to
-   * resolve against. `window.location` is the right one in a browser and does
-   * not exist during server rendering, so the configured site URL stands in.
+   * The API URL may be relative (`/api`), which needs an origin to resolve
+   * against. `window.location` is the right one in a browser and does not exist
+   * during the static export build, so the configured site URL stands in.
    */
   const origin =
     typeof window !== 'undefined'
@@ -31,11 +29,25 @@ export function httpAdapter(baseUrl: string): ApiAdapter {
       }
     }
 
+    /* The admin's JWT rides along on every request when one is stored.
+       Attached here, in the transport, rather than in each caller — so the day
+       the admin's CRUD flips from mock to http, it is already authenticated.
+       For a signed-out visitor the key is empty and the header is simply absent,
+       which is exactly the anonymous request public reads expect.
+
+       No `credentials: 'include'`: auth is this header, not a cookie. Keeping
+       credentials on would also drag in CORS's allow-credentials rules for the
+       dev origins (:3000 → :8000) for nothing. */
+    const token = readStore(STORAGE_KEYS.adminToken, '');
+
     const res = await fetch(url.toString(), {
       method,
-      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      headers: {
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: body ? JSON.stringify(body) : undefined,
-      credentials: 'include',
     });
 
     if (!res.ok) {

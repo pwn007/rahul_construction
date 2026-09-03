@@ -1,7 +1,7 @@
 # Neetu Archstone — Enterprise Website (Phase 1 Prototype)
 
 A premium, production-quality website prototype for **Neetu Archstone**, a Jaipur construction and
-architecture firm — plus a complete admin panel and an API-shaped, Prisma-ready backend.
+architecture firm — plus a complete admin panel and a Laravel API.
 
 > **Design · Build · Deliver** · नक़्शे से निर्माण तक
 
@@ -10,24 +10,24 @@ architecture firm — plus a complete admin panel and an API-shaped, Prisma-read
 ## Quick start
 
 ```bash
-# Frontend (React + Vite)
-cd web
+# Frontend (Next.js)
+cd web_next
 npm install
-npm run dev            # → http://localhost:5173
+npm run dev            # → http://localhost:3000
 
-# Backend (Express) — optional in Phase 1
-cd ../server
-npm install
-npm run seed           # generate JSON data from the shared typed source
-npm run dev            # → http://localhost:4000/api
+# Backend (Laravel)
+cd ../backend
+composer install
+php artisan migrate --seed
+php artisan serve      # → http://localhost:8000/api
 ```
 
 By default the frontend runs entirely on its **mock adapter** (no backend needed).
-To point it at the Express API instead, create `web/.env.local`:
+To point it at the Laravel API instead, set in `web_next/.env.local`:
 
 ```
-VITE_API_MODE=http
-VITE_API_URL=/api
+NEXT_PUBLIC_API_MODE=http
+NEXT_PUBLIC_API_URL=/api
 ```
 
 That single flag is the whole migration. No component, hook or service changes.
@@ -38,10 +38,13 @@ That single flag is the whole migration. No component, hook or service changes.
 
 ```
 Phase_1/
-├── docs/     research, sitemap, design system, architecture & roadmap
-├── web/      React 18 · Vite · TypeScript · Tailwind · Framer Motion · Lenis
-└── server/   Node · Express · TypeScript · Prisma schema (authored, not migrated)
+├── docs/       research, sitemap, design system, architecture & roadmap
+├── web_next/   Next 15 · React 19 · TypeScript · Tailwind · Framer Motion · Lenis
+└── backend/    Laravel 13 · PHP 8.3+ · MySQL — JSON API only, no UI
 ```
+
+The site is built as a **static export** (`out/`) and served as plain HTML from PHP shared
+hosting; Node is needed only to build it, never to serve it.
 
 ### Documentation (read these first)
 | File | Contents |
@@ -132,7 +135,7 @@ same relationship the other way, so every selection moves the estimate by exactl
 - Lead capture sits *after* value is delivered: name + phone, only at the download. The record stores
   the exact material-and-brand map, so an estimator can rebuild the quotation line by line.
 
-### 2. The declarative admin engine — `web/src/features/admin/`
+### 2. The declarative admin engine — `web_next/src/features/admin/`
 Twenty CRUD modules are **twenty config objects**, not twenty screens.
 
 ```ts
@@ -157,7 +160,7 @@ grid beneath them.
 - Boundaries come from [DataMeet's Jaipur zone polygons](https://github.com/datameet/Municipal_Spatial_Data)
   (CC BY 4.0), projected with the **cos(mid-latitude) correction** — skip it and the city renders
   12.1% too wide.
-- **No mapping library.** [`web/scripts/build-districts.mjs`](web/scripts/build-districts.mjs)
+- **No mapping library.** [`web_next/scripts/build-districts.mjs`](web_next/scripts/build-districts.mjs)
   simplifies the polygons at build time into ~6 KB gzip of SVG path data, sitting in the lazily
   loaded atlas chunk. MapLibre would have been 260 KB gzip — 1.6× the entire current first-paint
   payload — and Leaflet's free tile providers forbid commercial use.
@@ -172,26 +175,21 @@ grid beneath them.
   claims too.
 
 Regenerate with `npm run build:districts` after editing
-[`web/scripts/districts.config.mjs`](web/scripts/districts.config.mjs).
+[`web_next/scripts/districts.config.mjs`](web_next/scripts/districts.config.mjs).
 
-### 4. The data-access seam — how Prisma drops in later
+### 4. The data-access seam — one env var swaps the whole backend
 ```
 Component → feature hook → services/*.service.ts → ApiAdapter
-                                                    ├── mockAdapter()   ← Phase 1
-                                                    └── httpAdapter()   ← Phase 2 (already written)
+                                                    ├── mockAdapter()   ← src/data/* + localStorage
+                                                    └── httpAdapter()   ← the Laravel API
 ```
-```
-Route → Controller → Service → Repository<T>
-                                ├── JsonRepository    ← Phase 1
-                                └── PrismaRepository  ← Phase 2 (already written)
-```
-The ORM is invisible above the repository line. `server/prisma/schema.prisma` is fully authored
-(30 models, enums, indexes, relations) and mirrors the domain types and JSON seed exactly — Phase 2
-is a migration, not a modelling exercise.
+`NEXT_PUBLIC_API_MODE` picks one, in [`web_next/src/services/client.ts`](web_next/src/services/client.ts).
+Nothing above that line knows which is in use.
 
-**Both layers share one authored source of seed data.** `server/scripts/seed.ts` generates the API's
-JSON files from the same typed modules the frontend imports, so `GET /api/projects` and the mock
-adapter cannot drift apart.
+**Both sides share one authored source of seed data.** The Laravel seeders are generated from the
+same typed modules the frontend imports (`web_next/src/data/*.ts`), so `GET /api/projects` and the
+mock adapter cannot drift apart. The data model is documented in
+[`docs/09-data-model.prisma`](docs/09-data-model.prisma).
 
 ---
 
@@ -199,8 +197,8 @@ adapter cannot drift apart.
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| Build | Vite 5 | Fast HMR, native route-level code splitting |
-| UI | React 18 + TypeScript (strict) | — |
+| Build | Next 15 (static export) | Real HTML per route for crawlers; serves from any PHP host |
+| UI | React 19 + TypeScript (strict) | — |
 | Styling | Tailwind CSS 3.4 + CSS custom properties | Tokens are runtime-themeable, so `/admin/theme` can change the brand colour live |
 | Motion | Framer Motion + Lenis | Declarative, reduced-motion-aware, no imperative timeline cleanup burden |
 | Forms | React Hook Form + Zod | One schema validates the client form *and* the API route |
@@ -208,8 +206,8 @@ adapter cannot drift apart.
 | Charts | Recharts | Admin only — lazy-loaded |
 | PDF | jsPDF | Vector output, dynamically imported |
 | Icons | Lucide (curated registry) | See performance note below |
-| Backend | Express + Zod | Thin, RESTful, repository-backed |
-| DB | *None in Phase 1* | Prisma schema authored and ready |
+| Backend | Laravel 13 | JSON API only — no Blade, no admin UI |
+| DB | MySQL | What shared hosting gives us |
 
 ### Two stack decisions worth stating plainly
 
@@ -220,7 +218,7 @@ would have cost ~70 KB gzip for duplicated capability. The hero's drifting bluep
 ~2 KB custom `<canvas>` rather than Three.js, for the same reason: same atmosphere, no WebGL context,
 and it degrades to nothing under reduced motion.
 
-**Icons go through a curated registry** ([`web/src/lib/icons.tsx`](web/src/lib/icons.tsx)).
+**Icons go through a curated registry** ([`web_next/src/lib/icons.tsx`](web_next/src/lib/icons.tsx)).
 Data records reference icons by *name* so they can be edited from the admin panel, but
 `import * as Icons from 'lucide-react'` defeats tree-shaking and pulled **1.4 MB** into the shared
 vendor chunk. The registry keeps the name-based indirection while shipping ~70 icons instead of ~1,500.
@@ -239,7 +237,7 @@ Measured on the production build (`npm run build`):
 | Images | Lazy, explicit dimensions, `object-cover`, mask-reveal on entry |
 
 Getting there required removing a hand-rolled `manualChunks` config that was forcing lazily-imported
-libraries into the entry graph — Vite's default chunking follows the dynamic-import boundaries
+libraries into the entry graph — the bundler's default chunking follows the dynamic-import boundaries
 correctly. Both fixes are documented inline at the sites they affect.
 
 ## Accessibility
@@ -282,7 +280,7 @@ MEPF disciplines, Vastu positioning, contact details and the five project locali
 - Project case-study narratives — the challenge/approach/outcome text is illustrative
 - Blog articles, job listings, certifications, and the legal pages
 - All imagery uses a deterministic placeholder provider via
-  [`web/src/lib/media.ts`](web/src/lib/media.ts). Swapping in the client's real photography is a
+  [`web_next/src/lib/media.ts`](web_next/src/lib/media.ts). Swapping in the client's real photography is a
   **one-file change** — replace the body of `img()` with a CDN base URL and keep the seed keys as
   filenames.
 
@@ -293,23 +291,21 @@ Nothing invented is presented as verified fact.
 ## Scripts
 
 ```bash
-# web/
-npm run dev          # dev server, port 5173
-npm run build        # typecheck + production build
+# web_next/
+npm run dev          # dev server, port 3000
+npm run build        # production build → out/ (static export)
 npm run typecheck    # tsc --noEmit
-npm run build:districts  # regenerate the Project Atlas geometry (output is committed)
+npm run build:districts   # regenerate the Project Atlas geometry (output is committed)
 npm run check:estimator   # assert every estimator breakdown reconciles to the level above it
-npm run preview      # serve the production build
 
-# server/
-npm run seed         # regenerate src/data/*.json from the shared typed source
-npm run dev          # API with watch, port 4000
-npm run build        # tsc → dist/
-npm run typecheck
+# backend/
+php artisan migrate --seed   # schema + seed from the frontend's typed data
+php artisan serve            # API, port 8000
+php artisan test
 ```
 
-## Phase 2
+## Still to do
 
-Prisma + PostgreSQL migration · real JWT auth with server-enforced RBAC · S3/Cloudinary media with
-signed uploads · transactional email + WhatsApp Business API · real analytics · 360°/video players ·
-payment gateway in the portal · CI/CD · full EN/हिं internationalisation.
+Real file uploads (media library + career résumés) · `/admin`'s four mock screens — analytics,
+roles, theme, estimator-config · 360°/video players · payment gateway in the portal ·
+full EN/हिं internationalisation.

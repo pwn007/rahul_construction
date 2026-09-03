@@ -5,6 +5,11 @@ import { services } from '@/data/services';
 import { projects } from '@/data/projects';
 import { posts, jobs } from '@/data/content';
 
+/* The static export requires metadata routes to declare themselves static —
+   they are (both are pure functions over compiled-in data), but under
+   `output: 'export'` Next refuses to assume it. */
+export const dynamic = 'force-static';
+
 /**
  * The site's first sitemap — the Vite build shipped none.
  *

@@ -1,0 +1,466 @@
+[
+  {
+    "id": "mat_cement",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "cement",
+    "label": "Cement",
+    "group": "structure",
+    "unit": "bag",
+    "coefficient": 0.4,
+    "options": [
+      "UltraTech — ₹420",
+      "Ambuja — ₹420",
+      "JK Super — ₹455",
+      "ACC — ₹405",
+      "Wonder — ₹390",
+      "Shree — ₹390"
+    ],
+    "defaultRate": 420,
+    "provisional": true,
+    "essential": true,
+    "order": 1
+  },
+  {
+    "id": "mat_steel",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "steel",
+    "label": "TMT Steel",
+    "group": "structure",
+    "unit": "kg",
+    "coefficient": 4,
+    "options": [
+      "TATA TISCON — ₹78",
+      "Jindal Panther — ₹74",
+      "JSW — ₹72",
+      "Kamadhenu — ₹66",
+      "Rathi — ₹66"
+    ],
+    "defaultRate": 72,
+    "provisional": true,
+    "essential": true,
+    "order": 2
+  },
+  {
+    "id": "mat_sand",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "sand",
+    "label": "Sand",
+    "group": "structure",
+    "unit": "cft",
+    "coefficient": 0.9,
+    "options": [
+      "River sand — ₹55",
+      "M-sand — ₹40"
+    ],
+    "defaultRate": 55,
+    "provisional": false,
+    "essential": true,
+    "order": 3
+  },
+  {
+    "id": "mat_aggregate",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "aggregate",
+    "label": "Aggregate",
+    "group": "structure",
+    "unit": "cft",
+    "coefficient": 1.1,
+    "options": [
+      "Graded 20 mm & 10 mm — ₹45",
+      "Washed, low-silt — ₹52"
+    ],
+    "defaultRate": 45,
+    "provisional": true,
+    "essential": true,
+    "order": 4
+  },
+  {
+    "id": "mat_rmc",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "rmc",
+    "label": "Ready-mix concrete",
+    "group": "structure",
+    "unit": "cum",
+    "coefficient": 0.042,
+    "options": [
+      "M25 — ₹5600",
+      "M20 — ₹5280",
+      "M7.5 — ₹3200"
+    ],
+    "defaultRate": 5600,
+    "provisional": false,
+    "essential": false,
+    "order": 5
+  },
+  {
+    "id": "mat_bricks",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "bricks",
+    "label": "Bricks & blocks",
+    "group": "structure",
+    "unit": "nos",
+    "coefficient": 8,
+    "options": [
+      "Renwel — ₹9",
+      "Clay brick — ₹9",
+      "Fly-ash block — ₹7",
+      "Kanota — ₹11",
+      "Hanumangarh — ₹11"
+    ],
+    "defaultRate": 9,
+    "provisional": true,
+    "essential": true,
+    "order": 6
+  },
+  {
+    "id": "mat_stone",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "stone",
+    "label": "Foundation stone",
+    "group": "structure",
+    "unit": "ton",
+    "coefficient": 0.0125,
+    "options": [
+      "Masonry stone — ₹750"
+    ],
+    "defaultRate": 750,
+    "provisional": false,
+    "essential": true,
+    "order": 7
+  },
+  {
+    "id": "mat_waterproofing",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "waterproofing",
+    "label": "Waterproofing",
+    "group": "structure",
+    "unit": "sqft",
+    "coefficient": 1,
+    "options": [
+      "Terrace, baths & sunken slabs — ₹40",
+      "Full envelope + crystalline admixture — ₹55"
+    ],
+    "defaultRate": 40,
+    "provisional": true,
+    "essential": true,
+    "order": 8
+  },
+  {
+    "id": "mat_flooring",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "flooring",
+    "label": "Flooring & tiles",
+    "group": "finishing",
+    "unit": "sqft",
+    "coefficient": 1,
+    "options": [
+      "Vitrified, tile up to ₹50/sq ft — ₹60",
+      "Vitrified, tile up to ₹80/sq ft — ₹95",
+      "Large-format & marble, up to ₹120/sq ft — ₹142"
+    ],
+    "defaultRate": 95,
+    "provisional": false,
+    "essential": true,
+    "order": 9
+  },
+  {
+    "id": "mat_wall-finish",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "wall-finish",
+    "label": "Wall finish & paint",
+    "group": "finishing",
+    "unit": "sqft",
+    "coefficient": 2.4,
+    "options": [
+      "Tractor emulsion — ₹22",
+      "Premium emulsion — ₹28",
+      "Royal Matt + textures — ₹50"
+    ],
+    "defaultRate": 28,
+    "provisional": false,
+    "essential": true,
+    "order": 10
+  },
+  {
+    "id": "mat_doors",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "doors",
+    "label": "Doors",
+    "group": "finishing",
+    "unit": "nos",
+    "coefficient": 0.004,
+    "options": [
+      "Flush shutter — ₹9800",
+      "Laminated shutter — ₹12000",
+      "Teak veneer — ₹14200"
+    ],
+    "defaultRate": 12000,
+    "provisional": false,
+    "essential": true,
+    "order": 11
+  },
+  {
+    "id": "mat_grills",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "grills",
+    "label": "Grills & safety railings",
+    "group": "finishing",
+    "unit": "sqft",
+    "coefficient": 0.08,
+    "options": [
+      "MS plain — ₹300",
+      "MS decorative — ₹350",
+      "SS 304 — ₹600"
+    ],
+    "defaultRate": 350,
+    "provisional": true,
+    "essential": true,
+    "order": 12
+  },
+  {
+    "id": "mat_windows",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "windows",
+    "label": "Windows",
+    "group": "finishing",
+    "unit": "sqft",
+    "coefficient": 0.08,
+    "options": [
+      "Aluminium — ₹440",
+      "UPVC — ₹520",
+      "Wooden — ₹520"
+    ],
+    "defaultRate": 520,
+    "provisional": false,
+    "essential": true,
+    "order": 13
+  },
+  {
+    "id": "mat_conduiting",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "conduiting",
+    "label": "Electrical & plumbing conduiting",
+    "group": "services",
+    "unit": "sqft",
+    "coefficient": 1,
+    "options": [
+      "ISI conduit, drainage cast in — ₹75",
+      "PVC conduit and sleeves — ₹62"
+    ],
+    "defaultRate": 75,
+    "provisional": true,
+    "essential": true,
+    "order": 14
+  },
+  {
+    "id": "mat_electrical",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "electrical",
+    "label": "Electrical",
+    "group": "services",
+    "unit": "point",
+    "coefficient": 0.025,
+    "options": [
+      "Anchor Penta — ₹4100",
+      "Havells modular — ₹4400",
+      "Schneider — ₹4700",
+      "GM — ₹4700"
+    ],
+    "defaultRate": 4400,
+    "provisional": true,
+    "essential": true,
+    "order": 15
+  },
+  {
+    "id": "mat_plumbing",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "plumbing",
+    "label": "Plumbing",
+    "group": "services",
+    "unit": "sqft",
+    "coefficient": 1,
+    "options": [
+      "Ashirvad — ₹45",
+      "Astral — ₹45",
+      "Supreme — ₹41",
+      "Prince — ₹41",
+      "Kisan — ₹37"
+    ],
+    "defaultRate": 45,
+    "provisional": true,
+    "essential": true,
+    "order": 16
+  },
+  {
+    "id": "mat_bathroom",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "bathroom",
+    "label": "Bathroom fixtures",
+    "group": "services",
+    "unit": "nos",
+    "coefficient": 0.0025,
+    "options": [
+      "₹35,000 class — ₹22000",
+      "₹50,000 class — ₹31400"
+    ],
+    "defaultRate": 22000,
+    "provisional": false,
+    "essential": true,
+    "order": 17
+  },
+  {
+    "id": "mat_water-tank",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "water-tank",
+    "label": "Water tanks",
+    "group": "services",
+    "unit": "nos",
+    "coefficient": 0.0004,
+    "options": [
+      "500 L × 2 — ₹10000",
+      "1,000 L + 500 L — ₹15000",
+      "5,000 L — ₹50000",
+      "10,000 L — ₹100000"
+    ],
+    "defaultRate": 15000,
+    "provisional": false,
+    "essential": true,
+    "order": 18
+  },
+  {
+    "id": "mat_kitchen",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "kitchen",
+    "label": "Modular kitchen",
+    "group": "fixtures",
+    "unit": "rft",
+    "coefficient": 0.008,
+    "options": [
+      "Basic — ₹5000",
+      "Premium — ₹7500",
+      "Classic — ₹10000"
+    ],
+    "defaultRate": 7500,
+    "provisional": false,
+    "essential": false,
+    "order": 19
+  },
+  {
+    "id": "mat_kitchen-counter",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "kitchen-counter",
+    "label": "Kitchen counter & sink",
+    "group": "fixtures",
+    "unit": "rft",
+    "coefficient": 0.008,
+    "options": [
+      "Granite platform — ₹1800",
+      "Quartz platform — ₹3200"
+    ],
+    "defaultRate": 1800,
+    "provisional": true,
+    "essential": true,
+    "order": 20
+  },
+  {
+    "id": "mat_wardrobes",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "wardrobes",
+    "label": "Wardrobes & joinery",
+    "group": "fixtures",
+    "unit": "nos",
+    "coefficient": 0.0016,
+    "options": [
+      "Laminate shutters — ₹62000",
+      "Acrylic shutters — ₹85000",
+      "Membrane shutters — ₹85000",
+      "Veneer shutters — ₹118000"
+    ],
+    "defaultRate": 85000,
+    "provisional": true,
+    "essential": false,
+    "order": 21
+  },
+  {
+    "id": "mat_ceiling",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "ceiling",
+    "label": "False ceiling & lighting",
+    "group": "fixtures",
+    "unit": "sqft",
+    "coefficient": 0.55,
+    "options": [
+      "Plain gypsum, surface lights — ₹170",
+      "Gypsum with cove lighting — ₹230",
+      "Designer profile + smart lighting — ₹310"
+    ],
+    "defaultRate": 230,
+    "provisional": true,
+    "essential": false,
+    "order": 22
+  },
+  {
+    "id": "mat_railings",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "railings",
+    "label": "Staircase railings",
+    "group": "fixtures",
+    "unit": "rft",
+    "coefficient": 0.02,
+    "options": [
+      "MS railing — ₹1200",
+      "SS 304 railing — ₹1800",
+      "SS with toughened glass — ₹5400"
+    ],
+    "defaultRate": 1800,
+    "provisional": true,
+    "essential": false,
+    "order": 23
+  }
+]

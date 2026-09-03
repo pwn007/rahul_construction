@@ -146,12 +146,6 @@ const viewerPerms = MODULES.reduce<Record<string, ('view' | 'create' | 'edit' | 
   return acc;
 }, {});
 
-export const roles: Role[] = [
-  { ...meta('role_owner', '2026-01-01T09:00:00.000Z'), name: 'Owner', slug: 'owner', description: 'Full access to every module, including users, roles and billing.', permissions: allPerms, memberCount: 1 },
-  { ...meta('role_admin', '2026-01-01T09:00:00.000Z'), name: 'Administrator', slug: 'admin', description: 'Full content and lead access. Cannot manage roles or billing.', permissions: { ...allPerms, users: ['view'] }, memberCount: 2 },
-  { ...meta('role_editor', '2026-01-01T09:00:00.000Z'), name: 'Editor', slug: 'editor', description: 'Can create and edit content but not delete or publish.', permissions: editorPerms, memberCount: 3 },
-  { ...meta('role_viewer', '2026-01-01T09:00:00.000Z'), name: 'Viewer', slug: 'viewer', description: 'Read-only access for reporting and review.', permissions: viewerPerms, memberCount: 2 },
-];
 
 export const users: User[] = [
   { ...meta('usr_1', '2025-03-01T09:00:00.000Z'), name: 'Neetu Sharma', email: 'neetu@neetuarchstone.com', roleId: 'role_owner', roleName: 'Owner', avatar: monogram('Neetu Sharma'), lastActiveAt: day(0), active: true },
@@ -160,6 +154,25 @@ export const users: User[] = [
   { ...meta('usr_4', '2025-08-02T09:00:00.000Z'), name: 'Shruti Agarwal', email: 'shruti@neetuarchstone.com', roleId: 'role_editor', roleName: 'Editor', avatar: monogram('Shruti Agarwal'), lastActiveAt: day(2), active: true },
   { ...meta('usr_5', '2026-01-20T09:00:00.000Z'), name: 'Vikas Saini', email: 'vikas@neetuarchstone.com', roleId: 'role_editor', roleName: 'Editor', avatar: monogram('Vikas Saini'), lastActiveAt: day(3), active: true },
   { ...meta('usr_6', '2026-02-11T09:00:00.000Z'), name: 'Mahesh Jangid', email: 'mahesh@neetuarchstone.com', roleId: 'role_viewer', roleName: 'Viewer', avatar: monogram('Mahesh Jangid'), lastActiveAt: day(9), active: false },
+];
+
+/**
+ * Derived, not typed in.
+ *
+ * These four numbers were hand-written and two of them had gone stale — editor
+ * said 3 against two actual editors, viewer said 2 against one. Nobody would
+ * notice: the roles screen is read-only and the count is decoration until it
+ * contradicts the user list beside it. The Laravel API computes `memberCount`
+ * from the users relation for the same reason, so this keeps the two adapters
+ * agreeing as well as keeping the number true.
+ */
+const countIn = (roleId: string) => users.filter((u) => u.roleId === roleId).length;
+
+export const roles: Role[] = [
+  { ...meta('role_owner', '2026-01-01T09:00:00.000Z'), name: 'Owner', slug: 'owner', description: 'Full access to every module, including users, roles and billing.', permissions: allPerms, memberCount: countIn('role_owner') },
+  { ...meta('role_admin', '2026-01-01T09:00:00.000Z'), name: 'Administrator', slug: 'admin', description: 'Full content and lead access. Cannot manage roles or billing.', permissions: { ...allPerms, users: ['view'] }, memberCount: 2 },
+  { ...meta('role_editor', '2026-01-01T09:00:00.000Z'), name: 'Editor', slug: 'editor', description: 'Can create and edit content but not delete or publish.', permissions: editorPerms, memberCount: countIn('role_editor') },
+  { ...meta('role_viewer', '2026-01-01T09:00:00.000Z'), name: 'Viewer', slug: 'viewer', description: 'Read-only access for reporting and review.', permissions: viewerPerms, memberCount: countIn('role_viewer') },
 ];
 
 /* ==================================================================== */

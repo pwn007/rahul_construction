@@ -1,8 +1,8 @@
 # Image attribution
 
 All imagery in `public/images` is curated from **Wikimedia Commons**, including its
-Unsplash CC0 imports — with seven exceptions, all in the `mepf-*` block: `mepf-09`,
-`mepf-11`–`mepf-15` from Unsplash and Pexels direct, and `mepf-10` from Pexels. Files
+Unsplash CC0 imports — with nine exceptions: `mepf-09`, `mepf-11`–`mepf-15` and `mepf-10`
+from Unsplash and Pexels direct, plus `service-arch-01` and `service-pm-01` from Pexels. Files
 were downsized to 1500 px and recompressed for the web, and are served from this project’s
 own origin (no hotlinking).
 
@@ -81,6 +81,8 @@ own origin (no hotlinking).
 | `mepf-13.webp` | [Electrician in a hard hat and face shield testing an electrical panel](https://unsplash.com/photos/LMb98OOtoYU) | Unsplash License — no attribution required | colsan ltda |
 | `mepf-14.webp` | [Concrete ceiling with red sprinkler pipes and cable trays](https://unsplash.com/photos/KsLbHArxEuU) | Unsplash License — no attribution required | Valentin Lacoste |
 | `mepf-15.webp` | [High-angle view of an industrial ceiling — cable tray, conduit and lighting](https://www.pexels.com/photo/lamps-in-warehouse-26753121/) | Pexels License — no attribution required | Muharrem Alper |
+| `service-arch-01.webp` | [Two people measuring a floor plan with a scale rule](https://www.pexels.com/photo/women-pointing-at-blueprint-of-house-8837715/) | Pexels License — no attribution required | Yan Krukau |
+| `service-pm-01.webp` | [Site supervisor with a tablet in an unfinished room](https://www.pexels.com/photo/woman-wearing-white-helmet-while-holding-a-tablet-inside-the-house-6474469/) | Pexels License — no attribution required | Tima Miroshnichenko |
 | `residential-01.jpg` | [Urban Facades (Unsplash fpReukH1Y5s).jpg](https://commons.wikimedia.org/wiki/File:Urban_Facades_(Unsplash_fpReukH1Y5s).jpg) | CC0 | Eric Stein ericste_in |
 | `residential-02.jpg` | [What's on the other side? We may never know (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:What%27s_on_the_other_side%3F_We_may_never_know_(Unsplash).jpg) | CC0 | Melanie Wasser melwasser |
 | `residential-03.jpg` | [Blue hotel building (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Blue_hotel_building_(Unsplash).jpg) | CC0 | Francesca Saraco fransaraco |

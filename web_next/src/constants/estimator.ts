@@ -61,7 +61,7 @@ export const COST_HEADS: { key: CostHeadKey; label: string; description: string;
   { key: 'finishing', label: 'Finishing', description: 'Plaster, flooring, painting, doors & windows', color: '#00BBEE' },
   { key: 'mep', label: 'MEPF', description: 'Electrical, plumbing, HVAC, fire safety', color: '#4FD2F6' },
   { key: 'interior', label: 'Interiors', description: 'Kitchen, wardrobes, ceilings, fixtures', color: '#B99465' },
-  { key: 'misc', label: 'Approvals & Site', description: 'Approvals, supervision, contingency', color: '#828A9C' },
+  { key: 'misc', label: 'Approvals & Site', description: 'Approvals, supervision, contingency', color: '#8C93A3' },
 ];
 export const PROPERTY_TYPES: PropertyTypeOption[] = [
   {
@@ -196,7 +196,7 @@ export const COMMERCIAL_HEADS: {
     key: 'overhead',
     label: 'Approvals, site & contingency',
     description: 'Setup, temporary works, testing, wastage allowance and contingency.',
-    color: '#828A9C',
+    color: '#8C93A3',
   },
 ];
 

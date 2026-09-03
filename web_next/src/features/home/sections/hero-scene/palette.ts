@@ -65,8 +65,10 @@ export const PAPER = '#F7F6F2';
 export const HIVIS = '#F4762A';
 export const HIVIS_LIGHT = '#FF9147';
 /** The retroreflective bands across a vest. Pale, never white — white on this
- *  pale hero ground disappears. */
-export const BAND = '#EDF1F5';
+ *  pale hero ground disappears. navy-50: this was #EDF1F5, one to four points
+ *  off it, which is a near-miss rather than a choice — every other value in
+ *  this file is an exact scale step. */
+export const BAND = '#EEF1F9';
 
 /** Warm interior light, for the delivered home's windows. */
 export const GLOW = '#F3C078';

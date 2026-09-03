@@ -1,0 +1,847 @@
+[
+  {
+    "id": "prj_jagatpura",
+    "createdAt": "2024-11-12T09:00:00.000Z",
+    "updatedAt": "2024-11-12T09:00:00.000Z",
+    "status": "published",
+    "slug": "jagatpura-terrace-residence",
+    "title": "The Terrace Residence",
+    "subtitle": "A four-storey home organised around stacked green terraces",
+    "category": "residential",
+    "stage": "completed",
+    "locality": "Jagatpura",
+    "districtId": "jagatpura-sitapura",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.8129,
+      "lng": 75.8447
+    },
+    "year": 2024,
+    "areaSqft": 6400,
+    "floors": "G+3",
+    "durationMonths": 14,
+    "packageType": "fully-furnished",
+    "client": "Private residence",
+    "featured": true,
+    "order": 1,
+    "coverImage": "/images/residential-02.webp",
+    "beforeImage": "/images/construction-06.webp",
+    "afterImage": "/images/residential-04.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-03.webp",
+        "alt": "Street elevation at dusk",
+        "caption": "Curved timber soffits wrap each balcony",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/residential-09.webp",
+        "alt": "Terrace planting",
+        "caption": "Every floor gets a planted terrace",
+        "order": 2
+      },
+      {
+        "id": "i3",
+        "url": "/images/residential-01.webp",
+        "alt": "Double-height living room",
+        "caption": "Double-height living volume",
+        "order": 3
+      },
+      {
+        "id": "i4",
+        "url": "/images/residential-07.webp",
+        "alt": "Staircase detail",
+        "caption": "Cantilevered stone treads",
+        "order": 4
+      }
+    ],
+    "excerpt": "A narrow south-facing plot turned into a four-storey home where every level opens onto a planted terrace, with curved timber soffits carrying light deep into the plan.",
+    "challenge": "A 30×80 ft plot with a single open face and a strict south exposure. The family wanted four independent floors, outdoor space on every level, and no compromise on Vastu placement of the kitchen and master bedroom.",
+    "approach": "We pulled the built mass back at alternating levels to create deep terraces, then wrapped each in a curved timber-clad soffit that shades the glazing below. Services were coordinated in a single vertical shaft designed at concept stage, so no slab was ever cut after casting. Vastu placement was resolved in the first planning cycle rather than retrofitted.",
+    "outcome": "Handed over two weeks ahead of the agreed date. Measured indoor temperature runs 3–4°C below comparable neighbouring homes in May, and the family uses the terraces year-round.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "30 × 80 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "6,400 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+3, 4 independent floors"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Fully Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "14 months"
+      },
+      {
+        "label": "Completed",
+        "value": "November 2024"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "interior-design",
+      "mepf-consultancy"
+    ],
+    "tags": [
+      "Vastu-aligned",
+      "Terraces",
+      "Timber soffit",
+      "Four floors"
+    ]
+  },
+  {
+    "id": "prj_pratapnagar",
+    "createdAt": "2024-06-04T09:00:00.000Z",
+    "updatedAt": "2024-06-04T09:00:00.000Z",
+    "status": "published",
+    "slug": "pratap-nagar-slim-house",
+    "title": "The Slim House",
+    "subtitle": "Five levels on a 25-foot frontage",
+    "category": "residential",
+    "stage": "completed",
+    "locality": "Pratap Nagar",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.7833,
+      "lng": 75.8378
+    },
+    "year": 2024,
+    "areaSqft": 4900,
+    "floors": "G+3 + terrace",
+    "durationMonths": 12,
+    "packageType": "semi-furnished",
+    "featured": true,
+    "order": 2,
+    "coverImage": "/images/residential-03.webp",
+    "beforeImage": "/images/construction-07.webp",
+    "afterImage": "/images/residential-02.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-06.webp",
+        "alt": "Front facade",
+        "caption": "A dark stone frame against white render",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/residential-07.webp",
+        "alt": "Balcony glazing",
+        "caption": "Full-height glazing behind glass balustrades",
+        "order": 2
+      },
+      {
+        "id": "i3",
+        "url": "/images/residential-08.webp",
+        "alt": "Top floor lounge",
+        "caption": "The top floor opens to a covered terrace",
+        "order": 3
+      }
+    ],
+    "excerpt": "A tall, narrow plot handled with a single recessed frame that makes five levels read as one calm composition from the street.",
+    "challenge": "Only 25 ft of frontage with neighbours on both sides. Any conventional treatment would have produced a stack of unrelated balconies.",
+    "approach": "A single dark stone frame was recessed into the white render, gathering all four balconies into one vertical composition. Glazing was pushed to the frame line to maximise daylight from the only open face.",
+    "outcome": "The house reads as significantly larger than its footprint, and every habitable room has direct daylight despite the constrained site.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "25 × 60 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "4,900 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+3 with terrace"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Semi Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "12 months"
+      },
+      {
+        "label": "Completed",
+        "value": "June 2024"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "mepf-consultancy"
+    ],
+    "tags": [
+      "Narrow plot",
+      "Stone cladding",
+      "Daylight strategy"
+    ]
+  },
+  {
+    "id": "prj_mansarovar",
+    "createdAt": "2023-12-18T09:00:00.000Z",
+    "updatedAt": "2023-12-18T09:00:00.000Z",
+    "status": "published",
+    "slug": "mansarovar-courtyard-villa",
+    "title": "Courtyard Villa",
+    "subtitle": "A compact two-storey home built around a jali screen",
+    "category": "residential",
+    "stage": "completed",
+    "locality": "Mansarovar",
+    "districtId": "mansarovar-sanganer",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.8505,
+      "lng": 75.7628
+    },
+    "year": 2023,
+    "areaSqft": 2850,
+    "floors": "G+1",
+    "durationMonths": 9,
+    "packageType": "semi-furnished",
+    "featured": true,
+    "order": 3,
+    "coverImage": "/images/residential-04.webp",
+    "beforeImage": "/images/construction-08.webp",
+    "afterImage": "/images/residential-04.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-06.webp",
+        "alt": "Entrance elevation",
+        "caption": "A carved jali screen shades the stair",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/residential-05.webp",
+        "alt": "Planted balcony",
+        "caption": "Cascading planters soften the first floor",
+        "order": 2
+      },
+      {
+        "id": "i3",
+        "url": "/images/residential-04.webp",
+        "alt": "Living room",
+        "caption": "Living room opens to the front court",
+        "order": 3
+      }
+    ],
+    "excerpt": "Built for Dr. Ashok Verma. A traditional jali screen, detailed in a contemporary frame, does the work of shading, privacy and identity all at once.",
+    "challenge": "A west-facing entrance with harsh afternoon sun, and a client who wanted a modern house that still felt rooted in Jaipur.",
+    "approach": "A CNC-cut jali screen was placed over the staircase volume — cutting glare, giving privacy from the street, and providing the elevation its single memorable gesture. Deep cantilevered slabs shade the openings below.",
+    "outcome": "Delivered in nine months against a nine-month commitment. The client has since referred two further projects.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "30 × 50 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "2,850 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+1, 4 BHK"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Semi Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "9 months"
+      },
+      {
+        "label": "Completed",
+        "value": "December 2023"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "interior-design"
+    ],
+    "tags": [
+      "Jali screen",
+      "West-facing",
+      "Vastu-aligned"
+    ]
+  },
+  {
+    "id": "prj_gaushala",
+    "createdAt": "2024-09-02T09:00:00.000Z",
+    "updatedAt": "2024-09-02T09:00:00.000Z",
+    "status": "published",
+    "slug": "pratap-nagar-gaushala-residence",
+    "title": "Gaushala Residence",
+    "subtitle": "Warm materials, layered light, tension-free delivery",
+    "category": "residential",
+    "stage": "completed",
+    "locality": "Pratap Nagar (Gaushala)",
+    "districtId": "mansarovar-sanganer",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.7791,
+      "lng": 75.8264
+    },
+    "year": 2024,
+    "areaSqft": 3900,
+    "floors": "G+2",
+    "durationMonths": 11,
+    "packageType": "fully-furnished",
+    "client": "RaghuRaj Vijayvargiya",
+    "featured": true,
+    "order": 4,
+    "coverImage": "/images/residential-05.webp",
+    "beforeImage": "/images/construction-03.webp",
+    "afterImage": "/images/residential-01.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-08.webp",
+        "alt": "Facade at dusk",
+        "caption": "Stone base, timber ceiling, warm light",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/residential-07.webp",
+        "alt": "Laser-cut panel",
+        "caption": "A laser-cut leaf panel lights the stair core",
+        "order": 2
+      },
+      {
+        "id": "i3",
+        "url": "/images/residential-06.webp",
+        "alt": "Entrance porch",
+        "caption": "Timber-lined porch soffit",
+        "order": 3
+      }
+    ],
+    "excerpt": "A three-level family home where a rough stone base, timber soffits and a laser-cut screen build warmth into a modern elevation.",
+    "challenge": "The client had been through a difficult experience with a previous contractor and wanted total predictability more than anything else.",
+    "approach": "Every stage was fixed against a published milestone plan before work began, with weekly photo updates and camera access. Material samples were approved and locked in advance so nothing was decided under site pressure.",
+    "outcome": "Delivered on schedule with no change orders. In the client's words, the project stayed \"bilkul tension-free\" from start to completion.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "30 × 55 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "3,900 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+2"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Fully Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "11 months"
+      },
+      {
+        "label": "Completed",
+        "value": "September 2024"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "interior-design",
+      "project-management"
+    ],
+    "tags": [
+      "Stone base",
+      "Laser-cut screen",
+      "On-schedule"
+    ]
+  },
+  {
+    "id": "prj_sanganer",
+    "createdAt": "2025-02-20T09:00:00.000Z",
+    "updatedAt": "2025-02-20T09:00:00.000Z",
+    "status": "published",
+    "slug": "sanganer-mixed-use-block",
+    "title": "Sanganer Mixed-Use Block",
+    "subtitle": "Retail at grade, two residential floors above",
+    "category": "mixed-use",
+    "stage": "completed",
+    "locality": "Sanganer",
+    "districtId": "mansarovar-sanganer",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.8168,
+      "lng": 75.7891
+    },
+    "year": 2025,
+    "areaSqft": 7800,
+    "floors": "G+2",
+    "durationMonths": 15,
+    "packageType": "semi-furnished",
+    "client": "Royal Stationers",
+    "featured": true,
+    "order": 5,
+    "coverImage": "/images/residential-08.webp",
+    "beforeImage": "/images/construction-03.webp",
+    "afterImage": "/images/residential-09.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-06.webp",
+        "alt": "Retail frontage",
+        "caption": "Two shopfronts anchor the street edge",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/residential-03.webp",
+        "alt": "Upper balconies",
+        "caption": "Residential floors set back above the shops",
+        "order": 2
+      },
+      {
+        "id": "i3",
+        "url": "/images/residential-04.webp",
+        "alt": "Jali panels",
+        "caption": "Perforated panels screen the service stair",
+        "order": 3
+      }
+    ],
+    "excerpt": "A commercial ground floor with two independent shopfronts, and two residential floors above — separate services, separate access, one building.",
+    "challenge": "Commercial and residential uses in one structure means two electrical services, two water lines, fire compliance for the retail floor, and acoustic separation between the shops and the bedrooms above.",
+    "approach": "MEPF was designed as two fully independent systems from day one, with separate meters, risers and pumps. A floating slab detail with a resilient layer isolates the retail ceiling from the residence above.",
+    "outcome": "Both shops were trading within a week of handover. The owner reports no acoustic complaints from the residential floors.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "40 × 65 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "7,800 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G (retail) + 2 residential"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Semi Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "15 months"
+      },
+      {
+        "label": "Completed",
+        "value": "February 2025"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "mepf-consultancy"
+    ],
+    "tags": [
+      "Mixed use",
+      "Retail",
+      "Dual MEPF",
+      "Acoustic separation"
+    ]
+  },
+  {
+    "id": "prj_malviya",
+    "createdAt": "2025-05-14T09:00:00.000Z",
+    "updatedAt": "2025-05-14T09:00:00.000Z",
+    "status": "published",
+    "slug": "malviya-nagar-garden-house",
+    "title": "Garden House",
+    "subtitle": "A low, wide home that turns its back on the road",
+    "category": "residential",
+    "stage": "completed",
+    "locality": "Malviya Nagar",
+    "districtId": "malviya-nagar",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.8535,
+      "lng": 75.8095
+    },
+    "year": 2025,
+    "areaSqft": 5200,
+    "floors": "G+1",
+    "durationMonths": 13,
+    "packageType": "fully-furnished",
+    "client": "Dr. A. A. Pathan",
+    "featured": true,
+    "order": 6,
+    "coverImage": "/images/residential-06.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-03.webp",
+        "alt": "Garden elevation",
+        "caption": "The house opens fully to its garden",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/residential-09.webp",
+        "alt": "Courtyard",
+        "caption": "A planted court brings light to the core",
+        "order": 2
+      }
+    ],
+    "excerpt": "A wide corner plot allowed a low, horizontal house that presents a quiet face to the street and opens completely to a private garden.",
+    "challenge": "A busy road on two sides and a client who wanted the house to feel like a retreat.",
+    "approach": "Solid masonry to the street with high clerestory openings, and full-height glazing to the garden. A central planted court pulls daylight into the deep plan.",
+    "outcome": "Road noise inside the living areas measures well below the street level, and the garden has become the household's primary living space.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "60 × 70 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "5,200 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+1"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Fully Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "13 months"
+      },
+      {
+        "label": "Completed",
+        "value": "May 2025"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "interior-design"
+    ],
+    "tags": [
+      "Corner plot",
+      "Courtyard",
+      "Acoustic strategy"
+    ]
+  },
+  {
+    "id": "prj_vaishali_interior",
+    "createdAt": "2025-08-01T09:00:00.000Z",
+    "updatedAt": "2025-08-01T09:00:00.000Z",
+    "status": "published",
+    "slug": "vaishali-nagar-apartment-interiors",
+    "title": "Vaishali Nagar Apartment",
+    "subtitle": "A full interior fit-out in 14 weeks",
+    "category": "interior",
+    "stage": "completed",
+    "locality": "Vaishali Nagar",
+    "districtId": "vaishali-ajmer-road",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.9124,
+      "lng": 75.7395
+    },
+    "year": 2025,
+    "areaSqft": 2400,
+    "floors": "Single floor",
+    "durationMonths": 4,
+    "packageType": "fully-furnished",
+    "featured": false,
+    "order": 7,
+    "coverImage": "/images/interior-01.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/interior-01.webp",
+        "alt": "Living room",
+        "caption": "Warm neutrals with a fluted timber feature wall",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/interior-02.webp",
+        "alt": "Modular kitchen",
+        "caption": "Handleless modular kitchen in matte finish",
+        "order": 2
+      },
+      {
+        "id": "i3",
+        "url": "/images/interior-03.webp",
+        "alt": "Master bedroom",
+        "caption": "Full-height wardrobes in veneer",
+        "order": 3
+      }
+    ],
+    "excerpt": "A complete interior fit-out — modular kitchen, wardrobes, ceilings, lighting and loose furniture — delivered in fourteen weeks around an occupied building.",
+    "challenge": "Work had to proceed in a fully occupied apartment building with strict society rules on working hours and material movement.",
+    "approach": "Maximum off-site fabrication. Carcasses, shutters and ceiling frames were built in the workshop and installed in short, scheduled windows, cutting on-site time by roughly 40%.",
+    "outcome": "Fourteen weeks from start to handover with zero society complaints logged.",
+    "specs": [
+      {
+        "label": "Carpet area",
+        "value": "2,400 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "4 BHK apartment"
+      },
+      {
+        "label": "Package",
+        "value": "Interior Work"
+      },
+      {
+        "label": "Duration",
+        "value": "14 weeks"
+      },
+      {
+        "label": "Completed",
+        "value": "August 2025"
+      }
+    ],
+    "services": [
+      "interior-design",
+      "project-management"
+    ],
+    "tags": [
+      "Interiors",
+      "Modular kitchen",
+      "Off-site fabrication"
+    ]
+  },
+  {
+    "id": "prj_tonk_office",
+    "createdAt": "2026-01-15T09:00:00.000Z",
+    "updatedAt": "2026-01-15T09:00:00.000Z",
+    "status": "published",
+    "slug": "tonk-road-corporate-office",
+    "title": "Tonk Road Corporate Office",
+    "subtitle": "An 18,000 sq ft workplace with full MEPF design",
+    "category": "commercial",
+    "stage": "ongoing",
+    "locality": "Tonk Road",
+    "districtId": "malviya-nagar",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.8467,
+      "lng": 75.8065
+    },
+    "year": 2026,
+    "areaSqft": 18000,
+    "floors": "G+4",
+    "durationMonths": 18,
+    "packageType": "semi-furnished",
+    "featured": false,
+    "order": 8,
+    "coverImage": "/images/commercial-01.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/commercial-02.webp",
+        "alt": "Office facade",
+        "caption": "A unitised glazed facade with deep shading fins",
+        "order": 1
+      },
+      {
+        "id": "i2",
+        "url": "/images/commercial-05.webp",
+        "alt": "Atrium",
+        "caption": "Central atrium brings daylight to every floor plate",
+        "order": 2
+      }
+    ],
+    "excerpt": "A five-storey corporate office currently in construction, with centralised HVAC, full fire compliance and a scalable electrical backbone.",
+    "challenge": "A tenant mix that is not yet fixed, so every service has to be sized for an unknown final load and be reconfigurable per floor.",
+    "approach": "Floor-wise isolation on every service, with capacity headroom designed in and a raised-floor distribution strategy so tenant fit-outs never touch the base build.",
+    "outcome": "In progress — structure topped out, MEPF rough-in underway. Target handover Q4 2026.",
+    "specs": [
+      {
+        "label": "Plot size",
+        "value": "90 × 120 ft"
+      },
+      {
+        "label": "Built-up area",
+        "value": "18,000 sq ft"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+4 office"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Semi Furnished"
+      },
+      {
+        "label": "Duration",
+        "value": "18 months (in progress)"
+      },
+      {
+        "label": "Target",
+        "value": "Q4 2026"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "mepf-consultancy",
+      "project-management"
+    ],
+    "tags": [
+      "Commercial",
+      "Centralised HVAC",
+      "Fire compliance",
+      "In progress"
+    ]
+  },
+  {
+    "id": "prj_ajmer_mepf",
+    "createdAt": "2026-03-05T09:00:00.000Z",
+    "updatedAt": "2026-03-05T09:00:00.000Z",
+    "status": "published",
+    "slug": "ajmer-road-hospital-mepf",
+    "title": "Ajmer Road Clinic — MEPF",
+    "subtitle": "MEPF consultancy for a 40-bed day-care facility",
+    "category": "mepf",
+    "stage": "ongoing",
+    "locality": "Ajmer Road",
+    "districtId": "vaishali-ajmer-road",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.9089,
+      "lng": 75.7141
+    },
+    "year": 2026,
+    "areaSqft": 12000,
+    "floors": "G+2",
+    "durationMonths": 10,
+    "packageType": "civil",
+    "featured": false,
+    "order": 9,
+    "coverImage": "/images/commercial-02.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/commercial-04.webp",
+        "alt": "Services coordination drawing",
+        "caption": "Coordinated services routing above the corridor",
+        "order": 1
+      }
+    ],
+    "excerpt": "MEPF design and site supervision for a day-care medical facility, where air changes, medical gas routing and fire compartmentation drive the whole plan.",
+    "challenge": "Healthcare air-change requirements and medical gas distribution in a building whose structural grid was already fixed.",
+    "approach": "Full services coordination against the existing structure, with a corridor-based distribution spine that keeps all maintenance access out of clinical areas.",
+    "outcome": "In progress — design issued, first fix underway.",
+    "specs": [
+      {
+        "label": "Built-up area",
+        "value": "12,000 sq ft"
+      },
+      {
+        "label": "Scope",
+        "value": "MEPF design + supervision"
+      },
+      {
+        "label": "Configuration",
+        "value": "G+2, 40 beds"
+      },
+      {
+        "label": "Duration",
+        "value": "10 months (in progress)"
+      }
+    ],
+    "services": [
+      "mepf-consultancy",
+      "project-management"
+    ],
+    "tags": [
+      "Healthcare",
+      "Medical gas",
+      "Air changes",
+      "In progress"
+    ]
+  },
+  {
+    "id": "prj_jhotwara_upcoming",
+    "createdAt": "2026-06-10T09:00:00.000Z",
+    "updatedAt": "2026-06-10T09:00:00.000Z",
+    "status": "published",
+    "slug": "jhotwara-row-housing",
+    "title": "Jhotwara Row Housing",
+    "subtitle": "Eight units on a shared services spine",
+    "category": "residential",
+    "stage": "upcoming",
+    "locality": "Jhotwara",
+    "districtId": "vidhyadhar-jhotwara",
+    "city": "Jaipur",
+    "coordinates": {
+      "lat": 26.9432,
+      "lng": 75.7473
+    },
+    "year": 2026,
+    "areaSqft": 21000,
+    "floors": "G+1 × 8 units",
+    "durationMonths": 20,
+    "packageType": "semi-furnished",
+    "featured": false,
+    "order": 10,
+    "coverImage": "/images/residential-07.webp",
+    "images": [
+      {
+        "id": "i1",
+        "url": "/images/residential-07.webp",
+        "alt": "Row housing concept",
+        "caption": "Concept view of the shared street",
+        "order": 1
+      }
+    ],
+    "excerpt": "Eight identical row units sharing a single services spine — the efficiency of repetition applied to individual home ownership.",
+    "challenge": "Delivering eight homes at a per-unit cost that individual construction cannot match.",
+    "approach": "One structural bay, one services spine, one materials order. Repetition drives down both cost and programme while each unit still gets a private court.",
+    "outcome": "Design stage. Construction targeted to start Q4 2026.",
+    "specs": [
+      {
+        "label": "Site area",
+        "value": "21,000 sq ft"
+      },
+      {
+        "label": "Units",
+        "value": "8 × G+1"
+      },
+      {
+        "label": "Package",
+        "value": "Turnkey — Semi Furnished"
+      },
+      {
+        "label": "Status",
+        "value": "Design stage"
+      }
+    ],
+    "services": [
+      "architectural-design",
+      "project-management"
+    ],
+    "tags": [
+      "Row housing",
+      "Repetition",
+      "Upcoming"
+    ]
+  }
+]

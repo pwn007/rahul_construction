@@ -15,16 +15,16 @@ Visitor submits          enquiriesService.create()
   Estimator (PDF gate)                   └── httpAdapter()   ← written, unused
   Downloads gate                                 │
   Footer newsletter                              ▼
-                                        Express API → JsonRepository
+                                        Laravel API → MySQL
 ```
 
 Every form on the site goes through one seam: `createResourceService()` in
-[`web/src/services/resource.service.ts`](../web/src/services/resource.service.ts),
+[`web_next/src/services/resource.service.ts`](../web_next/src/services/resource.service.ts),
 which calls an `ApiAdapter`. Which adapter is chosen is a single line in
-[`web/src/services/client.ts`](../web/src/services/client.ts):
+[`web_next/src/services/client.ts`](../web_next/src/services/client.ts):
 
 ```ts
-const MODE = import.meta.env['VITE_API_MODE'] ?? 'mock';
+const MODE = process.env.NEXT_PUBLIC_API_MODE ?? 'mock';
 export const api: ApiAdapter = MODE === 'http' ? httpAdapter(API_URL) : mockAdapter();
 ```
 
@@ -56,36 +56,29 @@ would normally establish.
 
 ### Storage
 
-About 90% is already written and deliberately unwired:
+The frontend half is done and deliberately unwired: `httpAdapter` is complete and
+already unwraps the server's `{ data }` envelope, so the switch is one env var —
+`NEXT_PUBLIC_API_MODE=http` in `web_next/.env`.
 
-- `httpAdapter` — complete, and already unwraps the server's `{ data }` envelope.
-- The Express API — routes, controller, service, `Repository<T>`, Zod validation,
-  rate limiting on the two lead endpoints.
-- `PrismaRepository` — a complete implementation, compiled against a structural
-  interface so it builds without `@prisma/client` installed.
-- `prisma/schema.prisma` — 768 lines, 30+ models, including `Enquiry` with a real
-  `assignedToId → User` relation and indexes on `(stage, createdAt)` and `source`.
+The server half is `backend/` — Laravel 13 on the client's PHP shared hosting,
+JSON API only. The data model it implements is recorded in
+[`docs/09-data-model.prisma`](09-data-model.prisma) (768 lines, 32 models),
+including `Enquiry` with a real `assignedToId → User` relation and indexes on
+`(stage, createdAt)` and `source`.
 
-The switch is three steps:
-
-1. Set `VITE_API_MODE=http` in the web `.env`.
-2. Point `getRepository()` in
-   [`server/src/repositories/registry.ts`](../server/src/repositories/registry.ts)
-   at `PrismaRepository` instead of `JsonRepository` — one line.
-3. Provision a managed Postgres (Neon or Supabase free tier is ample at this
-   volume), run the migration, deploy the server.
-
-**Three things will bite on that day if not handled first** — two are now fixed:
+**Three things that were going to bite, and where they stand:**
 
 - ~~`estimateSchema` omitted `materialMode`, `materials` and `specAdjustment`, so
   Zod would have silently stripped the whole material specification off every
   estimate lead.~~ **Fixed.**
 - ~~Lead-capture failures were swallowed with `.catch(() => undefined)` while the
   visitor was told "We will call you within one working day."~~ **Fixed.**
-- `tsc` does not copy `server/src/data/*.json` into `dist/`, so `npm start` on the
-  built server starts with no data and writes to an empty `dist/data`. Irrelevant
-  once Prisma is the repository, but it will look like data loss if JSON mode is
-  ever deployed.
+- The recorded schema still says `plotArea` where the frontend sends
+  `areaPerFloor`, and has no columns for `consentAt`/`consentText`, the UTM
+  block, `materials`, `materialsCost`, `packageChosen`, `furniture` or
+  `furnitureCost`. **The Laravel migrations must add all of these** — a
+  validator that only whitelists the old fields drops the richest half of every
+  estimator lead without erroring.
 
 ### Notification — the part that does not exist at all
 

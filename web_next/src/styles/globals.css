@@ -161,9 +161,46 @@
   .text-muted { color: rgb(var(--c-text-muted)); }
   .text-subtle { color: rgb(var(--c-text-subtle)); }
 
+  /**
+   * Section labels — the small uppercase line above a heading.
+   *
+   * `text-decoration: none` is load-bearing, not tidying. Tailwind ships its own
+   * `overline` utility (`text-decoration-line: overline`) and this component
+   * class happens to share its name, so every label was quietly carrying a rule
+   * over the text that nobody drew. Utilities are emitted after components, so
+   * it won.
+   *
+   * That accident also had a bug in it: a text-decoration line is pinned to the
+   * font's ascender with no way to offset it, and it repeats on every wrapped
+   * line — so the longer labels ("Available on any package, priced separately")
+   * were drawing two of them.
+   *
+   * The `::before` replaces it with a mark we control. 32px rather than the full
+   * text width, which is the same device already used under the testimonial
+   * heading and over the hero's three captions. `currentColor` so it travels
+   * with the label: on dark grounds `--c-brand-text` flips to cyan-300 and the
+   * rule follows, where a hardcoded brand cyan would sit at 2.08:1 on paper —
+   * under the 3:1 a graphic element has to clear.
+   */
   .overline {
     @apply text-overline uppercase;
     color: rgb(var(--c-brand-text));
+  }
+  /* Doubled on purpose. A single `.overline` is specificity (0,1,0) — exactly what
+     Tailwind's own `overline` utility scores, and utilities are emitted after
+     components, so the tie went to the decoration. `.overline.overline` is
+     (0,2,0) and settles it without `!important`. */
+  .overline.overline {
+    text-decoration: none;
+  }
+  .overline::before {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    margin-bottom: 0.625rem;
   }
 
   /* Glass — used sparingly: navbar, cost meter, overlays, lightbox */

@@ -99,7 +99,7 @@ export function AboutView() {
           <Reveal>
             <div className="on-dark grain relative h-full overflow-hidden rounded-2xl bg-cyan-500 p-9 text-white">
               <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-white/15 blur-2xl" aria-hidden />
-              <p className="relative text-overline uppercase tracking-[0.18em] text-white/70">Our mission</p>
+              <p className="relative text-overline uppercase text-white/70">Our mission</p>
               <h2 className="relative mt-4 font-display text-display-sm font-semibold">{SITE.mission}</h2>
               <p className="relative mt-5 leading-relaxed text-white/85">
                 In today's fast-paced lifestyle, managing construction can be overwhelming. Our mission is to
@@ -115,7 +115,7 @@ export function AboutView() {
           <Reveal delay={0.1}>
             <div className="on-dark grain relative h-full overflow-hidden rounded-2xl bg-navy-800 p-9 text-white">
               <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
-              <p className="relative text-overline uppercase tracking-[0.18em] text-cyan-400">Our vision</p>
+              <p className="relative text-overline uppercase text-cyan-400">Our vision</p>
               <h2 className="relative mt-4 font-display text-display-sm font-semibold">
                 To make integrated construction the default in Rajasthan
               </h2>

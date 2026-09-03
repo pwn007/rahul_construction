@@ -104,6 +104,34 @@ const PINNED: Record<string, string> = {
      overwrite: /images/* is immutable for a year. */
   'service-mepf': 'mepf-15.webp',
   'post-mepf': 'mepf-05.webp',
+
+  /*
+   * The home page's services index — one photograph per row.
+   *
+   * These are pinned rather than routed, and the reason is what happens when
+   * they are not. `service-architecture`, `service-interior` and `service-pm`
+   * (the /services heroes) have never been pinned, so they hash into whatever
+   * pool their prefix routes to, and what they landed on is: a cactus in front
+   * of a concrete wall, a yellow armchair beside a Victorian radiator, and — for
+   * the service whose promise is "you always know where your project stands" —
+   * an empty office with a dying potted tree shedding leaves onto the carpet.
+   * A photograph chosen by a hash is a photograph nobody chose.
+   *
+   * `service-arch-01` and `service-pm-01` are new files and deliberately belong
+   * to **no pool**. `PINNED` is read before `poolFor` and returns immediately,
+   * so a pinned seed needs no pool membership — and keeping them out means no
+   * pool's `length` changes, so no unpinned seed anywhere on the site shifts to
+   * a different picture. That is the accident recorded above, avoided by
+   * construction rather than by care.
+   *
+   * `interior-08` is the exception: it was already in the interior pool and
+   * already shipping, but no seed reached it. It is a fully finished, styled
+   * living room — the best answer in the library to "Interior Design &
+   * Execution" — so it goes back to work rather than being downloaded twice.
+   */
+  'home-service-architectural-design': 'service-arch-01.webp',
+  'home-service-interior-design': 'interior-08.webp',
+  'home-service-project-management': 'service-pm-01.webp',
 };
 
 /** Explicit routes win. Ordered: first matching pattern decides. */

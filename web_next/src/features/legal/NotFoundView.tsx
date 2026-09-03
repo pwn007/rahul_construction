@@ -130,7 +130,7 @@ export function NotFoundView() {
 
             <div className="lg:col-span-5">
               <div className="glass-dark rounded-xl p-6">
-                <p className="text-overline uppercase tracking-[0.18em] text-white/40">Popular destinations</p>
+                <p className="text-overline uppercase text-white/40">Popular destinations</p>
                 <div className="mt-5 space-y-1">
                   {suggestions.map((s) => (
                     <Link
@@ -148,7 +148,7 @@ export function NotFoundView() {
                 </div>
 
                 <div className="mt-6 border-t border-white/10 pt-5">
-                  <p className="text-overline uppercase tracking-[0.18em] text-white/40">Recent project</p>
+                  <p className="text-overline uppercase text-white/40">Recent project</p>
                   {projects[0] && (
                     <Link href={ROUTES.project(projects[0].slug)} className="group mt-3 flex items-center gap-3">
                       <img src={projects[0].coverImage} alt="" className="h-14 w-20 rounded-md object-cover" loading="lazy" />

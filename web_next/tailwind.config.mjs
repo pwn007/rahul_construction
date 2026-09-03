@@ -96,7 +96,14 @@ export default {
         'heading-md': ['clamp(1.125rem, 1.4vw, 1.375rem)', { lineHeight: '1.3', letterSpacing: '-0.012em', fontWeight: '600' }],
         'body-lg': ['clamp(1.0625rem, 1.1vw, 1.1875rem)', { lineHeight: '1.65' }],
         caption: ['0.8125rem', { lineHeight: '1.5' }],
-        overline: ['0.75rem', { lineHeight: '1.2', letterSpacing: '0.18em', fontWeight: '600' }],
+        /* 14px, not 12. At 12px against a `display-md` heading the label was 21% of
+           the thing it introduced, where the convention for an eyebrow is 12–14px
+           and a good deal closer to the heading than that; the client could not
+           see it in a demo. Tracking comes in from 0.18em at the same time —
+           short uppercase reads best around 0.05em, and 0.18em was pulling the
+           word apart into letters. 0.10em keeps the house's wide-tracked look
+           without costing the word its shape. */
+        overline: ['0.875rem', { lineHeight: '1.2', letterSpacing: '0.10em', fontWeight: '600' }],
       },
       borderRadius: {
         sm: '6px',

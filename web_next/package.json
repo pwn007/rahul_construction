@@ -9,9 +9,14 @@
     "typecheck": "tsc --noEmit",
     "build:districts": "node scripts/build-districts.mjs",
     "optimize:images": "node scripts/optimize-images.mjs",
-    "check:estimator": "tsx scripts/check-estimator.ts"
+    "check:estimator": "tsx scripts/check-estimator.ts",
+    "export:seed": "tsx scripts/export-seed.mts",
+    "check:contract": "tsx scripts/contract-diff.mts && tsx scripts/contract-queries.mts",
+    "build:prod": "NEXT_PUBLIC_API_MODE=http NEXT_PUBLIC_API_URL=/backend/public/api next build"
   },
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@tanstack/react-query": "^5.62.7",

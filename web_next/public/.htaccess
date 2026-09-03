@@ -1,0 +1,69 @@
+# Neetu Archstone — public_html/.htaccess  (v5)
+#
+# Next.js copies everything in `public/` into the export, so this file ships
+# inside site.zip and lands at the docroot on its own. It carries what
+# next.config.mjs used to do at runtime (redirects, cache headers) plus the
+# /backend lock that only deployment needs.
+#
+# Layout it assumes — everything inside public_html, nothing outside:
+#
+#   public_html/
+#   ├── index.html  _next/  images/ …   ← this static site
+#   ├── .htaccess                        ← this file
+#   └── backend/                         ← the whole Laravel app
+#       ├── .htaccess                    ←   denies the tree (.env, vendor …)
+#       └── public/                      ←   the ONE open folder — the API
+#
+# How /backend/public came to be the API base, so nobody "cleans it up" back to
+# a broken state: the build originally called a tidy /api, rewritten here into
+# backend/public/index.php. The host's LiteSpeed refused that internal rewrite
+# in every form — relative, absolute, with RewriteBase — while running the 301s
+# below happily; a control rewrite to /robots.txt worked, the same rule into
+# backend/ never fired (measured live, Sep 2026). A PHP bridge was built and
+# validated as the clean fix, but the deployer preferred one moving part fewer,
+# so the API base is baked into the frontend as /backend/public/api and this
+# file simply lets that path through. Laravel resolves it fine: its base URL
+# becomes /backend/public and its own routes carry the api prefix.
+
+RewriteEngine On
+RewriteBase /
+
+# Marker to verify which version of this file is live — check with:
+#   curl -sI https://neetuarchstone.com/ | grep -i x-na-version
+<IfModule mod_headers.c>
+  Header always set X-NA-Version "v5"
+</IfModule>
+
+# ── 1. Lock /backend, except its public/ folder ─────────────────────────────
+# THE_REQUEST is the browser's original request line. Typed /backend/... URLs
+# get a 403 — except /backend/public/, which is Laravel's own public folder
+# and now the API's front door. The blanket deny in backend/.htaccess remains
+# the second lock for everything sensitive (.env, vendor, storage), including
+# against URL-encoding tricks that slip past this regex.
+RewriteCond %{THE_REQUEST} \s/+backend [NC]
+RewriteCond %{THE_REQUEST} !\s/+backend/public/ [NC]
+RewriteRule ^ - [F]
+
+# ── 2. Legacy 301s (were next.config.mjs redirects) ─────────────────────────
+# Real redirects so link equity moves — the old Vite app faked these
+# client-side and crawlers saw 200s.
+RewriteRule ^calculator/?$ /estimator/ [R=301,L]
+RewriteRule ^services/mep/?$ /services/mepf-consultancy/ [R=301,L]
+RewriteRule ^mepf/?$ /services/mepf-consultancy/ [R=301,L]
+
+# ── 3. Immutable cache for media (was next.config.mjs headers) ──────────────
+# Image and video filenames are content-independent and never overwritten — a
+# change ships as a new file — so a year-long immutable cache is honest.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(webp|jpg|jpeg|png|svg|mp4|webm|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # HTML is the one thing that must revalidate, or deploys take a day to show.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+
+# ── 4. Not-found ────────────────────────────────────────────────────────────
+# Next writes the 404 page to /404.html in an export.
+ErrorDocument 404 /404.html

@@ -43,8 +43,15 @@ export const STORAGE_KEYS = {
   theme: 'archstone.theme',
   estimator: 'archstone.estimator.draft',
   portalUser: 'archstone.portal.user',
-  adminUser: 'archstone.admin.user',
-  adminUnlocked: 'archstone.admin.unlocked',
+  /**
+   * The admin's JWT, verbatim.
+   *
+   * Replaces `admin.unlocked` (a boolean the old passcode gate wrote) and
+   * `admin.user` (declared, never used anywhere). The token is the whole
+   * session: present → try it against /api/auth/me; absent or rejected → the
+   * login gate. Nothing else about the signed-in state is stored client-side.
+   */
+  adminToken: 'archstone.admin.token',
   adminOverrides: 'archstone.admin.overrides',
   /**
    * Whether this browser has already given us a phone number.

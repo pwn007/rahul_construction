@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { ProjectsView } from '@/features/projects/ProjectsView';
+import { Spinner } from '@/components/ui';
 import { buildMetadata } from '@/lib/seo';
 import { IMG } from '@/lib/media';
 
@@ -13,18 +15,28 @@ export const metadata: Metadata = buildMetadata(
   '/projects',
 );
 
-/*
- * Rendered per request rather than prerendered, because the filters live in the
- * query string and this is a page whose content must reach a crawler.
- *
- * The alternative — prerender plus a Suspense boundary — would have put a
- * loading fallback in the static HTML and rendered the grid entirely on the
- * client, which is the SPA behaviour this migration exists to remove. Rendering
- * on request means the server emits the real, correctly-filtered list for any
- * URL, including a shared deep link.
- */
-export const dynamic = 'force-dynamic';
-
 export default function Page() {
-  return <ProjectsView />;
+  return (
+    /*
+     * Prerendered behind a Suspense boundary — the same pattern as /estimator.
+     *
+     * This used to be `force-dynamic`, per-request SSR so crawlers received the
+     * query-string-filtered list. The site now ships as a static export to PHP
+     * shared hosting, where there is no server to render per request, and
+     * `useSearchParams()` inside ProjectsView fails the export build without a
+     * boundary above it. The trade: /projects?category=… renders its grid on
+     * the client. The ten project detail pages — the URLs that actually rank
+     * and get shared — remain fully prerendered, and this page's metadata
+     * stays in its static HTML.
+     */
+    <Suspense
+      fallback={
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Spinner className="h-7 w-7" />
+        </div>
+      }
+    >
+      <ProjectsView />
+    </Suspense>
+  );
 }

@@ -1,0 +1,41 @@
+[
+  {
+    "id": "rate_civil",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "civil",
+    "label": "Civil Work",
+    "description": "A structurally complete building, ready for you to finish on your own terms.",
+    "minRate": 1200,
+    "maxRate": 1400,
+    "labourOnlyRate": 100,
+    "order": 1
+  },
+  {
+    "id": "rate_semi-furnished",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "semi-furnished",
+    "label": "Semi Furnished",
+    "description": "Everything in civil work, plus the finishes and services that make it livable.",
+    "minRate": 1800,
+    "maxRate": 2200,
+    "labourOnlyRate": 149,
+    "order": 2
+  },
+  {
+    "id": "rate_fully-furnished",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "fully-furnished",
+    "label": "Fully Furnished",
+    "description": "Hand over the keys and walk in. Modular kitchen, wardrobes, ceilings, lighting.",
+    "minRate": 2500,
+    "maxRate": 3000,
+    "labourOnlyRate": 199,
+    "order": 3
+  }
+]

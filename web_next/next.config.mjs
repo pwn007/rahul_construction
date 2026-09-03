@@ -3,38 +3,29 @@ const nextConfig = {
   reactStrictMode: true,
 
   /*
-   * Legacy paths from the previous site — preserve inbound links.
+   * Static export — the whole site becomes plain HTML/CSS/JS in `out/`, served
+   * by the client's shared PHP hosting (Hostinger, LiteSpeed). Node exists only
+   * on the machine that runs `npm run build:prod`, never on the server.
    *
-   * These were client-side `<Navigate replace />` routes in the Vite app, which
-   * meant a crawler saw a 200 on the old URL and no link equity moved. As real
-   * 301s they transfer authority to the destination.
-   *
-   * `/mepf` was a real page carrying the interactive house. The house moved onto
-   * the service page rather than being deleted, so this is a redirect and not a
-   * 404 — the destination still has what the URL promised.
+   * The `redirects()` and `headers()` that used to live here do not run in an
+   * export (there is no server to run them), so they moved verbatim into
+   * `public/.htaccess`: the three legacy 301s, and the immutable cache rule for
+   * /images and /video. That file also carries what only deployment needs — the
+   * /api rewrite into Laravel and the deny-lock on /backend.
    */
-  async redirects() {
-    return [
-      { source: '/calculator', destination: '/estimator', permanent: true },
-      { source: '/services/mep', destination: '/services/mepf-consultancy', permanent: true },
-      { source: '/mepf', destination: '/services/mepf-consultancy', permanent: true },
-    ];
-  },
+  output: 'export',
 
-  async headers() {
-    return [
-      {
-        source: '/images/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-      {
-        /* Same deal as the images: content-independent filenames, so a change
-           means a new filename rather than an overwrite. */
-        source: '/video/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-    ];
-  },
+  /*
+   * /about → about/index.html. LiteSpeed/Apache serve a directory's index
+   * without any rewrite rule, so clean URLs survive a refresh on a deep link —
+   * the failure mode every SPA-on-FTP deployment hits first.
+   */
+  trailingSlash: true,
+
+  /* Belt and braces: next/image is not used anywhere (everything is plain
+     <img>), but an export build refuses to start if the default loader is left
+     enabled, so this states the fact. */
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

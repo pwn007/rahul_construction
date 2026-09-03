@@ -15,9 +15,10 @@ import { useTheme } from '@/app/providers';
 import { useLockBodyScroll } from '@/hooks';
 import { MODULES, MODULE_GROUPS, EXTRA_NAV } from './config/modules';
 import { AdminDataReset } from './screens/System';
-import { users } from '@/data/ops';
 import { useLeadCounts } from './useLeadCounts';
-import { AdminGate, isAdminUnlocked, lockAdmin } from './AdminGate';
+import { AdminGate } from './AdminGate';
+import { authService, isSignedIn } from '@/services/auth';
+import type { User } from '@/types/domain';
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [filter, setFilter] = useState('');
@@ -103,11 +104,10 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function AdminShell({ children }: { children: ReactNode }) {
+function AdminShell({ user, onSignOut, children }: { user: User; onSignOut: () => void; children: ReactNode }) {
   const [navOpen, setNavOpen] = useState(false);
   const { resolved, toggle } = useTheme();
   const pathname = usePathname();
-  const user = users[0];
 
   useLockBodyScroll(navOpen);
 
@@ -143,23 +143,20 @@ function AdminShell({ children }: { children: ReactNode }) {
             >
               {resolved === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            {user && (
-              <div className="flex items-center gap-2.5 border-l pl-3">
-                <img src={user.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
-                <div className="hidden sm:block">
-                  <p className="text-caption font-medium leading-tight">{user.name}</p>
-                  <p className="text-[0.7rem] leading-tight text-subtle">{user.roleName}</p>
-                </div>
+            <div className="flex items-center gap-2.5 border-l pl-3">
+              {user.avatar && <img src={user.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />}
+              <div className="hidden sm:block">
+                <p className="text-caption font-medium leading-tight">{user.name}</p>
+                <p className="text-[0.7rem] leading-tight text-subtle">{user.roleName}</p>
               </div>
-            )}
-            <Link
-              href={ROUTES.home}
-              onClick={lockAdmin}
+            </div>
+            <button
+              onClick={onSignOut}
               className="rounded-md p-2 text-subtle transition-colors hover:bg-[rgb(var(--c-text))]/[0.06] hover:text-danger"
               aria-label="Sign out"
             >
               <LogOut className="h-[18px] w-[18px]" />
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -208,20 +205,30 @@ function AdminShell({ children }: { children: ReactNode }) {
 }
 
 /**
- * Admin chrome + passcode gate. Mounted from app/admin/layout.tsx.
+ * Admin chrome + sign-in gate. Mounted from app/admin/layout.tsx.
  *
- * The unlock flag lives in localStorage, which the server cannot read, so the
- * first client render must match the server's — hence `mounted`. Rendering the
- * gate before mount instead would flash the passcode screen at an already
- * unlocked admin on every reload.
+ * The session is a JWT in localStorage, which the server render cannot read, so
+ * the first client render must match the server's — hence `mounted`. On mount,
+ * a stored token is not taken at its word: it is sent to /api/auth/me, and the
+ * gate only opens on the server's answer. A token that expired overnight, or
+ * one revoked by sign-out on another device, fails that call, gets cleared by
+ * the auth service, and lands back on the gate rather than in a shell where
+ * every request would 401.
  */
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setUnlocked(isAdminUnlocked());
-    setMounted(true);
+    if (!isSignedIn()) {
+      setMounted(true);
+      return;
+    }
+    authService
+      .me()
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setMounted(true));
   }, []);
 
   useEffect(() => {
@@ -230,7 +237,18 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   }, []);
 
   if (!mounted) return <div className="min-h-screen bg-[rgb(var(--c-bg))]" />;
-  if (!unlocked) return <AdminGate onUnlock={() => setUnlocked(true)} />;
+  if (!user) return <AdminGate onSignIn={setUser} />;
 
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <AdminShell
+      user={user}
+      onSignOut={() => {
+        /* Revoke first (blacklists the JWT server-side), then drop to the gate.
+           The service clears the stored token even if the network call fails. */
+        void authService.signOut().finally(() => setUser(null));
+      }}
+    >
+      {children}
+    </AdminShell>
+  );
 }

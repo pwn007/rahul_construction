@@ -86,6 +86,9 @@ const truncate = (v: unknown, n = 48) => {
 /* Module registry                                                       */
 /* ==================================================================== */
 
+/* Adding a module? Its key must ALSO go into MODULE_KEYS in
+   `src/app/admin/[module]/page.tsx` — the static export enumerates admin pages
+   at build time, and a key missing there is a 404 on the live site. */
 export const MODULES: ResourceConfig<never>[] = [
   /* ---------------------------- CONTENT ---------------------------- */
   {
