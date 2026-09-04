@@ -31,7 +31,7 @@ class User extends Authenticatable implements JWTSubject
 
     protected $hidden = ['password', 'remember_token', 'role'];
 
-    protected $appends = ['roleName'];
+    protected $appends = ['roleName', 'roleSlug'];
 
     protected function casts(): array
     {
@@ -67,5 +67,12 @@ class User extends Authenticatable implements JWTSubject
     public function getRoleNameAttribute(): string
     {
         return (string) ($this->role?->name ?? '');
+    }
+
+    /* What code branches on — names are for people and can be reworded, the
+     * slug cannot. The admin's System-group gate reads this. */
+    public function getRoleSlugAttribute(): string
+    {
+        return (string) ($this->role?->slug ?? '');
     }
 }

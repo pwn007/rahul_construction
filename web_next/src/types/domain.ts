@@ -431,6 +431,9 @@ export interface User extends BaseEntity {
   email: string;
   roleId: string;
   roleName: string;
+  /** The role's slug — what code branches on. Names are for people and can be
+      reworded; the System-group gate in AdminLayout checks this. */
+  roleSlug: string;
   avatar: string;
   lastActiveAt: string;
   active: boolean;

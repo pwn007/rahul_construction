@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUpRight, LayoutDashboard, LogOut, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { Icon } from '@/lib/icons';
@@ -20,13 +20,33 @@ import { AdminGate } from './AdminGate';
 import { authService, isSignedIn } from '@/services/auth';
 import type { User } from '@/types/domain';
 
-function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+/**
+ * The System group belongs to exactly one account.
+ *
+ * Media library, SEO & meta, Users, Settings, Estimator config, Roles &
+ * permissions and Theme render only for the `superadmin` role — every other
+ * signed-in user gets the rest of the panel and simply never sees these. Two
+ * layers enforce it here: the sidebar drops the whole group, and AdminShell
+ * bounces a typed-in /admin/{system-key} URL back to the dashboard.
+ *
+ * Honest limit, on purpose: this is UI-level gating. The API itself still
+ * answers any signed-in user for these resources — server-side RBAC
+ * (CheckPermission over roles.permissions) is the deferred phase where that
+ * lock lands.
+ */
+const SUPER_ONLY_GROUP = 'System';
+
+const SUPER_ONLY_KEYS = new Set(['media', 'seo', 'users', 'settings', 'estimator-config', 'roles', 'theme']);
+
+const isSuper = (user: User | null) => user?.roleSlug === 'superadmin';
+
+function Sidebar({ user, onNavigate }: { user: User; onNavigate?: () => void }) {
   const [filter, setFilter] = useState('');
   const pathname = usePathname();
   /* Live, so a lead submitted on the public site moves this badge. */
   const { badges } = useLeadCounts();
 
-  const groups = MODULE_GROUPS.map((group) => ({
+  const groups = MODULE_GROUPS.filter((group) => group !== SUPER_ONLY_GROUP || isSuper(user)).map((group) => ({
     group,
     items: [
       ...MODULES.filter((m) => m.group === group).map((m) => ({ key: m.key, label: m.label, icon: m.icon })),
@@ -108,10 +128,21 @@ function AdminShell({ user, onSignOut, children }: { user: User; onSignOut: () =
   const [navOpen, setNavOpen] = useState(false);
   const { resolved, toggle } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
 
   useLockBodyScroll(navOpen);
 
   useEffect(() => setNavOpen(false), [pathname]);
+
+  /* A System URL typed by hand gets the same answer as the hidden sidebar
+     entry. `blocked` also blanks the frame below so the screen never flashes
+     before the replace lands. */
+  const moduleKey = pathname?.startsWith('/admin/') ? pathname.slice('/admin/'.length).replace(/\/$/, '') : '';
+  const blocked = !isSuper(user) && SUPER_ONLY_KEYS.has(moduleKey);
+
+  useEffect(() => {
+    if (blocked) router.replace('/admin');
+  }, [blocked, router]);
 
   return (
     <div className="min-h-screen bg-[rgb(var(--c-bg))]">
@@ -164,7 +195,7 @@ function AdminShell({ user, onSignOut, children }: { user: User; onSignOut: () =
       <div className="flex">
         {/* Sidebar — desktop */}
         <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r bg-[rgb(var(--c-surface))] lg:block">
-          <Sidebar />
+          <Sidebar user={user} />
         </aside>
 
         {/* Sidebar — mobile */}
@@ -179,7 +210,7 @@ function AdminShell({ user, onSignOut, children }: { user: User; onSignOut: () =
                 transition={{ duration: 0.35, ease: [0.76, 0, 0.24, 1] }}
                 className="absolute left-0 top-0 h-full w-72 border-r bg-[rgb(var(--c-surface))]"
               >
-                <Sidebar onNavigate={() => setNavOpen(false)} />
+                <Sidebar user={user} onNavigate={() => setNavOpen(false)} />
               </motion.aside>
             </motion.div>
           )}
@@ -196,7 +227,7 @@ function AdminShell({ user, onSignOut, children }: { user: User; onSignOut: () =
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            {children}
+            {blocked ? null : children}
           </motion.div>
         </main>
       </div>

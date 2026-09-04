@@ -148,12 +148,13 @@ const viewerPerms = MODULES.reduce<Record<string, ('view' | 'create' | 'edit' | 
 
 
 export const users: User[] = [
-  { ...meta('usr_1', '2025-03-01T09:00:00.000Z'), name: 'Neetu Sharma', email: 'neetu@neetuarchstone.com', roleId: 'role_owner', roleName: 'Owner', avatar: monogram('Neetu Sharma'), lastActiveAt: day(0), active: true },
-  { ...meta('usr_2', '2025-03-01T09:00:00.000Z'), name: 'Rahul Verma', email: 'rahul@neetuarchstone.com', roleId: 'role_admin', roleName: 'Administrator', avatar: monogram('Rahul Verma'), lastActiveAt: day(0), active: true },
-  { ...meta('usr_3', '2025-05-14T09:00:00.000Z'), name: 'Priya Nathani', email: 'priya@neetuarchstone.com', roleId: 'role_admin', roleName: 'Administrator', avatar: monogram('Priya Nathani'), lastActiveAt: day(1), active: true },
-  { ...meta('usr_4', '2025-08-02T09:00:00.000Z'), name: 'Shruti Agarwal', email: 'shruti@neetuarchstone.com', roleId: 'role_editor', roleName: 'Editor', avatar: monogram('Shruti Agarwal'), lastActiveAt: day(2), active: true },
-  { ...meta('usr_5', '2026-01-20T09:00:00.000Z'), name: 'Vikas Saini', email: 'vikas@neetuarchstone.com', roleId: 'role_editor', roleName: 'Editor', avatar: monogram('Vikas Saini'), lastActiveAt: day(3), active: true },
-  { ...meta('usr_6', '2026-02-11T09:00:00.000Z'), name: 'Mahesh Jangid', email: 'mahesh@neetuarchstone.com', roleId: 'role_viewer', roleName: 'Viewer', avatar: monogram('Mahesh Jangid'), lastActiveAt: day(9), active: false },
+  { ...meta('usr_0', '2026-09-01T09:00:00.000Z'), name: 'Super Admin', email: 'superadmin@neetuarchstone.com', roleId: 'role_superadmin', roleName: 'Super Admin', roleSlug: 'superadmin', avatar: monogram('Super Admin'), lastActiveAt: day(0), active: true },
+  { ...meta('usr_1', '2025-03-01T09:00:00.000Z'), name: 'Neetu Sharma', email: 'neetu@neetuarchstone.com', roleId: 'role_owner', roleName: 'Owner', roleSlug: 'owner', avatar: monogram('Neetu Sharma'), lastActiveAt: day(0), active: true },
+  { ...meta('usr_2', '2025-03-01T09:00:00.000Z'), name: 'Rahul Verma', email: 'rahul@neetuarchstone.com', roleId: 'role_admin', roleName: 'Administrator', roleSlug: 'admin', avatar: monogram('Rahul Verma'), lastActiveAt: day(0), active: true },
+  { ...meta('usr_3', '2025-05-14T09:00:00.000Z'), name: 'Priya Nathani', email: 'priya@neetuarchstone.com', roleId: 'role_admin', roleName: 'Administrator', roleSlug: 'admin', avatar: monogram('Priya Nathani'), lastActiveAt: day(1), active: true },
+  { ...meta('usr_4', '2025-08-02T09:00:00.000Z'), name: 'Shruti Agarwal', email: 'shruti@neetuarchstone.com', roleId: 'role_editor', roleName: 'Editor', roleSlug: 'editor', avatar: monogram('Shruti Agarwal'), lastActiveAt: day(2), active: true },
+  { ...meta('usr_5', '2026-01-20T09:00:00.000Z'), name: 'Vikas Saini', email: 'vikas@neetuarchstone.com', roleId: 'role_editor', roleName: 'Editor', roleSlug: 'editor', avatar: monogram('Vikas Saini'), lastActiveAt: day(3), active: true },
+  { ...meta('usr_6', '2026-02-11T09:00:00.000Z'), name: 'Mahesh Jangid', email: 'mahesh@neetuarchstone.com', roleId: 'role_viewer', roleName: 'Viewer', roleSlug: 'viewer', avatar: monogram('Mahesh Jangid'), lastActiveAt: day(9), active: false },
 ];
 
 /**
@@ -169,8 +170,12 @@ export const users: User[] = [
 const countIn = (roleId: string) => users.filter((u) => u.roleId === roleId).length;
 
 export const roles: Role[] = [
+  /* The one account the System group answers to. Everything in the sidebar's
+     System section — media, seo, users, settings, estimator-config, roles,
+     theme — renders only for this role; see the gate in AdminLayout. */
+  { ...meta('role_superadmin', '2026-01-01T09:00:00.000Z'), name: 'Super Admin', slug: 'superadmin', description: 'Everything, including the System modules — users, roles, settings, SEO, media and theme.', permissions: allPerms, memberCount: countIn('role_superadmin') },
   { ...meta('role_owner', '2026-01-01T09:00:00.000Z'), name: 'Owner', slug: 'owner', description: 'Full access to every module, including users, roles and billing.', permissions: allPerms, memberCount: countIn('role_owner') },
-  { ...meta('role_admin', '2026-01-01T09:00:00.000Z'), name: 'Administrator', slug: 'admin', description: 'Full content and lead access. Cannot manage roles or billing.', permissions: { ...allPerms, users: ['view'] }, memberCount: 2 },
+  { ...meta('role_admin', '2026-01-01T09:00:00.000Z'), name: 'Administrator', slug: 'admin', description: 'Full content and lead access. Cannot manage roles or billing.', permissions: { ...allPerms, users: ['view'] }, memberCount: countIn('role_admin') },
   { ...meta('role_editor', '2026-01-01T09:00:00.000Z'), name: 'Editor', slug: 'editor', description: 'Can create and edit content but not delete or publish.', permissions: editorPerms, memberCount: countIn('role_editor') },
   { ...meta('role_viewer', '2026-01-01T09:00:00.000Z'), name: 'Viewer', slug: 'viewer', description: 'Read-only access for reporting and review.', permissions: viewerPerms, memberCount: countIn('role_viewer') },
 ];

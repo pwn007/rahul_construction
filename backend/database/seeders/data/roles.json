@@ -1,5 +1,129 @@
 [
   {
+    "id": "role_superadmin",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "name": "Super Admin",
+    "slug": "superadmin",
+    "description": "Everything, including the System modules — users, roles, settings, SEO, media and theme.",
+    "permissions": {
+      "projects": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "services": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "blogs": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "gallery": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "testimonials": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "faqs": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "team": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "careers": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "applications": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "enquiries": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "estimates": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "downloads": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "media": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "seo": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "users": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "settings": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ]
+    },
+    "memberCount": 1
+  },
+  {
     "id": "role_owner",
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-01-01T09:00:00.000Z",
