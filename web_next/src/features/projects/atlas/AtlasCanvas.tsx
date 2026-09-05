@@ -202,6 +202,9 @@ function AtlasCanvasImpl({
 
         {/* Individual pins for the emphasised district. */}
         {pinned.map((project, i) => {
+          /* An admin-created project may have no pin — skip it here; the zone
+             shading above already counted it through districtId. */
+          if (!project.coordinates) return null;
           const { left, top } = toPercent(project.coordinates.lat, project.coordinates.lng);
           return (
             <span
@@ -225,6 +228,7 @@ function AtlasCanvasImpl({
           always dashed — they have no zone to fold into, and that is the point.
         */}
         {outside.map((project) => {
+          if (!project.coordinates) return null;
           const { left, top } = toPercent(project.coordinates.lat, project.coordinates.lng);
           return (
             <span

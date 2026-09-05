@@ -15,7 +15,7 @@ import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/lib/forma
 import { cn } from '@/lib/cn';
 import { ROUTES } from '@/constants/routes';
 import { SITE } from '@/constants/site';
-import { projects } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 import { estimatesService } from '@/services';
 import { COST_HEADS } from '@/constants/estimator';
 import type { EstimateResult, EstimatorInput } from '../model';
@@ -192,12 +192,14 @@ export function ResultScreen({
   const missing = missingEssentials(input);
   const complete = missing.length === 0 && result.materialLines.length > 0;
 
+  const projects = useProjects();
+
   const related = useMemo(
     () =>
       projects
         .filter((p) => p.locality.toLowerCase().includes(result.labels.location.toLowerCase().split(' ')[0] ?? ''))
         .slice(0, 3),
-    [result.labels.location],
+    [projects, result.labels.location],
   );
 
   const fallbackProjects = related.length ? related : projects.filter((p) => p.featured).slice(0, 3);

@@ -24,7 +24,7 @@ import { enquiries, estimateRequests, applications } from '@/data/ops';
 import { useLeadCounts } from '../useLeadCounts';
 import { useResourceList } from '@/hooks/useResource';
 import { enquiriesService, estimatesService } from '@/services';
-import { projects } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 import { posts } from '@/data/content';
 
 /* Deterministic mock series — no Math.random, so the dashboard is stable across renders. */
@@ -57,6 +57,7 @@ const SOURCE_SPLIT = [
 const PIPELINE = ['new', 'contacted', 'qualified', 'proposal', 'won'] as const;
 
 export function AdminDashboard() {
+  const projects = useProjects();
   /**
    * Live, not the static seed arrays.
    *

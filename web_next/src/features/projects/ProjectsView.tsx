@@ -11,12 +11,12 @@ import { Reveal } from '@/components/motion';
 import { scrollToTarget } from '@/hooks/useLenis';
 import { cn } from '@/lib/cn';
 import { ROUTES } from '@/constants/routes';
-import { projects as allProjects } from '@/data/projects';
 import { formatNumber } from '@/lib/format';
 import { IMG } from '@/lib/media';
 import { OUTSIDE_DISTRICT, districtLabel, resolveDistrictId } from '@/lib/geo';
 import { ProjectAtlas } from './components';
 import { PROJECT_CATEGORIES } from '@/data/projects';
+import { useProjects } from './useProjects';
 import type { Project } from '@/types/domain';
 
 /* "All work" is a filter affordance, not a category, so it is prepended here
@@ -60,13 +60,16 @@ export function ProjectsView() {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   const [hoveredDistrict, setHoveredDistrict] = useState<string | null>(null);
 
+  /* Live list — compiled-in on first paint, API-fresh right after. */
+  const allProjects = useProjects();
+
   const category = params.get('category') ?? 'all';
   const stage = params.get('stage') ?? 'all';
   const locality = params.get('locality') ?? 'all';
   const district = params.get('district') ?? 'all';
   const sort = params.get('sort') ?? 'newest';
 
-  const localities = useMemo(() => [...new Set(allProjects.map((p) => p.locality))].sort(), []);
+  const localities = useMemo(() => [...new Set(allProjects.map((p) => p.locality))].sort(), [allProjects]);
 
   /**
    * Everything except the district filter.
@@ -84,7 +87,7 @@ export function ProjectsView() {
           (stage === 'all' || p.stage === stage) &&
           (locality === 'all' || p.locality === locality),
       ),
-    [category, stage, locality],
+    [allProjects, category, stage, locality],
   );
 
   const filtered = useMemo(() => {

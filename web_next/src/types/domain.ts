@@ -43,7 +43,13 @@ export interface Project extends BaseEntity {
   stage: ProjectStage;
   locality: string;
   city: string;
-  coordinates: { lat: number; lng: number };
+  /**
+   * Optional since projects became admin-creatable: the panel's lat/lng field
+   * may be left blank, and a pin the editor never placed must be an absent
+   * fact, not {0,0} in the Gulf of Guinea. The atlas simply skips pinless
+   * projects — their district shading still counts them via districtId.
+   */
+  coordinates?: { lat: number; lng: number };
   /**
    * Jaipur municipal zone, from JAIPUR_DISTRICTS in @/data/jaipur-districts.
    *

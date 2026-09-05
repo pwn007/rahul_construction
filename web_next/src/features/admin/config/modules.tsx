@@ -149,7 +149,7 @@ export const MODULES: ResourceConfig<never>[] = [
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true, span: 8, section: 'Basics' },
       { name: 'slug', label: 'URL slug', type: 'slug', required: true, span: 4, section: 'Basics', help: '/projects/your-slug' },
-      { name: 'subtitle', label: 'Subtitle', type: 'text', span: 12, section: 'Basics' },
+      { name: 'subtitle', label: 'Subtitle', type: 'text', required: true, span: 12, section: 'Basics' },
       { name: 'excerpt', label: 'Excerpt', type: 'textarea', required: true, span: 12, section: 'Basics' },
       { name: 'category', label: 'Category', type: 'select', required: true, span: 4, section: 'Classification', options: CATEGORY_OPTIONS },
       { name: 'stage', label: 'Stage', type: 'select', span: 4, section: 'Classification', options: STAGE_OPTIONS },
@@ -199,17 +199,49 @@ export const MODULES: ResourceConfig<never>[] = [
           ...JAIPUR_DISTRICTS.map((d) => ({ value: d.id, label: `${d.label}  ·  JMC ${d.official}` })),
         ],
       },
-      { name: 'year', label: 'Year', type: 'number', span: 4, section: 'Specifications', min: 2000, max: 2100 },
-      { name: 'areaSqft', label: 'Built-up area (sq ft)', type: 'number', span: 4, section: 'Specifications' },
-      { name: 'durationMonths', label: 'Duration (months)', type: 'number', span: 4, section: 'Specifications' },
-      { name: 'floors', label: 'Configuration', type: 'text', span: 6, section: 'Specifications', placeholder: 'G+2' },
+      {
+        /* The atlas pin. Optional — without it the map falls back to the zone
+           centroid via districtId, so a project is never lost, just less
+           precisely placed. */
+        name: 'coordinates',
+        label: 'Map pin (lat / lng)',
+        type: 'latlng',
+        span: 12,
+        section: 'Location',
+        help: 'Right-click the spot in Google Maps → the first menu row is these two numbers.',
+      },
+      { name: 'year', label: 'Year', type: 'number', required: true, span: 4, section: 'Specifications', min: 2000, max: 2100 },
+      { name: 'areaSqft', label: 'Built-up area (sq ft)', type: 'number', required: true, span: 4, section: 'Specifications' },
+      { name: 'durationMonths', label: 'Duration (months)', type: 'number', required: true, span: 4, section: 'Specifications' },
+      { name: 'floors', label: 'Configuration', type: 'text', required: true, span: 6, section: 'Specifications', placeholder: 'G+2' },
       { name: 'client', label: 'Client name', type: 'text', span: 6, section: 'Specifications' },
       { name: 'coverImage', label: 'Cover image', type: 'image', required: true, span: 12, section: 'Media' },
       { name: 'beforeImage', label: 'Before image', type: 'image', span: 6, section: 'Media' },
       { name: 'afterImage', label: 'After image', type: 'image', span: 6, section: 'Media' },
-      { name: 'challenge', label: 'The challenge', type: 'textarea', span: 12, section: 'Narrative' },
-      { name: 'approach', label: 'Our approach', type: 'textarea', span: 12, section: 'Narrative' },
-      { name: 'outcome', label: 'The outcome', type: 'textarea', span: 12, section: 'Narrative' },
+      {
+        /* The detail page's photo gallery. Before this field existed a project
+           created in the panel simply had no gallery — the seed projects carry
+           4–5 photos each and there was nowhere to type them. */
+        name: 'images',
+        label: 'Photo gallery',
+        type: 'image-list',
+        span: 12,
+        section: 'Media',
+        help: 'Shown in display order on the project page. Alt text is what a screen reader speaks.',
+      },
+      {
+        /* The label/value strip on the detail page — Plot size, Built-up area,
+           Structure… Same gap as the gallery: renderable, never editable. */
+        name: 'specs',
+        label: 'Specifications',
+        type: 'kv-list',
+        span: 12,
+        section: 'Details',
+        help: 'Rows render in order on the project page.',
+      },
+      { name: 'challenge', label: 'The challenge', type: 'textarea', required: true, span: 12, section: 'Narrative' },
+      { name: 'approach', label: 'Our approach', type: 'textarea', required: true, span: 12, section: 'Narrative' },
+      { name: 'outcome', label: 'The outcome', type: 'textarea', required: true, span: 12, section: 'Narrative' },
       { name: 'tags', label: 'Tags', type: 'tags', span: 12, section: 'Narrative' },
       { name: 'featured', label: 'Feature on homepage', type: 'boolean', span: 6, section: 'Publishing' },
       orderField,

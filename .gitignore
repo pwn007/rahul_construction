@@ -16,3 +16,7 @@ coverage/
 # secret, and lives inside backend.zip too. Rebuilt on demand; never committed.
 /deploy
 backend/env.server
+
+# Uploaded media — server-side content, never in git
+web_next/public/uploads/
+/uploads/

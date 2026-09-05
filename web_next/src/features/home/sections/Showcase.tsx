@@ -4,7 +4,7 @@ import { Counter, Reveal, SplitText } from '@/components/motion';
 import { ProjectCard, SectionHeader, StatTile, TestimonialBand, CtaLink } from '@/components/common';
 import { ACHIEVEMENTS } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
-import { projects } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 import { testimonials } from '@/data/people';
 
 /* ==================================================================== */
@@ -21,6 +21,7 @@ export function FeaturedProjects() {
     whether the last row is complete: six fills 2+2+2 on tablet and 3+3 on
     desktop with no empty cell, where five leaves a hole at both.
   */
+  const projects = useProjects();
   const featured = projects.filter((p) => p.featured).slice(0, 6);
 
   return (

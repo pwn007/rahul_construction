@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Loader2, Plus, Upload, X } from 'lucide-react';
 import { Checkbox, FormField, Input, Select, Switch, Textarea } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import type { FieldConfig } from '../types';
+import { uploadImage } from '@/services/media';
 
 const SPAN: Record<number, string> = {
   4: 'sm:col-span-4',
@@ -140,7 +141,7 @@ export function FieldRenderer({
       break;
 
     case 'image':
-      control = <ImageField value={String(value ?? '')} onChange={onChange} error={error} />;
+      control = <ImageField id={id} value={String(value ?? '')} onChange={onChange} error={error} />;
       break;
 
     case 'tags':
@@ -168,6 +169,18 @@ export function FieldRenderer({
       );
       break;
 
+    case 'kv-list':
+      control = <KvListField value={Array.isArray(value) ? (value as KvRow[]) : []} onChange={onChange} />;
+      break;
+
+    case 'image-list':
+      control = <ImageListField value={Array.isArray(value) ? (value as GalleryRow[]) : []} onChange={onChange} />;
+      break;
+
+    case 'latlng':
+      control = <LatLngField value={(value as LatLng | undefined) ?? undefined} onChange={onChange} />;
+      break;
+
     default:
       control = (
         <Input
@@ -193,7 +206,7 @@ export function FieldRenderer({
   );
 }
 
-function ImageField({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: string }) {
+function ImageField({ id, value, onChange, error }: { id?: string; value: string; onChange: (v: string) => void; error?: string }) {
   return (
     <div className="space-y-3">
       {value && (
@@ -209,9 +222,14 @@ function ImageField({ value, onChange, error }: { value: string; onChange: (v: s
           </button>
         </div>
       )}
-      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Image URL, or pick from Media Library" error={error} />
+      <div className="flex gap-2">
+        {/* The id makes FormField's label actually point at something — before
+            this the htmlFor dangled and automation/label-clicks found nothing. */}
+        <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} placeholder="Image URL — /images/… or /uploads/…" error={error} className="flex-1" />
+        <UploadButton onUploaded={onChange} />
+      </div>
       <p className="text-caption text-subtle">
-        Prototype: paste a URL. Phase 2 opens the Media Library picker with signed-URL upload.
+        Upload a photo (webp/jpg/png, up to 8&nbsp;MB) or paste a URL.
       </p>
     </div>
   );
@@ -262,6 +280,181 @@ function TagsField({ value, onChange }: { value: string[]; onChange: (v: string[
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ------------------------------ KvList ------------------------------- */
+
+type KvRow = { label: string; value: string };
+
+/**
+ * Label/value rows — the shape of a project's `specs`.
+ *
+ * No drag handles: order is the row order, and with half a dozen rows the
+ * remove-and-re-add cost of getting it wrong is lower than the cost of a
+ * drag-and-drop dependency in the admin bundle.
+ */
+function KvListField({ value, onChange }: { value: KvRow[]; onChange: (v: KvRow[]) => void }) {
+  const set = (i: number, patch: Partial<KvRow>) => onChange(value.map((row, n) => (n === i ? { ...row, ...patch } : row)));
+
+  return (
+    <div className="space-y-2">
+      {value.map((row, i) => (
+        <div key={i} className="flex gap-2">
+          <Input value={row.label} onChange={(e) => set(i, { label: e.target.value })} placeholder="Label (e.g. Plot size)" className="flex-1" />
+          <Input value={row.value} onChange={(e) => set(i, { value: e.target.value })} placeholder="Value (e.g. 30 × 50 ft)" className="flex-1" />
+          <button
+            type="button"
+            onClick={() => onChange(value.filter((_, n) => n !== i))}
+            aria-label="Remove row"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-subtle transition-colors hover:border-danger hover:text-danger"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...value, { label: '', value: '' }])}
+        className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700"
+      >
+        <Plus className="h-3.5 w-3.5" /> Add row
+      </button>
+    </div>
+  );
+}
+
+/* ---------------------------- ImageList ------------------------------ */
+
+type GalleryRow = { id: string; url: string; alt: string; caption?: string; order: number };
+
+/**
+ * The project's photo gallery, in display order.
+ *
+ * Ids and `order` are re-normalised to `i1…iN` / `1…N` on every change rather
+ * than preserved, because that is exactly how the seed data is shaped
+ * (`src/data/projects.ts`) and the public gallery sorts by `order` — deriving
+ * both from row position makes an inconsistent pair unrepresentable.
+ */
+function ImageListField({ value, onChange }: { value: GalleryRow[]; onChange: (v: GalleryRow[]) => void }) {
+  const normalise = (rows: Omit<GalleryRow, 'id' | 'order'>[]) =>
+    onChange(rows.map((row, i) => ({ ...row, id: `i${i + 1}`, order: i + 1 })));
+
+  const set = (i: number, patch: Partial<GalleryRow>) => normalise(value.map((row, n) => (n === i ? { ...row, ...patch } : row)));
+
+  const move = (i: number, dir: -1 | 1) => {
+    const next = [...value];
+    const j = i + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[i], next[j]] = [next[j], next[i]];
+    normalise(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      {value.map((row, i) => (
+        <div key={row.id} className="flex gap-3 rounded-lg border p-3">
+          {row.url ? (
+            <img src={row.url} alt="" className="h-20 w-28 shrink-0 rounded object-cover" />
+          ) : (
+            <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded border border-dashed text-caption text-subtle">No image</div>
+          )}
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex gap-2">
+              <Input value={row.url} onChange={(e) => set(i, { url: e.target.value })} placeholder="Image URL — /images/… or /uploads/…" className="flex-1" />
+              <UploadButton onUploaded={(url) => set(i, { url })} />
+            </div>
+            <div className="flex gap-2">
+              <Input value={row.alt} onChange={(e) => set(i, { alt: e.target.value })} placeholder="Alt text (what the photo shows)" className="flex-1" />
+              <Input value={row.caption ?? ''} onChange={(e) => set(i, { caption: e.target.value })} placeholder="Caption (optional)" className="flex-1" />
+            </div>
+          </div>
+          <div className="flex shrink-0 flex-col gap-1.5">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up" className="rounded border px-2 py-1 text-caption text-subtle transition-colors hover:text-cyan-700 disabled:opacity-30">↑</button>
+            <button type="button" onClick={() => move(i, 1)} disabled={i === value.length - 1} aria-label="Move down" className="rounded border px-2 py-1 text-caption text-subtle transition-colors hover:text-cyan-700 disabled:opacity-30">↓</button>
+            <button type="button" onClick={() => normalise(value.filter((_, n) => n !== i))} aria-label="Remove image" className="rounded border px-2 py-1 text-caption text-subtle transition-colors hover:border-danger hover:text-danger"><X className="h-3.5 w-3.5" /></button>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => normalise([...value, { url: '', alt: '', caption: '' }])}
+        className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700"
+      >
+        <Plus className="h-3.5 w-3.5" /> Add photo
+      </button>
+    </div>
+  );
+}
+
+/* ----------------------------- LatLng -------------------------------- */
+
+type LatLng = { lat: number; lng: number };
+
+/** The atlas pin. Cleared entirely when both boxes are emptied, so "no pin" is
+    an absent object rather than {0, 0} — coordinates the atlas would dutifully
+    place in the Gulf of Guinea. */
+function LatLngField({ value, onChange }: { value?: LatLng; onChange: (v: LatLng | undefined) => void }) {
+  const set = (key: 'lat' | 'lng', raw: string) => {
+    const next = { lat: value?.lat ?? NaN, lng: value?.lng ?? NaN, [key]: raw === '' ? NaN : Number(raw) };
+    if (Number.isNaN(next.lat) && Number.isNaN(next.lng)) return onChange(undefined);
+    onChange({ lat: Number.isNaN(next.lat) ? 0 : next.lat, lng: Number.isNaN(next.lng) ? 0 : next.lng });
+  };
+
+  return (
+    <div className="flex gap-2">
+      <Input type="number" step="0.0001" value={value?.lat ?? ''} onChange={(e) => set('lat', e.target.value)} placeholder="Latitude — 26.9124" className="flex-1" />
+      <Input type="number" step="0.0001" value={value?.lng ?? ''} onChange={(e) => set('lng', e.target.value)} placeholder="Longitude — 75.7873" className="flex-1" />
+    </div>
+  );
+}
+
+/* --------------------------- UploadButton ---------------------------- */
+
+/**
+ * One button, one hidden input, one honest error line. Uploads go to the real
+ * API regardless of mock mode — see services/media.ts — and land as
+ * `/uploads/YYYY/MM/name-xxxxxx.ext`, which this hands straight to the field.
+ */
+function UploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
+  const pick = async (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setUploadError('');
+    try {
+      onUploaded((await uploadImage(file)).url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed.');
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="shrink-0">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/webp,image/jpeg,image/png"
+        className="hidden"
+        onChange={(e) => void pick(e.target.files?.[0])}
+      />
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => inputRef.current?.click()}
+        className="inline-flex h-11 items-center gap-1.5 rounded-md border px-3 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700 disabled:opacity-50"
+      >
+        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+        {busy ? 'Uploading…' : 'Upload'}
+      </button>
+      {uploadError && <p className="mt-1 max-w-[12rem] text-caption text-danger">{uploadError}</p>}
     </div>
   );
 }

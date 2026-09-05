@@ -7,6 +7,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -115,7 +116,17 @@ class ResourceController extends Controller
             $record->setAttribute('ip', $request->ip());
         }
 
-        $record->save();
+        try {
+            $record->save();
+        } catch (QueryException $e) {
+            /* A NOT NULL column the caller left out, a duplicate slug — data
+               problems, not server problems. The admin's form surfaces this
+               message next to its fields; a 500 would surface a support call.
+               The full SQL story still lands in the log. */
+            report($e);
+
+            return response()->json(['message' => 'Could not save — a required field is missing or a unique value (like the slug) is already taken.'], 422);
+        }
 
         return $this->ok($record->fresh(), 201);
     }
@@ -140,7 +151,13 @@ class ResourceController extends Controller
            a lead came from is a fact about the past, not an editable field. */
         unset($payload['id'], $payload['ip']);
 
-        $record->fill($payload)->save();
+        try {
+            $record->fill($payload)->save();
+        } catch (QueryException $e) {
+            report($e);
+
+            return response()->json(['message' => 'Could not save — a required field is missing or a unique value (like the slug) is already taken.'], 422);
+        }
 
         return $this->ok($record->fresh());
     }

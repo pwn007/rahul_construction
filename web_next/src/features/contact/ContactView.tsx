@@ -19,7 +19,7 @@ import { faqs } from '@/data/content';
 import { enquiriesService } from '@/services';
 import { ProjectAtlas } from '@/features/projects/components';
 import { QrCard } from './QrCard';
-import { projects } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Please enter your name'),
@@ -68,6 +68,7 @@ const CALLBACK_WINDOWS = [
 ];
 
 export function ContactView() {
+  const projects = useProjects();
   const [submitted, setSubmitted] = useState(false);
   const { push } = useToast();
 

@@ -27,7 +27,15 @@ export type FieldType =
   | 'url'
   | 'email'
   | 'tags'
-  | 'rating';
+  | 'rating'
+  /* A {label, value} row list — project specs and anything shaped like them. */
+  | 'kv-list'
+  /* An ordered gallery: url + alt + caption per row; ids and `order` are
+     re-normalised on every change so the stored JSON matches the seed data's
+     shape (`i1`, `i2`, … with 1-based order) exactly. */
+  | 'image-list'
+  /* A {lat, lng} pair — the Project Atlas pin. */
+  | 'latlng';
 
 export interface FieldConfig {
   name: string;

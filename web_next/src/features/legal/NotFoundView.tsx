@@ -1,14 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Calculator, Home, Search } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, Spinner } from '@/components/ui';
 import { SplitText } from '@/components/motion';
 import { usePrefersReducedMotion } from '@/hooks';
 import { ROUTES } from '@/constants/routes';
 import { projects } from '@/data/projects';
 import { useRegisterHeroTone } from '@/app/hero-tone';
+import { ProjectDetailView } from '@/features/projects/ProjectDetailView';
+import { useProjectsQuery } from '@/features/projects/useProjects';
 
 /**
  * A revision cloud — the scalloped loop an architect scribbles around a mistake
@@ -49,6 +52,49 @@ const CLOUD = revisionCloud(360, 200, 17);
 export function NotFoundView() {
   useRegisterHeroTone('dark');
   const reduced = usePrefersReducedMotion();
+
+  /*
+   * The dynamic-project takeover — how a project created in /admin gets a
+   * working page on a static host.
+   *
+   * The export bakes one HTML file per project that existed at build time, so
+   * an admin-created project's URL has no file and LiteSpeed serves this 404
+   * page (ErrorDocument in .htaccess). Before admitting defeat, this checks
+   * whether the path *names a project the API knows*: if the fetch finds it,
+   * the full detail view renders right here — same chrome, same URL. The
+   * response status was already 404 by the time JavaScript ran, which is
+   * honest: crawlers should not index the page until the next rebuild writes
+   * its real file, metadata and sitemap entry.
+   *
+   * The query is enabled only when the path looks like /projects/{slug}, so
+   * ordinary 404s never call the API.
+   */
+  /* window.location, not usePathname(): this page was exported from the
+     `/_not-found` route, and that is the path Next's router hydrates with —
+     the router literally does not know what URL the visitor typed. The browser
+     does. Read after mount so the first client render still matches the baked
+     404 HTML (no hydration mismatch); the swap to a spinner is one frame later. */
+  const [dynSlug, setDynSlug] = useState<string>();
+
+  useEffect(() => {
+    const match = window.location.pathname.match(/^\/projects\/([^/]+)\/?$/);
+    if (match) setDynSlug(decodeURIComponent(match[1]));
+  }, []);
+
+  const { data: liveProjects, isFetching } = useProjectsQuery({ enabled: Boolean(dynSlug) });
+  const dynProject = dynSlug ? liveProjects?.find((prj) => prj.slug === dynSlug) : undefined;
+
+  if (dynSlug && dynProject) {
+    return <ProjectDetailView slug={dynSlug} />;
+  }
+
+  if (dynSlug && isFetching) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Spinner className="h-7 w-7" />
+      </div>
+    );
+  }
 
   const suggestions = [
     { label: 'Cost Estimator', href: ROUTES.estimator, description: 'Get a costed range in two minutes.' },

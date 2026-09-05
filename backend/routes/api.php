@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\ResourceController;
 use App\Http\Middleware\EnsureResourceAccess;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('auth/logout', [AuthController::class, 'logout'])->middleware('auth:api');
 Route::get('auth/me', [AuthController::class, 'me'])->middleware('auth:api');
+
+/* Multipart upload — its own literal route so the generic {resource} POST never
+   sees it, and behind auth outright: an anonymous file-write endpoint on shared
+   hosting is how sites end up serving other people's PHP. */
+Route::post('media/upload', [MediaController::class, 'upload'])->middleware(['auth:api', 'throttle:30,1']);
 
 Route::middleware(EnsureResourceAccess::class)->group(function () {
     Route::get('{resource}', [ResourceController::class, 'index']);

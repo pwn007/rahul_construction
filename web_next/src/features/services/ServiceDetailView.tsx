@@ -10,11 +10,12 @@ import { Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
 import { services } from '@/data/services';
 import { faqs } from '@/data/content';
-import { projects } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 import { MEPF_SEGMENTS } from '@/constants/site';
 import { MEPF_EXPANSION } from '@/data/mepf';
 
 export function ServiceDetailView({ slug }: { slug: string }) {
+  const projects = useProjects();
   const service = services.find((s) => s.slug === slug);
 
   /* Unreachable in practice: the route is prerendered from `generateStaticParams`

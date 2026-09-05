@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar, Layers, MapPin, Ruler } from 'lucide-react';
-import { Badge, Button } from '@/components/ui';
+import { Badge, Button, Spinner } from '@/components/ui';
 import { CtaBand, ProjectCard, SectionHeader } from '@/components/common';
 import { MaskImage, Reveal, SplitText } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { projects, CATEGORY_LABEL } from '@/data/projects';
+import { CATEGORY_LABEL } from '@/data/projects';
+import { useProjectsQuery } from './useProjects';
 import { services } from '@/data/services';
 import { formatNumber } from '@/lib/format';
 import { useRegisterHeroTone } from '@/app/hero-tone';
@@ -21,14 +22,34 @@ export function ProjectDetailView({ slug }: { slug: string }) {
   // Full-bleed photographic hero — keep the navbar light-on-dark.
   useRegisterHeroTone('dark');
 
+  const { data: projects = [], isFetching } = useProjectsQuery();
+
   const index = projects.findIndex((p) => p.slug === slug);
   const project = projects[index];
 
-  /* Unreachable in practice: the route is prerendered from `generateStaticParams`
-     with `dynamicParams = false`, so an unknown slug 404s before this renders.
-     Kept as a type guard, and it replaces the old redirect-to-index — a soft
-     redirect on missing content reads to a crawler as "this page exists". */
-  if (!project) return null;
+  /* Reachable now, two honest ways. A slug the build never knew arrives here
+     through the 404 page's takeover (see NotFoundView) — the baked list lacks
+     it, so this shows a spinner until the API answer lands. And a project
+     deleted in /admin still has its baked page on disk — the refetch removes it
+     from the list, and pretending otherwise would be showing a ghost. */
+  if (!project) {
+    if (isFetching) {
+      return (
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Spinner className="h-7 w-7" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
+        <p className="text-heading-lg font-semibold">This project is no longer available.</p>
+        <Button href={ROUTES.projects} variant="accent">
+          Browse all projects
+        </Button>
+      </div>
+    );
+  }
 
   const prev = projects[(index - 1 + projects.length) % projects.length];
   const next = projects[(index + 1) % projects.length];

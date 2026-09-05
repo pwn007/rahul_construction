@@ -11,7 +11,8 @@ import { VideoLightbox, resolveVideo } from './VideoLightbox';
 import { CtaLink } from './CtaLink';
 import { ROUTES } from '@/constants/routes';
 import { formatNumber } from '@/lib/format';
-import { projects, CATEGORY_LABEL } from '@/data/projects';
+import { CATEGORY_LABEL } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 import { services } from '@/data/services';
 import type { Project, Testimonial } from '@/types/domain';
 import type { ReactNode } from 'react';
@@ -229,6 +230,7 @@ export function ProjectCard({ project, index = 0 }: { project: Project; index?: 
 /* ==================================================================== */
 
 export function TestimonialCard({ testimonial, className }: { testimonial: Testimonial; className?: string }) {
+  const projects = useProjects();
   const isDevanagari = testimonial.language === 'hi';
   const [playing, setPlaying] = useState(false);
 

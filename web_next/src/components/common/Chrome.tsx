@@ -20,7 +20,7 @@ import {
 import { cn } from '@/lib/cn';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
-import { projects } from '@/data/projects';
+import { useProjects } from '@/features/projects/useProjects';
 import { services } from '@/data/services';
 import { posts } from '@/data/content';
 import { useHotkey, useLockBodyScroll } from '@/hooks';
@@ -133,6 +133,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const router = useRouter();
+  const projects = useProjects();
 
   const commands = useMemo<Command[]>(() => {
     const pages: Command[] = [
@@ -184,7 +185,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       keywords: p.category,
     }));
     return [...pages, ...svc, ...prj, ...blog];
-  }, []);
+  }, [projects]);
 
   const results = useMemo(() => {
     if (!query.trim()) return commands.slice(0, 8);
