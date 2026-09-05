@@ -4,13 +4,14 @@ import { Check } from 'lucide-react';
 import { Marquee, Reveal, SplitText, StaggerGroup } from '@/components/motion';
 import { CtaLink } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
-import { clientLogos } from '@/data/people';
+import { useClientLogos } from '@/hooks/useClientLogos';
 
 /* ==================================================================== */
 /* Trust bar                                                             */
 /* ==================================================================== */
 
 export function TrustBar() {
+  const clientLogos = useClientLogos();
   return (
     // border-b only: the hero already closes with a rule, so a border-t here would double it.
     <section className="border-b bg-[rgb(var(--c-surface-2))] py-8">

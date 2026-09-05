@@ -8,21 +8,31 @@ import { MepfTwin } from '@/features/mepf/MepfTwin';
 import { Accordion, Button } from '@/components/ui';
 import { Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { services } from '@/data/services';
-import { faqs } from '@/data/content';
+import { useServices } from '@/hooks/useServices';
+import { useFaqs } from '@/hooks/useFaqs';
 import { useProjects } from '@/features/projects/useProjects';
 import { MEPF_SEGMENTS } from '@/constants/site';
 import { MEPF_EXPANSION } from '@/data/mepf';
 
 export function ServiceDetailView({ slug }: { slug: string }) {
   const projects = useProjects();
+  const services = useServices();
+  const faqs = useFaqs();
   const service = services.find((s) => s.slug === slug);
 
-  /* Unreachable in practice: the route is prerendered from `generateStaticParams`
-     with `dynamicParams = false`, so an unknown slug 404s before this renders.
-     Kept as a type guard, and it replaces the old redirect-to-index — a soft
-     redirect on missing content reads to a crawler as "this page exists". */
-  if (!service) return null;
+  /* Reachable two ways now that services are admin-editable: a service deleted
+     in the panel still has its baked page on disk, and the 404 takeover mounts
+     this for slugs the build never knew. Either way, absent means absent. */
+  if (!service) {
+    return (
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
+        <p className="text-heading-lg font-semibold">This service is no longer offered.</p>
+        <Button href={ROUTES.services} variant="accent">
+          See all services
+        </Button>
+      </div>
+    );
+  }
 
   const serviceFaqs = faqs.filter((f) => service.faqIds.includes(f.id));
   const relatedProjects = projects.filter((p) => p.services.includes(service.slug)).slice(0, 3);

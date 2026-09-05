@@ -10,7 +10,7 @@ import { MaskImage, Reveal, SplitText } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
 import { CATEGORY_LABEL } from '@/data/projects';
 import { useProjectsQuery } from './useProjects';
-import { services } from '@/data/services';
+import { useServices } from '@/hooks/useServices';
 import { formatNumber } from '@/lib/format';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { BeforeAfterSlider, GalleryGrid, Lightbox, ProjectAtlas } from './components';
@@ -22,6 +22,7 @@ export function ProjectDetailView({ slug }: { slug: string }) {
   // Full-bleed photographic hero — keep the navbar light-on-dark.
   useRegisterHeroTone('dark');
 
+  const services = useServices();
   const { data: projects = [], isFetching } = useProjectsQuery();
 
   const index = projects.findIndex((p) => p.slug === slug);

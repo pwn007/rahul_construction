@@ -5,7 +5,7 @@ import { CtaBand, PageHero, SectionHeader } from '@/components/common';
 import { Accordion, Badge } from '@/components/ui';
 import { MaskImage, Reveal, SplitText, StaggerGroup } from '@/components/motion';
 import { SITE, VASTU_BENEFITS } from '@/constants/site';
-import { faqs } from '@/data/content';
+import { useFaqs } from '@/hooks/useFaqs';
 import { IMG } from '@/lib/media';
 
 /** Direction-wise placement — the substance behind the differentiator. */
@@ -21,6 +21,7 @@ const DIRECTIONS = [
 ];
 
 export function VastuView() {
+  const faqs = useFaqs();
   const vastuFaqs = faqs.filter((f) => f.category === 'vastu' || f.id === 'faq_arch_2');
 
   return (

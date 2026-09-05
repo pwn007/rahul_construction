@@ -21,8 +21,8 @@ import { cn } from '@/lib/cn';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { useProjects } from '@/features/projects/useProjects';
-import { services } from '@/data/services';
-import { posts } from '@/data/content';
+import { useServices } from '@/hooks/useServices';
+import { usePosts } from '@/hooks/usePosts';
 import { useHotkey, useLockBodyScroll } from '@/hooks';
 import { track, type AnalyticsEvent } from '@/lib/analytics';
 
@@ -134,6 +134,8 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const [active, setActive] = useState(0);
   const router = useRouter();
   const projects = useProjects();
+  const services = useServices();
+  const posts = usePosts();
 
   const commands = useMemo<Command[]>(() => {
     const pages: Command[] = [
@@ -185,7 +187,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       keywords: p.category,
     }));
     return [...pages, ...svc, ...prj, ...blog];
-  }, [projects]);
+  }, [projects, services, posts]);
 
   const results = useMemo(() => {
     if (!query.trim()) return commands.slice(0, 8);

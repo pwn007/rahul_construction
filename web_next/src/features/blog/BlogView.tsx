@@ -8,17 +8,18 @@ import { CtaBand, PageHero, CtaLink } from '@/components/common';
 import { Badge, EmptyState, Input, Tabs } from '@/components/ui';
 import { MaskImage, Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { posts } from '@/data/content';
+import { usePosts } from '@/hooks/usePosts';
 import { formatDate } from '@/lib/format';
 import { useDebouncedValue } from '@/hooks';
 import { HIGH_PRIORITY_IMG } from '@/lib/dom';
 
 export function BlogView() {
+  const posts = usePosts();
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const debounced = useDebouncedValue(search, 250);
 
-  const categories = useMemo(() => ['all', ...new Set(posts.map((p) => p.category))], []);
+  const categories = useMemo(() => ['all', ...new Set(posts.map((p) => p.category))], [posts]);
 
   const filtered = useMemo(() => {
     const q = debounced.trim().toLowerCase();
@@ -31,7 +32,7 @@ export function BlogView() {
         p.tags.some((t) => t.toLowerCase().includes(q));
       return matchesCategory && matchesSearch;
     });
-  }, [category, debounced]);
+  }, [posts, category, debounced]);
 
   const featured = posts.find((p) => p.featured);
 

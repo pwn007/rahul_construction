@@ -8,7 +8,7 @@ import { CtaBand } from '@/components/common';
 import { Badge, Button, useToast } from '@/components/ui';
 import { Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { posts } from '@/data/content';
+import { usePosts } from '@/hooks/usePosts';
 import { formatDate } from '@/lib/format';
 import { SITE } from '@/constants/site';
 import { useCopy } from '@/hooks';
@@ -93,17 +93,27 @@ function ArticleBody({ body }: { body: string }) {
 }
 
 export function PostDetailView({ slug }: { slug: string }) {
+  const posts = usePosts();
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 220, damping: 40 });
   const { copied, copy } = useCopy();
   const { push } = useToast();
 
   const post = posts.find((p) => p.slug === slug);
-  /* Unreachable in practice: the route is prerendered from `generateStaticParams`
-     with `dynamicParams = false`, so an unknown slug 404s before this renders.
-     Kept as a type guard, and it replaces the old redirect-to-index — a soft
-     redirect on missing content reads to a crawler as "this page exists". */
-  if (!post) return null;
+  /* Reachable two ways now that posts are hybrid: the 404-takeover mounts this
+     for an admin-created slug whose fetch then misses (deleted between listing
+     and click), or an admin unpublishes a baked post. A notice beats the old
+     `return null` blank — same pattern as the project/service detail views. */
+  if (!post) {
+    return (
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
+        <p className="text-heading-lg font-semibold">This article is no longer available.</p>
+        <Button href={ROUTES.blog} variant="accent">
+          See all articles
+        </Button>
+      </div>
+    );
+  }
 
   const related = posts.filter((p) => p.id !== post.id && p.category === post.category).slice(0, 3);
   const shareUrl = `${SITE.url}${ROUTES.post(post.slug)}`;

@@ -12,6 +12,10 @@ import { projects } from '@/data/projects';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { ProjectDetailView } from '@/features/projects/ProjectDetailView';
 import { useProjectsQuery } from '@/features/projects/useProjects';
+import { ServiceDetailView } from '@/features/services/ServiceDetailView';
+import { useServices } from '@/hooks/useServices';
+import { PostDetailView } from '@/features/blog/PostDetailView';
+import { usePosts } from '@/hooks/usePosts';
 
 /**
  * A revision cloud — the scalloped loop an architect scribbles around a mistake
@@ -74,21 +78,41 @@ export function NotFoundView() {
      the router literally does not know what URL the visitor typed. The browser
      does. Read after mount so the first client render still matches the baked
      404 HTML (no hydration mismatch); the swap to a spinner is one frame later. */
-  const [dynSlug, setDynSlug] = useState<string>();
+  const [takeover, setTakeover] = useState<{ kind: 'project' | 'service' | 'post'; slug: string }>();
 
   useEffect(() => {
-    const match = window.location.pathname.match(/^\/projects\/([^/]+)\/?$/);
-    if (match) setDynSlug(decodeURIComponent(match[1]));
+    const path = window.location.pathname;
+    const project = path.match(/^\/projects\/([^/]+)\/?$/);
+    const service = path.match(/^\/services\/([^/]+)\/?$/);
+    const post = path.match(/^\/blog\/([^/]+)\/?$/);
+    if (project) setTakeover({ kind: 'project', slug: decodeURIComponent(project[1]) });
+    else if (service) setTakeover({ kind: 'service', slug: decodeURIComponent(service[1]) });
+    else if (post) setTakeover({ kind: 'post', slug: decodeURIComponent(post[1]) });
   }, []);
 
-  const { data: liveProjects, isFetching } = useProjectsQuery({ enabled: Boolean(dynSlug) });
-  const dynProject = dynSlug ? liveProjects?.find((prj) => prj.slug === dynSlug) : undefined;
+  const wantsProject = takeover?.kind === 'project';
+  const wantsService = takeover?.kind === 'service';
+  const wantsPost = takeover?.kind === 'post';
+  const { data: liveProjects, isFetching: fetchingProjects } = useProjectsQuery({ enabled: wantsProject });
+  const liveServices = useServices();
+  const livePosts = usePosts();
+  const dynProject = wantsProject ? liveProjects?.find((prj) => prj.slug === takeover.slug) : undefined;
+  const dynService = wantsService ? liveServices.find((svc) => svc.slug === takeover.slug) : undefined;
+  const dynPost = wantsPost ? livePosts.find((art) => art.slug === takeover.slug) : undefined;
 
-  if (dynSlug && dynProject) {
-    return <ProjectDetailView slug={dynSlug} />;
+  if (wantsProject && dynProject) {
+    return <ProjectDetailView slug={takeover.slug} />;
   }
 
-  if (dynSlug && isFetching) {
+  if (wantsService && dynService) {
+    return <ServiceDetailView slug={takeover.slug} />;
+  }
+
+  if (wantsPost && dynPost) {
+    return <PostDetailView slug={takeover.slug} />;
+  }
+
+  if (wantsProject && fetchingProjects) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
         <Spinner className="h-7 w-7" />

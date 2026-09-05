@@ -7,7 +7,7 @@ import { CtaBand, PageHero } from '@/components/common';
 import { Badge, EmptyState, Tabs } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { useLockBodyScroll } from '@/hooks';
-import { gallery } from '@/data/content';
+import { useGalleryItems } from '@/hooks/useGalleryItems';
 import type { GalleryItem, GalleryKind } from '@/types/domain';
 
 const KIND_META: Record<GalleryKind, { label: string; icon: typeof Camera }> = {
@@ -18,6 +18,7 @@ const KIND_META: Record<GalleryKind, { label: string; icon: typeof Camera }> = {
 };
 
 export function GalleryView() {
+  const gallery = useGalleryItems();
   const [kind, setKind] = useState<'all' | GalleryKind>('all');
   const [active, setActive] = useState<GalleryItem | null>(null);
 
@@ -44,7 +45,7 @@ export function GalleryView() {
     return () => document.removeEventListener('keydown', onKey);
   }, [active]);
 
-  const items = useMemo(() => (kind === 'all' ? gallery : gallery.filter((g) => g.kind === kind)), [kind]);
+  const items = useMemo(() => (kind === 'all' ? gallery : gallery.filter((g) => g.kind === kind)), [gallery, kind]);
 
   const tabs = [
     { value: 'all', label: 'Everything', count: gallery.length },

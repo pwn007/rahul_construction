@@ -7,12 +7,14 @@ import { CtaBand, PageHero, SectionHeader, CtaLink } from '@/components/common';
 import { Accordion, Badge } from '@/components/ui';
 import { MaskImage, Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { services } from '@/data/services';
-import { faqs } from '@/data/content';
+import { useServices } from '@/hooks/useServices';
+import { useFaqs } from '@/hooks/useFaqs';
 import { MEPF_DISCIPLINES, PROCESS_STEPS } from '@/constants/site';
 import { IMG } from '@/lib/media';
 
 export function ServicesView() {
+  const services = useServices();
+  const faqs = useFaqs();
   const generalFaqs = faqs.filter((f) => f.category === 'general' || f.category === 'process').slice(0, 6);
 
   return (

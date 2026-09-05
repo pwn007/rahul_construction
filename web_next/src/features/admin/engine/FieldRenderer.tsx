@@ -177,8 +177,20 @@ export function FieldRenderer({
       control = <ImageListField value={Array.isArray(value) ? (value as GalleryRow[]) : []} onChange={onChange} />;
       break;
 
+    case 'feature-list':
+      control = <FeatureListField value={Array.isArray(value) ? (value as FeatureRow[]) : []} onChange={onChange} />;
+      break;
+
+    case 'step-list':
+      control = <StepListField value={Array.isArray(value) ? (value as StepRow[]) : []} onChange={onChange} />;
+      break;
+
     case 'latlng':
       control = <LatLngField value={(value as LatLng | undefined) ?? undefined} onChange={onChange} />;
+      break;
+
+    case 'socials':
+      control = <SocialsField value={(value as Socials | undefined) ?? undefined} onChange={onChange} />;
       break;
 
     default:
@@ -410,6 +422,30 @@ function LatLngField({ value, onChange }: { value?: LatLng; onChange: (v: LatLng
   );
 }
 
+/* ----------------------------- Socials ------------------------------- */
+
+type Socials = { linkedin?: string; email?: string };
+
+/** A team member's contact links. Same clearing rule as LatLngField: blank
+    boxes drop their key, and when both are blank the whole object goes —
+    AboutView renders the icons with `socials?.linkedin &&`, so absence is the
+    correct "no links" state, not an object of empty strings. */
+function SocialsField({ value, onChange }: { value?: Socials; onChange: (v: Socials | undefined) => void }) {
+  const set = (key: 'linkedin' | 'email', raw: string) => {
+    const next: Socials = { ...value, [key]: raw };
+    if (!next.linkedin?.trim()) delete next.linkedin;
+    if (!next.email?.trim()) delete next.email;
+    onChange(next.linkedin || next.email ? next : undefined);
+  };
+
+  return (
+    <div className="flex gap-2">
+      <Input type="url" value={value?.linkedin ?? ''} onChange={(e) => set('linkedin', e.target.value)} placeholder="LinkedIn URL" className="flex-1" />
+      <Input type="email" value={value?.email ?? ''} onChange={(e) => set('email', e.target.value)} placeholder="Email address" className="flex-1" />
+    </div>
+  );
+}
+
 /* --------------------------- UploadButton ---------------------------- */
 
 /**
@@ -455,6 +491,94 @@ function UploadButton({ onUploaded }: { onUploaded: (url: string) => void }) {
         {busy ? 'Uploading…' : 'Upload'}
       </button>
       {uploadError && <p className="mt-1 max-w-[12rem] text-caption text-danger">{uploadError}</p>}
+    </div>
+  );
+}
+
+/* --------------------------- FeatureList ----------------------------- */
+
+type FeatureRow = { icon: string; title: string; description: string };
+
+/** A service's features — what renders as the icon-led card grid on the
+    service page and feeds the home page's "क्या-क्या मिलता है" chips. Icon is a
+    lucide name typed as text; the registry in lib/icons falls back safely on a
+    typo, so a wrong name costs a generic icon, not a crash. */
+function FeatureListField({ value, onChange }: { value: FeatureRow[]; onChange: (v: FeatureRow[]) => void }) {
+  const set = (i: number, patch: Partial<FeatureRow>) => onChange(value.map((row, n) => (n === i ? { ...row, ...patch } : row)));
+
+  return (
+    <div className="space-y-3">
+      {value.map((row, i) => (
+        <div key={i} className="space-y-2 rounded-lg border p-3">
+          <div className="flex gap-2">
+            <Input value={row.icon} onChange={(e) => set(i, { icon: e.target.value })} placeholder="Icon (lucide name — e.g. Ruler)" className="w-44" />
+            <Input value={row.title} onChange={(e) => set(i, { title: e.target.value })} placeholder="Title" className="flex-1" />
+            <button
+              type="button"
+              onClick={() => onChange(value.filter((_, n) => n !== i))}
+              aria-label="Remove feature"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-subtle transition-colors hover:border-danger hover:text-danger"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <Input value={row.description} onChange={(e) => set(i, { description: e.target.value })} placeholder="One-line description" />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...value, { icon: '', title: '', description: '' }])}
+        className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700"
+      >
+        <Plus className="h-3.5 w-3.5" /> Add feature
+      </button>
+    </div>
+  );
+}
+
+/* ----------------------------- StepList ------------------------------ */
+
+type StepRow = { step: number; title: string; description: string };
+
+/** The service's process timeline. `step` is derived from row position on
+    every change — same reasoning as the gallery's ids: a hand-maintained
+    number and a position that can disagree is a bug factory. */
+function StepListField({ value, onChange }: { value: StepRow[]; onChange: (v: StepRow[]) => void }) {
+  const normalise = (rows: Omit<StepRow, 'step'>[]) => onChange(rows.map((row, i) => ({ ...row, step: i + 1 })));
+  const set = (i: number, patch: Partial<StepRow>) => normalise(value.map((row, n) => (n === i ? { ...row, ...patch } : row)));
+  const move = (i: number, dir: -1 | 1) => {
+    const next = [...value];
+    const j = i + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[i], next[j]] = [next[j], next[i]];
+    normalise(next);
+  };
+
+  return (
+    <div className="space-y-3">
+      {value.map((row, i) => (
+        <div key={i} className="flex gap-3 rounded-lg border p-3">
+          <span className="num mt-2 w-8 shrink-0 text-center text-heading-lg font-semibold text-[rgb(var(--c-brand-text))]">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          <div className="min-w-0 flex-1 space-y-2">
+            <Input value={row.title} onChange={(e) => set(i, { title: e.target.value })} placeholder="Step title" />
+            <Input value={row.description} onChange={(e) => set(i, { description: e.target.value })} placeholder="What happens in this step" />
+          </div>
+          <div className="flex shrink-0 flex-col gap-1.5">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Move up" className="rounded border px-2 py-1 text-caption text-subtle transition-colors hover:text-cyan-700 disabled:opacity-30">↑</button>
+            <button type="button" onClick={() => move(i, 1)} disabled={i === value.length - 1} aria-label="Move down" className="rounded border px-2 py-1 text-caption text-subtle transition-colors hover:text-cyan-700 disabled:opacity-30">↓</button>
+            <button type="button" onClick={() => normalise(value.filter((_, n) => n !== i))} aria-label="Remove step" className="rounded border px-2 py-1 text-caption text-subtle transition-colors hover:border-danger hover:text-danger"><X className="h-3.5 w-3.5" /></button>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => normalise([...value, { title: '', description: '' }])}
+        className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700"
+      >
+        <Plus className="h-3.5 w-3.5" /> Add step
+      </button>
     </div>
   );
 }

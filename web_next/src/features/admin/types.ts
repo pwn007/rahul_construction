@@ -35,7 +35,15 @@ export type FieldType =
      shape (`i1`, `i2`, … with 1-based order) exactly. */
   | 'image-list'
   /* A {lat, lng} pair — the Project Atlas pin. */
-  | 'latlng';
+  | 'latlng'
+  /* {icon, title, description} rows — a service's feature list. */
+  | 'feature-list'
+  /* Auto-numbered {step, title, description} rows — a service's process. */
+  | 'step-list'
+  /* {linkedin?, email?} — a team member's contact links. One optional object
+     that disappears entirely when both boxes are blank, matching the seed
+     where members without links simply have no `socials` key. */
+  | 'socials';
 
 export interface FieldConfig {
   name: string;

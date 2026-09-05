@@ -13,7 +13,7 @@ import { ROUTES } from '@/constants/routes';
 import { formatNumber } from '@/lib/format';
 import { CATEGORY_LABEL } from '@/data/projects';
 import { useProjects } from '@/features/projects/useProjects';
-import { services } from '@/data/services';
+import { useServices } from '@/hooks/useServices';
 import type { Project, Testimonial } from '@/types/domain';
 import type { ReactNode } from 'react';
 
@@ -145,6 +145,7 @@ export function StatTile({
   left unused so that a differently-sized project card cannot quietly reappear.
 */
 export function ProjectCard({ project, index = 0 }: { project: Project; index?: number }) {
+  const services = useServices();
   return (
     <TiltCard max={3} className="h-full">
       <Link href={ROUTES.project(project.slug)} className="group block h-full">

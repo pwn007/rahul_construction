@@ -9,7 +9,7 @@ import { Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
 import { COST_HEADS, PACKAGES, type PackageKey } from '@/constants/estimator';
 import { WORK_HEADS, headInPackage, type WorkHead } from '@/constants/work-heads';
-import { faqs } from '@/data/content';
+import { useFaqs } from '@/hooks/useFaqs';
 import { formatNumber } from '@/lib/format';
 
 /**
@@ -69,6 +69,7 @@ const OPTIONAL_ROWS: { label: string; note: string }[] = [
 ];
 
 export function PricingView() {
+  const faqs = useFaqs();
   const [model, setModel] = useState<'turnkey' | 'labour-only'>('turnkey');
   const pricingFaqs = faqs.filter((f) => f.category === 'pricing');
 

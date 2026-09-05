@@ -31,6 +31,7 @@ import type { ResourceConfig } from '../types';
 import { JAIPUR_DISTRICTS } from '@/data/jaipur-districts';
 import { projects, CATEGORY_LABEL } from '@/data/projects';
 import { services } from '@/data/services';
+import { faqs } from '@/data/content';
 
 const STATUS_OPTIONS = [
   { value: 'published', label: 'Published' },
@@ -59,7 +60,7 @@ const statusField = {
   section: 'Publishing',
 };
 
-const orderField = { name: 'order', label: 'Display order', type: 'number' as const, span: 6 as const, section: 'Publishing', help: 'Lower numbers appear first.' };
+const orderField = { name: 'order', label: 'Display order', type: 'number' as const, span: 6 as const, section: 'Publishing', defaultValue: 0, help: 'Lower numbers appear first.' };
 
 /*
  * Project vocabulary — see the note above `CATEGORY_LABEL` in data/projects.ts.
@@ -281,13 +282,59 @@ export const MODULES: ResourceConfig<never>[] = [
     ],
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true, span: 8, section: 'Basics' },
-      { name: 'slug', label: 'URL slug', type: 'slug', required: true, span: 4, section: 'Basics' },
+      { name: 'slug', label: 'URL slug', type: 'slug', required: true, span: 4, section: 'Basics', help: 'Changing an existing slug breaks its URL — and mepf-consultancy is wired to the 3D house, so never rename that one.' },
       { name: 'shortTitle', label: 'Short title', type: 'text', span: 6, section: 'Basics', help: 'Used in navigation and chips.' },
       { name: 'icon', label: 'Lucide icon name', type: 'text', span: 6, section: 'Basics', placeholder: 'Compass' },
       { name: 'tagline', label: 'Tagline', type: 'text', span: 12, section: 'Basics' },
       { name: 'summary', label: 'Summary', type: 'textarea', required: true, span: 12, section: 'Content' },
       { name: 'description', label: 'Full description', type: 'richtext', span: 12, section: 'Content' },
       { name: 'heroImage', label: 'Hero image', type: 'image', span: 12, section: 'Media' },
+      {
+        /* The icon-led card grid on the service page — and the home page's
+           "What we do" chips read features[n].title, so an edit here flows to
+           both without either knowing about the other. */
+        name: 'features',
+        label: 'Features',
+        type: 'feature-list',
+        span: 12,
+        section: 'Content',
+      },
+      {
+        name: 'deliverables',
+        label: 'Deliverables',
+        type: 'tags',
+        span: 12,
+        section: 'Content',
+        help: 'One per entry — what the client walks away with.',
+      },
+      {
+        name: 'process',
+        label: 'Process steps',
+        type: 'step-list',
+        span: 12,
+        section: 'Content',
+        help: 'Numbered automatically, in row order.',
+      },
+      {
+        name: 'stats',
+        label: 'Stats',
+        type: 'kv-list',
+        span: 12,
+        section: 'Content',
+        help: 'Label + value pairs — e.g. "Projects delivered" / "80+".',
+      },
+      {
+        /* FAQs are their own module; this only picks which of them this
+           service's page shows. Options come from the compiled seed, so a
+           brand-new FAQ appears in this picker after the next rebuild — the
+           list itself is small and stable. */
+        name: 'faqIds',
+        label: 'FAQs on this page',
+        type: 'multiselect',
+        span: 12,
+        section: 'Content',
+        options: faqs.map((f) => ({ value: f.id, label: f.question })),
+      },
       { name: 'featured', label: 'Show on homepage', type: 'boolean', span: 6, section: 'Publishing' },
       orderField,
       statusField,
@@ -336,15 +383,15 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'slug', label: 'URL slug', type: 'slug', required: true, span: 4, section: 'Basics' },
       { name: 'excerpt', label: 'Excerpt', type: 'textarea', required: true, span: 12, section: 'Basics' },
       { name: 'body', label: 'Article body', type: 'richtext', required: true, span: 12, section: 'Content', help: 'Markdown-style: ## headings, - bullets, **bold**.' },
-      { name: 'coverImage', label: 'Cover image', type: 'image', span: 12, section: 'Media' },
+      { name: 'coverImage', label: 'Cover image', type: 'image', required: true, span: 12, section: 'Media' },
       { name: 'category', label: 'Category', type: 'text', span: 6, section: 'Classification' },
       { name: 'tags', label: 'Tags', type: 'tags', span: 6, section: 'Classification' },
-      { name: 'author', label: 'Author', type: 'text', span: 6, section: 'Author' },
-      { name: 'authorRole', label: 'Author role', type: 'text', span: 6, section: 'Author' },
-      { name: 'authorAvatar', label: 'Author photo', type: 'image', span: 12, section: 'Author' },
+      { name: 'author', label: 'Author', type: 'text', required: true, span: 6, section: 'Author' },
+      { name: 'authorRole', label: 'Author role', type: 'text', required: true, span: 6, section: 'Author' },
+      { name: 'authorAvatar', label: 'Author photo', type: 'image', required: true, span: 12, section: 'Author' },
       { name: 'publishedAt', label: 'Publish date', type: 'date', span: 6, section: 'Publishing' },
-      { name: 'readingMinutes', label: 'Reading time (min)', type: 'number', span: 6, section: 'Publishing' },
-      { name: 'featured', label: 'Feature at top of blog', type: 'boolean', span: 6, section: 'Publishing' },
+      { name: 'readingMinutes', label: 'Reading time (min)', type: 'number', required: true, span: 6, section: 'Publishing' },
+      { name: 'featured', label: 'Feature at top of blog', type: 'boolean', span: 6, section: 'Publishing', defaultValue: false },
       statusField,
     ],
   },
@@ -398,9 +445,20 @@ export const MODULES: ResourceConfig<never>[] = [
           { value: '360', label: '360° view' },
         ],
       },
-      { name: 'category', label: 'Category', type: 'text', span: 6, section: 'Basics' },
+      { name: 'category', label: 'Category', type: 'text', required: true, span: 6, section: 'Basics' },
+      {
+        /* Options are the compiled seed, like the services faqIds picker — a
+           brand-new project appears here after the next rebuild. Optional:
+           process/team shots have no project to point at. */
+        name: 'projectId',
+        label: 'Linked project',
+        type: 'select',
+        span: 6,
+        section: 'Basics',
+        options: projects.map((p) => ({ value: p.id, label: p.title })),
+      },
       { name: 'thumbnail', label: 'Thumbnail', type: 'image', required: true, span: 6, section: 'Media' },
-      { name: 'url', label: 'Full-size / source URL', type: 'image', span: 6, section: 'Media' },
+      { name: 'url', label: 'Full-size / source URL', type: 'image', required: true, span: 6, section: 'Media' },
       { name: 'duration', label: 'Duration', type: 'text', span: 6, section: 'Media', placeholder: '2:34' },
       orderField,
       statusField,
@@ -646,10 +704,11 @@ export const MODULES: ResourceConfig<never>[] = [
         section: 'Basics',
         options: ['leadership', 'design', 'engineering', 'site', 'support'].map((v) => ({ value: v, label: v })),
       },
-      { name: 'experienceYears', label: 'Years of experience', type: 'number', span: 6, section: 'Basics' },
-      { name: 'bio', label: 'Short bio', type: 'textarea', span: 12, section: 'Basics' },
-      { name: 'photo', label: 'Photograph', type: 'image', span: 12, section: 'Media' },
+      { name: 'experienceYears', label: 'Years of experience', type: 'number', required: true, span: 6, section: 'Basics' },
+      { name: 'bio', label: 'Short bio', type: 'textarea', required: true, span: 12, section: 'Basics' },
+      { name: 'photo', label: 'Photograph', type: 'image', required: true, span: 12, section: 'Media' },
       { name: 'expertise', label: 'Areas of expertise', type: 'tags', span: 12, section: 'Details' },
+      { name: 'socials', label: 'Social links', type: 'socials', span: 12, section: 'Details', help: 'Shown as icons on the about-page photo. Leave both blank for none.' },
       orderField,
       statusField,
     ],

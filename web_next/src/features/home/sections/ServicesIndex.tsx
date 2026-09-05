@@ -6,7 +6,7 @@ import { MaskImage } from '@/components/motion';
 import { SectionHeader, CtaLink } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
 import { IMG } from '@/lib/media';
-import { services } from '@/data/services';
+import { useServices } from '@/hooks/useServices';
 
 /**
  * MEPF is deliberately not in this list.
@@ -138,6 +138,7 @@ const ALT: Record<string, string> = {
  * is the one thing that already sets `MepfTeaser` apart.
  */
 export function ServicesIndex() {
+  const services = useServices();
   const listed = services.filter((s) => s.slug !== OMIT_SLUG);
 
   return (

@@ -25,7 +25,7 @@ import { useLeadCounts } from '../useLeadCounts';
 import { useResourceList } from '@/hooks/useResource';
 import { enquiriesService, estimatesService } from '@/services';
 import { useProjects } from '@/features/projects/useProjects';
-import { posts } from '@/data/content';
+import { usePosts } from '@/hooks/usePosts';
 
 /* Deterministic mock series — no Math.random, so the dashboard is stable across renders. */
 const TRAFFIC = [
@@ -58,6 +58,7 @@ const PIPELINE = ['new', 'contacted', 'qualified', 'proposal', 'won'] as const;
 
 export function AdminDashboard() {
   const projects = useProjects();
+  const posts = usePosts();
   /**
    * Live, not the static seed arrays.
    *

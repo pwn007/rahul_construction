@@ -14,8 +14,8 @@ import { getVisitor, rememberVisitor } from '@/lib/visitor';
 import { Reveal, SplitText } from '@/components/motion';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
-import { services } from '@/data/services';
-import { faqs } from '@/data/content';
+import { useServices } from '@/hooks/useServices';
+import { useFaqs } from '@/hooks/useFaqs';
 import { enquiriesService } from '@/services';
 import { ProjectAtlas } from '@/features/projects/components';
 import { QrCard } from './QrCard';
@@ -69,6 +69,8 @@ const CALLBACK_WINDOWS = [
 
 export function ContactView() {
   const projects = useProjects();
+  const services = useServices();
+  const faqs = useFaqs();
   const [submitted, setSubmitted] = useState(false);
   const { push } = useToast();
 
