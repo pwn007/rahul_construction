@@ -439,6 +439,17 @@ export const MODULES: ResourceConfig<never>[] = [
     ],
     fields: [
       { name: 'name', label: 'Client name', type: 'text', required: true, span: 6, section: 'Basics' },
+      {
+        /* "Director, XYZ Developers" / "Jagatpura homeowner" — the line under
+           the name. The card renders it when present; the panel simply had no
+           box for it, so every panel-born testimonial was name-only. */
+        name: 'title',
+        label: 'Designation / relation',
+        type: 'text',
+        span: 6,
+        section: 'Person',
+        placeholder: 'Homeowner, Jagatpura',
+      },
       { name: 'locality', label: 'Locality', type: 'text', required: true, span: 6, section: 'Basics' },
       { name: 'quote', label: 'Testimonial', type: 'textarea', required: true, span: 12, section: 'Basics' },
       {

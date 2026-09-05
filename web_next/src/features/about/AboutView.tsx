@@ -6,7 +6,8 @@ import { CtaBand, PageHero, SectionHeader, StatTile, TestimonialBand } from '@/c
 import { Badge, Tabs } from '@/components/ui';
 import { Counter, MaskImage, Reveal, SplitText, StaggerGroup } from '@/components/motion';
 import { ACHIEVEMENTS, DIFFERENTIATORS, SITE } from '@/constants/site';
-import { team, testimonials } from '@/data/people';
+import { team } from '@/data/people';
+import { useTestimonials } from '@/hooks/useTestimonials';
 import { IMG } from '@/lib/media';
 import { downloads } from '@/data/content';
 
@@ -36,6 +37,7 @@ const DEPARTMENTS = [
 ];
 
 export function AboutView() {
+  const testimonials = useTestimonials();
   const [dept, setDept] = useState('all');
   const visibleTeam = dept === 'all' ? team : team.filter((m) => m.department === dept);
   const certificates = downloads.filter((d) => d.category === 'certificate');

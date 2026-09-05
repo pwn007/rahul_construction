@@ -5,7 +5,7 @@ import { ProjectCard, SectionHeader, StatTile, TestimonialBand, CtaLink } from '
 import { ACHIEVEMENTS } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { useProjects } from '@/features/projects/useProjects';
-import { testimonials } from '@/data/people';
+import { useTestimonials } from '@/hooks/useTestimonials';
 
 /* ==================================================================== */
 /* Featured projects                                                     */
@@ -114,6 +114,8 @@ export function Achievements() {
 /* ==================================================================== */
 
 export function Testimonials() {
+  const testimonials = useTestimonials();
+
   return (
     <TestimonialBand
       overline="What our clients say"
