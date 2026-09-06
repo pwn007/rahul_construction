@@ -52,6 +52,14 @@ export interface NavLink {
   menuOnly?: boolean;
 }
 
+/*
+ * Since Sep 2026 the top bar is a merge: the Navigation admin module's rows
+ * own presence, order, label and badge (matched onto these entries by href —
+ * see mergeNav in components/common/Navbar.tsx), while this constant keeps
+ * everything the nav_items table has no columns for: the dropdown children,
+ * their descriptions, and `menuOnly`. Removing an entry here removes its
+ * dropdown even if the DB row survives.
+ */
 export const MAIN_NAV: NavLink[] = [
   {
     label: 'Services',
@@ -111,6 +119,12 @@ export const MAIN_NAV: NavLink[] = [
   { label: 'Contact', href: ROUTES.contact },
 ];
 
+/*
+ * Since Sep 2026 the footer columns render from the `footer` resource (admin
+ * module: Footer) via useFooterColumns — this constant is no longer read by
+ * the Footer component. It stays as the documented shape the seed rows in
+ * data/ops.ts mirror; edit those (and reseed) rather than this.
+ */
 export const FOOTER_NAV = [
   {
     heading: 'Services',

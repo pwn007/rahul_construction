@@ -7,6 +7,7 @@ import { SectionHeader, CtaLink } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
 import { IMG } from '@/lib/media';
 import { useServices } from '@/hooks/useServices';
+import { useHomeSections } from '@/hooks/useHomeSections';
 
 /**
  * MEPF is deliberately not in this list.
@@ -140,14 +141,17 @@ const ALT: Record<string, string> = {
 export function ServicesIndex() {
   const services = useServices();
   const listed = services.filter((s) => s.slug !== OMIT_SLUG);
+  /* `||`, not `??`: a blanked heading in admin falls back to the baked copy
+     rather than rendering an empty band. */
+  const section = useHomeSections().find((s) => s.key === 'services-index');
 
   return (
     <section className="section-sm">
       <div className="container">
         <SectionHeader
           overline="What we do"
-          title="Hand us one part, or the whole build."
-          lead="Each of these is a team that already sits in the same office as the others."
+          title={section?.heading || 'Hand us one part, or the whole build.'}
+          lead={section?.subheading || 'Each of these is a team that already sits in the same office as the others.'}
           action={<CtaLink href={ROUTES.services}>See all four services</CtaLink>}
         />
 

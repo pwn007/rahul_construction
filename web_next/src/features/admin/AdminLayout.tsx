@@ -14,7 +14,6 @@ import { SITE } from '@/constants/site';
 import { useTheme } from '@/app/providers';
 import { useLockBodyScroll } from '@/hooks';
 import { MODULES, MODULE_GROUPS, EXTRA_NAV } from './config/modules';
-import { AdminDataReset } from './screens/System';
 import { useLeadCounts } from './useLeadCounts';
 import { AdminGate } from './AdminGate';
 import { authService, isSignedIn } from '@/services/auth';
@@ -113,13 +112,6 @@ function Sidebar({ user, onNavigate }: { user: User; onNavigate?: () => void }) 
           </div>
         ))}
       </nav>
-
-      <div className="border-t p-4">
-        <AdminDataReset />
-        <p className="mt-3 text-caption leading-relaxed text-subtle">
-          Prototype panel. Edits persist to your browser and appear on the public site immediately.
-        </p>
-      </div>
     </div>
   );
 }

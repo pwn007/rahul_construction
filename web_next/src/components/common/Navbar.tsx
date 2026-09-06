@@ -10,12 +10,42 @@ import { Button } from '@/components/ui';
 import { Logo } from './Logo';
 import { VisitorChip } from './VisitorChip';
 import { MAIN_NAV, ROUTES, type NavLink as NavLinkType } from '@/constants/routes';
+import { useNavItems } from '@/hooks/useNavItems';
+import type { NavItem } from '@/types/domain';
 import { SITE } from '@/constants/site';
 import { useScrollInfo, useLockBodyScroll } from '@/hooks';
 import { useTheme } from '@/app/providers';
 import { useHeroTone } from '@/app/hero-tone';
 
+/**
+ * The admin's half of the navbar (module: Navigation) merged onto the code's
+ * half — the practical line drawn in Sep 2026:
+ *
+ * DB rows own *presence, order, label and badge* of the top bar: a row set to
+ * draft disappears, reordering reorders, renaming renames. Matching is by
+ * href, so a rename cannot detach an item from its dropdown. The mega-menu
+ * children, their descriptions and `menuOnly` stay in MAIN_NAV (the NavItem
+ * table has no columns for them — extending it is a later phase, recorded in
+ * the plan). A DB row whose href matches nothing becomes a plain link.
+ * The `highlight` row is the accent CTA button, not a nav item.
+ */
+function mergeNav(rows: NavItem[]): NavLinkType[] {
+  return rows
+    .filter((r) => !r.parentId && !r.highlight)
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .map((row) => {
+      const base = MAIN_NAV.find((n) => n.href === row.href);
+      return base
+        ? { ...base, label: row.label, badge: row.badge ?? base.badge }
+        : { label: row.label, href: row.href, badge: row.badge };
+    });
+}
+
 export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
+  const navRows = useNavItems();
+  const nav = mergeNav(navRows);
+  const cta = navRows.find((r) => r.highlight);
   const { atTop, direction, y } = useScrollInfo();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -59,7 +89,7 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
 
             {/* Desktop nav */}
             <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
-              {MAIN_NAV.map((item) => {
+              {nav.map((item) => {
                 const triggerClass = (lit: boolean) =>
                   cn(
                     'flex items-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium transition-colors',
@@ -171,8 +201,8 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
                 {resolved === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
               </button>
 
-              <Button href={ROUTES.estimator} variant="accent" size="md" className="hidden sm:inline-flex" leftIcon={<Calculator className="h-4 w-4" />}>
-                Get Estimate
+              <Button href={cta?.href ?? ROUTES.estimator} variant="accent" size="md" className="hidden sm:inline-flex" leftIcon={<Calculator className="h-4 w-4" />}>
+                {cta?.label ?? 'Get Estimate'}
               </Button>
 
               <button
@@ -200,7 +230,7 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
               className="glass hidden border-b shadow-md lg:block"
             >
               <div className="container py-8">
-                <MegaMenuContent item={MAIN_NAV.find((n) => n.label === openMenu)} />
+                <MegaMenuContent item={nav.find((n) => n.label === openMenu)} />
               </div>
             </motion.div>
           )}
@@ -264,6 +294,9 @@ function MegaMenuContent({ item }: { item?: NavLinkType }) {
 }
 
 function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const navRows = useNavItems();
+  const nav = mergeNav(navRows);
+  const cta = navRows.find((r) => r.highlight);
   const [expanded, setExpanded] = useState<string | null>(null);
   const { resolved, toggle } = useTheme();
 
@@ -297,7 +330,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
             </div>
 
             <nav className="flex-1 overflow-y-auto px-5 py-4" aria-label="Mobile">
-              {MAIN_NAV.map((item) => (
+              {nav.map((item) => (
                 <div key={item.label} className="border-b last:border-0">
                   {item.children ? (
                     <>
@@ -350,7 +383,11 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
             </nav>
 
             <div className="space-y-3 border-t px-5 py-5">
-              <Button href={ROUTES.estimator} variant="accent" size="lg" full leftIcon={<Calculator className="h-4 w-4" />}>
+              {/* Label deliberately not wired to the CTA row: the drawer says
+                  "Get Free Estimate" where the desktop bar says "Get Estimate",
+                  and freezing today's copy beats silently unifying it. The
+                  destination is the row's. */}
+              <Button href={cta?.href ?? ROUTES.estimator} variant="accent" size="lg" full leftIcon={<Calculator className="h-4 w-4" />}>
                 Get Free Estimate
               </Button>
               <div className="flex gap-3">

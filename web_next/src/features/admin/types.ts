@@ -43,7 +43,10 @@ export type FieldType =
   /* {linkedin?, email?} — a team member's contact links. One optional object
      that disappears entirely when both boxes are blank, matching the seed
      where members without links simply have no `socials` key. */
-  | 'socials';
+  | 'socials'
+  /* {label, href} rows — a footer column's links. kv-list's sibling; kept
+     separate because the stored key is `href`, not `value`. */
+  | 'link-list';
 
 export interface FieldConfig {
   name: string;

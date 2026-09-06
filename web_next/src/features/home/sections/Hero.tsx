@@ -8,6 +8,7 @@ import { usePrefersReducedMotion } from '@/hooks';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { cn } from '@/lib/cn';
 import { HeroScene } from './HeroScene';
+import { useHeroBanner } from '@/hooks/useHeroBanner';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -33,7 +34,11 @@ export function Hero() {
    * `.kinetic-line` is `display:block; overflow:hidden`, so each entry masks and
    * reveals as its own line — stacked exactly as the portfolio cover sets them.
    */
-  const lines = ['Building', 'Dreams'];
+  /* From the admin's Hero & banners row when it differs, else the baked cover
+     copy — one kinetic line per word, so a longer headline still masks and
+     reveals correctly. The seed row is byte-equal to these fallbacks. */
+  const banner = useHeroBanner();
+  const lines = (banner?.title ?? 'Building Dreams').split(' ');
 
   return (
     <section
@@ -222,7 +227,7 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
               className="mt-6"
             >
-              <p className="max-w-lead text-body-lg text-muted">{SITE.promise}</p>
+              <p className="max-w-lead text-body-lg text-muted">{banner?.subtitle ?? SITE.promise}</p>
               <p className="mt-3 font-deva text-lg text-cyan-700 dark:text-cyan-400">{SITE.taglineHi}</p>
             </motion.div>
           </motion.div>

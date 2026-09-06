@@ -63,24 +63,28 @@ export const applications: Application[] = [
 
 export const banners: Banner[] = [
   { ...meta('bnr_1', '2026-06-01T09:00:00.000Z'), title: 'Building Dreams', subtitle: 'From idea to reality, without the hassle.', image: IMG.hero('hero-primary'), ctaLabel: 'Start Your Project', ctaHref: '/contact', placement: 'home-hero', order: 1 },
-  { ...meta('bnr_2', '2026-06-01T09:00:00.000Z'), title: 'Monsoon booking window open', subtitle: 'Projects starting before October get design fees waived.', image: IMG.wide('banner-promo'), ctaLabel: 'Get an estimate', ctaHref: '/estimator', placement: 'promo-strip', order: 1 },
+  /* Draft on purpose: no band renders the promo-strip placement yet — publishing it would promise a surface that does not exist. */
+  { ...meta('bnr_2', '2026-06-01T09:00:00.000Z', 'draft'), title: 'Monsoon booking window open', subtitle: 'Projects starting before October get design fees waived.', image: IMG.wide('banner-promo'), ctaLabel: 'Get an estimate', ctaHref: '/estimator', placement: 'promo-strip', order: 1 },
   { ...meta('bnr_3', '2026-06-01T09:00:00.000Z', 'draft'), title: 'Now taking commercial projects', subtitle: 'Full MEPF capability in-house.', image: IMG.wide('banner-commercial'), ctaLabel: 'See our MEPF work', ctaHref: '/services/mepf-consultancy', placement: 'projects-top', order: 1 },
 ];
 
 export const homeSections: HomeSection[] = [
-  { ...meta('hs_hero', '2026-01-01T09:00:00.000Z'), key: 'hero', label: 'Cinematic Hero', enabled: true, heading: 'Building Dreams', subheading: 'From idea to reality, without the hassle.', order: 1 },
-  { ...meta('hs_trust', '2026-01-01T09:00:00.000Z'), key: 'trust', label: 'Trust Bar', enabled: true, heading: 'Trusted across Jaipur', subheading: '80+ projects delivered', order: 2 },
-  { ...meta('hs_intro', '2026-01-01T09:00:00.000Z'), key: 'intro', label: 'One System Narrative', enabled: true, heading: 'One system. One point of responsibility.', subheading: 'Architecture, engineering and execution under a single accountable team.', order: 3 },
-  { ...meta('hs_services', '2026-01-01T09:00:00.000Z'), key: 'services', label: 'Services Grid', enabled: true, heading: 'What we offer', subheading: 'Comprehensive construction solutions, end to end.', order: 4 },
-  { ...meta('hs_projects', '2026-01-01T09:00:00.000Z'), key: 'projects', label: 'Featured Projects', enabled: true, heading: 'Selected work', subheading: 'Built across Jaipur, from Mansarovar to Sanganer.', order: 5 },
-  { ...meta('hs_process', '2026-01-01T09:00:00.000Z'), key: 'process', label: 'Process Timeline', enabled: true, heading: 'How we work', subheading: 'Six stages, from your first idea to a year after handover.', order: 6 },
-  { ...meta('hs_stats', '2026-01-01T09:00:00.000Z'), key: 'stats', label: 'Achievements', enabled: true, heading: 'Built on trust', subheading: 'Driven by excellence.', order: 7 },
-  { ...meta('hs_vastu', '2026-01-01T09:00:00.000Z'), key: 'vastu', label: 'Vastu Teaser', enabled: true, heading: 'Right Direction, Happy Living', subheading: 'Vastu resolved in the plan, not patched afterwards.', order: 8 },
-  { ...meta('hs_monitoring', '2026-01-01T09:00:00.000Z'), key: 'monitoring', label: 'Smart Construction', enabled: true, heading: 'Watch your building rise', subheading: 'Live cameras, weekly reports, one portal.', order: 9 },
-  { ...meta('hs_testimonials', '2026-01-01T09:00:00.000Z'), key: 'testimonials', label: 'Testimonials', enabled: true, heading: 'What our clients say', subheading: 'Trusted by homeowners and businesses alike.', order: 10 },
-  { ...meta('hs_estimator', '2026-01-01T09:00:00.000Z'), key: 'estimator', label: 'Estimator CTA', enabled: true, heading: 'What will your home cost?', subheading: 'A real estimate in under two minutes.', order: 11 },
-  { ...meta('hs_insights', '2026-01-01T09:00:00.000Z'), key: 'insights', label: 'Latest Insights', enabled: true, heading: 'Insights', subheading: 'Guides on building in Jaipur.', order: 12 },
-  { ...meta('hs_cta', '2026-01-01T09:00:00.000Z'), key: 'cta', label: 'Contact CTA', enabled: true, heading: "Let's build your dream", subheading: 'Take the first step toward building with confidence.', order: 13 },
+  /*
+   * One row per band actually on the home page, top to bottom — rewritten
+   * Sep 2026 when the previous 13 rows still described a page (process
+   * timeline, stats, monitoring…) that no longer exists. `enabled` switches a
+   * band off; heading/subheading flow into the three sections built on
+   * SectionHeader (services-index, projects, testimonials) and are '' where a
+   * band composes its own copy (trust, mepf, one-system — see the note at the
+   * top of MepfTeaser for why it refuses SectionHeader). The hero has no row:
+   * its copy is owned by the Hero & banners `home-hero` row.
+   */
+  { ...meta('hs_trust', '2026-01-01T09:00:00.000Z'), key: 'trust', label: 'Trust bar — client logos', enabled: true, heading: '', subheading: '', order: 1 },
+  { ...meta('hs_services', '2026-01-01T09:00:00.000Z'), key: 'services-index', label: 'What we do — services index', enabled: true, heading: 'Hand us one part, or the whole build.', subheading: 'Each of these is a team that already sits in the same office as the others.', order: 2 },
+  { ...meta('hs_mepf', '2026-01-01T09:00:00.000Z'), key: 'mepf', label: 'MEPF teaser band', enabled: true, heading: '', subheading: '', order: 3 },
+  { ...meta('hs_projects', '2026-01-01T09:00:00.000Z'), key: 'projects', label: 'Featured projects', enabled: true, heading: 'Built across Jaipur', subheading: 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.', order: 4 },
+  { ...meta('hs_onesystem', '2026-01-01T09:00:00.000Z'), key: 'one-system', label: 'One system — dark band', enabled: true, heading: '', subheading: '', order: 5 },
+  { ...meta('hs_testimonials', '2026-01-01T09:00:00.000Z'), key: 'testimonials', label: 'Testimonials', enabled: true, heading: 'Trusted by homeowners and businesses alike', subheading: 'Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.', order: 6 },
 ];
 
 export const navItems: NavItem[] = [
@@ -89,13 +93,13 @@ export const navItems: NavItem[] = [
   { ...meta('nav_3', '2026-01-01T09:00:00.000Z'), label: 'Pricing', href: '/pricing', order: 3 },
   { ...meta('nav_4', '2026-01-01T09:00:00.000Z'), label: 'Company', href: '/about', order: 4 },
   { ...meta('nav_5', '2026-01-01T09:00:00.000Z'), label: 'Contact', href: '/contact', order: 5 },
-  { ...meta('nav_6', '2026-01-01T09:00:00.000Z'), label: 'Cost Estimator', href: '/estimator', order: 6, highlight: true, badge: 'New' },
+  { ...meta('nav_6', '2026-01-01T09:00:00.000Z'), label: 'Get Estimate', href: '/estimator', order: 6, highlight: true, badge: 'New' },
 ];
 
 export const footerColumns: FooterColumn[] = [
   { ...meta('fc_1', '2026-01-01T09:00:00.000Z'), heading: 'Services', order: 1, links: [ { label: 'Architectural Design', href: '/services/architectural-design' }, { label: 'MEPF Consultancy', href: '/services/mepf-consultancy' }, { label: 'Interior Design', href: '/services/interior-design' }, { label: 'Project Management', href: '/services/project-management' } ] },
   { ...meta('fc_2', '2026-01-01T09:00:00.000Z'), heading: 'Company', order: 2, links: [ { label: 'About Us', href: '/about' }, { label: 'Projects', href: '/projects' }, { label: 'Vastu Planning', href: '/vastu' }, { label: 'Careers', href: '/careers' }, { label: 'Insights', href: '/blog' } ] },
-  { ...meta('fc_3', '2026-01-01T09:00:00.000Z'), heading: 'Resources', order: 3, links: [ { label: 'Cost Estimator', href: '/estimator' }, { label: 'Pricing & Packages', href: '/pricing' }, { label: 'Gallery', href: '/gallery' }, { label: 'Downloads', href: '/downloads' } ] /* Client Portal is commented out for now — see features/portal/PortalLayout.tsx. */ },
+  { ...meta('fc_3', '2026-01-01T09:00:00.000Z'), heading: 'Resources', order: 3, links: [ { label: 'Cost Estimator', href: '/estimator' }, /* Pricing & Packages is commented out for now — published rates are hidden; see the Pricing entry in MAIN_NAV (constants/routes.ts). */ { label: 'Gallery', href: '/gallery' }, { label: 'Downloads', href: '/downloads' } ] /* Client Portal is commented out for now — see features/portal/PortalLayout.tsx. */ },
 ];
 
 export const seoMeta: SeoMeta[] = [

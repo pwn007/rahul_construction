@@ -6,7 +6,7 @@ import { CtaBand, PageHero, SectionHeader } from '@/components/common';
 import { Badge } from '@/components/ui';
 import { MaskImage, Reveal, StaggerGroup } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { jobs } from '@/data/content';
+import { useJobs } from '@/hooks/useJobs';
 import { formatRelative } from '@/lib/format';
 import { IMG } from '@/lib/media';
 
@@ -27,6 +27,7 @@ const BENEFITS = [
 ];
 
 export function CareersView() {
+  const jobs = useJobs();
   const openings = jobs.reduce((sum, j) => sum + j.openings, 0);
 
   return (
@@ -133,7 +134,7 @@ export function CareersView() {
                       </span>
                       <span className="num">{job.experience}</span>
                       {job.salaryRange && <span className="num">{job.salaryRange}</span>}
-                      <span>Posted {formatRelative(job.postedAt)}</span>
+                      {job.postedAt && <span>Posted {formatRelative(job.postedAt)}</span>}
                     </div>
                   </div>
 

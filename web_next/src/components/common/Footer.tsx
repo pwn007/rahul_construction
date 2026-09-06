@@ -8,7 +8,8 @@ import { Logo } from './Logo';
 import { ConsentCheckbox } from './ConsentCheckbox';
 import { leadMeta } from '@/lib/consent';
 import { track } from '@/lib/analytics';
-import { FOOTER_NAV, ROUTES } from '@/constants/routes';
+import { ROUTES } from '@/constants/routes';
+import { useFooterColumns } from '@/hooks/useFooterColumns';
 import { SITE } from '@/constants/site';
 
 /**
@@ -30,6 +31,7 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const footerColumns = useFooterColumns();
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [consentError, setConsentError] = useState<string | undefined>();
@@ -73,7 +75,7 @@ export function Footer() {
           </div>
 
           <div className="grid gap-8 sm:grid-cols-3 lg:col-span-5">
-            {FOOTER_NAV.map((col) => (
+            {footerColumns.map((col) => (
               <div key={col.heading}>
                 <h3 className="text-overline uppercase text-white/40">{col.heading}</h3>
                 <ul className="mt-4 space-y-2">

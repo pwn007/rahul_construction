@@ -173,6 +173,10 @@ export function FieldRenderer({
       control = <KvListField value={Array.isArray(value) ? (value as KvRow[]) : []} onChange={onChange} />;
       break;
 
+    case 'link-list':
+      control = <LinkListField value={Array.isArray(value) ? (value as LinkRow[]) : []} onChange={onChange} />;
+      break;
+
     case 'image-list':
       control = <ImageListField value={Array.isArray(value) ? (value as GalleryRow[]) : []} onChange={onChange} />;
       break;
@@ -332,6 +336,42 @@ function KvListField({ value, onChange }: { value: KvRow[]; onChange: (v: KvRow[
         className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700"
       >
         <Plus className="h-3.5 w-3.5" /> Add row
+      </button>
+    </div>
+  );
+}
+
+/* ----------------------------- LinkList ------------------------------ */
+
+type LinkRow = { label: string; href: string };
+
+/** A footer column's links — KvListField with `href` for a value key, and the
+    same no-drag rule: row order is display order. */
+function LinkListField({ value, onChange }: { value: LinkRow[]; onChange: (v: LinkRow[]) => void }) {
+  const set = (i: number, patch: Partial<LinkRow>) => onChange(value.map((row, n) => (n === i ? { ...row, ...patch } : row)));
+
+  return (
+    <div className="space-y-2">
+      {value.map((row, i) => (
+        <div key={i} className="flex gap-2">
+          <Input value={row.label} onChange={(e) => set(i, { label: e.target.value })} placeholder="Label (e.g. Gallery)" className="flex-1" />
+          <Input value={row.href} onChange={(e) => set(i, { href: e.target.value })} placeholder="Link (e.g. /gallery)" className="flex-1" />
+          <button
+            type="button"
+            onClick={() => onChange(value.filter((_, n) => n !== i))}
+            aria-label="Remove row"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border text-subtle transition-colors hover:border-danger hover:text-danger"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...value, { label: '', href: '' }])}
+        className="inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-caption font-medium text-muted transition-colors hover:border-cyan-500 hover:text-cyan-700"
+      >
+        <Plus className="h-3.5 w-3.5" /> Add link
       </button>
     </div>
   );

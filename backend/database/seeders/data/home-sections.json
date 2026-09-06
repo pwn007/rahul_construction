@@ -1,51 +1,39 @@
 [
   {
-    "id": "hs_hero",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "hero",
-    "label": "Cinematic Hero",
-    "enabled": true,
-    "heading": "Building Dreams",
-    "subheading": "From idea to reality, without the hassle.",
-    "order": 1
-  },
-  {
     "id": "hs_trust",
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-01-01T09:00:00.000Z",
     "status": "published",
     "key": "trust",
-    "label": "Trust Bar",
+    "label": "Trust bar — client logos",
     "enabled": true,
-    "heading": "Trusted across Jaipur",
-    "subheading": "80+ projects delivered",
-    "order": 2
-  },
-  {
-    "id": "hs_intro",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "intro",
-    "label": "One System Narrative",
-    "enabled": true,
-    "heading": "One system. One point of responsibility.",
-    "subheading": "Architecture, engineering and execution under a single accountable team.",
-    "order": 3
+    "heading": "",
+    "subheading": "",
+    "order": 1
   },
   {
     "id": "hs_services",
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-01-01T09:00:00.000Z",
     "status": "published",
-    "key": "services",
-    "label": "Services Grid",
+    "key": "services-index",
+    "label": "What we do — services index",
     "enabled": true,
-    "heading": "What we offer",
-    "subheading": "Comprehensive construction solutions, end to end.",
-    "order": 4
+    "heading": "Hand us one part, or the whole build.",
+    "subheading": "Each of these is a team that already sits in the same office as the others.",
+    "order": 2
+  },
+  {
+    "id": "hs_mepf",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "mepf",
+    "label": "MEPF teaser band",
+    "enabled": true,
+    "heading": "",
+    "subheading": "",
+    "order": 3
   },
   {
     "id": "hs_projects",
@@ -53,59 +41,23 @@
     "updatedAt": "2026-01-01T09:00:00.000Z",
     "status": "published",
     "key": "projects",
-    "label": "Featured Projects",
+    "label": "Featured projects",
     "enabled": true,
-    "heading": "Selected work",
-    "subheading": "Built across Jaipur, from Mansarovar to Sanganer.",
+    "heading": "Built across Jaipur",
+    "subheading": "From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.",
+    "order": 4
+  },
+  {
+    "id": "hs_onesystem",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "one-system",
+    "label": "One system — dark band",
+    "enabled": true,
+    "heading": "",
+    "subheading": "",
     "order": 5
-  },
-  {
-    "id": "hs_process",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "process",
-    "label": "Process Timeline",
-    "enabled": true,
-    "heading": "How we work",
-    "subheading": "Six stages, from your first idea to a year after handover.",
-    "order": 6
-  },
-  {
-    "id": "hs_stats",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "stats",
-    "label": "Achievements",
-    "enabled": true,
-    "heading": "Built on trust",
-    "subheading": "Driven by excellence.",
-    "order": 7
-  },
-  {
-    "id": "hs_vastu",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "vastu",
-    "label": "Vastu Teaser",
-    "enabled": true,
-    "heading": "Right Direction, Happy Living",
-    "subheading": "Vastu resolved in the plan, not patched afterwards.",
-    "order": 8
-  },
-  {
-    "id": "hs_monitoring",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "monitoring",
-    "label": "Smart Construction",
-    "enabled": true,
-    "heading": "Watch your building rise",
-    "subheading": "Live cameras, weekly reports, one portal.",
-    "order": 9
   },
   {
     "id": "hs_testimonials",
@@ -115,44 +67,8 @@
     "key": "testimonials",
     "label": "Testimonials",
     "enabled": true,
-    "heading": "What our clients say",
-    "subheading": "Trusted by homeowners and businesses alike.",
-    "order": 10
-  },
-  {
-    "id": "hs_estimator",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "estimator",
-    "label": "Estimator CTA",
-    "enabled": true,
-    "heading": "What will your home cost?",
-    "subheading": "A real estimate in under two minutes.",
-    "order": 11
-  },
-  {
-    "id": "hs_insights",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "insights",
-    "label": "Latest Insights",
-    "enabled": true,
-    "heading": "Insights",
-    "subheading": "Guides on building in Jaipur.",
-    "order": 12
-  },
-  {
-    "id": "hs_cta",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-01-01T09:00:00.000Z",
-    "status": "published",
-    "key": "cta",
-    "label": "Contact CTA",
-    "enabled": true,
-    "heading": "Let's build your dream",
-    "subheading": "Take the first step toward building with confidence.",
-    "order": 13
+    "heading": "Trusted by homeowners and businesses alike",
+    "subheading": "Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.",
+    "order": 6
   }
 ]

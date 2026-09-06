@@ -10,7 +10,7 @@ import { PageHero } from '@/components/common';
 import { Badge, Button, FormField, Input, Textarea, useToast } from '@/components/ui';
 import { Reveal } from '@/components/motion';
 import { ROUTES } from '@/constants/routes';
-import { jobs } from '@/data/content';
+import { useJobs } from '@/hooks/useJobs';
 import { applicationsService } from '@/services';
 import { formatRelative } from '@/lib/format';
 
@@ -26,6 +26,7 @@ const applicationSchema = z.object({
 type ApplicationForm = z.infer<typeof applicationSchema>;
 
 export function CareerDetailView({ slug }: { slug: string }) {
+  const jobs = useJobs();
   const [submitted, setSubmitted] = useState(false);
   const { push } = useToast();
 
@@ -45,7 +46,19 @@ export function CareerDetailView({ slug }: { slug: string }) {
      with `dynamicParams = false`, so an unknown slug 404s before this renders.
      Kept as a type guard, and it replaces the old redirect-to-index — a soft
      redirect on missing content reads to a crawler as "this page exists". */
-  if (!job) return null;
+  /* Reachable two ways now that jobs are hybrid: the 404-takeover mounts this
+     for an admin-created slug whose fetch then misses, or an admin closes a
+     baked role. Same pattern as the other detail views. */
+  if (!job) {
+    return (
+      <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
+        <p className="text-heading-lg font-semibold">This role is no longer open.</p>
+        <Button href={ROUTES.careers} variant="accent">
+          See all openings
+        </Button>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: ApplicationForm) => {
     await applicationsService.create({
@@ -85,7 +98,7 @@ export function CareerDetailView({ slug }: { slug: string }) {
           <Badge variant="brand" size="sm" className="bg-cyan-500 text-white">
             {job.openings} opening{job.openings === 1 ? '' : 's'}
           </Badge>
-          <span>Posted {formatRelative(job.postedAt)}</span>
+          {job.postedAt && <span>Posted {formatRelative(job.postedAt)}</span>}
         </div>
       </PageHero>
 

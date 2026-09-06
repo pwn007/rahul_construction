@@ -25,7 +25,6 @@ import { PACKAGES, LOCATIONS, ENHANCEMENTS } from '@/constants/estimator';
 import { MATERIAL_GROUPS, MATERIAL_LINES, QUANTITY_UNIT_LABEL, defaultOption } from '@/constants/materials';
 import { WORK_HEADS } from '@/constants/work-heads';
 import { FURNITURE_LINES, furnitureOptionOf } from '@/constants/furniture';
-import { resetOverlay } from '@/services/adapters/mock.adapter';
 import type { PermissionAction } from '@/types/domain';
 
 /* ==================================================================== */
@@ -713,27 +712,5 @@ export function AdminTheme() {
         </div>
       </div>
     </div>
-  );
-}
-
-/* ==================================================================== */
-/* Data reset (prototype utility)                                        */
-/* ==================================================================== */
-
-export function AdminDataReset() {
-  const { push } = useToast();
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => {
-        resetOverlay();
-        push({ kind: 'info', title: 'Mock data reset', description: 'Reloading…' });
-        window.setTimeout(() => window.location.reload(), 600);
-      }}
-      leftIcon={<RotateCcw className="h-3.5 w-3.5" />}
-    >
-      Reset mock data
-    </Button>
   );
 }

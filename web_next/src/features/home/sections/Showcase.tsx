@@ -6,12 +6,14 @@ import { ACHIEVEMENTS } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { useProjects } from '@/features/projects/useProjects';
 import { useTestimonials } from '@/hooks/useTestimonials';
+import { useHomeSections } from '@/hooks/useHomeSections';
 
 /* ==================================================================== */
 /* Featured projects                                                     */
 /* ==================================================================== */
 
 export function FeaturedProjects() {
+  const section = useHomeSections().find((s) => s.key === 'projects');
   /*
     Six, not five, and that is a layout constraint rather than an editorial one.
 
@@ -29,8 +31,8 @@ export function FeaturedProjects() {
       <div className="container">
         <SectionHeader
           overline="Selected work"
-          title="Built across Jaipur"
-          lead="From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly."
+          title={section?.heading || 'Built across Jaipur'}
+          lead={section?.subheading || 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.'}
           action={
             <CtaLink href={ROUTES.projects}>All projects</CtaLink>
           }
@@ -115,12 +117,13 @@ export function Achievements() {
 
 export function Testimonials() {
   const testimonials = useTestimonials();
+  const section = useHomeSections().find((s) => s.key === 'testimonials');
 
   return (
     <TestimonialBand
       overline="What our clients say"
-      title="Trusted by homeowners and businesses alike"
-      lead="Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words."
+      title={section?.heading || 'Trusted by homeowners and businesses alike'}
+      lead={section?.subheading || 'Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.'}
       items={testimonials}
     />
   );

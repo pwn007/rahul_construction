@@ -7,8 +7,15 @@ import { MepfTeaser } from '@/features/mepf/MepfTeaser';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
 import { FeaturedProjects, Testimonials } from './sections/Showcase';
+import { useHomeSections } from '@/hooks/useHomeSections';
 
 export function HomeView() {
+  /* Admin's "Home page sections" rows gate each band below. `!== false` is
+     fail-open: a missing row shows the band — hiding is an explicit act, and
+     an API hiccup must not blank the home page. */
+  const sections = useHomeSections();
+  const on = (key: string) => sections.find((s) => s.key === key)?.enabled !== false;
+
   return (
     <>
       {/*
@@ -55,26 +62,26 @@ export function HomeView() {
         into `WhyChooseUs` and are back on their own band.
       */}
       <Hero />
-      <TrustBar />
+      {on('trust') && <TrustBar />}
       {/* The offer, before any argument about it. Three rows, not four — MEPF is
           the section immediately below, and listing it here as well would put it
           on this page three times. */}
-      <ServicesIndex />
+      {on('services-index') && <ServicesIndex />}
       {/* MEPF expands the one service the index deliberately leaves out: it is
           the firm's core discipline and the thing a visitor is least able to
           picture, so it gets a band rather than a line. `OneSystem` names the
           four disciplines it belongs to further down. */}
-      <MepfTeaser />
-      <FeaturedProjects />
+      {on('mepf') && <MepfTeaser />}
+      {on('projects') && <FeaturedProjects />}
       {/* The claim, now made after the evidence rather than before it. This is
           the page's only dark band and its last argument before the people who
           vouch for it. */}
-      <OneSystem />
+      {on('one-system') && <OneSystem />}
       {/* The claims, then the people backing them. This band is `--c-surface-2`,
           and with `Packages` switched off below it is now the page's last one —
           the tint carries straight into the footer, which is fine, but restoring
           `Packages` is what puts it back between two sections on page ground. */}
-      <Testimonials />
+      {on('testimonials') && <Testimonials />}
       {/*
         Published rates, hidden at the client's request.
 
