@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Lead alerts
+    |--------------------------------------------------------------------------
+    | Where the "new enquiry / estimate / application" mails go. Unset (the
+    | local default) switches the feature off entirely — nothing is attempted.
+    */
+
+    'lead_to' => env('LEAD_NOTIFY_TO'),
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Mailer
     |--------------------------------------------------------------------------
     |

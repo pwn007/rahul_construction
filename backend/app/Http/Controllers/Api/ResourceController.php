@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -128,6 +129,10 @@ class ResourceController extends Controller
             return response()->json(['message' => 'Could not save — a required field is missing or a unique value (like the slug) is already taken.'], 422);
         }
 
+        /* After the save, never instead of it: the lead is in the database —
+           that was the job. The mail is a courtesy on top. */
+        $this->notifyLead($resource, $record);
+
         return $this->ok($record->fresh(), 201);
     }
 
@@ -191,6 +196,78 @@ class ResourceController extends Controller
      * mock's `.toLowerCase().includes()` does. The wildcards are escaped because
      * a visitor searching for "50%" should find "50%", not everything.
      */
+    /**
+     * Owner alert for a new lead — only for resources whose config carries a
+     * `notify` label, and only when LEAD_NOTIFY_TO is set. Plain text on
+     * purpose: no Blade view means one less file to deploy, and the owner
+     * needs a name and a phone number, not a layout. Sent synchronously —
+     * this hosting has no queue worker or cron — so SMTP adds a moment to
+     * the form submit; recorded trade-off. Any failure is swallowed into the
+     * log: a mail problem must never turn a captured lead into a 422/500.
+     */
+    private function notifyLead(string $resource, Model $record): void
+    {
+        $label = config("resources.{$resource}.notify");
+        $to = config('mail.lead_to');
+
+        if (! $label || ! $to) {
+            return;
+        }
+
+        try {
+            $r = $record->getAttributes();
+            $name = $r['name'] ?? 'Unknown';
+
+            $lines = ["Name: {$name}"];
+            $fields = [
+                'phone' => 'Phone',
+                'email' => 'Email',
+                'serviceInterest' => 'Interested in',
+                'budget' => 'Budget',
+                'city' => 'City',
+                'message' => 'Message',
+                'source' => 'Source',
+                'propertyType' => 'Property type',
+                'builtUpArea' => 'Built-up area (sqft)',
+                'floors' => 'Floors',
+                'jobTitle' => 'Applied for',
+                'experienceYears' => 'Experience (years)',
+                'resumeUrl' => 'Resume',
+            ];
+            foreach ($fields as $key => $caption) {
+                if (isset($r[$key]) && $r[$key] !== '') {
+                    $lines[] = "{$caption}: {$r[$key]}";
+                }
+            }
+            if (isset($r['totalMin'], $r['totalMax'])) {
+                $lines[] = 'Estimate: '.$this->inr((float) $r['totalMin']).' - '.$this->inr((float) $r['totalMax']);
+            }
+            if (! empty($r['ip'])) {
+                $lines[] = "IP: {$r['ip']}";
+            }
+            $lines[] = '';
+            $lines[] = 'Full details: '.config('app.url').'/admin';
+
+            Mail::raw(implode("\n", $lines), function ($mail) use ($to, $label, $name, $r): void {
+                $mail->to($to)->subject("{$label} - {$name}");
+                /* Reply lands with the visitor, not the no-reply sender. */
+                if (! empty($r['email'])) {
+                    $mail->replyTo($r['email'], $name);
+                }
+            });
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /** ₹42.4 L / ₹1.84 Cr — the same shorthand the site itself prints. */
+    private function inr(float $amount): string
+    {
+        return $amount >= 10000000
+            ? '₹'.round($amount / 10000000, 2).' Cr'
+            : '₹'.round($amount / 100000, 1).' L';
+    }
+
     private function applySearch(Builder $query, array $columns, string $search): void
     {
         $term = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $search).'%';

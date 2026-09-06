@@ -72,9 +72,12 @@ return [
     /* ── Leads. Never publicly readable — these are names and phone numbers.
        `publicCreate` opens POST alone: a visitor can *submit* a lead without a
        token, and still cannot read, edit or delete one. */
-    'applications' => ['model' => Application::class, 'public' => false, 'publicCreate' => true, 'search' => ['name', 'email']],
-    'enquiries' => ['model' => Enquiry::class, 'public' => false, 'publicCreate' => true, 'search' => ['name', 'email']],
-    'estimates' => ['model' => EstimateRequest::class, 'public' => false, 'publicCreate' => true, 'search' => ['name', 'email']],
+    /* `notify` is the subject-label of the owner-alert mail sent on every new
+       row (ResourceController::notifyLead). Absent = no mail for that
+       resource. The mail goes to LEAD_NOTIFY_TO (config/mail.php lead_to). */
+    'applications' => ['model' => Application::class, 'public' => false, 'publicCreate' => true, 'search' => ['name', 'email'], 'notify' => 'New job application'],
+    'enquiries' => ['model' => Enquiry::class, 'public' => false, 'publicCreate' => true, 'search' => ['name', 'email'], 'notify' => 'New enquiry'],
+    'estimates' => ['model' => EstimateRequest::class, 'public' => false, 'publicCreate' => true, 'search' => ['name', 'email'], 'notify' => 'New estimate request'],
 
     /* ── Site content & chrome ─────────────────────────────────────────── */
     'banners' => ['model' => Banner::class, 'public' => true, 'search' => ['title']],
