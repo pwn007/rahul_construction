@@ -121,7 +121,7 @@
         "publish"
       ]
     },
-    "memberCount": 1
+    "memberCount": 2
   },
   {
     "id": "role_owner",
@@ -365,7 +365,7 @@
         "publish"
       ]
     },
-    "memberCount": 2
+    "memberCount": 1
   },
   {
     "id": "role_editor",

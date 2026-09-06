@@ -34,9 +34,9 @@
     "status": "published",
     "name": "Rahul Verma",
     "email": "rahul@neetuarchstone.com",
-    "roleId": "role_admin",
-    "roleName": "Administrator",
-    "roleSlug": "admin",
+    "roleId": "role_superadmin",
+    "roleName": "Super Admin",
+    "roleSlug": "superadmin",
     "avatar": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20128%20128%22%20role%3D%22img%22%20aria-label%3D%22RV%22%3E%20%3Crect%20width%3D%22128%22%20height%3D%22128%22%20fill%3D%22%23F7F3EC%22%2F%3E%20%3Ctext%20x%3D%2264%22%20y%3D%2264%22%20fill%3D%22%2312265C%22%20font-family%3D%22Outfit%2C%20Inter%2C%20system-ui%2C%20sans-serif%22%20font-size%3D%2248%22%20font-weight%3D%22600%22%20letter-spacing%3D%221%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%3ERV%3C%2Ftext%3E%20%3C%2Fsvg%3E",
     "lastActiveAt": "2026-07-30T09:30:00.000Z",
     "active": true
