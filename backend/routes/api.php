@@ -34,6 +34,9 @@ Route::get('auth/me', [AuthController::class, 'me'])->middleware('auth:api');
 /* Multipart upload — its own literal route so the generic {resource} POST never
    sees it, and behind auth outright: an anonymous file-write endpoint on shared
    hosting is how sites end up serving other people's PHP. */
+/* Pure computation, no auth and no storage — see EstimatorController. */
+Route::post('estimator/quote', [\App\Http\Controllers\Api\EstimatorController::class, 'quote']);
+
 Route::post('media/upload', [MediaController::class, 'upload'])->middleware(['auth:api', 'throttle:30,1']);
 
 Route::middleware(EnsureResourceAccess::class)->group(function () {

@@ -21,6 +21,12 @@ import { track } from '@/lib/analytics';
 export function StickyContactBar() {
   const pathname = usePathname();
 
+  /* The estimator owns its own bottom slot: a live-total bar that updates as
+     the visitor plays with brands (see QuoteResult). Two stacked fixed bars is
+     exactly the NN/G failure the comment above warns about, and that page
+     already offers WhatsApp inline next to the PDF button. */
+  if (pathname.startsWith('/estimator')) return null;
+
   /*
    * A page-aware opener beats a generic one: the message arrives already
    * carrying what they were looking at, so the first reply can be about the

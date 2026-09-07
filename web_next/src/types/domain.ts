@@ -337,7 +337,10 @@ export interface EstimateRequest extends BaseEntity, LeadMeta {
    * "semi-furnished" meant on the day.
    */
   /** materialKey → chosen brand key, exactly as the visitor selected it. */
-  materials?: Record<string, string>;
+  /** Since the Sep 2026 civil revamp: the priced quantity lines the engine
+      produced (key/label/unit/qty/rate/amount). Older rows hold the previous
+      shape — a material→brand map from the retired wizard. */
+  materials?: { key: string; label: string; unit: string; qty: number; rate: number; amount: number; note?: string }[] | Record<string, string>;
   /** Sum of the priced material lines. Everything else derives from it. */
   materialsCost?: number;
   /** furnitureKey → chosen allowance level, priced on top of the package. */

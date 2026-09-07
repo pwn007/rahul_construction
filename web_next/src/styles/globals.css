@@ -202,6 +202,15 @@
     background: currentColor;
     margin-bottom: 0.625rem;
   }
+  /* The bar is a left-aligned gesture. In centred compositions (PageHero with
+     no aside, SectionHeader align="center") the fixed-width block ignores
+     text-align and strands at the column's left edge — it read as a stray mark
+     on /estimator's hero, which is how the client reported it. Centred labels
+     drop the bar entirely rather than centre it: a floating 2rem dash over a
+     centred line looks like punctuation, not structure. */
+  .text-center .overline::before {
+    display: none;
+  }
 
   /* Glass — used sparingly: navbar, cost meter, overlays, lightbox */
   .glass {

@@ -1,437 +1,954 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, CalendarCheck, Check, Clock, FileDown, IndianRupee, PieChart, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui';
-import { PageHero } from '@/components/common';
-// Only consumer was the "See published rates" button, commented out below.
-// import { ROUTES } from '@/constants/routes';
-import { scrollToTarget } from '@/hooks/useLenis';
-import { cn } from '@/lib/cn';
-import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
+import { Calculator, ChevronDown, Download, FileDown, Image as ImageIcon, IndianRupee, Info, MessageCircle, MoveLeft, Ruler, ShieldCheck } from 'lucide-react';
+import { Button, Dialog, FormField, Input, Select, Spinner, useToast } from '@/components/ui';
+import { ConsentCheckbox, CONSENT_REQUIRED, PageHero } from '@/components/common';
+import { leadMeta } from '@/lib/consent';
 import { track } from '@/lib/analytics';
+import { markLeadCaptured } from '@/features/lead/useLeadOffer';
+import { getVisitor, rememberVisitor } from '@/lib/visitor';
+import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
+import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/lib/format';
 import { SITE } from '@/constants/site';
-import { IMG } from '@/lib/media';
-import { usePrefersReducedMotion } from '@/hooks';
-import { calculateEstimate, decodeInput, encodeInput, DEFAULT_INPUT, type EstimatorInput } from './model';
-import { StepSite, StepMaterialSelect } from './components/Steps';
-import { StepPackage } from './components/StepPackage';
-import { LiveCostMeter, ResultScreen } from './components/Result';
+import { AREA_UNITS, FLOOR_OPTIONS, PROPERTY_TYPES, ASSUMPTIONS } from '@/constants/estimator';
+import { estimatesService } from '@/services';
+import { scrollToTarget } from '@/hooks/useLenis';
+import { DEFAULT_QUOTE_INPUT, useQuote, type Quote, type QuoteInput, type QuoteOption } from './quote';
+import { MaterialArt } from './components/MaterialArt';
 
 /**
- * The hero previously showed a worked *sample* estimate. It read as a quotation
- * rather than an example, and it anchored the visitor against a number that was not
- * theirs — if your budget is ₹25 L and the first thing you see is ₹42.4 L, you leave
- * before starting. The same card still runs on the homepage, where previewing the
- * output is genuinely its job.
+ * The estimator, rebuilt around quantities — September 2026.
  *
- * This replaces it with what the page actually needs to do: remove the two objections
- * people have about calculators — "will this waste my time?" and "will they spam me?"
+ * The previous version was a four-step wizard (package → 23 materials × 73
+ * brand options → furniture → result) that produced one rupee range. Visitors
+ * could not see where the number came from, and the firm carried the risk of
+ * a big gap between an opaque estimate and the real bill. This version asks
+ * only what arithmetic needs — plot size and floors — and answers with the
+ * actual shopping list: so many bricks, so many bags of cement, priced line
+ * by line, with labour, overheads and a 20% wastage buffer stated in the
+ * open. Civil structure only, on purpose: quantities for finishing and
+ * furniture return once this engine has proven itself against real builds
+ * (the old wizard survives in git history).
+ *
+ * The estimate itself stays free — the gate is on the PDF alone, exactly as
+ * before: that gate is where the lead comes from, and the toast only promises
+ * a call once the record actually exists (see handleLead).
  */
+
 const DELIVERABLES = [
   {
+    icon: Ruler,
+    title: 'Real material quantities',
+    detail: 'Bricks, cement bags, steel, sand — computed from your plot size with the thumb rules every site engineer uses.',
+  },
+  {
     icon: IndianRupee,
-    title: 'A costed range',
-    detail: 'Not a single fake-precise number — a defensible band built on our published rate card.',
+    title: 'Priced line by line',
+    detail: 'Every quantity at today’s Jaipur rates, plus labour and site overheads. Nothing hidden in a lump sum.',
   },
   {
-    icon: PieChart,
-    title: 'Head-wise breakdown',
-    detail: 'Where every rupee goes: structure, finishing, MEPF, interiors, approvals.',
-  },
-  {
-    icon: CalendarCheck,
-    title: 'Milestone payment schedule',
-    detail: 'What you pay and exactly when — tied to work completed, never to dates.',
+    icon: ShieldCheck,
+    title: 'Nothing hidden',
+    detail: 'Wastage buffer, labour and site overheads shown as separate lines — check the arithmetic yourself.',
   },
   {
     icon: FileDown,
     title: 'A branded PDF',
-    detail: 'Yours to keep, compare against other quotes, and share with your family.',
+    detail: 'The full working, yours to keep and compare against any contractor’s quote.',
   },
 ];
 
-/**
- * Two questions, then the number.
- *
- * The model has exactly one required input — the area — and every other field
- * ships with a working default. The original seven-step wizard therefore stood
- * between the visitor and a figure it could already have produced; collapsing it
- * to three helped, but the remaining three still asked nine questions, of which
- * six had a safe default and two were industry vocabulary a homeowner has no way
- * to evaluate.
- *
- * What is left is the irreducible set: where, how big, how finished. The service
- * model, building type, basement, stilt and coverage all default; materials and
- * enhancements live on the result screen, where a visitor who has already seen
- * their number is far more willing to spend the effort.
- *
- * The package screen is the one addition since, and it does not reopen that
- * argument: it asks nothing, has no field on it, and answers a question — what do
- * the three scopes cost — that the wizard previously made unanswerable. Four steps
- * is also the ceiling; published multi-step data has completion falling off a
- * cliff beyond it.
- */
-const ALL_STEPS = [
-  { key: 'site', label: 'Your building' },
-  { key: 'package', label: 'Your package' },
-  { key: 'materials', label: 'Your materials' },
-  { key: 'result', label: 'Estimate' },
-] as const;
-
-type StepKey = (typeof ALL_STEPS)[number]['key'];
+/* Interior-only fit-outs have no civil structure to quantify. */
+const BUILD_TYPES = PROPERTY_TYPES.filter((t) => t.key !== 'interior-only');
 
 export function EstimatorView() {
-  /*
-   * Reading search params puts this whole view behind the Suspense boundary in
-   * app/(public)/estimator/page.tsx, so it renders on the client — which is what
-   * the Vite build did too (the route was `lazy()` behind a spinner). It also
-   * keeps the `sessionStorage` draft seeding below free of hydration mismatch:
-   * there is no server HTML for this subtree to disagree with.
-   */
-  const searchParams = useSearchParams();
-  const search = searchParams.toString();
-  const reduced = usePrefersReducedMotion();
-
-  const [input, setInput] = useState<EstimatorInput>(() => ({
-    ...DEFAULT_INPUT,
-    ...readStore<Partial<EstimatorInput>>(STORAGE_KEYS.estimator, {}, 'session'),
-    ...decodeInput(search),
+  const [draft, setDraft] = useState<QuoteInput>(() => ({
+    ...DEFAULT_QUOTE_INPUT,
+    ...readStore<Partial<QuoteInput>>(STORAGE_KEYS.estimator, {}, 'session'),
   }));
-
-  const steps = useMemo(() => [...ALL_STEPS], []);
-
-  /**
-   * The step is part of the draft, not local state.
-   *
-   * It used to be a bare `useState(0)`, so refreshing on the last step dropped
-   * you back to the first with forward navigation disabled — every answer
-   * survived but your position did not. A deep link that pre-answered the
-   * package (see PackageCard) landed on step one too, re-asking what the link
-   * had already said. Both are fixed by seeding from the saved draft and from
-   * whatever the URL already answers.
-   */
-  const [step, setStep] = useState(() => {
-    const saved = readStore<{ step?: number }>(STORAGE_KEYS.estimator, {}, 'session').step;
-    const decoded = decodeInput(search);
-    /* A link that already answers something should not re-ask it: a package link
-       lands on materials, a full material list lands on the estimate. */
-    const initial = saved ?? (decoded.materials ? 2 : decoded.packageKey ? 1 : 0);
-    return Math.max(0, Math.min(ALL_STEPS.length - 1, initial));
-  });
-
-  const result = useMemo(() => calculateEstimate(input), [input]);
-
-  const patch = useCallback((next: Partial<EstimatorInput>) => {
-    setInput((prev) => ({ ...prev, ...next }));
-  }, []);
-
-  /* Draft survives a refresh; the URL stays deep-linkable. */
+  /* Typing debounces into `committed`; the query key follows committed only. */
+  const [committed, setCommitted] = useState(draft);
   useEffect(() => {
-    writeStore(STORAGE_KEYS.estimator, { ...input, step }, 'session');
-  }, [input, step]);
+    const t = window.setTimeout(() => {
+      setCommitted(draft);
+      writeStore(STORAGE_KEYS.estimator, draft, 'session');
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [draft]);
 
-  /*
-   * `history.replaceState`, not `router.replace`.
-   *
-   * This fires on every keystroke and every option tap. Routing each one through
-   * the Next router re-runs the route tree and re-suspends the boundary, which
-   * made the form stutter. The native call is what the App Router itself uses to
-   * keep `useSearchParams` in sync, so the URL stays deep-linkable at no cost.
-   */
-  useEffect(() => {
-    const qs = encodeInput(input);
-    window.history.replaceState(null, '', qs ? `?${qs.replace(/^\?/, '')}` : window.location.pathname);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input]);
+  const { data: quote, isFetching, isError } = useQuote(committed);
+  const [leadOpen, setLeadOpen] = useState(false);
+  const { push } = useToast();
 
-  /*
-   * The funnel, reported as three events.
-   *
-   * `estimator_start` fires once per mount rather than on the first
-   * interaction, because the drop-off worth knowing about is between arriving
-   * and answering anything — the step someone never reaches is invisible if
-   * the funnel only starts once they engage.
-   */
-  const started = useRef(false);
-  useEffect(() => {
-    /*
-     * Latched. StrictMode double-invokes effects in development, which sent two
-     * `estimator_start` events per visit — a funnel whose first step is
-     * inflated makes every downstream conversion rate look half as good as it
-     * is, and the discrepancy only shows up once someone compares it to the
-     * session count.
-     */
-    if (started.current) return;
-    started.current = true;
-    track('estimator_start', { entryStep: step });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const set = <K extends keyof QuoteInput>(key: K, value: QuoteInput[K]) => setDraft((d) => ({ ...d, [key]: value }));
 
-  const goTo = (next: number) => {
-    const clamped = Math.max(0, Math.min(steps.length - 1, next));
-    /* Forward only. Going back to change an answer is not funnel progress. */
-    if (clamped > step) {
-      const key = steps[clamped]?.key;
-      track(key === 'result' ? 'estimator_result' : 'estimator_step', { step: clamped, key });
-    }
-    setStep(clamped);
-    const anchor = document.getElementById('wizard');
-    if (anchor) {
-      const top = anchor.getBoundingClientRect().top + window.scrollY - 100;
-      window.scrollTo({ top, behavior: reduced ? 'instant' : 'smooth' } as ScrollToOptions);
-    }
+  /* Brand taps skip the typing debounce — a tap is a decision, and the 250ms
+     amount-tick below is the feedback loop that makes playing with brands
+     feel alive (the research file calls this the engagement loop). */
+  /* Same instant-commit as a brand tap: switching scope is a decision,
+     not typing. */
+  const choosePackage = (pkg: QuoteInput['package']) => {
+    setDraft((d) => {
+      const next = { ...d, package: pkg };
+      setCommitted(next);
+      writeStore(STORAGE_KEYS.estimator, next, 'session');
+      return next;
+    });
   };
 
-  const restart = () => {
-    setInput(DEFAULT_INPUT);
-    setStep(0);
-    goTo(0);
+  const choose = (lineKey: string, optionKey: string) => {
+    setDraft((d) => {
+      const next = { ...d, selections: { ...d.selections, [lineKey]: optionKey } };
+      setCommitted(next);
+      writeStore(STORAGE_KEYS.estimator, next, 'session');
+      return next;
+    });
   };
 
-  const current: StepKey = steps[step]?.key ?? 'site';
-  const stepLabel = `Step ${step + 1} of ${steps.length - 1}`;
-  const isResult = current === 'result';
-  const shareUrl = `${SITE.url}/estimator?${encodeInput(input)}`;
+  const handleLead = async (lead: { name: string; phone: string; email?: string }) => {
+    if (!quote) return;
+    const { generateCivilPdf } = await import('./pdf');
+    generateCivilPdf(quote, committed, lead);
+    setLeadOpen(false);
+    track('lead_submit', { source: 'estimator-pdf', fields: 3 });
+    markLeadCaptured();
+    rememberVisitor(lead.name);
 
-  /**
-   * Two gates, one per asking step. The area is the model's only genuine
-   * requirement; the package is the one thing the next screen cannot default,
-   * because arriving at the material picker with nothing chosen is what the
-   * package screen exists to prevent.
-   */
-  const canAdvance = current === 'site' ? input.areaPerFloor > 0 : current !== 'package' || Boolean(input.packageKey);
+    /* The PDF is already downloading — the lead write never blocks it, but its
+       outcome is honest: the "we will call" promise appears only once the
+       record exists (this POST also fires the owner's email alert). */
+    void estimatesService
+      .create({
+        name: lead.name,
+        phone: lead.phone,
+        email: lead.email,
+        propertyType: committed.propertyType,
+        areaPerFloor: committed.areaPerFloor,
+        areaUnit: committed.areaUnit,
+        floors: committed.floors,
+        packageType: committed.package,
+        qualityTier: 'standard',
+        location: 'jaipur',
+        enhancements: [],
+        /* The whole shopping list — chosen brand included — so sales can
+           rebuild the quote line by line. The options[] catalogue is UI
+           plumbing, not part of the lead. */
+        materials: quote.lines.map(({ options: _options, ...line }) => line),
+        materialsCost: quote.materialsTotal,
+        builtUpArea: quote.builtUpArea,
+        totalMin: quote.totalMin,
+        totalMax: quote.totalMax,
+        timelineWeeks: quote.timelineWeeks,
+        stage: 'new',
+        ...leadMeta(),
+      })
+      .then(() =>
+        push({
+          kind: 'success',
+          title: 'Your estimate is downloading',
+          description: 'We will call you within one working day.',
+        }),
+      )
+      .catch(() => {
+        track('lead_submit_failed', { source: 'estimator-pdf' });
+        push({
+          kind: 'error',
+          title: 'Your estimate is downloading',
+          description: 'We could not save your details, so nobody will call. Send it on WhatsApp and we will pick it up.',
+        });
+      });
+  };
 
   return (
     <>
       <PageHero
         overline="Cost estimator"
-        title="What will your build actually cost?"
+        title="See the materials before the money."
         lead={
           <>
-            Two questions, about thirty seconds. You get a costed range, an itemised breakdown down to the
-            bag of cement, a milestone payment schedule and a branded PDF — built on our published rate card,
-            not a number pulled from the air.
+            Give us your plot size and floors — get the actual quantities your structure needs, priced line by line
+            at today&rsquo;s Jaipur rates, with a branded PDF yours to keep.
           </>
         }
         breadcrumbs={[{ label: 'Cost Estimator' }]}
         actions={
-          <>
-            <Button
-              variant="accent"
-              size="lg"
-              onClick={() => scrollToTarget('#wizard', -100)}
-              rightIcon={<ArrowRight className="h-4 w-4" />}
-            >
-              Start my estimate
-            </Button>
-            {/* "See published rates" is commented out for now — published rates
-                are hidden; see the Pricing entry in MAIN_NAV (constants/routes.ts). */}
-            {/* <Button href={ROUTES.pricing} variant="secondary" size="lg">
-              See published rates
-            </Button> */}
-          </>
-        }
-        aside={
-          <div className="surface overflow-hidden rounded-2xl border shadow-lg">
-            <div className="border-b bg-gradient-to-r from-cyan-500/[0.09] via-transparent to-sand-300/[0.14] px-6 py-5 dark:to-sand-500/[0.08]">
-              <p className="text-overline uppercase text-subtle">What you&apos;ll get</p>
-              <p className="mt-1.5 font-display text-heading-md font-semibold">
-                Four things, in about two minutes
-              </p>
-            </div>
-
-            <ul className="divide-y">
-              {DELIVERABLES.map((item, i) => (
-                <li key={item.title} className="flex items-start gap-4 px-6 py-4">
-                  <span className="num mt-0.5 w-4 shrink-0 text-caption text-subtle">{i + 1}</span>
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-700 dark:text-cyan-400">
-                    <item.icon className="h-[18px] w-[18px]" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-[0.9375rem] font-semibold leading-tight">{item.title}</span>
-                    <span className="mt-1 block text-caption leading-relaxed text-muted">{item.detail}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t bg-[rgb(var(--c-surface-2))] px-6 py-4">
-              <span className="flex items-center gap-2 text-caption text-muted">
-                <Clock className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
-                About 2 minutes
-              </span>
-              <span className="flex items-center gap-2 text-caption text-muted">
-                <ShieldCheck className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
-                No email needed to see your number
-              </span>
-            </div>
-          </div>
+          <Button variant="accent" size="lg" onClick={() => scrollToTarget('#estimate', -100)} rightIcon={<Calculator className="h-4 w-4" />}>
+            Start my estimate
+          </Button>
         }
       />
 
-      <section id="wizard" className="section-sm">
+      <section className="section-sm">
         <div className="container">
-          {/*
-            Step indicator.
-
-            `min-w-max` inside a scroller meant this ran 135px past a 390px phone,
-            so the third step — the one telling you the estimate is coming — was
-            off-screen. A progress indicator you have to scroll to see the end of
-            is not doing its job. It now fits: labels are hidden below `sm` except
-            on the active step, which is the only one whose name you need, and the
-            connectors shrink. The scroller stays as a safety net for very narrow
-            devices rather than as the normal case.
-          */}
-          <div className="mb-10 overflow-x-auto no-scrollbar">
-            <ol className="flex min-w-max items-center gap-1">
-              {steps.map((s, i) => {
-                const done = i < step;
-                const active = i === step;
-                return (
-                  <li key={s.key} className="flex items-center">
-                    <button
-                      onClick={() => i <= step && goTo(i)}
-                      disabled={i > step}
-                      aria-current={active ? 'step' : undefined}
-                      className={cn(
-                        'flex items-center gap-2 rounded-full px-2 py-2 text-sm transition-colors sm:gap-2.5 sm:px-3',
-                        active && 'bg-cyan-500/10 font-medium text-cyan-700 dark:text-cyan-300',
-                        done && 'text-[rgb(var(--c-text-muted))] hover:text-cyan-700',
-                        i > step && 'cursor-not-allowed text-subtle',
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[0.7rem] font-semibold',
-                          active && 'border-cyan-500 bg-cyan-500 text-white',
-                          done && 'border-cyan-500/40 bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
-                        )}
-                      >
-                        {done ? <Check className="h-3 w-3" strokeWidth={3} /> : i + 1}
-                      </span>
-                      {/* The inactive labels are hidden, not removed: a screen reader
-                          still reads "Your materials", it simply does not take up
-                          130px of a 390px viewport to say so. */}
-                      <span className={cn('whitespace-nowrap', !active && 'sr-only sm:not-sr-only')}>{s.label}</span>
-                    </button>
-                    {i < steps.length - 1 && (
-                      <span
-                        className={cn(
-                          'mx-0.5 h-px w-3 shrink-0 sm:mx-1 sm:w-6',
-                          i < step ? 'bg-cyan-500' : 'bg-[rgb(var(--c-border))]',
-                        )}
-                        aria-hidden
-                      />
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-
-          {isResult ? (
-            <ResultScreen result={result} input={input} patch={patch} onRestart={restart} shareUrl={shareUrl} />
-          ) : (
-            /*
-              `[&>*]:min-w-0` — a grid item defaults to `min-width: auto`, so it
-              refuses to shrink below its content's min-content width. Any wide
-              child then widens the item, the grid, and the document with it.
-
-              The package screen drops the sticky meter and takes the full width.
-              It carries three prices of its own, so the meter beside it would be
-              a fourth number — and an empty one, since nothing is selected until
-              a card is tapped. "Estimated cost — appears here" sitting next to a
-              live ₹46.2 L reads as a broken widget rather than a hint.
-            */
-            <div className={cn('grid gap-8 [&>*]:min-w-0', current !== 'package' && 'lg:grid-cols-12')}>
-              <div className={cn(current === 'package' ? 'w-full' : 'lg:col-span-8')}>
-                <div className="surface rounded-xl border p-7 shadow-sm md:p-10">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={step}
-                      initial={reduced ? { opacity: 0 } : { opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={reduced ? { opacity: 0 } : { opacity: 0, x: -20 }}
-                      transition={{ duration: reduced ? 0.15 : 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      {current === 'site' && <StepSite input={input} patch={patch} stepLabel={stepLabel} />}
-                      {current === 'package' && (
-                        <StepPackage input={input} patch={patch} stepLabel={stepLabel} />
-                      )}
-                      {current === 'materials' && (
-                        <StepMaterialSelect
-                          input={input}
-                          patch={patch}
-                          stepLabel={stepLabel}
-                          chargeableArea={result.chargeableArea}
-                        />
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* "See my estimate" plus "Back", both `whitespace-nowrap`, do not fit side
-                      by side at 320px. They wrap and go full-width on the narrowest
-                      screens, which also gives each a full-width tap target. */}
-                  <div className="mt-10 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                    <Button
-                      variant="ghost"
-                      size="lg"
-                      onClick={() => goTo(step - 1)}
-                      disabled={step === 0}
-                      leftIcon={<ArrowLeft className="h-4 w-4" />}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      variant="accent"
-                      size="lg"
-                      onClick={() => goTo(step + 1)}
-                      disabled={!canAdvance}
-                      rightIcon={<ArrowRight className="h-4 w-4" />}
-                    >
-                      {step === steps.length - 2 ? 'See my estimate' : 'Continue'}
-                    </Button>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-caption text-subtle">
-                  Your answers and your place in the flow are both saved — a refresh will not lose them. The URL carries
-                  your configuration, so you can bookmark it or send it to someone.
-                </p>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {DELIVERABLES.map((d) => (
+              <div key={d.title} className="rounded-xl border p-5">
+                <d.icon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" aria-hidden />
+                <h3 className="mt-3 font-medium">{d.title}</h3>
+                <p className="mt-1.5 text-caption leading-relaxed text-muted">{d.detail}</p>
               </div>
-
-              {/* Sticky live meter */}
-              {current !== 'package' && (
-              <aside className="lg:col-span-4">
-                <div className="sticky top-24 space-y-4">
-                  <LiveCostMeter result={result} />
-                  <div className="rounded-xl border border-dashed p-5">
-                    <p className="text-caption leading-relaxed text-muted">
-                      This number updates with every choice you make. It is built from our published rate card, adjusted
-                      for material specification, locality and building type — the same model our estimators use.
-                    </p>
-                  </div>
-                </div>
-              </aside>
-              )}
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Mobile sticky meter */}
-      {!isResult && (
-        /* `pr-20` keeps the content clear of the floating action button, which is
-           fixed bottom-right at z-40 and was sitting on top of the price. */
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t p-3 pr-20 lg:hidden">
-          <div className="glass rounded-xl">
-            <LiveCostMeter result={result} compact />
+      <section id="estimate" className="section-sm">
+        <div className="container">
+          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+            {/* ── Inputs ─────────────────────────────────────────────── */}
+            <div className="rounded-2xl border p-6 lg:sticky lg:top-24">
+              <h2 className="font-display text-heading-md font-semibold">Your building</h2>
+
+              <div className="mt-6 space-y-5">
+                <FormField label="What should we price?" htmlFor="est-package">
+                  <div id="est-package" className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Package">
+                    {([
+                      { key: 'civil', title: 'Civil Work', sub: 'Structure only' },
+                      { key: 'semi-furnished', title: 'Semi Furnished', sub: 'Structure + finishing' },
+                    ] as const).map((pkg) => {
+                      const selected = draft.package === pkg.key;
+                      return (
+                        <button
+                          key={pkg.key}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => choosePackage(pkg.key)}
+                          className={
+                            selected
+                              ? 'rounded-lg border-2 border-cyan-600 bg-cyan-500/[0.06] px-3 py-2.5 text-left transition-colors'
+                              : 'rounded-lg border px-3 py-2.5 text-left transition-colors hover:border-cyan-500'
+                          }
+                        >
+                          <span className={selected ? 'block text-sm font-semibold' : 'block text-sm font-medium'}>{pkg.title}</span>
+                          <span className="block text-caption text-subtle">{pkg.sub}</span>
+                        </button>
+                      );
+                    })}
+                    {/* Teaser, not an option: full-width dashed row below the live
+                        pair rather than a third equal column — a disabled control
+                        shown as a peer invites taps it can't answer, and three
+                        columns wrap badly at 390px. No onClick, so the fully-
+                        furnished key never enters state/types/backend. */}
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={false}
+                      disabled
+                      aria-disabled
+                      className="col-span-2 flex cursor-not-allowed items-center justify-between gap-2 rounded-lg border border-dashed px-3 py-2.5 text-left"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-subtle">Fully Furnished</span>
+                        <span className="block text-caption text-subtle">Move-in ready interiors</span>
+                      </span>
+                      <span className="shrink-0 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                        Coming soon
+                      </span>
+                    </button>
+                  </div>
+                </FormField>
+
+                <FormField label="Building type" htmlFor="est-type">
+                  <Select id="est-type" value={draft.propertyType} onChange={(e) => set('propertyType', e.target.value)}>
+                    {BUILD_TYPES.map((t) => (
+                      <option key={t.key} value={t.key}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+
+                <FormField label="Plot area (per floor)" htmlFor="est-area">
+                  <div className="flex gap-2">
+                    <Input
+                      id="est-area"
+                      type="number"
+                      min={50}
+                      value={draft.areaPerFloor || ''}
+                      onChange={(e) => set('areaPerFloor', Number(e.target.value))}
+                      className="flex-1"
+                    />
+                    <Select
+                      aria-label="Area unit"
+                      value={draft.areaUnit}
+                      onChange={(e) => set('areaUnit', e.target.value as QuoteInput['areaUnit'])}
+                      className="w-36"
+                    >
+                      {AREA_UNITS.map((u) => (
+                        <option key={u.key} value={u.key}>
+                          {u.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                </FormField>
+
+                <FormField label="Floors" htmlFor="est-floors">
+                  <Select id="est-floors" value={draft.floors} onChange={(e) => set('floors', Number(e.target.value))}>
+                    {FLOOR_OPTIONS.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+              </div>
+
+              <div className="mt-6 flex items-start gap-2.5 rounded-lg border border-cyan-500/25 bg-cyan-500/[0.07] p-4">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-400" aria-hidden />
+                <p className="text-caption leading-relaxed text-muted">
+                  {draft.package === 'civil' ? (
+                    <>
+                      <span className="font-medium text-[rgb(var(--c-text))]">Civil structure only.</span> Foundation
+                      to roof — masonry, RCC and waterproofing. Flooring, interiors and furniture are quoted
+                      separately once the structure is scoped.
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-medium text-[rgb(var(--c-text))]">Structure + finishing.</span> Everything
+                      in Civil Work plus flooring, paint, doors, windows, electricals and plumbing. Modular kitchen,
+                      wardrobes and furniture are quoted separately.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* ── Result ─────────────────────────────────────────────── */}
+            {/* Gated on the *committed* area, not on having data: with the
+                query disabled its placeholder keeps the previous answer, so
+                clearing the field would otherwise leave a stale estimate for
+                an area the visitor just deleted. */}
+            {/* min-w-0: without it the chip rows set this column's minimum
+                width and push the amounts off a phone screen — overflow-x-auto
+                can only scroll inside a constrained box. pb keeps the last
+                content clear of the sticky mini-bar. */}
+            <div aria-live="polite" className="min-w-0 pb-16 lg:pb-0">
+              {committed.areaPerFloor < 50 && (
+                <div className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-2xl border p-8 text-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10">
+                    <MoveLeft className="h-5 w-5 text-cyan-600 dark:text-cyan-400 lg:block" aria-hidden />
+                  </span>
+                  <p className="font-medium">Enter your plot area to begin</p>
+                  <p className="max-w-sm text-sm leading-relaxed text-muted">
+                    Fill in the area and floors on the left — the material quantities and cost appear here instantly.
+                    Nothing to submit, nothing to sign up for.
+                  </p>
+                </div>
+              )}
+
+              {committed.areaPerFloor >= 50 && isError && (
+                <div className="rounded-2xl border p-8 text-center">
+                  <p className="font-medium">We could not calculate right now.</p>
+                  <p className="mt-1.5 text-sm text-muted">
+                    Please try again in a minute, or WhatsApp us your plot size on {SITE.phone}.
+                  </p>
+                </div>
+              )}
+
+              {committed.areaPerFloor >= 50 && !isError && !quote && (
+                <div className="flex min-h-[300px] items-center justify-center rounded-2xl border">
+                  <Spinner className="h-6 w-6" />
+                </div>
+              )}
+
+              {committed.areaPerFloor >= 50 && quote && (
+                <QuoteResult
+                  quote={quote}
+                  input={committed}
+                  busy={isFetching}
+                  onChoose={choose}
+                  onDownload={() => {
+                    setLeadOpen(true);
+                    track('lead_gate_open', { source: 'estimator-pdf' });
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </section>
+
+      <LeadDialog open={leadOpen} onClose={() => setLeadOpen(false)} onSubmit={handleLead} />
     </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Result — the shopping list                                          */
+/* ------------------------------------------------------------------ */
+/* Result — the shopping list, now with brand choice                    */
+/* ------------------------------------------------------------------ */
+
+/** A trademark image that can never break the card: a failed load swaps to
+    the brand name in text. */
+function BrandLogo({ src, label, cover }: { src: string; label: string; cover?: boolean }) {
+  const [broken, setBroken] = useState(false);
+  if (broken) return <span className="text-caption font-medium text-neutral-700">{label}</span>;
+  return (
+    <img
+      src={src}
+      alt={label}
+      loading="lazy"
+      className={cover ? 'h-full w-full object-cover' : 'max-h-7 w-auto max-w-full object-contain'}
+      onError={() => setBroken(true)}
+    />
+  );
+}
+
+/** The amount re-mounts on every value change, so each brand tap lands with a
+    250ms settle — research's 150–300ms feedback window: fast enough to feel
+    instant, slow enough to be *seen* changing. */
+function AnimatedAmount({ value, className }: { value: number; className?: string }) {
+  return (
+    <span className={className} style={{ display: 'inline-block' }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={value}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          style={{ display: 'inline-block' }}
+        >
+          {formatCurrency(value)}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+function QuoteResult({
+  quote,
+  input,
+  busy,
+  onChoose,
+  onDownload,
+}: {
+  quote: Quote;
+  input: QuoteInput;
+  busy: boolean;
+  onChoose: (lineKey: string, optionKey: string) => void;
+  onDownload: () => void;
+}) {
+  const unitLabel = AREA_UNITS.find((u) => u.key === input.areaUnit)?.label ?? input.areaUnit;
+
+  /* Group chrome appears only when there are two groups to tell apart —
+     the civil-only view stays exactly as it always was. */
+  const grouped = quote.lines.some((l) => l.group === 'finishing');
+  const groupTotal = (g: 'structure' | 'finishing') => quote.lines.filter((l) => l.group === g).reduce((sum, l) => sum + l.amount, 0);
+  const groupCount = (g: 'structure' | 'finishing') => quote.lines.filter((l) => l.group === g).length;
+
+  /* Collapsible groups (the accordion the mobile research favours over
+     tabs): when Semi arrives, Structure starts folded — the visitor has
+     already seen the civil half, the news is the finishing half — and one
+     tap opens it. The civil-only view carries none of this chrome. */
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    setCollapsed(input.package === 'semi-furnished' ? { structure: true } : {});
+  }, [input.package]);
+  const toggleGroup = (g: string) => setCollapsed((c) => ({ ...c, [g]: !c[g] }));
+
+  const GroupHeader = ({ group, label }: { group: 'structure' | 'finishing'; label: string }) => (
+    <button
+      type="button"
+      onClick={() => toggleGroup(group)}
+      aria-expanded={!collapsed[group]}
+      className="flex w-full items-center justify-between gap-3 bg-[rgb(var(--c-text))]/[0.03] px-5 py-3 text-left transition-colors hover:bg-[rgb(var(--c-text))]/[0.05]"
+    >
+      <span className="flex items-center gap-2">
+        <ChevronDown className={collapsed[group] ? 'h-4 w-4 -rotate-90 text-subtle transition-transform' : 'h-4 w-4 text-subtle transition-transform'} aria-hidden />
+        <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-subtle">{label}</span>
+        <span className="text-caption text-subtle">· {groupCount(group)} items</span>
+      </span>
+      <AnimatedAmount value={groupTotal(group)} className="num text-sm font-medium" />
+    </button>
+  );
+
+  /* ── Bigger-image preview, mobile-first ─────────────────────────────
+     Most estimator traffic is phones, where hover does not exist — so the
+     primary affordance is a per-row "See photos" sheet (large swatches,
+     tap selects and closes: seeing and choosing in one place). Desktop
+     additionally gets a 200ms hover preview — under 150ms triggers on
+     drive-by cursors, over 250ms feels broken (tooltip-timing research);
+     it renders as a fixed-position node because the materials container
+     clips overflow. */
+  const [photosForKey, setPhotosForKey] = useState<string | null>(null);
+  const photosLine = photosForKey ? quote.lines.find((l) => l.key === photosForKey) : undefined;
+
+  const [canHover] = useState(() => typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches);
+  const [preview, setPreview] = useState<{ opt: QuoteOption; x: number; y: number; below: boolean } | null>(null);
+  const hoverTimer = useRef<number | undefined>(undefined);
+  const showPreview = (opt: QuoteOption, el: HTMLElement) => {
+    if (!canHover || (!opt.photo && !opt.logo)) return;
+    window.clearTimeout(hoverTimer.current);
+    hoverTimer.current = window.setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      const below = r.top < 280;
+      shownScrollY.current = window.scrollY;
+      setPreview({ opt, x: r.left + r.width / 2, y: below ? r.bottom + 10 : r.top - 10, below });
+    }, 200);
+  };
+  const shownScrollY = useRef(0);
+  const hidePreview = () => {
+    window.clearTimeout(hoverTimer.current);
+    setPreview(null);
+  };
+  useEffect(() => {
+    if (!preview) return;
+    /* Not a blind hide: Lenis (the site's smooth-scroll) keeps emitting
+       momentum ticks for a beat after the wheel stops, and killing the
+       preview on the first of those made it flicker out the moment it
+       appeared. A real scroll moves tens of pixels; momentum residue moves
+       a few — 24px separates the two. */
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - shownScrollY.current) > 24) setPreview(null);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [preview]);
+  /* The sticky mini-bar shows once the headline card has scrolled away, so
+     the number a brand tap changes is never off-screen (the configurator
+     bottom-bar pattern). Small screens only — on desktop the card is rarely
+     far, and a second bar would just be chrome. */
+  const headlineRef = useRef<HTMLDivElement>(null);
+  const [headlineGone, setHeadlineGone] = useState(false);
+  useEffect(() => {
+    const el = headlineRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setHeadlineGone(!entry.isIntersecting), { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div className={busy ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+      {/* The headline: a range, not fake precision. */}
+      <div ref={headlineRef} className="rounded-2xl border p-6 sm:p-8">
+        <p className="text-overline uppercase text-subtle">
+          {input.package === 'semi-furnished' ? 'Estimated semi furnished cost' : 'Estimated civil cost'}
+        </p>
+        <p className="mt-2 font-display text-display-sm font-semibold">
+          {formatCurrencyCompact(quote.totalMin)} <span className="text-muted">–</span> {formatCurrencyCompact(quote.totalMax)}
+        </p>
+        {/* The visitor's own numbers doing the arithmetic in front of them —
+            the show-your-work line the clarity research asks for. */}
+        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 text-sm text-muted">
+          <span>
+            <span className="num font-medium text-[rgb(var(--c-text))]">{formatNumber(input.areaPerFloor)} {unitLabel}</span>
+            {' × '}
+            <span className="num font-medium text-[rgb(var(--c-text))]">{input.floors}</span>
+            {input.floors === 1 ? ' floor' : ' floors'}
+            {' = '}
+            <span className="num font-medium text-[rgb(var(--c-text))]">{formatNumber(quote.builtUpArea)} sq ft</span> built-up
+          </span>
+          <span>
+            about <span className="num font-medium text-[rgb(var(--c-text))]">{formatCurrency(Math.round(quote.total / Math.max(quote.builtUpArea, 1)))}</span> / sq ft
+          </span>
+        </div>
+      </div>
+
+      {/* The working — quantities first, brands under your thumb. */}
+      <div className="mt-6 overflow-hidden rounded-2xl border">
+        <div className="border-b bg-[rgb(var(--c-text))]/[0.03] px-5 py-3.5">
+          <h3 className="font-medium">Materials your structure needs</h3>
+          <p className="mt-0.5 text-caption text-subtle">
+            Quantities include a {quote.wastagePct}% wastage buffer.
+          </p>
+        </div>
+
+        <div className="divide-y">
+          {quote.lines.map((line, idx) => (
+            <Fragment key={line.key}>
+              {grouped && idx === 0 && <GroupHeader group="structure" label="Structure" />}
+              {grouped && line.group === 'finishing' && quote.lines[idx - 1]?.group !== 'finishing' && (
+                <GroupHeader group="finishing" label="Finishing" />
+              )}
+              {!(grouped && collapsed[line.group]) && (
+            <div className="px-5 py-5">
+              {/* Identity row — the scan entry-point (F-pattern), with the
+                  thumb-rule chip kept tertiary on the right. */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  {/* Neutral plate, not cyan: the artwork carries its own
+                      material colours (terracotta bricks, kraft sack). */}
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--c-text))]/[0.04] sm:h-11 sm:w-11">
+                    <MaterialArt name={line.key} className="h-7 w-7 sm:h-8 sm:w-8" />
+                  </span>
+                  <h4 className="truncate text-heading-sm font-semibold">{line.label}</h4>
+                </div>
+                <span className="num shrink-0 rounded-full border px-2.5 py-1 text-[0.65rem] text-subtle">
+                  {line.coefficient === 1 && line.unit === 'sq ft' && !line.wastes
+                    ? 'covers built-up area'
+                    : `${line.coefficient} ${line.unit.replace(/s$/, '')}/sq ft${line.wastes ? ` + ${quote.wastagePct}%` : ''}`}
+                </span>
+              </div>
+
+              {/* One tinted body binds the stats and the brand picker into a
+                  single perceived unit — common region, the strongest Gestalt
+                  grouping (Palmer 1992: +34% over proximity alone). The
+                  earlier full-width border-t inside the card read as a "new
+                  chapter", which is a line-divider's actual meaning — exactly
+                  the disconnect the client saw. Rows still separate with
+                  divide-y: between materials IS the chapter break. */}
+              <div className="mt-3 rounded-xl bg-[rgb(var(--c-text))]/[0.025] p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-subtle">You need</p>
+                    <p className="num mt-1 font-display text-heading-md font-semibold leading-tight">
+                      {line.buyQty ? (
+                        <>
+                          {/* The word, not the ≈ symbol: ~30% of adults trip
+                              on mathematical notation, and everyday speech
+                              does approximation with words. The rounded
+                              headline + exact sub-line below is also the
+                              trust-safe pairing for an estimate. */}
+                          <span className="text-heading-sm font-medium text-muted">about</span> {line.buyQty}{' '}
+                          <span className="text-heading-sm font-medium text-muted">{line.buyUnit}</span>
+                        </>
+                      ) : (
+                        <>
+                          {formatNumber(line.qty)} <span className="text-heading-sm font-medium text-muted">{line.unit}</span>
+                        </>
+                      )}
+                    </p>
+                    {line.buyQty && (
+                      <p className="num mt-0.5 text-caption text-subtle">
+                        {formatNumber(line.qty)} {line.unit}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-subtle">It costs</p>
+                    <p className="num mt-1 font-display text-heading-md font-semibold leading-tight">
+                      <AnimatedAmount value={line.amount} />
+                    </p>
+                    <p className="num mt-0.5 text-caption text-subtle">
+                      @ {formatCurrency(line.rate)}/{line.unit.replace(/s$/, '')} · {line.chosen.label}
+                    </p>
+                  </div>
+                </div>
+
+                {line.options.length > 1 && (
+                  <div className="mt-4">
+                    <div className="mb-2.5 flex items-center justify-between gap-3">
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-subtle">
+                        Choose your brand <span className="font-normal normal-case tracking-normal">— price updates instantly</span>
+                      </p>
+                      {/* -m-2 p-2 grows the hit area to ≥44px without moving
+                          the layout — phones first. */}
+                      <button
+                        type="button"
+                        onClick={() => setPhotosForKey(line.key)}
+                        className="-m-2 flex shrink-0 items-center gap-1 p-2 text-caption font-medium text-cyan-700 transition-colors hover:text-cyan-800 dark:text-cyan-400"
+                      >
+                        <ImageIcon className="h-3.5 w-3.5" aria-hidden /> See photos
+                      </button>
+                    </div>
+                    {/* Brands show their mark on a white plate; type options
+                        (bricks, sand…) show a licensed product photo
+                        (docs/image-credits.md); anything imageless falls back
+                        to a text plate so a missing file degrades quietly. */}
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6" role="radiogroup" aria-label={`${line.label} brand`}>
+                      {line.options.map((opt) => {
+                        const selected = opt.key === line.chosen.key;
+                        return (
+                          <button
+                            key={opt.key}
+                            type="button"
+                            role="radio"
+                            aria-checked={selected}
+                            onClick={() => onChoose(line.key, opt.key)}
+                            onMouseEnter={(e) => showPreview(opt, e.currentTarget)}
+                            onMouseLeave={hidePreview}
+                            className={
+                              selected
+                                ? 'relative rounded-lg border-2 border-cyan-600 bg-cyan-500/[0.06] p-2 text-left transition-colors'
+                                : 'relative rounded-lg border bg-[rgb(var(--c-bg))] p-2 text-left transition-colors hover:border-cyan-500'
+                            }
+                          >
+                            {opt.default && (
+                              <span className="absolute -top-2 right-2 rounded-full bg-cyan-600 px-1.5 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wide text-white">
+                                Our pick
+                              </span>
+                            )}
+                            {opt.photo ? (
+                              <span className="block h-14 overflow-hidden rounded-md">
+                                <BrandLogo src={opt.photo} label={opt.label} cover />
+                              </span>
+                            ) : (
+                              <span className="flex h-10 items-center justify-center rounded-md bg-white px-1.5">
+                                {opt.logo ? (
+                                  <BrandLogo src={opt.logo} label={opt.label} />
+                                ) : (
+                                  <span className="truncate text-[0.7rem] font-medium text-neutral-700">{opt.label}</span>
+                                )}
+                              </span>
+                            )}
+                            <span className="mt-1.5 flex items-baseline justify-between gap-1">
+                              <span className={selected ? 'truncate text-[0.7rem] font-medium leading-tight' : 'truncate text-[0.7rem] leading-tight text-muted'}>{opt.label}</span>
+                              <span className="num shrink-0 text-[0.7rem] text-subtle">{formatCurrency(opt.rate)}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+              )}
+            </Fragment>
+          ))}
+        </div>
+
+        {/* Totals */}
+        <div className="border-t text-sm">
+          {grouped ? (
+            <>
+              <div className="flex items-baseline justify-between px-5 py-3">
+                <span>Structure materials</span>
+                <AnimatedAmount value={groupTotal('structure')} className="num" />
+              </div>
+              <div className="flex items-baseline justify-between px-5 py-3">
+                <span>Finishing materials</span>
+                <AnimatedAmount value={groupTotal('finishing')} className="num" />
+              </div>
+              <div className="flex items-baseline justify-between px-5 py-3">
+                <span className="font-medium">Materials</span>
+                <AnimatedAmount value={quote.materialsTotal} className="num font-medium" />
+              </div>
+            </>
+          ) : (
+            <div className="flex items-baseline justify-between px-5 py-3">
+              <span className="font-medium">Materials</span>
+              <AnimatedAmount value={quote.materialsTotal} className="num font-medium" />
+            </div>
+          )}
+          <div className="flex items-baseline justify-between px-5 py-3">
+            <span>
+              Labour <span className="text-caption text-subtle">({formatCurrency(quote.labour.rate)} / sq ft)</span>
+            </span>
+            <span className="num">{formatCurrency(quote.labour.amount)}</span>
+          </div>
+          <div className="flex items-baseline justify-between gap-4 px-5 py-3">
+            <span>
+              Site overheads{' '}
+              <span className="text-caption text-subtle">
+                (shuttering, scaffolding, curing, transport &amp; supervision — {quote.overheads.pct}%)
+              </span>
+            </span>
+            <AnimatedAmount value={quote.overheads.amount} className="num shrink-0" />
+          </div>
+          <div className="flex items-baseline justify-between border-t bg-[rgb(var(--c-text))]/[0.03] px-5 py-3.5">
+            <span className="font-semibold">Total</span>
+            <AnimatedAmount value={quote.total} className="num font-semibold" />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <Button variant="accent" size="lg" onClick={onDownload} leftIcon={<Download className="h-4 w-4" />}>
+          Get this as a PDF
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          href={`https://wa.me/${SITE.phoneRaw.replace(/\D/g, '')}?text=${encodeURIComponent('Hi! I used your cost estimator and would like to discuss my project.')}`}
+          leftIcon={<MessageCircle className="h-4 w-4" />}
+        >
+          Discuss on WhatsApp
+        </Button>
+      </div>
+
+      <ul className="mt-8 space-y-1.5 text-caption leading-relaxed text-subtle">
+        {ASSUMPTIONS.map((a) => (
+          <li key={a} className="flex gap-2">
+            <span aria-hidden>·</span>
+            {a}
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop hover preview — one shared fixed node (the materials
+          container clips overflow, fixed positioning is immune). */}
+      <AnimatePresence>
+        {preview && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="pointer-events-none fixed z-50 w-56 -translate-x-1/2 overflow-hidden rounded-xl border bg-white shadow-xl"
+            style={{ left: preview.x, top: preview.y, transform: `translateX(-50%) translateY(${preview.below ? '0' : '-100%'})` }}
+          >
+            {preview.opt.photo ? (
+              <img src={preview.opt.photo} alt={preview.opt.label} className="h-36 w-full object-cover" />
+            ) : (
+              <span className="flex h-28 items-center justify-center p-4">
+                <img src={preview.opt.logo ?? ''} alt={preview.opt.label} className="max-h-16 w-auto max-w-full object-contain" />
+              </span>
+            )}
+            <p className="flex items-baseline justify-between gap-2 px-3 py-2 text-caption text-neutral-800">
+              <span className="truncate font-medium">
+                {preview.opt.label}
+                {preview.opt.detail ? ` · ${preview.opt.detail}` : ''}
+              </span>
+              <span className="num shrink-0 text-neutral-500">{formatCurrency(preview.opt.rate)}</span>
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* "See photos" sheet — the phone-first way to look closely: large
+          swatches, and tapping one selects it and closes. Seeing and
+          choosing happen in the same place. */}
+      <Dialog
+        open={photosLine !== undefined && photosLine !== null}
+        onClose={() => setPhotosForKey(null)}
+        title={photosLine ? `${photosLine.label} — brands` : ''}
+        description="Tap one to select it."
+        size="lg"
+      >
+        {photosLine && (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {photosLine.options.map((opt) => {
+              const selected = opt.key === photosLine.chosen.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => {
+                    onChoose(photosLine.key, opt.key);
+                    setPhotosForKey(null);
+                  }}
+                  className={
+                    selected
+                      ? 'relative overflow-hidden rounded-xl border-2 border-cyan-600 bg-cyan-500/[0.06] text-left transition-colors'
+                      : 'relative overflow-hidden rounded-xl border text-left transition-colors hover:border-cyan-500'
+                  }
+                >
+                  {opt.default && (
+                    <span className="absolute left-2 top-2 z-10 rounded-full bg-cyan-600 px-1.5 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wide text-white">
+                      Our pick
+                    </span>
+                  )}
+                  {opt.photo ? (
+                    <img src={opt.photo} alt={opt.label} className="h-40 w-full object-cover sm:h-44" loading="lazy" />
+                  ) : (
+                    <span className="flex h-40 items-center justify-center bg-white p-5 sm:h-44">
+                      <img src={opt.logo ?? ''} alt={opt.label} className="max-h-16 w-auto max-w-full object-contain sm:max-h-20" loading="lazy" />
+                    </span>
+                  )}
+                  <span className="flex items-baseline justify-between gap-2 px-3 py-2">
+                    <span className="min-w-0">
+                      <span className={selected ? 'block truncate text-sm font-medium' : 'block truncate text-sm'}>{opt.label}</span>
+                      {opt.detail && <span className="block truncate text-caption text-subtle">{opt.detail}</span>}
+                    </span>
+                    <span className="num shrink-0 text-caption text-muted">{formatCurrency(opt.rate)}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </Dialog>
+
+      {/* Sticky mini-bar — small screens, once the headline card is gone. */}
+      <AnimatePresence>
+        {headlineGone && (
+          <motion.div
+            initial={{ y: 72, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 72, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-x-0 bottom-0 z-40 border-t bg-[rgb(var(--c-bg))]/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 backdrop-blur lg:hidden"
+          >
+            <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
+              <div>
+                <p className="text-[0.65rem] uppercase tracking-wide text-subtle">
+                  {input.package === 'semi-furnished' ? 'Semi Furnished' : 'Civil Work'} estimate
+                </p>
+                <p className="num font-display text-lg font-semibold leading-tight">
+                  {formatCurrencyCompact(quote.totalMin)} – {formatCurrencyCompact(quote.totalMax)}
+                </p>
+              </div>
+              <Button variant="accent" size="md" onClick={onDownload} leftIcon={<Download className="h-4 w-4" />}>
+                Get PDF
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Lead-capture gate for the PDF — ported unchanged from the old       */
+/* Result screen: the estimate stays free, the itemised PDF is what    */
+/* is worth a name and a number.                                       */
+/* ------------------------------------------------------------------ */
+
+function LeadDialog({
+  open,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (lead: { name: string; phone: string; email?: string }) => void;
+}) {
+  const [name, setName] = useState(() => getVisitor() ?? '');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; consent?: string }>({});
+
+  const submit = () => {
+    const next: typeof errors = {};
+    if (name.trim().length < 2) next.name = 'Please enter your name';
+    if (!/^[+]?[\d\s-]{10,15}$/.test(phone.trim())) next.phone = 'Enter a valid 10-digit mobile number';
+    if (!consent) next.consent = CONSENT_REQUIRED;
+    setErrors(next);
+    if (Object.keys(next).length) return;
+    onSubmit({ name: name.trim(), phone: phone.trim(), email: email.trim() || undefined });
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Where should we send this?"
+      description="Two fields. We generate your PDF instantly — no email verification, no waiting."
+      size="sm"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="accent" onClick={submit} leftIcon={<Download className="h-4 w-4" />}>
+            Get my detailed PDF
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <FormField label="Your name" htmlFor="lead-name" required error={errors.name}>
+          <Input id="lead-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ritu Sharma" error={errors.name} />
+        </FormField>
+        <FormField label="Mobile number" htmlFor="lead-phone" required error={errors.phone}>
+          <Input id="lead-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="98290 00000" error={errors.phone} />
+        </FormField>
+        <FormField label="Email" htmlFor="lead-email" hint="Optional">
+          <Input id="lead-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        </FormField>
+        <ConsentCheckbox checked={consent} onChange={setConsent} error={errors.consent} />
+        <p className="text-caption text-subtle">We use this only to follow up on your estimate. No marketing lists, no sharing.</p>
+      </div>
+    </Dialog>
   );
 }
