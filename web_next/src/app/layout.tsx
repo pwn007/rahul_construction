@@ -15,7 +15,19 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.name,
-  icons: { icon: '/favicon.svg' },
+  /* The .ico + PNGs are rasters of favicon.svg (regenerate them together if the
+     mark changes). SVG alone left Google's favicon crawler showing a globe on
+     the search result — it wants the classic formats at ≥48px far more
+     reliably, and /favicon.ico 404'd. Order matters: ico first as the
+     universal fallback, svg after for browsers that prefer it. */
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     type: 'website',
     siteName: SITE.name,
