@@ -135,8 +135,15 @@ export function ProjectsView() {
 
       <section id="project-grid" className="section-sm">
         <div className="container">
-          {/* Filter bar */}
-          <div className="surface sticky top-[calc(var(--nav-h)+8px)] z-20 rounded-xl border p-4 shadow-sm">
+          {/* Filter bar.
+
+              Sticky only from `sm`. On a phone the pinned rounded card hung over
+              the project photos as the page scrolled — a floating island with
+              content sliding behind its side margins (the client sent two
+              screenshots). Chrome that spans the viewport can stick; a card
+              can't. The short list (ten projects) makes scroll-back-to-filter
+              cheap, so mobile simply lets it scroll away. */}
+          <div className="surface z-20 rounded-xl border p-4 shadow-sm max-sm:p-3 sm:sticky sm:top-[calc(var(--nav-h)+8px)]">
             <div className="flex flex-wrap items-center gap-3">
               <SlidersHorizontal className="hidden h-4 w-4 shrink-0 text-subtle sm:block" />
 
@@ -153,15 +160,22 @@ export function ProjectsView() {
                 Wrapping removes the scroller outright, and dropping `flex-1` stops
                 the selects starving it. The chips take the rows they need; the
                 parent already wraps, so the selects fall below when space runs out.
+
+                Below `sm` the trade reverses and the rail comes back: the selects
+                sit *under* the chips there, so nothing competes for the row and
+                the rail gets the full container (~342px at 390) instead of the
+                72px that killed it at 768. Wrapped chips on a phone cost two rows
+                of a sticky card that already stood ~470px tall — the client sent
+                a screenshot. A cut-off chip at the right edge is the scroll cue.
               */}
-              <div className="flex flex-wrap gap-1.5">
+              <div className="no-scrollbar flex flex-wrap gap-1.5 max-sm:w-full max-sm:flex-nowrap max-sm:overflow-x-auto">
                 {CATEGORIES.map((c) => (
                   <button
                     key={c.value}
                     onClick={() => setFilter('category', c.value)}
                     aria-pressed={category === c.value}
                     className={cn(
-                      'whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm transition-colors',
+                      'shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm transition-colors',
                       category === c.value
                         ? 'bg-navy-800 text-white dark:bg-cyan-500 dark:text-navy-950'
                         : 'text-muted hover:bg-[rgb(var(--c-text))]/[0.05]',
@@ -173,32 +187,53 @@ export function ProjectsView() {
               </div>
 
               {/* A native select with `w-auto` sizes to its longest option — the locality
-                  list pushed this row to 559px and took the document with it. */}
-              <div className="flex flex-wrap items-center gap-2">
-                <Select value={locality} onChange={(e) => setFilter('locality', e.target.value)} aria-label="Filter by locality" className="h-11 w-full min-w-0 flex-1 sm:w-auto sm:flex-none lg:text-caption">
-                  <option value="all">All localities</option>
-                  {localities.map((l) => (
-                    <option key={l} value={l}>
-                      {l}
-                    </option>
-                  ))}
-                </Select>
-                <Select value={stage} onChange={(e) => setFilter('stage', e.target.value)} aria-label="Filter by status" className="h-11 w-full min-w-0 flex-1 sm:w-auto sm:flex-none lg:text-caption">
-                  {STAGES.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </Select>
-                <Select value={sort} onChange={(e) => setFilter('sort', e.target.value)} aria-label="Sort projects" className="h-11 w-full min-w-0 flex-1 sm:w-auto sm:flex-none lg:text-caption">
-                  {SORTS.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </Select>
+                  list pushed this row to 559px and took the document with it.
 
-                <div className="flex rounded-md border p-0.5">
+                  Every Select is wrapped in a sizing div because the component
+                  wraps its <select> in a plain `relative` div of its own: classes
+                  passed to Select land on the inner element, so the *flex item*
+                  here is a div nothing was controlling — which is why phones got
+                  one select per row (each wrapper shrink-wrapped its longest
+                  option and wrapped). Below `sm` the wrappers lay out as two
+                  compact rows — locality beside the view toggle, then status and
+                  sort as halves (readable labels beat a one-row cram that left
+                  ~55px of text). `max-sm:order-*` does the pairing; from `sm` the
+                  DOM order and shrink-wrap sizing are exactly what they were. */}
+              <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
+                {/* basis is the wrap decider: flex-1's basis-0 let the status
+                    select join this line and squeeze "All localities" to two
+                    letters — a wide basis (full width minus the toggle) claims
+                    the row, and grow absorbs the rounding. */}
+                <div className="min-w-0 max-sm:order-1 max-sm:flex-1 max-sm:basis-[calc(100%-4.75rem)]">
+                  <Select value={locality} onChange={(e) => setFilter('locality', e.target.value)} aria-label="Filter by locality" className="h-11 w-full min-w-0 max-sm:h-10 max-sm:text-sm sm:w-auto lg:text-caption">
+                    <option value="all">All localities</option>
+                    {localities.map((l) => (
+                      <option key={l} value={l}>
+                        {l}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="min-w-0 max-sm:order-3 max-sm:w-[calc(50%-0.25rem)]">
+                  <Select value={stage} onChange={(e) => setFilter('stage', e.target.value)} aria-label="Filter by status" className="h-11 w-full min-w-0 max-sm:h-10 max-sm:text-sm sm:w-auto lg:text-caption">
+                    {STAGES.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="min-w-0 max-sm:order-4 max-sm:w-[calc(50%-0.25rem)]">
+                  <Select value={sort} onChange={(e) => setFilter('sort', e.target.value)} aria-label="Sort projects" className="h-11 w-full min-w-0 max-sm:h-10 max-sm:text-sm sm:w-auto lg:text-caption">
+                    {SORTS.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="flex shrink-0 rounded-md border p-0.5 max-sm:order-2">
                   <button
                     onClick={() => setView('grid')}
                     aria-label="Grid view"
