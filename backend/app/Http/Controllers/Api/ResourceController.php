@@ -225,6 +225,7 @@ class ResourceController extends Controller
                 'serviceInterest' => 'Interested in',
                 'budget' => 'Budget',
                 'city' => 'City',
+                'state' => 'State',
                 'message' => 'Message',
                 'source' => 'Source',
                 'propertyType' => 'Property type',

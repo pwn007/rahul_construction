@@ -37,3 +37,11 @@ supreme, prince, kisan`) are the manufacturers' trademarks, sourced from
 official sites and Wikipedia, shown to identify their products offered at
 their rates (nominative use, same basis as the cement/steel marks). The
 Astral white-variant mark is presented on its own navy backdrop.
+
+## Geo data (not an image, credited here to keep one credits file)
+
+- `web_next/public/geo/states.json` + `web_next/public/geo/cities/*.json` — India's 36
+  states/UTs and 4,198 cities, extracted 8 Sep 2026 from
+  [dr5hn/countries-states-cities-database](https://github.com/dr5hn/countries-states-cities-database)
+  (Open Database License v1.0). The extract keeps only `name`/`iso2`; regenerate by
+  re-downloading `json/countries+states+cities.json` and re-running the same filter.

@@ -330,6 +330,13 @@ export interface EstimateRequest extends BaseEntity, LeadMeta {
   packageChosen?: string;
   qualityTier: string;
   location: string;
+  /**
+   * Structured geography, captured in the lead form since Sep 2026 for the
+   * nationwide plan. Optional because older rows predate the fields;
+   * `location` stays the lowercase-city it always was.
+   */
+  state?: string;
+  city?: string;
   enhancements: string[];
   /**
    * The exact specification the visitor chose, material key → grade, so an

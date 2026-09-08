@@ -22,7 +22,11 @@ const inr = (n: number) => `Rs ${formatNumber(Math.round(n))}`;
  * ~30 KB) that renders identically everywhere. One page, on purpose: a
  * shopping list a client can hold next to any contractor's quote.
  */
-export function generateCivilPdf(quote: Quote, input: QuoteInput, lead: { name: string; phone: string; email?: string }) {
+export function generateCivilPdf(
+  quote: Quote,
+  input: QuoteInput,
+  lead: { name: string; phone: string; email?: string; state?: string; city?: string },
+) {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
@@ -69,7 +73,7 @@ export function generateCivilPdf(quote: Quote, input: QuoteInput, lead: { name: 
   doc.text(lead.name || 'Prospective client', M, y + 17);
   doc.setFont('helvetica', 'normal').setFontSize(9);
   setColor(GREY);
-  doc.text([lead.phone, lead.email].filter(Boolean).join('  ·  '), M, y + 31);
+  doc.text([lead.phone, lead.email, lead.city && `${lead.city}${lead.state ? `, ${lead.state}` : ''}`].filter(Boolean).join('  ·  ') as string, M, y + 31);
   doc.text(`${typeLabel} · ${formatNumber(input.areaPerFloor)} ${unitLabel} per floor · ${floorsLabel}`, W / 2 + 20, y + 17);
   doc.text(
     `Built-up area ${formatNumber(quote.builtUpArea)} sq ft · ${input.package === 'semi-furnished' ? 'Structure + finishing' : 'Civil structure only'}`,

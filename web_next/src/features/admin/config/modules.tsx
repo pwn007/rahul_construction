@@ -933,6 +933,8 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'phone', label: 'Phone', type: 'text', span: 6 },
       { name: 'email', label: 'Email', type: 'email', span: 6 },
       { name: 'location', label: 'Locality', type: 'text', span: 6 },
+      { name: 'city', label: 'City', type: 'text', span: 6 },
+      { name: 'state', label: 'State', type: 'text', span: 6 },
       { name: 'propertyType', label: 'Property type', type: 'text', span: 4 },
       { name: 'packageType', label: 'Package', type: 'text', span: 4 },
       { name: 'qualityTier', label: 'Quality tier', type: 'text', span: 4 },
@@ -953,8 +955,8 @@ export const MODULES: ResourceConfig<never>[] = [
     preview: (row: never) => {
       const e = row as unknown as {
         name: string; phone: string; propertyType: string; packageType: string; qualityTier: string;
-        location: string; areaPerFloor: number; builtUpArea: number; floors: number; totalMin: number;
-        totalMax: number; timelineWeeks: number; enhancements: string[];
+        location: string; state?: string; city?: string; areaPerFloor: number; builtUpArea: number;
+        floors: number; totalMin: number; totalMax: number; timelineWeeks: number; enhancements: string[];
       };
       return (
         <div>
@@ -974,7 +976,10 @@ export const MODULES: ResourceConfig<never>[] = [
               ['Property type', e.propertyType],
               ['Package', e.packageType],
               ['Quality', e.qualityTier],
-              ['Locality', e.location],
+              /* Old rows predate the pickers — fall back to the locality
+                 column so the cell never sits empty. */
+              ['City', e.city ?? e.location],
+              ['State', e.state ?? '—'],
               ['Area per floor', `${formatNumber(e.areaPerFloor)}`],
               ['Floors', String(e.floors)],
             ].map(([k, v]) => (

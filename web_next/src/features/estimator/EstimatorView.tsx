@@ -14,6 +14,7 @@ import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/lib/forma
 import { SITE } from '@/constants/site';
 import { AREA_UNITS, FLOOR_OPTIONS, PROPERTY_TYPES, ASSUMPTIONS } from '@/constants/estimator';
 import { estimatesService } from '@/services';
+import { useStates, useCities, DEFAULT_STATE_CODE, DEFAULT_CITY, CITY_OTHER } from './geo';
 import { scrollToTarget } from '@/hooks/useLenis';
 import { DEFAULT_QUOTE_INPUT, useQuote, type Quote, type QuoteInput, type QuoteOption } from './quote';
 import { MaterialArt } from './components/MaterialArt';
@@ -107,12 +108,12 @@ export function EstimatorView() {
     });
   };
 
-  const handleLead = async (lead: { name: string; phone: string; email?: string }) => {
+  const handleLead = async (lead: { name: string; phone: string; email?: string; state: string; city: string }) => {
     if (!quote) return;
     const { generateCivilPdf } = await import('./pdf');
     generateCivilPdf(quote, committed, lead);
     setLeadOpen(false);
-    track('lead_submit', { source: 'estimator-pdf', fields: 3 });
+    track('lead_submit', { source: 'estimator-pdf', fields: 5 });
     markLeadCaptured();
     rememberVisitor(lead.name);
 
@@ -130,7 +131,12 @@ export function EstimatorView() {
         floors: committed.floors,
         packageType: committed.package,
         qualityTier: 'standard',
-        location: 'jaipur',
+        /* Structured geography for the nationwide plan; `location` keeps the
+           same meaning it always had (a lowercase city), so old rows and new
+           stay comparable in one column. */
+        state: lead.state,
+        city: lead.city,
+        location: lead.city.toLowerCase(),
         enhancements: [],
         /* The whole shopping list — chosen brand included — so sales can
            rebuild the quote line by line. The options[] catalogue is UI
@@ -900,22 +906,40 @@ function LeadDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmit: (lead: { name: string; phone: string; email?: string }) => void;
+  onSubmit: (lead: { name: string; phone: string; email?: string; state: string; city: string }) => void;
 }) {
   const [name, setName] = useState(() => getVisitor() ?? '');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  /* Pre-selected, not blank: most visitors are exactly here today, so the
+     default costs them nothing, and an outstation visitor changes it in two
+     taps. A blank-required pair would tax every Jaipur lead to purify data
+     the phone call verifies anyway. */
+  const [stateCode, setStateCode] = useState(DEFAULT_STATE_CODE);
+  const [city, setCity] = useState<string>(DEFAULT_CITY);
   const [consent, setConsent] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; phone?: string; consent?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; city?: string; consent?: string }>({});
+
+  const states = useStates().data ?? [];
+  const cities = useCities(stateCode).data;
 
   const submit = () => {
     const next: typeof errors = {};
     if (name.trim().length < 2) next.name = 'Please enter your name';
     if (!/^[+]?[\d\s-]{10,15}$/.test(phone.trim())) next.phone = 'Enter a valid 10-digit mobile number';
+    if (!city) next.city = 'Please select your city';
     if (!consent) next.consent = CONSENT_REQUIRED;
     setErrors(next);
     if (Object.keys(next).length) return;
-    onSubmit({ name: name.trim(), phone: phone.trim(), email: email.trim() || undefined });
+    onSubmit({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim() || undefined,
+      /* The lead stores names, not codes — readable in the admin drawer and
+         the owner's mail without a lookup table. */
+      state: states.find((s) => s.code === stateCode)?.name ?? stateCode,
+      city,
+    });
   };
 
   return (
@@ -923,7 +947,7 @@ function LeadDialog({
       open={open}
       onClose={onClose}
       title="Where should we send this?"
-      description="Two fields. We generate your PDF instantly — no email verification, no waiting."
+      description="We generate your PDF instantly — no email verification, no waiting."
       size="sm"
       footer={
         <>
@@ -946,6 +970,39 @@ function LeadDialog({
         <FormField label="Email" htmlFor="lead-email" hint="Optional">
           <Input id="lead-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </FormField>
+        {/* Two native selects — the exact controls the inputs card already
+            uses, so the dialog stays in one visual language. Changing state
+            blanks the city (its list just changed under it) rather than
+            silently keeping a city from the wrong state. */}
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="State" htmlFor="lead-state" required>
+            <Select
+              id="lead-state"
+              value={stateCode}
+              onChange={(e) => {
+                setStateCode(e.target.value);
+                setCity('');
+              }}
+            >
+              {states.map((s) => (
+                <option key={s.code} value={s.code}>
+                  {s.name}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+          <FormField label="City" htmlFor="lead-city" required error={errors.city}>
+            <Select id="lead-city" value={city} onChange={(e) => setCity(e.target.value)}>
+              {!city && <option value="">Select city…</option>}
+              {(cities ?? (city ? [city] : [])).map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+              <option value={CITY_OTHER}>Other / not listed</option>
+            </Select>
+          </FormField>
+        </div>
         <ConsentCheckbox checked={consent} onChange={setConsent} error={errors.consent} />
         <p className="text-caption text-subtle">We use this only to follow up on your estimate. No marketing lists, no sharing.</p>
       </div>
