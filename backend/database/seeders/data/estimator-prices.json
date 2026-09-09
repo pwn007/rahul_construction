@@ -587,11 +587,22 @@
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-06-01T09:00:00.000Z",
     "status": "published",
-    "key": "labour:civil",
-    "label": "Labour — Civil Work",
+    "key": "labour:civil-ground",
+    "label": "Labour — Civil (Ground only)",
     "unit": "per sq ft built-up",
-    "rate": 250,
+    "rate": 450,
     "order": 56
+  },
+  {
+    "id": "esp_59",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "labour:civil-upper",
+    "label": "Labour — Civil (Ground + floors)",
+    "unit": "per sq ft built-up",
+    "rate": 350,
+    "order": 57
   },
   {
     "id": "esp_57",
@@ -602,7 +613,7 @@
     "label": "Labour — Semi Furnished",
     "unit": "per sq ft built-up",
     "rate": 400,
-    "order": 57
+    "order": 58
   },
   {
     "id": "esp_58",
@@ -613,6 +624,6 @@
     "label": "Site overheads",
     "unit": "% of materials + labour",
     "rate": 15,
-    "order": 58
+    "order": 59
   }
 ]

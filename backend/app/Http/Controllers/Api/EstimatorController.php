@@ -122,14 +122,23 @@ class EstimatorController extends Controller
             ];
         }
 
-        $labourRates = [
-            'civil' => (int) ($db['labour:civil'] ?? $cfg['labour_rate']['civil']),
-            'semi-furnished' => (int) ($db['labour:semi-furnished'] ?? $cfg['labour_rate']['semi-furnished']),
-        ];
+        /* Civil labour is floor-dependent: a ground-only build carries the
+           whole excavation/foundation/backfilling effort on one floor's area,
+           so its per-sqft labour runs higher; any added floor spreads that
+           one-time work and the rate drops (the client's numbers, and the
+           industry's — upper floors are quoted 15–20% cheaper per sq ft).
+           Semi-furnished stays flat by the client's choice. Both civil rates
+           ride in the response so the page's explainer note quotes whatever
+           the admin has actually set, never a hardcoded number. */
+        $civilGround = (int) ($db['labour:civil-ground'] ?? $cfg['labour_rate']['civil']['ground']);
+        $civilUpper = (int) ($db['labour:civil-upper'] ?? $cfg['labour_rate']['civil']['upper']);
+        $labourRate = $package === 'civil'
+            ? ((int) $validated['floors'] === 1 ? $civilGround : $civilUpper)
+            : (int) ($db['labour:semi-furnished'] ?? $cfg['labour_rate']['semi-furnished']);
         /* DB row holds a whole percent (15); the config fallback is a fraction. */
         $overheadsPct = (float) ($db['overheads'] ?? $cfg['overheads'] * 100);
 
-        $labour = round($labourRates[$package] * $builtUp);
+        $labour = round($labourRate * $builtUp);
         $overheads = round(($materialsTotal + $labour) * $overheadsPct / 100);
         $total = $materialsTotal + $labour + $overheads;
 
@@ -142,10 +151,14 @@ class EstimatorController extends Controller
             'wastagePct' => (int) round($cfg['wastage'] * 100),
             'lines' => $lines,
             'materialsTotal' => $materialsTotal,
-            /* The active package's own rate, a scalar — the map went out once
-               and the UI's formatCurrency printed an em-dash off it (the type
-               always said number). Nothing needs the other package's rate. */
-            'labour' => ['rate' => $labourRates[$package], 'amount' => $labour],
+            /* rate: the applied scalar (a map went out once and formatCurrency
+               printed an em-dash off it — the type says number). rates: both
+               civil tiers, only when they explain this quote, for the
+               floors-note on the page. */
+            'labour' => array_merge(
+                ['rate' => $labourRate, 'amount' => $labour],
+                $package === 'civil' ? ['rates' => ['ground' => $civilGround, 'upper' => $civilUpper]] : [],
+            ),
             'overheads' => ['pct' => (int) round($overheadsPct), 'amount' => $overheads],
             'total' => $total,
             'totalMin' => (int) round($total * $cfg['range_low']),

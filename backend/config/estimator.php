@@ -11,7 +11,8 @@
 | quoted, and the target is the firm's own published civil band of
 | ₹1,200–1,400 / sq ft (constants/estimator.ts PACKAGES):
 |
-|   labour_rate 250  — market mason+labour for structure work; the old
+|   labour_rate      — market mason+labour for structure work, floor-wise for
+|                      civil (450 ground-only / 350 with added floors); the old
 |                      labourOnlyRate of 100 was a labour-contract headline,
 |                      not the built-in labour share of a turnkey rate.
 |   overheads   0.15 — shuttering, scaffolding, curing water/power,
@@ -44,7 +45,14 @@ return [
        plumbers); calibrated the same way civil was — so a 2,000 sq ft semi
        build lands at ≈ ₹2,100/sq ft all-in, inside the published
        ₹1,800–2,200 band. */
-    'labour_rate' => ['civil' => 250, 'semi-furnished' => 400],
+    /* Civil labour is floor-dependent since Sep 2026 (client's call, and the
+       industry's: upper floors skip excavation, foundation and backfilling, so
+       published guides put them 15–20% cheaper per sq ft). A ground-only build
+       carries all of that one-time work on a single floor's area — ₹450; any
+       added floor spreads it — ₹350. Semi-furnished stays flat by the client's
+       choice. These are fallbacks; the estimator_prices rows
+       (labour:civil-ground / labour:civil-upper / labour:semi-furnished) win. */
+    'labour_rate' => ['civil' => ['ground' => 450, 'upper' => 350], 'semi-furnished' => 400],
     'packages' => ['civil', 'semi-furnished'],
     'overheads' => 0.15,    // fraction of (materials + labour)
 

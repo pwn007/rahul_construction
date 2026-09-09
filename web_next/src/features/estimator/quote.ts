@@ -76,7 +76,10 @@ export interface Quote {
   wastagePct: number;
   lines: QuoteLine[];
   materialsTotal: number;
-  labour: { rate: number; amount: number };
+  /* `rates` rides along only on civil quotes: ground-only carries the one-time
+     excavation/foundation work on one floor, so the two tiers differ and the
+     page's floors-note quotes them (admin-set, never hardcoded in copy). */
+  labour: { rate: number; amount: number; rates?: { ground: number; upper: number } };
   overheads: { pct: number; amount: number };
   total: number;
   totalMin: number;

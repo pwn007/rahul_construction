@@ -104,7 +104,8 @@ export const FURNITURE_RECORDS: FurnitureSpec[] = FURNITURE_LINES.map((l, i) => 
  * wastage buffer BAKED INTO the rates of every line that used to waste
  * (rate × 1.2, rounded; ≥200 to the nearest 5) — the client's call: quantities
  * now read net, the allowance rides inside the rate like a contractor's loaded
- * rate. Keys are "<line>:<option>", plus labour:civil / labour:semi-furnished
+ * rate. Keys are "<line>:<option>", plus labour:civil-ground /
+ * labour:civil-upper / labour:semi-furnished
  * (₹ per built-up sq ft) and overheads (whole percent). If a rate changes here
  * or in the config, regenerate the other side with it — contract-diff catches
  * drift.
@@ -163,7 +164,10 @@ export const ESTIMATOR_PRICES: EstimatorPrice[] = [
   { ...meta('esp_53'), key: 'water-tank:s15', label: 'Water tanks — 1,000 L + 500 L', unit: 'per tank', rate: 15000, order: 53 },
   { ...meta('esp_54'), key: 'water-tank:s50', label: 'Water tanks — 5,000 L', unit: 'per tank', rate: 50000, order: 54 },
   { ...meta('esp_55'), key: 'water-tank:s100', label: 'Water tanks — 10,000 L', unit: 'per tank', rate: 100000, order: 55 },
-  { ...meta('esp_56'), key: 'labour:civil', label: 'Labour — Civil Work', unit: 'per sq ft built-up', rate: 250, order: 56 },
-  { ...meta('esp_57'), key: 'labour:semi-furnished', label: 'Labour — Semi Furnished', unit: 'per sq ft built-up', rate: 400, order: 57 },
-  { ...meta('esp_58'), key: 'overheads', label: 'Site overheads', unit: '% of materials + labour', rate: 15, order: 58 },
+  /* Civil labour is floor-wise (client's call): ground-only carries all the
+     one-time excavation/foundation work on one floor's area. */
+  { ...meta('esp_56'), key: 'labour:civil-ground', label: 'Labour — Civil (Ground only)', unit: 'per sq ft built-up', rate: 450, order: 56 },
+  { ...meta('esp_59'), key: 'labour:civil-upper', label: 'Labour — Civil (Ground + floors)', unit: 'per sq ft built-up', rate: 350, order: 57 },
+  { ...meta('esp_57'), key: 'labour:semi-furnished', label: 'Labour — Semi Furnished', unit: 'per sq ft built-up', rate: 400, order: 58 },
+  { ...meta('esp_58'), key: 'overheads', label: 'Site overheads', unit: '% of materials + labour', rate: 15, order: 59 },
 ];

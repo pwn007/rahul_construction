@@ -740,11 +740,25 @@ function QuoteResult({
               <AnimatedAmount value={quote.materialsTotal} className="num font-medium" />
             </div>
           )}
-          <div className="flex items-baseline justify-between px-5 py-3">
-            <span>
-              Labour <span className="text-caption text-subtle">({formatCurrency(quote.labour.rate)} / sq ft)</span>
-            </span>
-            <span className="num">{formatCurrency(quote.labour.amount)}</span>
+          <div className="px-5 py-3">
+            <div className="flex items-baseline justify-between">
+              <span>
+                Labour <span className="text-caption text-subtle">({formatCurrency(quote.labour.rate)} / sq ft)</span>
+              </span>
+              <span className="num">{formatCurrency(quote.labour.amount)}</span>
+            </div>
+            {/* Why the rate moves with the floor count — without this, toggling
+                Ground only ↔ Ground + 1 looks like an arbitrary price jump.
+                Both numbers come from the server (admin-set), never hardcoded.
+                Industry guides put upper floors 15–20% cheaper per sq ft for
+                exactly this reason, so the copy states the mechanism plainly. */}
+            {quote.labour.rates && (
+              <p className="mt-1 text-caption leading-relaxed text-subtle">
+                {input.floors === 1
+                  ? `A single-floor build carries all the one-time work — excavation, foundation, backfilling — on one floor's area, so labour runs ${formatCurrency(quote.labour.rates.ground)}/sq ft. Add a floor and it drops to ${formatCurrency(quote.labour.rates.upper)}.`
+                  : `Upper floors skip the excavation and foundation work, so labour here is ${formatCurrency(quote.labour.rates.upper)}/sq ft (a ground-only build runs ${formatCurrency(quote.labour.rates.ground)}).`}
+              </p>
+            )}
           </div>
           <div className="flex items-baseline justify-between gap-4 px-5 py-3">
             <span>
