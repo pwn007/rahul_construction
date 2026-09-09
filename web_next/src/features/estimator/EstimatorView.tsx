@@ -591,11 +591,12 @@ function QuoteResult({
                   </span>
                   <h4 className="truncate text-heading-sm font-semibold">{line.label}</h4>
                 </div>
-                <span className="num shrink-0 rounded-full border px-2.5 py-1 text-[0.65rem] text-subtle">
-                  {line.coefficient === 1 && line.unit === 'sq ft' && !line.wastes
-                    ? 'covers built-up area'
-                    : `${line.coefficient} ${line.unit.replace(/s$/, '')}/sq ft${line.wastes && quote.wastagePct > 0 ? ` + ${quote.wastagePct}%` : ''}`}
-                </span>
+                {/* The per-sqft thumb-rule chip lived here until Sep 2026.
+                    It existed to justify the "+20%" buffer beside it; once the
+                    client baked the allowance into the rates the chip was down
+                    to a bare coefficient, and they asked for it to go — the
+                    YOU NEED quantity already carries the answer. Coefficients
+                    still ride in the payload for the PDF/lead record. */}
               </div>
 
               {/* One tinted body binds the stats and the brand picker into a
