@@ -131,8 +131,6 @@ export const ESTIMATOR_PRICES: EstimatorPrice[] = [
   { ...meta('esp_19'), key: 'aggregate:graded', label: 'Aggregate — Graded 20 & 10 mm', unit: 'per cubic ft', rate: 54, order: 19 },
   { ...meta('esp_20'), key: 'aggregate:washed', label: 'Aggregate — Washed, low-silt', unit: 'per cubic ft', rate: 62, order: 20 },
   { ...meta('esp_21'), key: 'stone:masonry', label: 'Foundation stone — Masonry stone (Kota quarry)', unit: 'per tonne', rate: 900, order: 21 },
-  { ...meta('esp_22'), key: 'waterproofing:standard', label: 'Waterproofing — Terrace, baths & sunken', unit: 'per sq ft', rate: 40, order: 22 },
-  { ...meta('esp_23'), key: 'waterproofing:full', label: 'Waterproofing — Full envelope (+ crystalline admixture)', unit: 'per sq ft', rate: 55, order: 23 },
   { ...meta('esp_24'), key: 'flooring:t50', label: 'Flooring & tiles — Vitrified, tile up to ₹50/sq ft', unit: 'per sq ft', rate: 72, order: 24 },
   { ...meta('esp_25'), key: 'flooring:t80', label: 'Flooring & tiles — Vitrified, tile up to ₹80/sq ft', unit: 'per sq ft', rate: 114, order: 25 },
   { ...meta('esp_26'), key: 'flooring:t120', label: 'Flooring & tiles — Large-format & marble, up to ₹120/sq ft', unit: 'per sq ft', rate: 170, order: 26 },

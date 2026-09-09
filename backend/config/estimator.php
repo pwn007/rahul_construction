@@ -123,10 +123,6 @@ return [
         ['key' => 'stone', 'tier' => 'civil', 'label' => 'Foundation stone', 'unit' => 'tonnes', 'coefficient' => 0.0125, 'note' => 'Rubble masonry footings', 'options' => [
             ['key' => 'masonry', 'label' => 'Masonry stone', 'detail' => 'Kota quarry', 'rate' => 900, 'default' => true],
         ]],
-        ['key' => 'waterproofing', 'tier' => 'civil', 'label' => 'Waterproofing', 'unit' => 'sq ft', 'coefficient' => 1, 'wastes' => false, 'note' => 'Membranes & coatings', 'options' => [
-            ['key' => 'standard', 'label' => 'Terrace, baths & sunken', 'detail' => '', 'rate' => 40, 'default' => true, 'photo' => '/images/materials/wp-standard.jpg'],
-            ['key' => 'full', 'label' => 'Full envelope', 'detail' => '+ crystalline admixture', 'rate' => 55, 'photo' => '/images/materials/wp-full.jpg'],
-        ]],
 
         /*
          * Semi-furnished tier — the finishing trades, verbatim from the firm's

@@ -310,7 +310,7 @@ export function EstimatorView() {
                   {draft.package === 'civil' ? (
                     <>
                       <span className="font-medium text-[rgb(var(--c-text))]">Civil structure only.</span> Foundation
-                      to roof — masonry, RCC and waterproofing. Flooring, interiors and furniture are quoted
+                      to roof — masonry and RCC. Flooring, interiors and furniture are quoted
                       separately once the structure is scoped.
                     </>
                   ) : (

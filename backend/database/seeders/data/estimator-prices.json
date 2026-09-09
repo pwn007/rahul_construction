@@ -231,28 +231,6 @@
     "order": 21
   },
   {
-    "id": "esp_22",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-06-01T09:00:00.000Z",
-    "status": "published",
-    "key": "waterproofing:standard",
-    "label": "Waterproofing — Terrace, baths & sunken",
-    "unit": "per sq ft",
-    "rate": 40,
-    "order": 22
-  },
-  {
-    "id": "esp_23",
-    "createdAt": "2026-01-01T09:00:00.000Z",
-    "updatedAt": "2026-06-01T09:00:00.000Z",
-    "status": "published",
-    "key": "waterproofing:full",
-    "label": "Waterproofing — Full envelope (+ crystalline admixture)",
-    "unit": "per sq ft",
-    "rate": 55,
-    "order": 23
-  },
-  {
     "id": "esp_24",
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-06-01T09:00:00.000Z",
