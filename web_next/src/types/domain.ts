@@ -470,6 +470,20 @@ export interface BaseRate extends BaseEntity {
 }
 
 /**
+ * One editable number for the quantities engine — "cement:ultratech" → 505,
+ * "labour:civil" → 250, "overheads" → 15 (whole percent). Structure lives in
+ * backend/config/estimator.php; these rows overlay its rates, and a row
+ * parked in draft falls back to the config rate.
+ */
+export interface EstimatorPrice extends BaseEntity {
+  key: string;
+  label: string;
+  unit: string;
+  rate: number;
+  order: number;
+}
+
+/**
  * A priced material line, as the admin panel sees it.
  *
  * Replaced `QualityTier`. A single global quality multiplier had nothing left to

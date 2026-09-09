@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\{
-    Application, Banner, BaseRate, ClientLogo, Download, Enhancement, Enquiry,
+    Application, Banner, BaseRate, ClientLogo, Download, Enhancement, Enquiry, EstimatorPrice,
     EstimateRequest, Faq, FooterColumn, GalleryItem, HomeSection, Job,
     LocationMultiplier, MaterialSpec, MediaAsset, NavItem, Post, Project, Role,
     SeoMeta, Service, Setting, TeamMember, Testimonial, User
@@ -92,6 +92,10 @@ return [
     'roles' => ['model' => Role::class, 'public' => false, 'search' => ['name']],
 
     /* ── Estimator configuration ───────────────────────────────────────── */
+    /* The one the live quote engine actually reads (flat editable rates);
+       the ones below are the retired wizard's collections, kept for contract
+       parity. */
+    'estimator-prices' => ['model' => EstimatorPrice::class, 'public' => true, 'search' => ['key', 'label']],
     'estimator-rates' => ['model' => BaseRate::class, 'public' => true, 'search' => ['key', 'label']],
     'estimator-materials' => ['model' => MaterialSpec::class, 'public' => true, 'search' => ['key', 'label']],
     'estimator-locations' => ['model' => LocationMultiplier::class, 'public' => true, 'search' => ['key', 'label']],

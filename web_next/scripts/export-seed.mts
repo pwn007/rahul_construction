@@ -26,7 +26,7 @@ import {
   homeSections, mediaAssets, navItems, roles, seoMeta, settings, users,
 } from '../src/data/ops';
 import {
-  BASE_RATES, ENHANCEMENT_RECORDS, LOCATION_RECORDS, MATERIAL_RECORDS,
+  BASE_RATES, ESTIMATOR_PRICES, ENHANCEMENT_RECORDS, LOCATION_RECORDS, MATERIAL_RECORDS,
 } from '../src/data/estimator-config';
 
 /**
@@ -63,6 +63,7 @@ const COLLECTIONS: Record<string, readonly unknown[]> = {
   users,
   roles,
   media: mediaAssets,
+  'estimator-prices': ESTIMATOR_PRICES,
   'estimator-rates': BASE_RATES,
   'estimator-materials': MATERIAL_RECORDS,
   'estimator-locations': LOCATION_RECORDS,

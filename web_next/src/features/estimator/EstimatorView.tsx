@@ -28,8 +28,9 @@ import { MaterialArt } from './components/MaterialArt';
  * a big gap between an opaque estimate and the real bill. This version asks
  * only what arithmetic needs — plot size and floors — and answers with the
  * actual shopping list: so many bricks, so many bags of cement, priced line
- * by line, with labour, overheads and a 20% wastage buffer stated in the
- * open. Civil structure only, on purpose: quantities for finishing and
+ * by line, with labour and overheads stated in the open (the old visible
+ * wastage buffer now rides inside the admin-owned rates — see
+ * estimator-prices). Civil structure only, on purpose: quantities for finishing and
  * furniture return once this engine has proven itself against real builds
  * (the old wizard survives in git history).
  *
@@ -52,7 +53,7 @@ const DELIVERABLES = [
   {
     icon: ShieldCheck,
     title: 'Nothing hidden',
-    detail: 'Wastage buffer, labour and site overheads shown as separate lines — check the arithmetic yourself.',
+    detail: 'Labour and site overheads shown as separate lines — check the arithmetic yourself.',
   },
   {
     icon: FileDown,
@@ -562,7 +563,11 @@ function QuoteResult({
         <div className="border-b bg-[rgb(var(--c-text))]/[0.03] px-5 py-3.5">
           <h3 className="font-medium">Materials your structure needs</h3>
           <p className="mt-0.5 text-caption text-subtle">
-            Quantities include a {quote.wastagePct}% wastage buffer.
+            {/* wastagePct has been 0 since the buffer moved into the rates
+                (Sep 2026) — the branch keeps this honest if it ever returns. */}
+            {quote.wastagePct > 0
+              ? `Quantities include a ${quote.wastagePct}% wastage buffer.`
+              : 'Priced at today\u2019s Jaipur rates.'}
           </p>
         </div>
 
@@ -589,7 +594,7 @@ function QuoteResult({
                 <span className="num shrink-0 rounded-full border px-2.5 py-1 text-[0.65rem] text-subtle">
                   {line.coefficient === 1 && line.unit === 'sq ft' && !line.wastes
                     ? 'covers built-up area'
-                    : `${line.coefficient} ${line.unit.replace(/s$/, '')}/sq ft${line.wastes ? ` + ${quote.wastagePct}%` : ''}`}
+                    : `${line.coefficient} ${line.unit.replace(/s$/, '')}/sq ft${line.wastes && quote.wastagePct > 0 ? ` + ${quote.wastagePct}%` : ''}`}
                 </span>
               </div>
 

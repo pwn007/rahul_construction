@@ -8,8 +8,8 @@ import { AREA_UNITS, type AreaUnit } from '@/constants/estimator';
  *
  * The arithmetic lives on the server (backend config/estimator.php +
  * EstimatorController): quantities from per-sqft thumb-rule coefficients with
- * a 20% wastage buffer, priced at current Jaipur rates, plus labour and site
- * overheads. Keeping it server-side means a cement price change is an .env-free
+ * quantities priced at current Jaipur rates (the wastage allowance rides
+ * inside the admin-owned rates), plus labour and site overheads. Keeping it server-side means a cement price change is an .env-free
  * config edit on the host — the live estimator follows without a rebuild, and
  * the PDF, the admin's lead record and the page can never disagree.
  *

@@ -12,6 +12,7 @@ import {
   downloadsService,
   enquiriesService,
   estimatesService,
+  estimatorPricesService,
   faqsService,
   footerService,
   galleryService,
@@ -1280,16 +1281,55 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'value', label: 'Value', type: 'textarea', required: true, span: 12 },
     ],
   },
+
+  {
+    key: 'estimator-prices',
+    label: 'Estimator prices',
+    singular: 'Price',
+    /* The one knob the owner turns most. Rows are created by the deploy seed,
+       never here — the quote engine matches on the fixed `key`, so the list is
+       read-and-edit only. Parking a row in Draft makes the engine fall back to
+       the built-in default rate: the kill-switch for a bad edit. The old 20%
+       wastage buffer is baked into these rates (client's call, Sep 2026) —
+       quantities on the public page read net. */
+    description: 'Every rate the public cost estimator charges — materials by brand, labour per sq ft, and site overheads. The wastage allowance is baked into these rates.',
+    icon: 'SlidersHorizontal',
+    group: 'System',
+    service: estimatorPricesService as never,
+    canCreate: false,
+    canDelete: false,
+    searchPlaceholder: 'Search by material or brand…',
+    columns: [
+      { key: 'label', label: 'Item', render: (row: never) => <span className="font-medium">{(row as unknown as { label: string }).label}</span> },
+      { key: 'unit', label: 'Unit', width: '190px', render: (row: never) => <span className="text-caption text-subtle">{(row as unknown as { unit: string }).unit}</span> },
+      {
+        key: 'rate',
+        label: 'Rate',
+        width: '120px',
+        align: 'right',
+        render: (row: never) => {
+          const r = row as unknown as { rate: number; key: string };
+          return <span className="num font-medium">{r.key === 'overheads' ? `${r.rate}%` : `₹${formatNumber(r.rate)}`}</span>;
+        },
+      },
+      statusColumn as never,
+    ],
+    fields: [
+      { name: 'label', label: 'Item', type: 'text', span: 8, readOnly: true },
+      { name: 'unit', label: 'Unit', type: 'text', span: 4, readOnly: true },
+      { name: 'rate', label: 'Rate', type: 'number', required: true, span: 6, help: 'Whole rupees — except Site overheads, where this is a percent.' },
+      statusField,
+    ],
+  },
 ];
 
 export const MODULE_BY_KEY = Object.fromEntries(MODULES.map((m) => [m.key, m]));
 
 export const MODULE_GROUPS = ['Content', 'People', 'Leads', 'Page builder', 'System'] as const;
 
-/** Rate/quality/location/enhancement modules get a dedicated screen, so they are not in MODULES. */
+/** Screens with no generic CRUD shape — dashboards and matrices, not resources. */
 export const EXTRA_NAV = [
   { key: 'analytics', label: 'Analytics', icon: 'BarChart3', group: 'Overview' as const },
-  { key: 'estimator-config', label: 'Estimator config', icon: 'SlidersHorizontal', group: 'System' as const },
   { key: 'roles', label: 'Roles & permissions', icon: 'ShieldCheck', group: 'System' as const },
   { key: 'theme', label: 'Theme', icon: 'Palette', group: 'System' as const },
 ];

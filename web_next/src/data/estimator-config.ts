@@ -1,5 +1,6 @@
 import type {
   BaseRate,
+  EstimatorPrice,
   Enhancement,
   FurnitureSpec,
   LocationMultiplier,
@@ -14,9 +15,9 @@ import { FURNITURE_LINES, furnitureOptionOf } from '@/constants/furniture';
 /**
  * Persisted mirror of the estimator constants.
  *
- * The public calculator resolves its configuration from this collection (via the
- * API layer) and falls back to the compiled constants if the request fails —
- * so editing a rate in /admin/estimator-config changes the live estimator.
+ * The live calculator reads only ESTIMATOR_PRICES below (the estimator-prices
+ * resource, editable in /admin/estimator-prices); the other collections are the
+ * retired wizard's, kept because the API contract still serves them.
  */
 
 const meta = (id: string) => ({
@@ -95,3 +96,76 @@ export const FURNITURE_RECORDS: FurnitureSpec[] = FURNITURE_LINES.map((l, i) => 
   defaultRate: furnitureOptionOf(l, undefined).rate,
   order: i + 1,
 }));
+
+/**
+ * The flat price list the live quote engine reads (estimator-prices resource).
+ *
+ * Generated from backend/config/estimator.php on 9 Sep 2026, with the old 20%
+ * wastage buffer BAKED INTO the rates of every line that used to waste
+ * (rate × 1.2, rounded; ≥200 to the nearest 5) — the client's call: quantities
+ * now read net, the allowance rides inside the rate like a contractor's loaded
+ * rate. Keys are "<line>:<option>", plus labour:civil / labour:semi-furnished
+ * (₹ per built-up sq ft) and overheads (whole percent). If a rate changes here
+ * or in the config, regenerate the other side with it — contract-diff catches
+ * drift.
+ */
+export const ESTIMATOR_PRICES: EstimatorPrice[] = [
+  { ...meta('esp_1'), key: 'cement:ultratech', label: 'Cement — UltraTech (PPC)', unit: 'per bag', rate: 505, order: 1 },
+  { ...meta('esp_2'), key: 'cement:ambuja', label: 'Cement — Ambuja (PPC)', unit: 'per bag', rate: 505, order: 2 },
+  { ...meta('esp_3'), key: 'cement:jk-super', label: 'Cement — JK Super (OPC 53-grade)', unit: 'per bag', rate: 545, order: 3 },
+  { ...meta('esp_4'), key: 'cement:acc', label: 'Cement — ACC (OPC 43-grade)', unit: 'per bag', rate: 485, order: 4 },
+  { ...meta('esp_5'), key: 'cement:wonder', label: 'Cement — Wonder (PPC)', unit: 'per bag', rate: 470, order: 5 },
+  { ...meta('esp_6'), key: 'cement:shree', label: 'Cement — Shree (PPC)', unit: 'per bag', rate: 470, order: 6 },
+  { ...meta('esp_7'), key: 'steel:jsw', label: 'TMT Steel — JSW (Fe500D)', unit: 'per kg', rate: 86, order: 7 },
+  { ...meta('esp_8'), key: 'steel:tata', label: 'TMT Steel — TATA TISCON (Fe550D)', unit: 'per kg', rate: 94, order: 8 },
+  { ...meta('esp_9'), key: 'steel:jindal', label: 'TMT Steel — Jindal Panther (Fe500D)', unit: 'per kg', rate: 89, order: 9 },
+  { ...meta('esp_10'), key: 'steel:kamadhenu', label: 'TMT Steel — Kamadhenu (Fe500D)', unit: 'per kg', rate: 79, order: 10 },
+  { ...meta('esp_11'), key: 'steel:rathi', label: 'TMT Steel — Rathi (Fe500D)', unit: 'per kg', rate: 79, order: 11 },
+  { ...meta('esp_12'), key: 'bricks:renwel', label: 'Bricks — Renwel (Branded clay brick)', unit: 'per brick', rate: 11, order: 12 },
+  { ...meta('esp_13'), key: 'bricks:clay', label: 'Bricks — Clay brick (Standard local kiln)', unit: 'per brick', rate: 11, order: 13 },
+  { ...meta('esp_14'), key: 'bricks:flyash', label: 'Bricks — Fly-ash block', unit: 'per brick', rate: 8, order: 14 },
+  { ...meta('esp_15'), key: 'bricks:kanota', label: 'Bricks — Kanota', unit: 'per brick', rate: 13, order: 15 },
+  { ...meta('esp_16'), key: 'bricks:hanumangarh', label: 'Bricks — Hanumangarh', unit: 'per brick', rate: 13, order: 16 },
+  { ...meta('esp_17'), key: 'sand:river', label: 'Sand — River sand (Screened)', unit: 'per cubic ft', rate: 66, order: 17 },
+  { ...meta('esp_18'), key: 'sand:msand', label: 'Sand — M-sand (Manufactured)', unit: 'per cubic ft', rate: 48, order: 18 },
+  { ...meta('esp_19'), key: 'aggregate:graded', label: 'Aggregate — Graded 20 & 10 mm', unit: 'per cubic ft', rate: 54, order: 19 },
+  { ...meta('esp_20'), key: 'aggregate:washed', label: 'Aggregate — Washed, low-silt', unit: 'per cubic ft', rate: 62, order: 20 },
+  { ...meta('esp_21'), key: 'stone:masonry', label: 'Foundation stone — Masonry stone (Kota quarry)', unit: 'per tonne', rate: 900, order: 21 },
+  { ...meta('esp_22'), key: 'waterproofing:standard', label: 'Waterproofing — Terrace, baths & sunken', unit: 'per sq ft', rate: 40, order: 22 },
+  { ...meta('esp_23'), key: 'waterproofing:full', label: 'Waterproofing — Full envelope (+ crystalline admixture)', unit: 'per sq ft', rate: 55, order: 23 },
+  { ...meta('esp_24'), key: 'flooring:t50', label: 'Flooring & tiles — Vitrified, tile up to ₹50/sq ft', unit: 'per sq ft', rate: 72, order: 24 },
+  { ...meta('esp_25'), key: 'flooring:t80', label: 'Flooring & tiles — Vitrified, tile up to ₹80/sq ft', unit: 'per sq ft', rate: 114, order: 25 },
+  { ...meta('esp_26'), key: 'flooring:t120', label: 'Flooring & tiles — Large-format & marble, up to ₹120/sq ft', unit: 'per sq ft', rate: 170, order: 26 },
+  { ...meta('esp_27'), key: 'wall-finish:tractor', label: 'Wall finish & paint — Tractor emulsion', unit: 'per sq ft', rate: 26, order: 27 },
+  { ...meta('esp_28'), key: 'wall-finish:premium', label: 'Wall finish & paint — Premium emulsion', unit: 'per sq ft', rate: 34, order: 28 },
+  { ...meta('esp_29'), key: 'wall-finish:royal', label: 'Wall finish & paint — Royal Matt + textures', unit: 'per sq ft', rate: 60, order: 29 },
+  { ...meta('esp_30'), key: 'doors:flush', label: 'Doors — Flush shutter (Granite frame)', unit: 'per door', rate: 9800, order: 30 },
+  { ...meta('esp_31'), key: 'doors:laminated', label: 'Doors — Laminated shutter (Wooden frame)', unit: 'per door', rate: 12000, order: 31 },
+  { ...meta('esp_32'), key: 'doors:teak', label: 'Doors — Teak veneer (Polished wooden frame)', unit: 'per door', rate: 14200, order: 32 },
+  { ...meta('esp_33'), key: 'grills:ms-plain', label: 'Grills & safety railings — MS plain (Painted mild steel)', unit: 'per sq ft', rate: 300, order: 33 },
+  { ...meta('esp_34'), key: 'grills:ms-design', label: 'Grills & safety railings — MS decorative (Fabricated pattern)', unit: 'per sq ft', rate: 350, order: 34 },
+  { ...meta('esp_35'), key: 'grills:ss', label: 'Grills & safety railings — SS 304 (Brushed stainless)', unit: 'per sq ft', rate: 600, order: 35 },
+  { ...meta('esp_36'), key: 'windows:aluminium', label: 'Windows — Aluminium (Single glazed)', unit: 'per sq ft', rate: 440, order: 36 },
+  { ...meta('esp_37'), key: 'windows:upvc', label: 'Windows — UPVC (Single glazed)', unit: 'per sq ft', rate: 520, order: 37 },
+  { ...meta('esp_38'), key: 'windows:wooden', label: 'Windows — Wooden (Seasoned hardwood)', unit: 'per sq ft', rate: 520, order: 38 },
+  { ...meta('esp_39'), key: 'conduiting:isi', label: 'Electrical & plumbing conduiting — ISI conduit, drainage cast in', unit: 'per sq ft', rate: 90, order: 39 },
+  { ...meta('esp_40'), key: 'conduiting:pvc', label: 'Electrical & plumbing conduiting — PVC conduit and sleeves', unit: 'per sq ft', rate: 74, order: 40 },
+  { ...meta('esp_41'), key: 'electrical:anchor', label: 'Electrical — Anchor Penta', unit: 'per point', rate: 4100, order: 41 },
+  { ...meta('esp_42'), key: 'electrical:havells', label: 'Electrical — Havells modular', unit: 'per point', rate: 4400, order: 42 },
+  { ...meta('esp_43'), key: 'electrical:schneider', label: 'Electrical — Schneider (Modular)', unit: 'per point', rate: 4700, order: 43 },
+  { ...meta('esp_44'), key: 'electrical:gm', label: 'Electrical — GM (Modular)', unit: 'per point', rate: 4700, order: 44 },
+  { ...meta('esp_45'), key: 'plumbing:ashirvad', label: 'Plumbing — Ashirvad (CPVC & PVC)', unit: 'per sq ft', rate: 54, order: 45 },
+  { ...meta('esp_46'), key: 'plumbing:astral', label: 'Plumbing — Astral (CPVC & PVC)', unit: 'per sq ft', rate: 54, order: 46 },
+  { ...meta('esp_47'), key: 'plumbing:supreme', label: 'Plumbing — Supreme (CPVC & PVC)', unit: 'per sq ft', rate: 49, order: 47 },
+  { ...meta('esp_48'), key: 'plumbing:prince', label: 'Plumbing — Prince (CPVC & PVC)', unit: 'per sq ft', rate: 49, order: 48 },
+  { ...meta('esp_49'), key: 'plumbing:kisan', label: 'Plumbing — Kisan (CPVC & PVC)', unit: 'per sq ft', rate: 44, order: 49 },
+  { ...meta('esp_50'), key: 'bathroom:set35', label: 'Bathroom fixtures — ₹35,000 class (Parryware, Essco or equivalent)', unit: 'per bathrooms', rate: 22000, order: 50 },
+  { ...meta('esp_51'), key: 'bathroom:set50', label: 'Bathroom fixtures — ₹50,000 class (Jaquar, Kohler or equivalent)', unit: 'per bathrooms', rate: 31400, order: 51 },
+  { ...meta('esp_52'), key: 'water-tank:s10', label: 'Water tanks — 500 L × 2', unit: 'per tank', rate: 10000, order: 52 },
+  { ...meta('esp_53'), key: 'water-tank:s15', label: 'Water tanks — 1,000 L + 500 L', unit: 'per tank', rate: 15000, order: 53 },
+  { ...meta('esp_54'), key: 'water-tank:s50', label: 'Water tanks — 5,000 L', unit: 'per tank', rate: 50000, order: 54 },
+  { ...meta('esp_55'), key: 'water-tank:s100', label: 'Water tanks — 10,000 L', unit: 'per tank', rate: 100000, order: 55 },
+  { ...meta('esp_56'), key: 'labour:civil', label: 'Labour — Civil Work', unit: 'per sq ft built-up', rate: 250, order: 56 },
+  { ...meta('esp_57'), key: 'labour:semi-furnished', label: 'Labour — Semi Furnished', unit: 'per sq ft built-up', rate: 400, order: 57 },
+  { ...meta('esp_58'), key: 'overheads', label: 'Site overheads', unit: '% of materials + labour', rate: 15, order: 58 },
+];

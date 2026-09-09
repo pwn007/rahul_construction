@@ -22,7 +22,7 @@ import {
   users,
 } from '@/data/ops';
 import { portalProjects } from '@/data/portal';
-import { BASE_RATES, ENHANCEMENT_RECORDS, LOCATION_RECORDS, MATERIAL_RECORDS } from '@/data/estimator-config';
+import { BASE_RATES, ESTIMATOR_PRICES, ENHANCEMENT_RECORDS, LOCATION_RECORDS, MATERIAL_RECORDS } from '@/data/estimator-config';
 import type { ListQuery, Paginated } from '@/types/domain';
 
 type Row = Record<string, unknown> & { id: string };
@@ -52,6 +52,7 @@ const SEED: Record<string, Row[]> = {
   roles: roles as unknown as Row[],
   media: mediaAssets as unknown as Row[],
   'portal-projects': portalProjects as unknown as Row[],
+  'estimator-prices': ESTIMATOR_PRICES as unknown as Row[],
   'estimator-rates': BASE_RATES as unknown as Row[],
   'estimator-materials': MATERIAL_RECORDS as unknown as Row[],
   'estimator-locations': LOCATION_RECORDS as unknown as Row[],

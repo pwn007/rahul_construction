@@ -31,7 +31,13 @@ return [
 
     /* User-decided buffer over thumb-rule quantities — spillage, breakage,
        cutting waste. Applied to material quantities, not to labour. */
-    'wastage' => 0.20,
+    /* 0 since Sep 2026: the client chose to bake the wastage allowance into
+       the rates themselves (the trade's "loaded rate") instead of showing a
+       "+20%" chip — every rate above was multiplied by 1.2 (rounded) on the
+       lines that used to waste, and the admin now owns rates via the
+       estimator-prices table. The knob stays so the open-buffer presentation
+       can come back by setting it and un-padding the rates together. */
+    'wastage' => 0.0,
 
     /* ₹ per sq ft of built-up area, per package. Semi's 400 = civil's 250
        plus the finishing trades (tilers, painters, carpenters, electricians,
@@ -85,37 +91,37 @@ return [
      */
     'lines' => [
         ['key' => 'cement', 'tier' => 'civil', 'label' => 'Cement', 'unit' => 'bags', 'coefficient' => 0.4, 'note' => '50 kg bags', 'options' => [
-            ['key' => 'ultratech', 'label' => 'UltraTech', 'detail' => 'PPC', 'rate' => 420, 'default' => true, 'logo' => '/images/brands/ultratech.png'],
-            ['key' => 'ambuja', 'label' => 'Ambuja', 'detail' => 'PPC', 'rate' => 420, 'logo' => '/images/brands/ambuja.png'],
-            ['key' => 'jk-super', 'label' => 'JK Super', 'detail' => 'OPC 53-grade', 'rate' => 455, 'logo' => '/images/brands/jk-super.png'],
-            ['key' => 'acc', 'label' => 'ACC', 'detail' => 'OPC 43-grade', 'rate' => 405, 'logo' => '/images/brands/acc.png'],
-            ['key' => 'wonder', 'label' => 'Wonder', 'detail' => 'PPC', 'rate' => 390, 'logo' => '/images/brands/wonder.png'],
-            ['key' => 'shree', 'label' => 'Shree', 'detail' => 'PPC', 'rate' => 390, 'logo' => '/images/brands/shree.png'],
+            ['key' => 'ultratech', 'label' => 'UltraTech', 'detail' => 'PPC', 'rate' => 505, 'default' => true, 'logo' => '/images/brands/ultratech.png'],
+            ['key' => 'ambuja', 'label' => 'Ambuja', 'detail' => 'PPC', 'rate' => 505, 'logo' => '/images/brands/ambuja.png'],
+            ['key' => 'jk-super', 'label' => 'JK Super', 'detail' => 'OPC 53-grade', 'rate' => 545, 'logo' => '/images/brands/jk-super.png'],
+            ['key' => 'acc', 'label' => 'ACC', 'detail' => 'OPC 43-grade', 'rate' => 485, 'logo' => '/images/brands/acc.png'],
+            ['key' => 'wonder', 'label' => 'Wonder', 'detail' => 'PPC', 'rate' => 470, 'logo' => '/images/brands/wonder.png'],
+            ['key' => 'shree', 'label' => 'Shree', 'detail' => 'PPC', 'rate' => 470, 'logo' => '/images/brands/shree.png'],
         ]],
         ['key' => 'steel', 'tier' => 'civil', 'label' => 'TMT Steel', 'unit' => 'kg', 'coefficient' => 4, 'note' => 'Reinforcement bars', 'buy' => ['per' => 1000, 'unit' => 'tonnes', 'round' => 'd1'], 'options' => [
-            ['key' => 'jsw', 'label' => 'JSW', 'detail' => 'Fe500D', 'rate' => 72, 'default' => true, 'logo' => '/images/brands/jsw.svg'],
-            ['key' => 'tata', 'label' => 'TATA TISCON', 'detail' => 'Fe550D', 'rate' => 78, 'logo' => '/images/brands/tata.png'],
-            ['key' => 'jindal', 'label' => 'Jindal Panther', 'detail' => 'Fe500D', 'rate' => 74, 'logo' => '/images/brands/jindal.png'],
-            ['key' => 'kamadhenu', 'label' => 'Kamadhenu', 'detail' => 'Fe500D', 'rate' => 66, 'logo' => '/images/brands/kamadhenu.png'],
-            ['key' => 'rathi', 'label' => 'Rathi', 'detail' => 'Fe500D', 'rate' => 66, 'logo' => '/images/brands/rathi.png'],
+            ['key' => 'jsw', 'label' => 'JSW', 'detail' => 'Fe500D', 'rate' => 86, 'default' => true, 'logo' => '/images/brands/jsw.svg'],
+            ['key' => 'tata', 'label' => 'TATA TISCON', 'detail' => 'Fe550D', 'rate' => 94, 'logo' => '/images/brands/tata.png'],
+            ['key' => 'jindal', 'label' => 'Jindal Panther', 'detail' => 'Fe500D', 'rate' => 89, 'logo' => '/images/brands/jindal.png'],
+            ['key' => 'kamadhenu', 'label' => 'Kamadhenu', 'detail' => 'Fe500D', 'rate' => 79, 'logo' => '/images/brands/kamadhenu.png'],
+            ['key' => 'rathi', 'label' => 'Rathi', 'detail' => 'Fe500D', 'rate' => 79, 'logo' => '/images/brands/rathi.png'],
         ]],
         ['key' => 'bricks', 'tier' => 'civil', 'label' => 'Bricks', 'unit' => 'bricks', 'coefficient' => 8, 'note' => 'Masonry for walls', 'options' => [
-            ['key' => 'renwel', 'label' => 'Renwel', 'detail' => 'Branded clay brick', 'rate' => 9, 'default' => true, 'photo' => '/images/materials/bricks-renwel.jpg'],
-            ['key' => 'clay', 'label' => 'Clay brick', 'detail' => 'Standard local kiln', 'rate' => 9, 'photo' => '/images/materials/bricks-clay.jpg'],
-            ['key' => 'flyash', 'label' => 'Fly-ash block', 'detail' => '', 'rate' => 7, 'photo' => '/images/materials/bricks-flyash.jpg'],
-            ['key' => 'kanota', 'label' => 'Kanota', 'detail' => '', 'rate' => 11, 'photo' => '/images/materials/bricks-kanota.jpg'],
-            ['key' => 'hanumangarh', 'label' => 'Hanumangarh', 'detail' => '', 'rate' => 11, 'photo' => '/images/materials/bricks-hanumangarh.jpg'],
+            ['key' => 'renwel', 'label' => 'Renwel', 'detail' => 'Branded clay brick', 'rate' => 11, 'default' => true, 'photo' => '/images/materials/bricks-renwel.jpg'],
+            ['key' => 'clay', 'label' => 'Clay brick', 'detail' => 'Standard local kiln', 'rate' => 11, 'photo' => '/images/materials/bricks-clay.jpg'],
+            ['key' => 'flyash', 'label' => 'Fly-ash block', 'detail' => '', 'rate' => 8, 'photo' => '/images/materials/bricks-flyash.jpg'],
+            ['key' => 'kanota', 'label' => 'Kanota', 'detail' => '', 'rate' => 13, 'photo' => '/images/materials/bricks-kanota.jpg'],
+            ['key' => 'hanumangarh', 'label' => 'Hanumangarh', 'detail' => '', 'rate' => 13, 'photo' => '/images/materials/bricks-hanumangarh.jpg'],
         ]],
         ['key' => 'sand', 'tier' => 'civil', 'label' => 'Sand', 'unit' => 'cubic ft', 'coefficient' => 0.9, 'note' => 'Fine aggregate', 'buy' => ['per' => 22, 'unit' => 'tonnes', 'round' => 'ceil'], 'options' => [
-            ['key' => 'river', 'label' => 'River sand', 'detail' => 'Screened', 'rate' => 55, 'default' => true, 'photo' => '/images/materials/sand-river.jpg'],
-            ['key' => 'msand', 'label' => 'M-sand', 'detail' => 'Manufactured', 'rate' => 40, 'photo' => '/images/materials/sand-msand.jpg'],
+            ['key' => 'river', 'label' => 'River sand', 'detail' => 'Screened', 'rate' => 66, 'default' => true, 'photo' => '/images/materials/sand-river.jpg'],
+            ['key' => 'msand', 'label' => 'M-sand', 'detail' => 'Manufactured', 'rate' => 48, 'photo' => '/images/materials/sand-msand.jpg'],
         ]],
         ['key' => 'aggregate', 'tier' => 'civil', 'label' => 'Aggregate', 'unit' => 'cubic ft', 'coefficient' => 1.1, 'note' => 'Coarse aggregate for RCC', 'buy' => ['per' => 23, 'unit' => 'tonnes', 'round' => 'ceil'], 'options' => [
-            ['key' => 'graded', 'label' => 'Graded 20 & 10 mm', 'detail' => '', 'rate' => 45, 'default' => true, 'photo' => '/images/materials/agg-graded.jpg'],
-            ['key' => 'washed', 'label' => 'Washed, low-silt', 'detail' => '', 'rate' => 52, 'photo' => '/images/materials/agg-washed.jpg'],
+            ['key' => 'graded', 'label' => 'Graded 20 & 10 mm', 'detail' => '', 'rate' => 54, 'default' => true, 'photo' => '/images/materials/agg-graded.jpg'],
+            ['key' => 'washed', 'label' => 'Washed, low-silt', 'detail' => '', 'rate' => 62, 'photo' => '/images/materials/agg-washed.jpg'],
         ]],
         ['key' => 'stone', 'tier' => 'civil', 'label' => 'Foundation stone', 'unit' => 'tonnes', 'coefficient' => 0.0125, 'note' => 'Rubble masonry footings', 'options' => [
-            ['key' => 'masonry', 'label' => 'Masonry stone', 'detail' => 'Kota quarry', 'rate' => 750, 'default' => true],
+            ['key' => 'masonry', 'label' => 'Masonry stone', 'detail' => 'Kota quarry', 'rate' => 900, 'default' => true],
         ]],
         ['key' => 'waterproofing', 'tier' => 'civil', 'label' => 'Waterproofing', 'unit' => 'sq ft', 'coefficient' => 1, 'wastes' => false, 'note' => 'Membranes & coatings', 'options' => [
             ['key' => 'standard', 'label' => 'Terrace, baths & sunken', 'detail' => '', 'rate' => 40, 'default' => true, 'photo' => '/images/materials/wp-standard.jpg'],
@@ -134,14 +140,14 @@ return [
          * tank is in practice a finishing-stage purchase.
          */
         ['key' => 'flooring', 'label' => 'Flooring & tiles', 'unit' => 'sq ft', 'coefficient' => 1.0, 'tier' => 'semi', 'note' => 'Tiles laid, skirting included', 'options' => [
-            ['key' => 't50', 'label' => 'Vitrified, tile up to ₹50/sq ft', 'rate' => 60, 'photo' => '/images/materials/flooring-t50.jpg'],
-            ['key' => 't80', 'label' => 'Vitrified, tile up to ₹80/sq ft', 'rate' => 95, 'default' => true, 'photo' => '/images/materials/flooring-t80.jpg'],
-            ['key' => 't120', 'label' => 'Large-format & marble, up to ₹120/sq ft', 'rate' => 142, 'photo' => '/images/materials/flooring-t120.jpg'],
+            ['key' => 't50', 'label' => 'Vitrified, tile up to ₹50/sq ft', 'rate' => 72, 'photo' => '/images/materials/flooring-t50.jpg'],
+            ['key' => 't80', 'label' => 'Vitrified, tile up to ₹80/sq ft', 'rate' => 114, 'default' => true, 'photo' => '/images/materials/flooring-t80.jpg'],
+            ['key' => 't120', 'label' => 'Large-format & marble, up to ₹120/sq ft', 'rate' => 170, 'photo' => '/images/materials/flooring-t120.jpg'],
         ]],
         ['key' => 'wall-finish', 'label' => 'Wall finish & paint', 'unit' => 'sq ft', 'coefficient' => 2.4, 'tier' => 'semi', 'note' => 'Putty + primer + paint, walls and ceilings', 'options' => [
-            ['key' => 'tractor', 'label' => 'Tractor emulsion', 'rate' => 22, 'photo' => '/images/materials/wallfinish-tractor.jpg'],
-            ['key' => 'premium', 'label' => 'Premium emulsion', 'rate' => 28, 'default' => true, 'photo' => '/images/materials/wallfinish-premium.jpg'],
-            ['key' => 'royal', 'label' => 'Royal Matt + textures', 'rate' => 50, 'photo' => '/images/materials/wallfinish-royal.jpg'],
+            ['key' => 'tractor', 'label' => 'Tractor emulsion', 'rate' => 26, 'photo' => '/images/materials/wallfinish-tractor.jpg'],
+            ['key' => 'premium', 'label' => 'Premium emulsion', 'rate' => 34, 'default' => true, 'photo' => '/images/materials/wallfinish-premium.jpg'],
+            ['key' => 'royal', 'label' => 'Royal Matt + textures', 'rate' => 60, 'photo' => '/images/materials/wallfinish-royal.jpg'],
         ]],
         ['key' => 'doors', 'wastes' => false, 'label' => 'Doors', 'unit' => 'doors', 'coefficient' => 0.004, 'tier' => 'semi', 'note' => 'Frames and shutters, fitted', 'options' => [
             ['key' => 'flush', 'label' => 'Flush shutter', 'detail' => 'Granite frame', 'rate' => 9800, 'photo' => '/images/materials/doors-flush.jpg'],
@@ -159,8 +165,8 @@ return [
             ['key' => 'wooden', 'label' => 'Wooden', 'detail' => 'Seasoned hardwood', 'rate' => 520, 'photo' => '/images/materials/windows-wooden.jpg'],
         ]],
         ['key' => 'conduiting', 'label' => 'Electrical & plumbing conduiting', 'unit' => 'sq ft', 'coefficient' => 1.0, 'tier' => 'semi', 'note' => 'Electrical and plumbing lines cast in the slab', 'options' => [
-            ['key' => 'isi', 'label' => 'ISI conduit, drainage cast in', 'rate' => 75, 'default' => true, 'photo' => '/images/materials/conduit-isi.jpg'],
-            ['key' => 'pvc', 'label' => 'PVC conduit and sleeves', 'rate' => 62, 'photo' => '/images/materials/conduit-pvc.jpg'],
+            ['key' => 'isi', 'label' => 'ISI conduit, drainage cast in', 'rate' => 90, 'default' => true, 'photo' => '/images/materials/conduit-isi.jpg'],
+            ['key' => 'pvc', 'label' => 'PVC conduit and sleeves', 'rate' => 74, 'photo' => '/images/materials/conduit-pvc.jpg'],
         ]],
         ['key' => 'electrical', 'wastes' => false, 'label' => 'Electrical', 'unit' => 'points', 'coefficient' => 0.025, 'tier' => 'semi', 'note' => 'Wiring, switches and boards per point', 'options' => [
             ['key' => 'anchor', 'label' => 'Anchor Penta', 'rate' => 4100, 'logo' => '/images/brands/anchor.png'],
@@ -169,11 +175,11 @@ return [
             ['key' => 'gm', 'label' => 'GM', 'detail' => 'Modular', 'rate' => 4700, 'logo' => '/images/brands/gm.svg'],
         ]],
         ['key' => 'plumbing', 'label' => 'Plumbing', 'unit' => 'sq ft', 'coefficient' => 1.0, 'tier' => 'semi', 'note' => 'Lines, fittings and fixtures rough-in', 'options' => [
-            ['key' => 'ashirvad', 'label' => 'Ashirvad', 'detail' => 'CPVC & PVC', 'rate' => 45, 'default' => true, 'logo' => '/images/brands/ashirvad.png'],
-            ['key' => 'astral', 'label' => 'Astral', 'detail' => 'CPVC & PVC', 'rate' => 45, 'logo' => '/images/brands/astral.png'],
-            ['key' => 'supreme', 'label' => 'Supreme', 'detail' => 'CPVC & PVC', 'rate' => 41, 'logo' => '/images/brands/supreme.png'],
-            ['key' => 'prince', 'label' => 'Prince', 'detail' => 'CPVC & PVC', 'rate' => 41, 'logo' => '/images/brands/prince.png'],
-            ['key' => 'kisan', 'label' => 'Kisan', 'detail' => 'CPVC & PVC', 'rate' => 37, 'logo' => '/images/brands/kisan.png'],
+            ['key' => 'ashirvad', 'label' => 'Ashirvad', 'detail' => 'CPVC & PVC', 'rate' => 54, 'default' => true, 'logo' => '/images/brands/ashirvad.png'],
+            ['key' => 'astral', 'label' => 'Astral', 'detail' => 'CPVC & PVC', 'rate' => 54, 'logo' => '/images/brands/astral.png'],
+            ['key' => 'supreme', 'label' => 'Supreme', 'detail' => 'CPVC & PVC', 'rate' => 49, 'logo' => '/images/brands/supreme.png'],
+            ['key' => 'prince', 'label' => 'Prince', 'detail' => 'CPVC & PVC', 'rate' => 49, 'logo' => '/images/brands/prince.png'],
+            ['key' => 'kisan', 'label' => 'Kisan', 'detail' => 'CPVC & PVC', 'rate' => 44, 'logo' => '/images/brands/kisan.png'],
         ]],
         ['key' => 'bathroom', 'wastes' => false, 'label' => 'Bathroom fixtures', 'unit' => 'bathrooms', 'coefficient' => 0.0025, 'tier' => 'semi', 'note' => 'Sanitaryware and CP fittings per bathroom', 'options' => [
             ['key' => 'set35', 'label' => '₹35,000 class', 'detail' => 'Parryware, Essco or equivalent', 'rate' => 22000, 'default' => true, 'photo' => '/images/materials/bathroom-set35.jpg'],

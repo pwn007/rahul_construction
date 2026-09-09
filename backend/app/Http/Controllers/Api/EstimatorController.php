@@ -27,6 +27,19 @@ class EstimatorController extends Controller
     {
         $cfg = config('estimator');
 
+        /* The admin's price list (estimator_prices) overlays the config
+           defaults — rates only, never structure. Missing row or a row parked
+           in draft → the config rate stands, which is the owner's kill-switch
+           for a bad edit. The catch keeps the calculator alive even if the
+           table is absent (fresh deploy before the SQL ran) or the DB is
+           down: quoting at default rates beats a 500 on the lead page. */
+        try {
+            $db = \App\Models\EstimatorPrice::query()->where('status', 'published')->pluck('rate', 'key');
+        } catch (\Throwable) {
+            $db = collect();
+        }
+
+
         $validated = $request->validate([
             'areaPerFloor' => 'required|numeric|min:50|max:100000',
             'areaUnit' => 'required|string|in:'.implode(',', array_keys($cfg['units'])),
@@ -54,7 +67,11 @@ class EstimatorController extends Controller
             if (! in_array($line['tier'], $tiers, true)) {
                 continue;
             }
-            $options = $line['options'];
+            $options = array_map(function (array $o) use ($db, $line) {
+                $o['rate'] = (int) ($db[$line['key'].':'.$o['key']] ?? $o['rate']);
+
+                return $o;
+            }, $line['options']);
             $chosen = collect($options)->firstWhere('key', $selections[$line['key']] ?? null)
                 ?? collect($options)->firstWhere('default', true)
                 ?? $options[0];
@@ -105,8 +122,15 @@ class EstimatorController extends Controller
             ];
         }
 
-        $labour = round($cfg['labour_rate'][$package] * $builtUp);
-        $overheads = round(($materialsTotal + $labour) * $cfg['overheads']);
+        $labourRates = [
+            'civil' => (int) ($db['labour:civil'] ?? $cfg['labour_rate']['civil']),
+            'semi-furnished' => (int) ($db['labour:semi-furnished'] ?? $cfg['labour_rate']['semi-furnished']),
+        ];
+        /* DB row holds a whole percent (15); the config fallback is a fraction. */
+        $overheadsPct = (float) ($db['overheads'] ?? $cfg['overheads'] * 100);
+
+        $labour = round($labourRates[$package] * $builtUp);
+        $overheads = round(($materialsTotal + $labour) * $overheadsPct / 100);
         $total = $materialsTotal + $labour + $overheads;
 
         $t = $cfg['timeline'];
@@ -118,8 +142,11 @@ class EstimatorController extends Controller
             'wastagePct' => (int) round($cfg['wastage'] * 100),
             'lines' => $lines,
             'materialsTotal' => $materialsTotal,
-            'labour' => ['rate' => $cfg['labour_rate'], 'amount' => $labour],
-            'overheads' => ['pct' => (int) round($cfg['overheads'] * 100), 'amount' => $overheads],
+            /* The active package's own rate, a scalar — the map went out once
+               and the UI's formatCurrency printed an em-dash off it (the type
+               always said number). Nothing needs the other package's rate. */
+            'labour' => ['rate' => $labourRates[$package], 'amount' => $labour],
+            'overheads' => ['pct' => (int) round($overheadsPct), 'amount' => $overheads],
             'total' => $total,
             'totalMin' => (int) round($total * $cfg['range_low']),
             'totalMax' => (int) round($total * $cfg['range_high']),

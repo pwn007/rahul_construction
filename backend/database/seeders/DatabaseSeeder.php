@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
         'team', 'client-logos', 'blogs', 'faqs', 'downloads', 'media',
         'enquiries', 'estimates',
         'banners', 'home-sections', 'navbar', 'footer', 'seo', 'settings',
+        'estimator-prices',
         'estimator-rates', 'estimator-materials', 'estimator-locations', 'estimator-enhancements',
     ];
 

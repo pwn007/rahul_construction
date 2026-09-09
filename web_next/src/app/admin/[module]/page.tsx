@@ -2,7 +2,7 @@ import { AdminModuleScreen } from '@/features/admin/AdminModuleScreen';
 
 /*
  * The 21 data modules, which were generated from MODULES inside a nested
- * <Routes> before. Static siblings (analytics, estimator-config, roles, theme)
+ * <Routes> before. Static siblings (analytics, roles, theme)
  * outrank this segment in the App Router, so they keep their own screens.
  */
 
@@ -22,7 +22,7 @@ const MODULE_KEYS = [
   'projects', 'services', 'blogs', 'gallery', 'testimonials', 'faqs',
   'client-logos', 'downloads', 'team', 'careers', 'applications', 'enquiries',
   'estimates', 'hero', 'home-sections', 'navbar', 'footer', 'media', 'seo',
-  'users', 'settings',
+  'users', 'settings', 'estimator-prices',
 ];
 
 export function generateStaticParams() {

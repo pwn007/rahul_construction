@@ -106,7 +106,10 @@ export function generateCivilPdf(
   doc.text('Materials your structure needs', M, y);
   doc.setFont('helvetica', 'normal').setFontSize(8.5);
   setColor(GREY);
-  doc.text(`Quantities include a ${quote.wastagePct}% wastage buffer`, W - M, y, { align: 'right' });
+  doc.text(
+    quote.wastagePct > 0 ? `Quantities include a ${quote.wastagePct}% wastage buffer` : 'Priced at current Jaipur rates',
+    W - M, y, { align: 'right' },
+  );
   y += 14;
 
   const col = { label: M, qty: W - M - 250, rate: W - M - 130, amount: W - M };

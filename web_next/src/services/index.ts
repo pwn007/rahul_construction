@@ -3,6 +3,7 @@ import type {
   Application,
   Banner,
   BaseRate,
+  EstimatorPrice,
   ClientLogo,
   Download,
   Enhancement,
@@ -60,6 +61,7 @@ export const RESOURCES = {
   roles: 'roles',
   media: 'media',
   portalProjects: 'portal-projects',
+  estimatorPrices: 'estimator-prices',
   estimatorRates: 'estimator-rates',
   estimatorMaterials: 'estimator-materials',
   estimatorLocations: 'estimator-locations',
@@ -89,6 +91,7 @@ export const usersService = createResourceService<User>(RESOURCES.users);
 export const rolesService = createResourceService<Role>(RESOURCES.roles);
 export const mediaService = createResourceService<MediaAsset>(RESOURCES.media);
 export const portalService = createResourceService<PortalProject>(RESOURCES.portalProjects);
+export const estimatorPricesService = createResourceService<EstimatorPrice>(RESOURCES.estimatorPrices);
 export const estimatorRatesService = createResourceService<BaseRate>(RESOURCES.estimatorRates);
 export const estimatorMaterialsService = createResourceService<MaterialSpec>(RESOURCES.estimatorMaterials);
 export const estimatorLocationsService = createResourceService<LocationMultiplier>(RESOURCES.estimatorLocations);

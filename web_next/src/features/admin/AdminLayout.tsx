@@ -35,7 +35,7 @@ import type { User } from '@/types/domain';
  */
 const SUPER_ONLY_GROUP = 'System';
 
-const SUPER_ONLY_KEYS = new Set(['media', 'seo', 'users', 'settings', 'estimator-config', 'roles', 'theme']);
+const SUPER_ONLY_KEYS = new Set(['media', 'seo', 'users', 'settings', 'estimator-prices', 'roles', 'theme']);
 
 const isSuper = (user: User | null) => user?.roleSlug === 'superadmin';
 
