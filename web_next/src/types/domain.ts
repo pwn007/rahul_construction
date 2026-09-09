@@ -480,6 +480,8 @@ export interface EstimatorPrice extends BaseEntity {
   label: string;
   unit: string;
   rate: number;
+  /** Overrides the option's config logo/photo when set; null = config stands. */
+  image?: string;
   order: number;
 }
 

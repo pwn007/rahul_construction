@@ -129,7 +129,7 @@ return [
             ['key' => 'washed', 'label' => 'Washed, low-silt', 'detail' => '', 'rate' => 62, 'photo' => '/images/materials/agg-washed.jpg'],
         ]],
         ['key' => 'stone', 'tier' => 'civil', 'label' => 'Foundation stone', 'unit' => 'tonnes', 'coefficient' => 0.0125, 'note' => 'Rubble masonry footings', 'options' => [
-            ['key' => 'masonry', 'label' => 'Masonry stone', 'detail' => 'Kota quarry', 'rate' => 900, 'default' => true],
+            ['key' => 'masonry', 'label' => 'Masonry stone', 'detail' => 'Kota quarry', 'rate' => 900, 'default' => true, 'photo' => '/images/materials/stone-masonry.jpg'],
         ]],
 
         /*

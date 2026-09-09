@@ -8,6 +8,7 @@
     "label": "Cement — UltraTech (PPC)",
     "unit": "per bag",
     "rate": 505,
+    "image": "/images/brands/ultratech.png",
     "order": 1
   },
   {
@@ -19,6 +20,7 @@
     "label": "Cement — Ambuja (PPC)",
     "unit": "per bag",
     "rate": 505,
+    "image": "/images/brands/ambuja.png",
     "order": 2
   },
   {
@@ -30,6 +32,7 @@
     "label": "Cement — JK Super (OPC 53-grade)",
     "unit": "per bag",
     "rate": 545,
+    "image": "/images/brands/jk-super.png",
     "order": 3
   },
   {
@@ -41,6 +44,7 @@
     "label": "Cement — ACC (OPC 43-grade)",
     "unit": "per bag",
     "rate": 485,
+    "image": "/images/brands/acc.png",
     "order": 4
   },
   {
@@ -52,6 +56,7 @@
     "label": "Cement — Wonder (PPC)",
     "unit": "per bag",
     "rate": 470,
+    "image": "/images/brands/wonder.png",
     "order": 5
   },
   {
@@ -63,6 +68,7 @@
     "label": "Cement — Shree (PPC)",
     "unit": "per bag",
     "rate": 470,
+    "image": "/images/brands/shree.png",
     "order": 6
   },
   {
@@ -74,6 +80,7 @@
     "label": "TMT Steel — JSW (Fe500D)",
     "unit": "per kg",
     "rate": 86,
+    "image": "/images/brands/jsw.svg",
     "order": 7
   },
   {
@@ -85,6 +92,7 @@
     "label": "TMT Steel — TATA TISCON (Fe550D)",
     "unit": "per kg",
     "rate": 94,
+    "image": "/images/brands/tata.png",
     "order": 8
   },
   {
@@ -96,6 +104,7 @@
     "label": "TMT Steel — Jindal Panther (Fe500D)",
     "unit": "per kg",
     "rate": 89,
+    "image": "/images/brands/jindal.png",
     "order": 9
   },
   {
@@ -107,6 +116,7 @@
     "label": "TMT Steel — Kamadhenu (Fe500D)",
     "unit": "per kg",
     "rate": 79,
+    "image": "/images/brands/kamadhenu.png",
     "order": 10
   },
   {
@@ -118,6 +128,7 @@
     "label": "TMT Steel — Rathi (Fe500D)",
     "unit": "per kg",
     "rate": 79,
+    "image": "/images/brands/rathi.png",
     "order": 11
   },
   {
@@ -129,6 +140,7 @@
     "label": "Bricks — Renwel (Branded clay brick)",
     "unit": "per brick",
     "rate": 11,
+    "image": "/images/materials/bricks-renwel.jpg",
     "order": 12
   },
   {
@@ -140,6 +152,7 @@
     "label": "Bricks — Clay brick (Standard local kiln)",
     "unit": "per brick",
     "rate": 11,
+    "image": "/images/materials/bricks-clay.jpg",
     "order": 13
   },
   {
@@ -151,6 +164,7 @@
     "label": "Bricks — Fly-ash block",
     "unit": "per brick",
     "rate": 8,
+    "image": "/images/materials/bricks-flyash.jpg",
     "order": 14
   },
   {
@@ -162,6 +176,7 @@
     "label": "Bricks — Kanota",
     "unit": "per brick",
     "rate": 13,
+    "image": "/images/materials/bricks-kanota.jpg",
     "order": 15
   },
   {
@@ -173,6 +188,7 @@
     "label": "Bricks — Hanumangarh",
     "unit": "per brick",
     "rate": 13,
+    "image": "/images/materials/bricks-hanumangarh.jpg",
     "order": 16
   },
   {
@@ -184,6 +200,7 @@
     "label": "Sand — River sand (Screened)",
     "unit": "per cubic ft",
     "rate": 66,
+    "image": "/images/materials/sand-river.jpg",
     "order": 17
   },
   {
@@ -195,6 +212,7 @@
     "label": "Sand — M-sand (Manufactured)",
     "unit": "per cubic ft",
     "rate": 48,
+    "image": "/images/materials/sand-msand.jpg",
     "order": 18
   },
   {
@@ -206,6 +224,7 @@
     "label": "Aggregate — Graded 20 & 10 mm",
     "unit": "per cubic ft",
     "rate": 54,
+    "image": "/images/materials/agg-graded.jpg",
     "order": 19
   },
   {
@@ -217,6 +236,7 @@
     "label": "Aggregate — Washed, low-silt",
     "unit": "per cubic ft",
     "rate": 62,
+    "image": "/images/materials/agg-washed.jpg",
     "order": 20
   },
   {
@@ -228,6 +248,7 @@
     "label": "Foundation stone — Masonry stone (Kota quarry)",
     "unit": "per tonne",
     "rate": 900,
+    "image": "/images/materials/stone-masonry.jpg",
     "order": 21
   },
   {
@@ -239,6 +260,7 @@
     "label": "Flooring & tiles — Vitrified, tile up to ₹50/sq ft",
     "unit": "per sq ft",
     "rate": 72,
+    "image": "/images/materials/flooring-t50.jpg",
     "order": 24
   },
   {
@@ -250,6 +272,7 @@
     "label": "Flooring & tiles — Vitrified, tile up to ₹80/sq ft",
     "unit": "per sq ft",
     "rate": 114,
+    "image": "/images/materials/flooring-t80.jpg",
     "order": 25
   },
   {
@@ -261,6 +284,7 @@
     "label": "Flooring & tiles — Large-format & marble, up to ₹120/sq ft",
     "unit": "per sq ft",
     "rate": 170,
+    "image": "/images/materials/flooring-t120.jpg",
     "order": 26
   },
   {
@@ -272,6 +296,7 @@
     "label": "Wall finish & paint — Tractor emulsion",
     "unit": "per sq ft",
     "rate": 26,
+    "image": "/images/materials/wallfinish-tractor.jpg",
     "order": 27
   },
   {
@@ -283,6 +308,7 @@
     "label": "Wall finish & paint — Premium emulsion",
     "unit": "per sq ft",
     "rate": 34,
+    "image": "/images/materials/wallfinish-premium.jpg",
     "order": 28
   },
   {
@@ -294,6 +320,7 @@
     "label": "Wall finish & paint — Royal Matt + textures",
     "unit": "per sq ft",
     "rate": 60,
+    "image": "/images/materials/wallfinish-royal.jpg",
     "order": 29
   },
   {
@@ -305,6 +332,7 @@
     "label": "Doors — Flush shutter (Granite frame)",
     "unit": "per door",
     "rate": 9800,
+    "image": "/images/materials/doors-flush.jpg",
     "order": 30
   },
   {
@@ -316,6 +344,7 @@
     "label": "Doors — Laminated shutter (Wooden frame)",
     "unit": "per door",
     "rate": 12000,
+    "image": "/images/materials/doors-laminated.jpg",
     "order": 31
   },
   {
@@ -327,6 +356,7 @@
     "label": "Doors — Teak veneer (Polished wooden frame)",
     "unit": "per door",
     "rate": 14200,
+    "image": "/images/materials/doors-teak.jpg",
     "order": 32
   },
   {
@@ -338,6 +368,7 @@
     "label": "Grills & safety railings — MS plain (Painted mild steel)",
     "unit": "per sq ft",
     "rate": 300,
+    "image": "/images/materials/grills-msplain.jpg",
     "order": 33
   },
   {
@@ -349,6 +380,7 @@
     "label": "Grills & safety railings — MS decorative (Fabricated pattern)",
     "unit": "per sq ft",
     "rate": 350,
+    "image": "/images/materials/grills-msdecorative.jpg",
     "order": 34
   },
   {
@@ -360,6 +392,7 @@
     "label": "Grills & safety railings — SS 304 (Brushed stainless)",
     "unit": "per sq ft",
     "rate": 600,
+    "image": "/images/materials/grills-ss.jpg",
     "order": 35
   },
   {
@@ -371,6 +404,7 @@
     "label": "Windows — Aluminium (Single glazed)",
     "unit": "per sq ft",
     "rate": 440,
+    "image": "/images/materials/windows-aluminium.jpg",
     "order": 36
   },
   {
@@ -382,6 +416,7 @@
     "label": "Windows — UPVC (Single glazed)",
     "unit": "per sq ft",
     "rate": 520,
+    "image": "/images/materials/windows-upvc.jpg",
     "order": 37
   },
   {
@@ -393,6 +428,7 @@
     "label": "Windows — Wooden (Seasoned hardwood)",
     "unit": "per sq ft",
     "rate": 520,
+    "image": "/images/materials/windows-wooden.jpg",
     "order": 38
   },
   {
@@ -404,6 +440,7 @@
     "label": "Electrical & plumbing conduiting — ISI conduit, drainage cast in",
     "unit": "per sq ft",
     "rate": 90,
+    "image": "/images/materials/conduit-isi.jpg",
     "order": 39
   },
   {
@@ -415,6 +452,7 @@
     "label": "Electrical & plumbing conduiting — PVC conduit and sleeves",
     "unit": "per sq ft",
     "rate": 74,
+    "image": "/images/materials/conduit-pvc.jpg",
     "order": 40
   },
   {
@@ -426,6 +464,7 @@
     "label": "Electrical — Anchor Penta",
     "unit": "per point",
     "rate": 4100,
+    "image": "/images/brands/anchor.png",
     "order": 41
   },
   {
@@ -437,6 +476,7 @@
     "label": "Electrical — Havells modular",
     "unit": "per point",
     "rate": 4400,
+    "image": "/images/brands/havells.png",
     "order": 42
   },
   {
@@ -448,6 +488,7 @@
     "label": "Electrical — Schneider (Modular)",
     "unit": "per point",
     "rate": 4700,
+    "image": "/images/brands/schneider.png",
     "order": 43
   },
   {
@@ -459,6 +500,7 @@
     "label": "Electrical — GM (Modular)",
     "unit": "per point",
     "rate": 4700,
+    "image": "/images/brands/gm.svg",
     "order": 44
   },
   {
@@ -470,6 +512,7 @@
     "label": "Plumbing — Ashirvad (CPVC & PVC)",
     "unit": "per sq ft",
     "rate": 54,
+    "image": "/images/brands/ashirvad.png",
     "order": 45
   },
   {
@@ -481,6 +524,7 @@
     "label": "Plumbing — Astral (CPVC & PVC)",
     "unit": "per sq ft",
     "rate": 54,
+    "image": "/images/brands/astral.png",
     "order": 46
   },
   {
@@ -492,6 +536,7 @@
     "label": "Plumbing — Supreme (CPVC & PVC)",
     "unit": "per sq ft",
     "rate": 49,
+    "image": "/images/brands/supreme.png",
     "order": 47
   },
   {
@@ -503,6 +548,7 @@
     "label": "Plumbing — Prince (CPVC & PVC)",
     "unit": "per sq ft",
     "rate": 49,
+    "image": "/images/brands/prince.png",
     "order": 48
   },
   {
@@ -514,6 +560,7 @@
     "label": "Plumbing — Kisan (CPVC & PVC)",
     "unit": "per sq ft",
     "rate": 44,
+    "image": "/images/brands/kisan.png",
     "order": 49
   },
   {
@@ -525,6 +572,7 @@
     "label": "Bathroom fixtures — ₹35,000 class (Parryware, Essco or equivalent)",
     "unit": "per bathrooms",
     "rate": 22000,
+    "image": "/images/materials/bathroom-set35.jpg",
     "order": 50
   },
   {
@@ -536,6 +584,7 @@
     "label": "Bathroom fixtures — ₹50,000 class (Jaquar, Kohler or equivalent)",
     "unit": "per bathrooms",
     "rate": 31400,
+    "image": "/images/materials/bathroom-set50.jpg",
     "order": 51
   },
   {
@@ -547,6 +596,7 @@
     "label": "Water tanks — 500 L × 2",
     "unit": "per tank",
     "rate": 10000,
+    "image": "/images/materials/tank-small.jpg",
     "order": 52
   },
   {
@@ -558,6 +608,7 @@
     "label": "Water tanks — 1,000 L + 500 L",
     "unit": "per tank",
     "rate": 15000,
+    "image": "/images/materials/tank-small.jpg",
     "order": 53
   },
   {

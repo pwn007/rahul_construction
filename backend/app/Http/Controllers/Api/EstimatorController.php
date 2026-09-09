@@ -34,7 +34,7 @@ class EstimatorController extends Controller
            table is absent (fresh deploy before the SQL ran) or the DB is
            down: quoting at default rates beats a 500 on the lead page. */
         try {
-            $db = \App\Models\EstimatorPrice::query()->where('status', 'published')->pluck('rate', 'key');
+            $db = \App\Models\EstimatorPrice::query()->where('status', 'published')->get(['key', 'rate', 'image'])->keyBy('key');
         } catch (\Throwable) {
             $db = collect();
         }
@@ -68,7 +68,17 @@ class EstimatorController extends Controller
                 continue;
             }
             $options = array_map(function (array $o) use ($db, $line) {
-                $o['rate'] = (int) ($db[$line['key'].':'.$o['key']] ?? $o['rate']);
+                $row = $db->get($line['key'].':'.$o['key']);
+                if ($row) {
+                    $o['rate'] = (int) $row->rate;
+                    /* The admin's picture replaces whichever slot the option
+                       already renders with — brand rows carry logos (white
+                       plate, contain), type rows carry photos (full bleed);
+                       that nature stays with the config line. */
+                    if ($row->image) {
+                        $o[isset($o['logo']) ? 'logo' : 'photo'] = $row->image;
+                    }
+                }
 
                 return $o;
             }, $line['options']);
@@ -130,13 +140,13 @@ class EstimatorController extends Controller
            Semi-furnished stays flat by the client's choice. Both civil rates
            ride in the response so the page's explainer note quotes whatever
            the admin has actually set, never a hardcoded number. */
-        $civilGround = (int) ($db['labour:civil-ground'] ?? $cfg['labour_rate']['civil']['ground']);
-        $civilUpper = (int) ($db['labour:civil-upper'] ?? $cfg['labour_rate']['civil']['upper']);
+        $civilGround = (int) ($db->get('labour:civil-ground')?->rate ?? $cfg['labour_rate']['civil']['ground']);
+        $civilUpper = (int) ($db->get('labour:civil-upper')?->rate ?? $cfg['labour_rate']['civil']['upper']);
         $labourRate = $package === 'civil'
             ? ((int) $validated['floors'] === 1 ? $civilGround : $civilUpper)
-            : (int) ($db['labour:semi-furnished'] ?? $cfg['labour_rate']['semi-furnished']);
+            : (int) ($db->get('labour:semi-furnished')?->rate ?? $cfg['labour_rate']['semi-furnished']);
         /* DB row holds a whole percent (15); the config fallback is a fraction. */
-        $overheadsPct = (float) ($db['overheads'] ?? $cfg['overheads'] * 100);
+        $overheadsPct = (float) ($db->get('overheads')?->rate ?? $cfg['overheads'] * 100);
 
         $labour = round($labourRate * $builtUp);
         $overheads = round(($materialsTotal + $labour) * $overheadsPct / 100);

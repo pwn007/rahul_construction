@@ -45,3 +45,7 @@ Astral white-variant mark is presented on its own navy backdrop.
   [dr5hn/countries-states-cities-database](https://github.com/dr5hn/countries-states-cities-database)
   (Open Database License v1.0). The extract keeps only `name`/`iso2`; regenerate by
   re-downloading `json/countries+states+cities.json` and re-running the same filter.
+
+- `web_next/public/images/materials/stone-masonry.jpg` — crop of
+  ["Huge pile of stones"](https://commons.wikimedia.org/wiki/File:Huge_pile_of_stones_-_geograph.org.uk_-_3092912.jpg)
+  by Mat Fascione, via geograph.org.uk / Wikimedia Commons, CC BY-SA 2.0.

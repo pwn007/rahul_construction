@@ -1300,7 +1300,23 @@ export const MODULES: ResourceConfig<never>[] = [
     canDelete: false,
     searchPlaceholder: 'Search by material or brand…',
     columns: [
-      { key: 'label', label: 'Item', render: (row: never) => <span className="font-medium">{(row as unknown as { label: string }).label}</span> },
+      {
+        key: 'label',
+        label: 'Item',
+        render: (row: never) => {
+          const r = row as unknown as { label: string; image?: string };
+          return (
+            <div className="flex items-center gap-3">
+              {r.image ? (
+                <img src={r.image} alt="" className="h-8 w-10 shrink-0 rounded border bg-white object-contain p-0.5" loading="lazy" />
+              ) : (
+                <span className="h-8 w-10 shrink-0 rounded border bg-[rgb(var(--c-text))]/[0.04]" />
+              )}
+              <span className="font-medium">{r.label}</span>
+            </div>
+          );
+        },
+      },
       { key: 'unit', label: 'Unit', width: '190px', render: (row: never) => <span className="text-caption text-subtle">{(row as unknown as { unit: string }).unit}</span> },
       {
         key: 'rate',
@@ -1318,6 +1334,13 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'label', label: 'Item', type: 'text', span: 8, readOnly: true },
       { name: 'unit', label: 'Unit', type: 'text', span: 4, readOnly: true },
       { name: 'rate', label: 'Rate', type: 'number', required: true, span: 6, help: 'Whole rupees — except Site overheads, where this is a percent.' },
+      {
+        name: 'image',
+        label: 'Image',
+        type: 'image',
+        span: 12,
+        help: 'The brand logo or material photo shown on the calculator card. Upload a new file or paste a URL; leave the Labour and Site overheads rows empty — they have no card.',
+      },
       statusField,
     ],
   },

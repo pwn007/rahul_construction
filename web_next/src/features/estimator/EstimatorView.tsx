@@ -644,11 +644,23 @@ function QuoteResult({
                   </div>
                 </div>
 
-                {line.options.length > 1 && (
+                {/* Single-option lines used to render no picker at all, which
+                    left Foundation stone the only card with no product image —
+                    the client flagged the inconsistency. One choice is still no
+                    choice, so the label drops the "choose" language, but the
+                    card (and See photos / hover) now appears whenever there is
+                    an image to show. */}
+                {(line.options.length > 1 || line.options.some((o) => o.photo || o.logo)) && (
                   <div className="mt-4">
                     <div className="mb-2.5 flex items-center justify-between gap-3">
                       <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-subtle">
-                        Choose your brand <span className="font-normal normal-case tracking-normal">— price updates instantly</span>
+                        {line.options.length > 1 ? (
+                          <>
+                            Choose your brand <span className="font-normal normal-case tracking-normal">— price updates instantly</span>
+                          </>
+                        ) : (
+                          'What we use'
+                        )}
                       </p>
                       {/* -m-2 p-2 grows the hit area to ≥44px without moving
                           the layout — phones first. */}
