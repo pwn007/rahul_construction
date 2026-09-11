@@ -323,8 +323,13 @@ export function ResourcePage<T extends { id: string }>({ config }: { config: Res
             <div key={section}>
               {sections.length > 1 && <p className="mb-4 text-overline uppercase text-subtle">{section}</p>}
               <div className="grid grid-cols-12 gap-5">
+                {/* Read-only fields are shown disabled, not hidden. Hiding
+                    them left a drawer with no idea *what* was being edited —
+                    "Edit price" over a bare Rate box, with the item's name
+                    (a readOnly field) filtered out. FieldRenderer already
+                    passes `disabled: field.readOnly`, so this filter was the
+                    only thing standing between the two halves of the idea. */}
                 {fields
-                  .filter((f) => !f.readOnly)
                   .map((field) => (
                     <FieldRenderer
                       key={field.name}
