@@ -8,7 +8,7 @@ import { ArrowUpRight, LayoutDashboard, LogOut, Menu, Moon, Search, Sun, X } fro
 import { Icon } from '@/lib/icons';
 import { cn } from '@/lib/cn';
 import { Badge, Button, Input } from '@/components/ui';
-import { LogoMark } from '@/components/common';
+import { LogoMark, LogoWordmark } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
 import { SITE } from '@/constants/site';
 import { useTheme } from '@/app/providers';
@@ -148,7 +148,8 @@ function AdminShell({ user, onSignOut, children }: { user: User; onSignOut: () =
             </button>
             <Link href="/admin" className="flex items-center gap-2.5">
               <LogoMark className="h-8 w-8" />
-              <span className="hidden font-display text-lg font-semibold sm:block">{SITE.wordmark.primary}</span>
+              <LogoWordmark className="hidden h-[15px] sm:block" />
+              <span className="sr-only">{SITE.wordmark.primary}</span>
               <Badge variant="default" size="sm">
                 Admin
               </Badge>

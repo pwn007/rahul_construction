@@ -1,16 +1,11 @@
 <!--
-  The LogoMark from src/components/common/Logo.tsx, inlined as a standalone file
-  because index.html references /favicon.svg before React boots.
+  The brand mark (docs/brand/mark.svg) cropped to its ink box with a little air,
+  as a standalone file so browsers can fetch it before React boots.
 
-  Kept on a solid navy tile rather than transparent: browser tab strips and
-  bookmark bars are light *or* dark, and the navy trailing shape vanishes on
-  dark chrome without a ground. Colours are navy-800 / cyan-500 from
-  tailwind.config.js — if the brand palette moves, move them here too.
+  Transparent and cyan, matching the fav32.png in the client's 2026 kit: the
+  cyan reads on light and dark tab strips alike. favicon.ico, icon-192/512 and
+  apple-touch-icon.png are rasters of this file — regenerate them together.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
-  <rect width="44" height="44" rx="9" fill="#03094E" />
-  <g transform="translate(4 4) scale(0.818)">
-    <path d="M4 4h13v20L4 30V4Z" fill="#00BBEE" />
-    <path d="M21 10h13v20a10 10 0 0 1-10 10h-3V10Z" fill="#FFFFFF" />
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="222.5 222.5 555 555" width="44" height="44">
+  <path d="M500,238.36V577.55a5.57,5.57,0,0,1-5.58,5.57,5.45,5.45,0,0,1-2.66-.68,3.67,3.67,0,0,1-.47-.26L273.4,456.4V605.18a44.4,44.4,0,0,0,22.2,38.46l204.4,118V596.87a5.57,5.57,0,0,1,5.58-5.57,5.37,5.37,0,0,1,2.57.63,4.56,4.56,0,0,1,.6.34L726.6,718V369.18Z" fill="#00BBEE" />
 </svg>

@@ -7,13 +7,48 @@ import { formatDate, formatNumber } from '@/lib/format';
 import type { Quote, QuoteInput } from './quote';
 
 const NAVY: [number, number, number] = [10, 27, 77];
-const CYAN: [number, number, number] = [0, 174, 239];
+const CYAN: [number, number, number] = [0, 187, 238]; // #00BBEE, the kit's cyan
 const GREY: [number, number, number] = [110, 118, 135];
 const LIGHT: [number, number, number] = [232, 234, 240];
 
 /* jsPDF's built-in Helvetica has no rupee glyph, so amounts print as "Rs" —
    the old PDF had the same constraint. */
 const inr = (n: number) => `Rs ${formatNumber(Math.round(n))}`;
+
+/* The brand mark (docs/brand/mark.svg) as a vector polygon — jsPDF draws no
+   SVG. Corners are the path's own points in the kit's 1000-unit artboard; its
+   two notch arcs are under half a point at header size and run straight, and
+   the one rounded corner is a single cubic. Keep in step with MARK_PATH. */
+const MARK_TOP = { x: 273.4, y: 238.36, h: 523.28 };
+const MARK_POINTS: number[][] = [
+  [500, 238.36],
+  [500, 577.55],
+  [491.29, 582.18],
+  [273.4, 456.4],
+  [273.4, 605.18],
+  [273.4, 621.04, 281.87, 635.71, 295.6, 643.64],
+  [500, 761.64],
+  [500, 596.87],
+  [508.75, 592.27],
+  [726.6, 718],
+  [726.6, 369.18],
+];
+
+function drawMark(doc: jsPDF, x: number, y: number, height: number) {
+  const k = height / MARK_TOP.h;
+  const [sx, sy] = MARK_POINTS[0];
+  let cx = sx;
+  let cy = sy;
+  /* jsPDF.lines takes each segment relative to where the previous one ended —
+     bezier control points included. */
+  const segments = MARK_POINTS.slice(1).map((pt) => {
+    const rel = pt.map((v, i) => v - (i % 2 === 0 ? cx : cy));
+    cx = pt[pt.length - 2];
+    cy = pt[pt.length - 1];
+    return rel;
+  });
+  doc.lines(segments, x + (sx - MARK_TOP.x) * k, y + (sy - MARK_TOP.y) * k, [k, k], 'F', true);
+}
 
 /**
  * Branded civil-work estimate — the quantities are the document.
@@ -40,9 +75,7 @@ export function generateCivilPdf(
   setFill(NAVY);
   doc.rect(0, 0, W, 108, 'F');
   setFill(CYAN);
-  doc.rect(M, 32, 9, 22, 'F');
-  setFill([255, 255, 255]);
-  doc.rect(M + 13, 38, 9, 22, 'F');
+  drawMark(doc, M, 30, 30);
   doc.setFont('helvetica', 'bold').setFontSize(20);
   doc.setTextColor(255, 255, 255);
   doc.text('Neetu', M + 32, 50);

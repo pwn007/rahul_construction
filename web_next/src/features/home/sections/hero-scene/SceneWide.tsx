@@ -1,6 +1,6 @@
 'use client';
 
-import { MARK_PATHS } from '@/components/common/Logo';
+import { MARK_BBOX, MARK_PATH } from '@/components/common/Logo';
 import { Person, POSES } from './Person';
 import { BAND, CYAN, GLOW, NAVY, PAPER, SAND } from './palette';
 import type { Reg } from './refs';
@@ -245,13 +245,12 @@ export function SceneWide({ reg }: { reg: Reg }) {
             <rect x={1060} y={282} width={46} height={58} rx={3} fill={CYAN[600]} />
             <circle cx={1098} cy={312} r={3} fill={SAND[300]} />
 
-            {/* The mark, over the door. Same path data as `LogoMark`, so it can
-                never drift from the brand. Transforms apply right to left: move
-                the *ink* bbox (4 4 30 36, not the 44×44 artboard) to the origin,
-                then scale, then place. */}
-            <g transform={`translate(1068 236) scale(${30 / 36}) translate(-4 -4)`}>
-              <path d={MARK_PATHS.leading} fill={CYAN[500]} />
-              <path d={MARK_PATHS.trailing} fill={NAVY[800]} />
+            {/* The mark, over the door — the same path and ink box as `LogoMark`,
+                so a brand change reaches the scene with it. Move the ink box to
+                the origin, scale to 30 units tall, then place; scaling by the
+                kit's 1000-unit artboard instead would shrink the sign to a dot. */}
+            <g transform={`translate(1068 236) scale(${30 / MARK_BBOX.h}) translate(${-MARK_BBOX.x} ${-MARK_BBOX.y})`}>
+              <path d={MARK_PATH} fill={CYAN[500]} />
             </g>
           </g>
         </g>
