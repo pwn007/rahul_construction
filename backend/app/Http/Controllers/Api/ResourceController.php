@@ -227,6 +227,8 @@ class ResourceController extends Controller
                 'city' => 'City',
                 'state' => 'State',
                 'message' => 'Message',
+                'developmentType' => 'Development type',
+                'remarks' => 'Remarks',
                 'source' => 'Source',
                 'propertyType' => 'Property type',
                 'builtUpArea' => 'Built-up area (sqft)',

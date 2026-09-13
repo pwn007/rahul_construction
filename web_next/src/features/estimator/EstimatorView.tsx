@@ -65,6 +65,10 @@ const DELIVERABLES = [
 /* Interior-only fit-outs have no civil structure to quantify. */
 const BUILD_TYPES = PROPERTY_TYPES.filter((t) => t.key !== 'interior-only');
 
+/* What one unit of an option costs the visitor. Door-frame options carry their
+   own fixing labour on top of the material, so every picker compares totals. */
+const optionPrice = (o: QuoteOption) => o.rate + (o.labour ?? 0);
+
 export function EstimatorView() {
   const [draft, setDraft] = useState<QuoteInput>(() => ({
     ...DEFAULT_QUOTE_INPUT,
@@ -639,10 +643,31 @@ function QuoteResult({
                       <AnimatedAmount value={line.amount} />
                     </p>
                     <p className="num mt-0.5 text-caption text-subtle">
-                      @ {formatCurrency(line.rate)}/{line.unit.replace(/s$/, '')} · {line.chosen.label}
+                      {line.labourRate != null ? (
+                        <>
+                          @ {formatCurrency(line.rate)} material + {formatCurrency(line.labourRate)} fixing /{' '}
+                          {line.unit.replace(/s$/, '')} · {line.chosen.label}
+                        </>
+                      ) : (
+                        <>
+                          @ {formatCurrency(line.rate)}/{line.unit.replace(/s$/, '')} · {line.chosen.label}
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
+
+                {/* Only door frames carry per-option fixing labour today. Without
+                    this line the visitor sees a rate that is not the material
+                    price alone, and wonders whether the Labour line below counts
+                    it twice. */}
+                {line.labourRate != null && (
+                  <p className="mt-3 text-caption leading-relaxed text-subtle">
+                    Fixing labour is priced right here, per running ft, and it changes with the frame you pick — granite is
+                    heavy and set in mortar, steel frames are grouted in, and wood is fixed with holdfasts. It is not part
+                    of the general Labour line below.
+                  </p>
+                )}
 
                 {/* Single-option lines used to render no picker at all, which
                     left Foundation stone the only card with no product image —
@@ -714,7 +739,7 @@ function QuoteResult({
                             )}
                             <span className="mt-1.5 flex items-baseline justify-between gap-1">
                               <span className={selected ? 'truncate text-[0.7rem] font-medium leading-tight' : 'truncate text-[0.7rem] leading-tight text-muted'}>{opt.label}</span>
-                              <span className="num shrink-0 text-[0.7rem] text-subtle">{formatCurrency(opt.rate)}</span>
+                              <span className="num shrink-0 text-[0.7rem] text-subtle">{formatCurrency(optionPrice(opt))}</span>
                             </span>
                           </button>
                         );
@@ -835,7 +860,7 @@ function QuoteResult({
                 {preview.opt.label}
                 {preview.opt.detail ? ` · ${preview.opt.detail}` : ''}
               </span>
-              <span className="num shrink-0 text-neutral-500">{formatCurrency(preview.opt.rate)}</span>
+              <span className="num shrink-0 text-neutral-500">{formatCurrency(optionPrice(preview.opt))}</span>
             </p>
           </motion.div>
         )}
@@ -886,7 +911,7 @@ function QuoteResult({
                       <span className={selected ? 'block truncate text-sm font-medium' : 'block truncate text-sm'}>{opt.label}</span>
                       {opt.detail && <span className="block truncate text-caption text-subtle">{opt.detail}</span>}
                     </span>
-                    <span className="num shrink-0 text-caption text-muted">{formatCurrency(opt.rate)}</span>
+                    <span className="num shrink-0 text-caption text-muted">{formatCurrency(optionPrice(opt))}</span>
                   </span>
                 </button>
               );

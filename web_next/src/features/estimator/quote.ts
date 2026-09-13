@@ -36,6 +36,8 @@ export interface QuoteOption {
   label: string;
   detail: string;
   rate: number;
+  /** Fixing labour per unit, when the line prices it per option. */
+  labour?: number | null;
   default: boolean;
   /** Site-relative brand mark (only real brands carry one — cement, steel). */
   logo: string | null;
@@ -53,6 +55,10 @@ export interface QuoteLine {
   unit: string;
   qty: number;
   rate: number;
+  /** Per-unit fixing labour on lines whose options carry it (door frames —
+      granite, steel and wood install differently); null everywhere else.
+      `rate` stays the material price, and amount = qty × (rate + labourRate). */
+  labourRate: number | null;
   amount: number;
   note: string;
   /** Thumb-rule inputs, restated for the visitor (show-your-work). */

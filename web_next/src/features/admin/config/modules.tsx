@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui';
 import { ROUTES } from '@/constants/routes';
+import { DEVELOPMENT_TYPES, developmentTypeLabel } from '@/constants/leads';
 import { formatCurrency, formatCurrencyCompact, formatDate, formatNumber } from '@/lib/format';
 import {
   applicationsService,
@@ -831,6 +832,7 @@ export const MODULES: ResourceConfig<never>[] = [
          path writes is a filter that can never match a row. `idle-popup` was
          missing, so popup leads could not be filtered at all. */
       { key: 'source', label: 'Source', options: ['contact-form', 'estimator', 'idle-popup', 'download', 'newsletter'].map((v) => ({ value: v, label: v })) },
+      { key: 'developmentType', label: 'Type', options: DEVELOPMENT_TYPES.map((t) => ({ value: t.key, label: t.label })) },
     ],
     badge: (rows: never[]) => (rows as unknown as { stage: string }[]).filter((r) => r.stage === 'new').length || undefined,
     columns: [
@@ -848,6 +850,16 @@ export const MODULES: ResourceConfig<never>[] = [
         },
       },
       { key: 'serviceInterest', label: 'Interested in', width: '190px' },
+      {
+        key: 'developmentType',
+        label: 'Type',
+        width: '120px',
+        /* Only popup leads carry a type; older rows and the other sources show a dash. */
+        render: (row: never) => {
+          const type = (row as unknown as { developmentType?: string }).developmentType;
+          return type ? <Badge variant="default" size="sm">{developmentTypeLabel(type)}</Badge> : <span className="text-subtle">—</span>;
+        },
+      },
       { key: 'budget', label: 'Budget', width: '130px' },
       { key: 'source', label: 'Source', width: '130px', render: (row: never) => <Badge variant="default" size="sm">{(row as unknown as { source: string }).source}</Badge> },
       {
@@ -870,6 +882,14 @@ export const MODULES: ResourceConfig<never>[] = [
       { name: 'serviceInterest', label: 'Service interest', type: 'text', span: 6 },
       { name: 'budget', label: 'Budget', type: 'text', span: 6 },
       { name: 'message', label: 'Message', type: 'textarea', span: 12 },
+      {
+        name: 'developmentType',
+        label: 'Type of development',
+        type: 'select',
+        span: 6,
+        options: DEVELOPMENT_TYPES.map((t) => ({ value: t.key, label: t.label })),
+      },
+      { name: 'remarks', label: 'Remarks (from visitor)', type: 'textarea', span: 12 },
       {
         name: 'stage',
         label: 'Pipeline stage',
@@ -1333,7 +1353,7 @@ export const MODULES: ResourceConfig<never>[] = [
     fields: [
       { name: 'label', label: 'Item', type: 'text', span: 8, readOnly: true },
       { name: 'unit', label: 'Unit', type: 'text', span: 4, readOnly: true },
-      { name: 'rate', label: 'Rate', type: 'number', required: true, span: 6, help: 'Whole rupees — except Site overheads, where this is a percent.' },
+      { name: 'rate', label: 'Rate', type: 'number', required: true, span: 6, help: 'Whole rupees — except Site overheads, where this is a percent. Rows ending in “fixing labour” are the installation charge per running ft for that door-frame type, added on top of its material rate.' },
       {
         name: 'image',
         label: 'Image',

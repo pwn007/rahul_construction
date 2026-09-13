@@ -80,6 +80,16 @@ class EstimatorController extends Controller
                     }
                 }
 
+                /* Options that carry their own fixing labour (door frames: granite,
+                   steel and wood install differently) price it per unit here,
+                   instead of inside the package-wide labour rate. */
+                if (array_key_exists('labour', $o)) {
+                    $lab = $db->get($line['key'].':'.$o['key'].':labour');
+                    if ($lab) {
+                        $o['labour'] = (int) $lab->rate;
+                    }
+                }
+
                 return $o;
             }, $line['options']);
             $chosen = collect($options)->firstWhere('key', $selections[$line['key']] ?? null)
@@ -89,7 +99,8 @@ class EstimatorController extends Controller
             $wastes = $line['wastes'] ?? true;
             $buffer = $wastes ? 1 + $cfg['wastage'] : 1.0;
             $qty = ceil($line['coefficient'] * $builtUp * $buffer);
-            $amount = round($qty * $chosen['rate']);
+            $fixing = isset($chosen['labour']) ? (int) $chosen['labour'] : null;
+            $amount = round($qty * ($chosen['rate'] + ($fixing ?? 0)));
             $materialsTotal += $amount;
 
             /* The headline quantity in the unit people buy in (see config);
@@ -110,6 +121,9 @@ class EstimatorController extends Controller
                 'unit' => $line['unit'],
                 'qty' => $qty,
                 'rate' => $chosen['rate'],
+                /* Per-unit fixing labour when the option carries it; `rate` stays
+                   the material price so the card can show both. */
+                'labourRate' => $fixing,
                 'amount' => $amount,
                 'note' => $line['note'],
                 'coefficient' => $line['coefficient'],
@@ -125,6 +139,7 @@ class EstimatorController extends Controller
                     'label' => $o['label'],
                     'detail' => $o['detail'] ?? '',
                     'rate' => $o['rate'],
+                    'labour' => isset($o['labour']) ? (int) $o['labour'] : null,
                     'default' => (bool) ($o['default'] ?? false),
                     'logo' => $o['logo'] ?? null,
                     'photo' => $o['photo'] ?? null,

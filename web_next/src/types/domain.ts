@@ -274,6 +274,9 @@ export interface LeadMeta {
   landingPage?: string;
 }
 
+/** Labels live in `constants/leads.ts`. */
+export type DevelopmentType = 'residential' | 'commercial' | 'other';
+
 export interface Enquiry extends BaseEntity, LeadMeta {
   name: string;
   phone: string;
@@ -288,6 +291,17 @@ export interface Enquiry extends BaseEntity, LeadMeta {
    * either grow a textarea or invent filler to satisfy the type.
    */
   message?: string;
+  /**
+   * Both asked only by the idle popup, where the type is required and remarks
+   * are not. Optional here — and nullable in the table — because the contact
+   * form, downloads gate and newsletter share this record and collect neither;
+   * requiring them would break three forms to serve one.
+   *
+   * `remarks` is the visitor's own words. It is kept apart from `message`, which
+   * the popup already fills with a fixed context line for the sales team.
+   */
+  developmentType?: DevelopmentType;
+  remarks?: string;
   /**
    * Where the lead came from. Only values the site actually produces.
    *

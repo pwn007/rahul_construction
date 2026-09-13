@@ -22,14 +22,17 @@ export function LeadOfferModal() {
     <Dialog
       open={open}
       onClose={dismiss}
-      title="Jaipur construction rates, 2026"
+      /* No city and no year, in either line: the popup runs on every page for
+         every visitor, so naming Jaipur or 2026 makes it wrong the day the
+         business opens a second city or the calendar turns. */
+      title="Get our latest construction rates"
       description="Per-square-foot rates by locality and package — the sheet our own estimators quote from."
       size="sm"
     >
       <ShortLeadForm
         source="idle-popup"
         serviceInterest="Rate card"
-        context="Requested the 2026 Jaipur rate card."
+        context="Requested the rate card."
         submitLabel="Send me the rate card"
         onDone={suppress}
       />

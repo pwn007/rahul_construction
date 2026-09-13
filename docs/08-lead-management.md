@@ -36,11 +36,12 @@ open `/admin/enquiries`, and watch it appear with the sidebar badge increment â€
 and completely wrong for production, where the lead never leaves the visitor's
 machine. **This is the single thing that must change before launch.**
 
-### The four lead sources the site produces
+### The five lead sources the site produces
 
 | Source | Where | Fields captured |
 |---|---|---|
 | `contact-form` | Contact page | name, phone, email, service, budget, **preferred callback window**, message |
+| `idle-popup` | Rate-card popup, any public page | name, phone, **development type** (residential / commercial / other, required), **remarks** (optional) |
 | `estimator` | PDF download gate on the result screen | name, phone, email + the **entire configuration** and the `totalMin`/`totalMax` range |
 | `download` | Gated documents | name, phone, which file |
 | `newsletter` | Footer | email |

@@ -2,25 +2,32 @@
 
 import { useId, useState } from 'react';
 import { ArrowRight, Check } from 'lucide-react';
-import { Button, FormField, Input } from '@/components/ui';
+import { Button, FormField, Input, Select, Textarea } from '@/components/ui';
 import { ConsentCheckbox, CONSENT_REQUIRED } from '@/components/common/ConsentCheckbox';
+import { DEVELOPMENT_TYPES } from '@/constants/leads';
 import { leadMeta } from '@/lib/consent';
 import { track, type LeadSource } from '@/lib/analytics';
 import { enquiriesService } from '@/services';
 import { markLeadCaptured } from './useLeadOffer';
 import { rememberVisitor } from '@/lib/visitor';
-import type { Enquiry } from '@/types/domain';
+import type { DevelopmentType, Enquiry } from '@/types/domain';
 import { cn } from '@/lib/cn';
 
+/** Remarks are free text into a TEXT column; the cap is for the reader, not the column. */
+const REMARKS_MAX = 1000;
+
 /**
- * Name, number, consent. The shortest form the site is willing to ship.
+ * The idle popup's form: name, number, what they want built, and room to
+ * explain. Its only caller is `LeadOfferModal`.
  *
- * Every short capture surface uses this one — the behavioural offer, the
- * per-page enquiry bands, the footer callback. Three fields is where the
- * conversion curve peaks, but the reason to share the component is not the
- * conversion rate: it is that consent wording, attribution, the analytics
- * event and the "stop offering, they converted" call all have to happen on
- * every submission, and four copies of that is four chances to forget one.
+ * The type of development is required because it is the one answer that
+ * decides who calls back — a residential lead and a commercial lead go to
+ * different people. Remarks are optional: most visitors will skip them, and a
+ * required textarea is where short forms go to die.
+ *
+ * Consent wording, attribution, the analytics event and the "stop offering,
+ * they converted" call all live here so none of them can be forgotten on a
+ * submission.
  */
 export function ShortLeadForm({
   source,
@@ -40,11 +47,15 @@ export function ShortLeadForm({
 }) {
   const nameId = useId();
   const phoneId = useId();
+  const typeId = useId();
+  const remarksId = useId();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [developmentType, setDevelopmentType] = useState<DevelopmentType | ''>('');
+  const [remarks, setRemarks] = useState('');
   const [consent, setConsent] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; phone?: string; consent?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; developmentType?: string; consent?: string }>({});
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -54,26 +65,34 @@ export function ShortLeadForm({
     const next: typeof errors = {};
     if (name.trim().length < 2) next.name = 'Please enter your name';
     if (!/^[+]?[\d\s-]{10,15}$/.test(phone.trim())) next.phone = 'Enter a valid 10-digit mobile number';
+    if (!developmentType) next.developmentType = 'Please choose the type of development';
     if (!consent) next.consent = CONSENT_REQUIRED;
     setErrors(next);
     if (Object.keys(next).length) return;
 
     setBusy(true);
     try {
+      const note = remarks.trim();
+      /*
+       * No `city`. This used to stamp 'Jaipur' on every popup lead, but the
+       * visitor is never asked for one — the moment a second city opens, every
+       * lead from it would have been recorded in the wrong place. Absent is honest.
+       */
       const payload: Partial<Enquiry> = {
         name: name.trim(),
         phone: phone.trim(),
         serviceInterest,
-        city: 'Jaipur',
+        developmentType: developmentType as DevelopmentType,
         source,
         stage: 'new',
         ...leadMeta(),
       };
       if (context) payload.message = context;
+      if (note) payload.remarks = note;
 
       await enquiriesService.create(payload as Omit<Enquiry, 'id' | 'createdAt' | 'updatedAt' | 'status'>);
 
-      track('lead_submit', { source, fields: 2 });
+      track('lead_submit', { source, fields: note ? 4 : 3 });
       /* They have given us a number. Nothing on this site should ask again. */
       markLeadCaptured();
       /* And we can greet them by name from here on. First name only — see lib/visitor. */
@@ -131,6 +150,38 @@ export function ShortLeadForm({
           />
         </FormField>
       </div>
+
+      <FormField label="Type of development" htmlFor={typeId} required error={errors.developmentType}>
+        <Select
+          id={typeId}
+          value={developmentType}
+          onChange={(e) => {
+            setDevelopmentType(e.target.value as DevelopmentType);
+            if (errors.developmentType) setErrors((prev) => ({ ...prev, developmentType: undefined }));
+          }}
+          error={errors.developmentType}
+        >
+          <option value="" disabled>
+            Choose one…
+          </option>
+          {DEVELOPMENT_TYPES.map((t) => (
+            <option key={t.key} value={t.key}>
+              {t.label}
+            </option>
+          ))}
+        </Select>
+      </FormField>
+
+      <FormField label="Remarks" htmlFor={remarksId} description="Optional — plot size, location, timeline, anything that helps us prepare.">
+        <Textarea
+          id={remarksId}
+          rows={3}
+          maxLength={REMARKS_MAX}
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+          placeholder="e.g. 30×50 plot, looking to start in three months"
+        />
+      </FormField>
 
       <ConsentCheckbox checked={consent} onChange={setConsent} error={errors.consent} />
 

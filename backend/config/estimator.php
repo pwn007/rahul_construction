@@ -153,10 +153,25 @@ return [
             ['key' => 'premium', 'label' => 'Premium emulsion', 'rate' => 34, 'default' => true, 'photo' => '/images/materials/wallfinish-premium.jpg'],
             ['key' => 'royal', 'label' => 'Royal Matt + textures', 'rate' => 60, 'photo' => '/images/materials/wallfinish-royal.jpg'],
         ]],
-        ['key' => 'doors', 'wastes' => false, 'label' => 'Doors', 'unit' => 'doors', 'coefficient' => 0.004, 'tier' => 'semi', 'note' => 'Frames and shutters, fitted', 'options' => [
-            ['key' => 'flush', 'label' => 'Flush shutter', 'detail' => 'Granite frame', 'rate' => 9800, 'photo' => '/images/materials/doors-flush.jpg'],
-            ['key' => 'laminated', 'label' => 'Laminated shutter', 'detail' => 'Wooden frame', 'rate' => 12000, 'default' => true, 'photo' => '/images/materials/doors-laminated.jpg'],
-            ['key' => 'teak', 'label' => 'Teak veneer', 'detail' => 'Polished wooden frame', 'rate' => 14200, 'photo' => '/images/materials/doors-teak.jpg'],
+        /* Shutters only since the door-frame line below took the frames out —
+           the client lowers these rates in the admin to drop the frame share. */
+        ['key' => 'doors', 'wastes' => false, 'label' => 'Doors', 'unit' => 'doors', 'coefficient' => 0.004, 'tier' => 'semi', 'note' => 'Shutters, fitted (frames priced separately)', 'options' => [
+            ['key' => 'flush', 'label' => 'Flush shutter', 'detail' => 'Commercial grade', 'rate' => 9800, 'photo' => '/images/materials/doors-flush.jpg'],
+            ['key' => 'laminated', 'label' => 'Laminated shutter', 'detail' => 'Laminate both faces', 'rate' => 12000, 'default' => true, 'photo' => '/images/materials/doors-laminated.jpg'],
+            ['key' => 'teak', 'label' => 'Teak veneer', 'detail' => 'Polished veneer', 'rate' => 14200, 'photo' => '/images/materials/doors-teak.jpg'],
+        ]],
+        /* Door frames (chaukhat) — the client's thumb rule: a standard door takes
+           7 + 7 + 3.5 = 17.5 running ft of frame, and a typical plan needs
+           0.35–0.4 running ft per sq ft built-up (0.4, the client's own figure).
+           Each frame type carries its own fixing labour per running ft — granite
+           is heavy and set in mortar, steel frames are grouted, wood is fixed with
+           holdfasts — so `labour` is priced on the option, not in labour_rate.
+           Rates are Sep 2026 market-research defaults; the estimator_prices rows
+           door-frame:<type> and door-frame:<type>:labour override both. */
+        ['key' => 'door-frame', 'wastes' => false, 'label' => 'Door frames (chaukhat)', 'unit' => 'running ft', 'coefficient' => 0.4, 'tier' => 'semi', 'note' => 'Frame supply plus fixing, by frame type', 'options' => [
+            ['key' => 'granite', 'label' => 'Granite', 'detail' => 'Set in cement mortar', 'rate' => 62, 'labour' => 75, 'default' => true, 'photo' => '/images/materials/frame-granite.svg'],
+            ['key' => 'steel', 'label' => 'Steel', 'detail' => 'Japani chaukhat, grouted', 'rate' => 120, 'labour' => 40, 'photo' => '/images/materials/frame-steel.svg'],
+            ['key' => 'wood', 'label' => 'Wood (sal)', 'detail' => 'Fixed with holdfasts', 'rate' => 250, 'labour' => 60, 'photo' => '/images/materials/frame-wood.svg'],
         ]],
         ['key' => 'grills', 'wastes' => false, 'label' => 'Grills & safety railings', 'unit' => 'sq ft', 'coefficient' => 0.08, 'tier' => 'semi', 'note' => 'Window safety grills, painted', 'options' => [
             ['key' => 'ms-plain', 'label' => 'MS plain', 'detail' => 'Painted mild steel', 'rate' => 300, 'photo' => '/images/materials/grills-msplain.jpg'],

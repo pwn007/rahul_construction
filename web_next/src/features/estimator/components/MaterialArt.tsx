@@ -144,6 +144,16 @@ const ART: Record<string, React.ReactNode> = {
     </>
   ),
 
+  /* Door frames — an empty chaukhat set in a wall: two jambs and a head, open
+     at the floor, no shutter (the Doors card owns shutters). */
+  'door-frame': (
+    <>
+      <path d="M4 44h40v2H4z" fill="#C9B79C" />
+      <path d="M11 44V7h26v37h-5V12H16v32z" fill="#8C5A2E" />
+      <path d="M16 12h16v32H16z" fill="#F2EBDD" />
+    </>
+  ),
+
   /* Grills — a safety grill of verticals with a scroll motif. */
   grills: (
     <>

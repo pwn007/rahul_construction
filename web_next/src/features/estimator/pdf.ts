@@ -181,7 +181,11 @@ export function generateCivilPdf(
     setColor(NAVY);
     doc.text(`${formatNumber(line.qty)} ${line.unit}`, col.qty, y + 13, { align: 'right' });
     setColor(GREY);
-    doc.text(inr(line.rate), col.rate, y + 13, { align: 'right' });
+    /* Frame lines price fixing labour per running ft on top of the material. */
+    doc.text(
+      line.labourRate != null ? `${inr(line.rate)} + ${formatNumber(line.labourRate)}` : inr(line.rate),
+      col.rate, y + 13, { align: 'right' },
+    );
     doc.setFont('helvetica', 'bold');
     setColor(NAVY);
     doc.text(inr(line.amount), col.amount - 8, y + 13, { align: 'right' });
@@ -238,5 +242,5 @@ export function generateCivilPdf(
   setColor(CYAN);
   doc.text('Free site visit & detailed quotation on request', W - M, H - 24, { align: 'right' });
 
-  doc.save(`NeetuArchstone-Civil-Estimate-${quote.builtUpArea}sqft.pdf`);
+  doc.save(`NeetuArchstone-${input.package === 'semi-furnished' ? 'Semi-Furnished' : 'Civil'}-Estimate-${quote.builtUpArea}sqft.pdf`);
 }
