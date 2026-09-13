@@ -164,13 +164,14 @@ return [
            7 + 7 + 3.5 = 17.5 running ft of frame, and a typical plan needs
            0.35–0.4 running ft per sq ft built-up (0.4, the client's own figure).
            Each frame type carries its own fixing labour per running ft — granite
-           is heavy and set in mortar, steel frames are grouted, wood is fixed with
-           holdfasts — so `labour` is priced on the option, not in labour_rate.
+           and Bijolia stone are set in mortar, wood is fixed with holdfasts (Bijolia —
+           Rajasthan's grey sandstone — replaced the steel frame on the client's word:
+           steel chaukhats are not what gets fitted locally) — so `labour` is priced on the option, not in labour_rate.
            Rates are Sep 2026 market-research defaults; the estimator_prices rows
            door-frame:<type> and door-frame:<type>:labour override both. */
         ['key' => 'door-frame', 'wastes' => false, 'label' => 'Door frames (chaukhat)', 'unit' => 'running ft', 'coefficient' => 0.4, 'tier' => 'semi', 'note' => 'Frame supply plus fixing, by frame type', 'options' => [
-            ['key' => 'granite', 'label' => 'Granite', 'detail' => 'Set in cement mortar', 'rate' => 62, 'labour' => 75, 'default' => true, 'photo' => '/images/materials/frame-granite.svg'],
-            ['key' => 'steel', 'label' => 'Steel', 'detail' => 'Japani chaukhat, grouted', 'rate' => 120, 'labour' => 40, 'photo' => '/images/materials/frame-steel.svg'],
+            ['key' => 'bijolia', 'label' => 'Bijolia stone', 'detail' => 'Grey sandstone, set in mortar', 'rate' => 60, 'labour' => 75, 'default' => true, 'photo' => '/images/materials/frame-bijolia.svg'],
+            ['key' => 'granite', 'label' => 'Granite', 'detail' => 'Set in cement mortar', 'rate' => 62, 'labour' => 75, 'photo' => '/images/materials/frame-granite.svg'],
             ['key' => 'wood', 'label' => 'Wood (sal)', 'detail' => 'Fixed with holdfasts', 'rate' => 250, 'labour' => 60, 'photo' => '/images/materials/frame-wood.svg'],
         ]],
         ['key' => 'grills', 'wastes' => false, 'label' => 'Grills & safety railings', 'unit' => 'sq ft', 'coefficient' => 0.08, 'tier' => 'semi', 'note' => 'Window safety grills, painted', 'options' => [

@@ -663,8 +663,8 @@ function QuoteResult({
                     it twice. */}
                 {line.labourRate != null && (
                   <p className="mt-3 text-caption leading-relaxed text-subtle">
-                    Fixing labour is priced right here, per running ft, and it changes with the frame you pick — granite is
-                    heavy and set in mortar, steel frames are grouted in, and wood is fixed with holdfasts. It is not part
+                    Fixing labour is priced right here, per running ft, and it changes with the frame you pick — granite and Bijolia stone are
+                    set in mortar, while wood is fixed with holdfasts. It is not part
                     of the general Labour line below.
                   </p>
                 )}

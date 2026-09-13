@@ -145,8 +145,8 @@ export const ESTIMATOR_PRICES: EstimatorPrice[] = [
      both per running ft — the engine adds them. */
   { ...meta('esp_60'), key: 'door-frame:granite', label: 'Door frames (chaukhat) — Granite (Set in cement mortar)', unit: 'per running ft', rate: 62, image: '/images/materials/frame-granite.svg', order: 60 },
   { ...meta('esp_61'), key: 'door-frame:granite:labour', label: 'Door frames (chaukhat) — Granite · fixing labour', unit: 'per running ft', rate: 75, order: 61 },
-  { ...meta('esp_62'), key: 'door-frame:steel', label: 'Door frames (chaukhat) — Steel (Japani chaukhat, grouted)', unit: 'per running ft', rate: 120, image: '/images/materials/frame-steel.svg', order: 62 },
-  { ...meta('esp_63'), key: 'door-frame:steel:labour', label: 'Door frames (chaukhat) — Steel · fixing labour', unit: 'per running ft', rate: 40, order: 63 },
+  { ...meta('esp_62'), key: 'door-frame:bijolia', label: 'Door frames (chaukhat) — Bijolia stone (Grey sandstone, set in mortar)', unit: 'per running ft', rate: 60, image: '/images/materials/frame-bijolia.svg', order: 62 },
+  { ...meta('esp_63'), key: 'door-frame:bijolia:labour', label: 'Door frames (chaukhat) — Bijolia stone · fixing labour', unit: 'per running ft', rate: 75, order: 63 },
   { ...meta('esp_64'), key: 'door-frame:wood', label: 'Door frames (chaukhat) — Wood (sal) (Fixed with holdfasts)', unit: 'per running ft', rate: 250, image: '/images/materials/frame-wood.svg', order: 64 },
   { ...meta('esp_65'), key: 'door-frame:wood:labour', label: 'Door frames (chaukhat) — Wood (sal) · fixing labour', unit: 'per running ft', rate: 60, order: 65 },
   { ...meta('esp_33'), key: 'grills:ms-plain', label: 'Grills & safety railings — MS plain (Painted mild steel)', unit: 'per sq ft', rate: 300, image: '/images/materials/grills-msplain.jpg', order: 33 },

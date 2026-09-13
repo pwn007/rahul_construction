@@ -387,11 +387,11 @@
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-06-01T09:00:00.000Z",
     "status": "published",
-    "key": "door-frame:steel",
-    "label": "Door frames (chaukhat) — Steel (Japani chaukhat, grouted)",
+    "key": "door-frame:bijolia",
+    "label": "Door frames (chaukhat) — Bijolia stone (Grey sandstone, set in mortar)",
     "unit": "per running ft",
-    "rate": 120,
-    "image": "/images/materials/frame-steel.svg",
+    "rate": 60,
+    "image": "/images/materials/frame-bijolia.svg",
     "order": 62
   },
   {
@@ -399,10 +399,10 @@
     "createdAt": "2026-01-01T09:00:00.000Z",
     "updatedAt": "2026-06-01T09:00:00.000Z",
     "status": "published",
-    "key": "door-frame:steel:labour",
-    "label": "Door frames (chaukhat) — Steel · fixing labour",
+    "key": "door-frame:bijolia:labour",
+    "label": "Door frames (chaukhat) — Bijolia stone · fixing labour",
     "unit": "per running ft",
-    "rate": 40,
+    "rate": 75,
     "order": 63
   },
   {
