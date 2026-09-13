@@ -205,6 +205,25 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
                 {cta?.label ?? 'Get Estimate'}
               </Button>
 
+              {/*
+                The phone-width twin of the button above, so the estimator is one
+                tap away without opening the drawer (client ask). The label is a
+                short fixed word rather than the admin's nav label: a long label
+                there would break this row. Below 360px the row has no room for
+                it, so the word goes sr-only — kept in the DOM because Button's
+                href branch does not forward aria-label, and an icon-only link
+                would otherwise have no accessible name.
+              */}
+              <Button
+                href={cta?.href ?? ROUTES.estimator}
+                variant="accent"
+                size="sm"
+                className="sm:hidden"
+                leftIcon={<Calculator className="h-4 w-4" aria-hidden />}
+              >
+                <span className="sr-only min-[360px]:not-sr-only">Estimate</span>
+              </Button>
+
               <button
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open menu"
