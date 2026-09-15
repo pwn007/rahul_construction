@@ -367,7 +367,7 @@
     "key": "door-frame:granite",
     "label": "Door frames (chaukhat) — Granite (Set in cement mortar)",
     "unit": "per running ft",
-    "rate": 62,
+    "rate": 250,
     "image": "/images/materials/frame-granite.svg",
     "order": 60
   },
@@ -379,7 +379,7 @@
     "key": "door-frame:granite:labour",
     "label": "Door frames (chaukhat) — Granite · fixing labour",
     "unit": "per running ft",
-    "rate": 75,
+    "rate": 70,
     "order": 61
   },
   {
@@ -413,7 +413,7 @@
     "key": "door-frame:wood",
     "label": "Door frames (chaukhat) — Wood (sal) (Fixed with holdfasts)",
     "unit": "per running ft",
-    "rate": 250,
+    "rate": 275,
     "image": "/images/materials/frame-wood.svg",
     "order": 64
   },
@@ -425,7 +425,7 @@
     "key": "door-frame:wood:labour",
     "label": "Door frames (chaukhat) — Wood (sal) · fixing labour",
     "unit": "per running ft",
-    "rate": 60,
+    "rate": 45,
     "order": 65
   },
   {
@@ -743,7 +743,7 @@
     "key": "overheads",
     "label": "Site overheads",
     "unit": "% of materials + labour",
-    "rate": 15,
+    "rate": 0,
     "order": 59
   }
 ]

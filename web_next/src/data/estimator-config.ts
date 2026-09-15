@@ -143,12 +143,12 @@ export const ESTIMATOR_PRICES: EstimatorPrice[] = [
   { ...meta('esp_32'), key: 'doors:teak', label: 'Doors — Teak veneer (Polished veneer)', unit: 'per door', rate: 14200, image: '/images/materials/doors-teak.jpg', order: 32 },
   /* Door frames (chaukhat): each type's material and its own fixing labour,
      both per running ft — the engine adds them. */
-  { ...meta('esp_60'), key: 'door-frame:granite', label: 'Door frames (chaukhat) — Granite (Set in cement mortar)', unit: 'per running ft', rate: 62, image: '/images/materials/frame-granite.svg', order: 60 },
-  { ...meta('esp_61'), key: 'door-frame:granite:labour', label: 'Door frames (chaukhat) — Granite · fixing labour', unit: 'per running ft', rate: 75, order: 61 },
+  { ...meta('esp_60'), key: 'door-frame:granite', label: 'Door frames (chaukhat) — Granite (Set in cement mortar)', unit: 'per running ft', rate: 250, image: '/images/materials/frame-granite.svg', order: 60 },
+  { ...meta('esp_61'), key: 'door-frame:granite:labour', label: 'Door frames (chaukhat) — Granite · fixing labour', unit: 'per running ft', rate: 70, order: 61 },
   { ...meta('esp_62'), key: 'door-frame:bijolia', label: 'Door frames (chaukhat) — Bijolia stone (Grey sandstone, set in mortar)', unit: 'per running ft', rate: 60, image: '/images/materials/frame-bijolia.svg', order: 62 },
   { ...meta('esp_63'), key: 'door-frame:bijolia:labour', label: 'Door frames (chaukhat) — Bijolia stone · fixing labour', unit: 'per running ft', rate: 75, order: 63 },
-  { ...meta('esp_64'), key: 'door-frame:wood', label: 'Door frames (chaukhat) — Wood (sal) (Fixed with holdfasts)', unit: 'per running ft', rate: 250, image: '/images/materials/frame-wood.svg', order: 64 },
-  { ...meta('esp_65'), key: 'door-frame:wood:labour', label: 'Door frames (chaukhat) — Wood (sal) · fixing labour', unit: 'per running ft', rate: 60, order: 65 },
+  { ...meta('esp_64'), key: 'door-frame:wood', label: 'Door frames (chaukhat) — Wood (sal) (Fixed with holdfasts)', unit: 'per running ft', rate: 275, image: '/images/materials/frame-wood.svg', order: 64 },
+  { ...meta('esp_65'), key: 'door-frame:wood:labour', label: 'Door frames (chaukhat) — Wood (sal) · fixing labour', unit: 'per running ft', rate: 45, order: 65 },
   { ...meta('esp_33'), key: 'grills:ms-plain', label: 'Grills & safety railings — MS plain (Painted mild steel)', unit: 'per sq ft', rate: 300, image: '/images/materials/grills-msplain.jpg', order: 33 },
   { ...meta('esp_34'), key: 'grills:ms-design', label: 'Grills & safety railings — MS decorative (Fabricated pattern)', unit: 'per sq ft', rate: 350, image: '/images/materials/grills-msdecorative.jpg', order: 34 },
   { ...meta('esp_35'), key: 'grills:ss', label: 'Grills & safety railings — SS 304 (Brushed stainless)', unit: 'per sq ft', rate: 600, image: '/images/materials/grills-ss.jpg', order: 35 },
@@ -177,5 +177,5 @@ export const ESTIMATOR_PRICES: EstimatorPrice[] = [
   { ...meta('esp_56'), key: 'labour:civil-ground', label: 'Labour — Civil (Ground only)', unit: 'per sq ft built-up', rate: 450, order: 56 },
   { ...meta('esp_59'), key: 'labour:civil-upper', label: 'Labour — Civil (Ground + floors)', unit: 'per sq ft built-up', rate: 350, order: 57 },
   { ...meta('esp_57'), key: 'labour:semi-furnished', label: 'Labour — Semi Furnished', unit: 'per sq ft built-up', rate: 400, order: 58 },
-  { ...meta('esp_58'), key: 'overheads', label: 'Site overheads', unit: '% of materials + labour', rate: 15, order: 59 },
+  { ...meta('esp_58'), key: 'overheads', label: 'Site overheads', unit: '% of materials + labour', rate: 0, order: 59 },
 ];

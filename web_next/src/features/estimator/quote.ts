@@ -9,7 +9,7 @@ import { AREA_UNITS, type AreaUnit } from '@/constants/estimator';
  * The arithmetic lives on the server (backend config/estimator.php +
  * EstimatorController): quantities from per-sqft thumb-rule coefficients with
  * quantities priced at current Jaipur rates (the wastage allowance rides
- * inside the admin-owned rates), plus labour and site overheads. Keeping it server-side means a cement price change is an .env-free
+ * inside the admin-owned rates), plus labour. Keeping it server-side means a cement price change is an .env-free
  * config edit on the host — the live estimator follows without a rebuild, and
  * the PDF, the admin's lead record and the page can never disagree.
  *
@@ -56,7 +56,7 @@ export interface QuoteLine {
   qty: number;
   rate: number;
   /** Per-unit fixing labour on lines whose options carry it (door frames —
-      granite, steel and wood install differently); null everywhere else.
+      granite, Bijolia and wood install differently); null everywhere else.
       `rate` stays the material price, and amount = qty × (rate + labourRate). */
   labourRate: number | null;
   amount: number;

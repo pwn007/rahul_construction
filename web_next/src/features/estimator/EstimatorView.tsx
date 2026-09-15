@@ -28,7 +28,7 @@ import { MaterialArt } from './components/MaterialArt';
  * a big gap between an opaque estimate and the real bill. This version asks
  * only what arithmetic needs — plot size and floors — and answers with the
  * actual shopping list: so many bricks, so many bags of cement, priced line
- * by line, with labour and overheads stated in the open (the old visible
+ * by line, with labour stated in the open (the old visible
  * wastage buffer now rides inside the admin-owned rates — see
  * estimator-prices). Civil structure only, on purpose: quantities for finishing and
  * furniture return once this engine has proven itself against real builds
@@ -48,12 +48,12 @@ const DELIVERABLES = [
   {
     icon: IndianRupee,
     title: 'Priced line by line',
-    detail: 'Every quantity at today’s Jaipur rates, plus labour and site overheads. Nothing hidden in a lump sum.',
+    detail: 'Every quantity at today’s Jaipur rates, plus labour. Nothing hidden in a lump sum.',
   },
   {
     icon: ShieldCheck,
     title: 'Nothing hidden',
-    detail: 'Labour and site overheads shown as separate lines — check the arithmetic yourself.',
+    detail: 'Labour shown as its own line — check the arithmetic yourself.',
   },
   {
     icon: FileDown,
@@ -797,15 +797,19 @@ function QuoteResult({
               </p>
             )}
           </div>
-          <div className="flex items-baseline justify-between gap-4 px-5 py-3">
-            <span>
-              Site overheads{' '}
-              <span className="text-caption text-subtle">
-                (shuttering, scaffolding, curing, transport &amp; supervision — {quote.overheads.pct}%)
+          {/* Hidden at 0: the client dropped site overheads (Sep 2026). The admin's
+              `overheads` row brings the line back by setting it above 0. */}
+          {quote.overheads.pct > 0 && (
+            <div className="flex items-baseline justify-between gap-4 px-5 py-3">
+              <span>
+                Site overheads{' '}
+                <span className="text-caption text-subtle">
+                  (shuttering, scaffolding, curing, transport &amp; supervision — {quote.overheads.pct}%)
+                </span>
               </span>
-            </span>
-            <AnimatedAmount value={quote.overheads.amount} className="num shrink-0" />
-          </div>
+              <AnimatedAmount value={quote.overheads.amount} className="num shrink-0" />
+            </div>
+          )}
           <div className="flex items-baseline justify-between border-t bg-[rgb(var(--c-text))]/[0.03] px-5 py-3.5">
             <span className="font-semibold">Total</span>
             <AnimatedAmount value={quote.total} className="num font-semibold" />

@@ -212,7 +212,10 @@ export function generateCivilPdf(
 
   totalRow('Materials', '', quote.materialsTotal);
   totalRow('Labour', `${inr(quote.labour.rate)} / sq ft`, quote.labour.amount);
+  /* Omitted at 0 — the client dropped site overheads; see EstimatorView. */
+  if (quote.overheads.pct > 0) {
   totalRow('Site overheads', `shuttering, scaffolding, curing, transport, supervision — ${quote.overheads.pct}%`, quote.overheads.amount);
+  }
   doc.setDrawColor(NAVY[0], NAVY[1], NAVY[2]).setLineWidth(1);
   doc.line(M, y + 2, W - M, y + 2);
   totalRow('Total', '', quote.total, true);

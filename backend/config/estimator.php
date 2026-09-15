@@ -15,12 +15,13 @@
 |                      civil (450 ground-only / 350 with added floors); the old
 |                      labourOnlyRate of 100 was a labour-contract headline,
 |                      not the built-in labour share of a turnkey rate.
-|   overheads   0.15 — shuttering, scaffolding, curing water/power,
+|   overheads   0 (was 0.15) — shuttering, scaffolding, curing water/power,
 |                      transport and supervision; nothing in the material
 |                      lines carries these.
 |
-| With both, a 2,000 sq ft build lands at ≈ ₹1,220/sq ft all-in — inside the
-| band the firm already quotes. Change rates here (cement price moved etc.)
+| With overheads at 0 (client, Sep 2026) and door frames in Civil, a 2,000 sq ft
+| G+1 civil build lands at ≈ ₹1,168/sq ft — below that band; rates are
+| admin-owned (estimator_prices), so the client can lift them there. Change rates here (cement price moved etc.)
 | and the live estimator follows on the next request — no rebuild. When the
 | admin-editing phase lands, this file becomes a DB read.
 |
@@ -54,7 +55,10 @@ return [
        (labour:civil-ground / labour:civil-upper / labour:semi-furnished) win. */
     'labour_rate' => ['civil' => ['ground' => 450, 'upper' => 350], 'semi-furnished' => 400],
     'packages' => ['civil', 'semi-furnished'],
-    'overheads' => 0.15,    // fraction of (materials + labour)
+    /* 0 since Sep 2026: the client dropped the Site overheads line. The knob
+       stays — set it (or the admin's `overheads` row) above 0 and the line
+       returns on the page and in the PDF. */
+    'overheads' => 0.0,     // fraction of (materials + labour)
 
     /* Spread around the point estimate — same factors the old model used. */
     'range_low' => 0.94,
@@ -131,6 +135,23 @@ return [
         ['key' => 'stone', 'tier' => 'civil', 'label' => 'Foundation stone', 'unit' => 'tonnes', 'coefficient' => 0.0125, 'note' => 'Rubble masonry footings', 'options' => [
             ['key' => 'masonry', 'label' => 'Masonry stone', 'detail' => 'Kota quarry', 'rate' => 900, 'default' => true, 'photo' => '/images/materials/stone-masonry.jpg'],
         ]],
+        /* Door frames (chaukhat) — the client's thumb rule: a standard door takes
+           7 + 7 + 3.5 = 17.5 running ft of frame, and a typical plan needs
+           0.35–0.4 running ft per sq ft built-up (0.4, the client's own figure).
+           Each frame type carries its own fixing labour per running ft — granite
+           and Bijolia stone are set in mortar, wood is fixed with holdfasts (Bijolia —
+           Rajasthan's grey sandstone — replaced the steel frame on the client's word:
+           steel chaukhats are not what gets fitted locally) — so `labour` is priced on the option, not in labour_rate.
+           Civil tier since Sep 2026 (client), so Semi Furnished inherits the
+           same single line. Rates: Bijolia 60 + 75 (research); Granite 250 + 70 and
+           Wood 275 + 45 from the client (wood was quoted 250–300 + 40–50 — the
+           midpoint is used); the estimator_prices rows
+           door-frame:<type> and door-frame:<type>:labour override both. */
+        ['key' => 'door-frame', 'wastes' => false, 'label' => 'Door frames (chaukhat)', 'unit' => 'running ft', 'coefficient' => 0.4, 'tier' => 'civil', 'note' => 'Frame supply plus fixing, by frame type', 'options' => [
+            ['key' => 'bijolia', 'label' => 'Bijolia stone', 'detail' => 'Grey sandstone, set in mortar', 'rate' => 60, 'labour' => 75, 'default' => true, 'photo' => '/images/materials/frame-bijolia.svg'],
+            ['key' => 'granite', 'label' => 'Granite', 'detail' => 'Set in cement mortar', 'rate' => 250, 'labour' => 70, 'photo' => '/images/materials/frame-granite.svg'],
+            ['key' => 'wood', 'label' => 'Wood (sal)', 'detail' => 'Fixed with holdfasts', 'rate' => 275, 'labour' => 45, 'photo' => '/images/materials/frame-wood.svg'],
+        ]],
 
         /*
          * Semi-furnished tier — the finishing trades, verbatim from the firm's
@@ -153,26 +174,13 @@ return [
             ['key' => 'premium', 'label' => 'Premium emulsion', 'rate' => 34, 'default' => true, 'photo' => '/images/materials/wallfinish-premium.jpg'],
             ['key' => 'royal', 'label' => 'Royal Matt + textures', 'rate' => 60, 'photo' => '/images/materials/wallfinish-royal.jpg'],
         ]],
-        /* Shutters only since the door-frame line below took the frames out —
+        /* Shutters only since frames moved to their own
+           door-frame line (Civil) —
            the client lowers these rates in the admin to drop the frame share. */
         ['key' => 'doors', 'wastes' => false, 'label' => 'Doors', 'unit' => 'doors', 'coefficient' => 0.004, 'tier' => 'semi', 'note' => 'Shutters, fitted (frames priced separately)', 'options' => [
             ['key' => 'flush', 'label' => 'Flush shutter', 'detail' => 'Commercial grade', 'rate' => 9800, 'photo' => '/images/materials/doors-flush.jpg'],
             ['key' => 'laminated', 'label' => 'Laminated shutter', 'detail' => 'Laminate both faces', 'rate' => 12000, 'default' => true, 'photo' => '/images/materials/doors-laminated.jpg'],
             ['key' => 'teak', 'label' => 'Teak veneer', 'detail' => 'Polished veneer', 'rate' => 14200, 'photo' => '/images/materials/doors-teak.jpg'],
-        ]],
-        /* Door frames (chaukhat) — the client's thumb rule: a standard door takes
-           7 + 7 + 3.5 = 17.5 running ft of frame, and a typical plan needs
-           0.35–0.4 running ft per sq ft built-up (0.4, the client's own figure).
-           Each frame type carries its own fixing labour per running ft — granite
-           and Bijolia stone are set in mortar, wood is fixed with holdfasts (Bijolia —
-           Rajasthan's grey sandstone — replaced the steel frame on the client's word:
-           steel chaukhats are not what gets fitted locally) — so `labour` is priced on the option, not in labour_rate.
-           Rates are Sep 2026 market-research defaults; the estimator_prices rows
-           door-frame:<type> and door-frame:<type>:labour override both. */
-        ['key' => 'door-frame', 'wastes' => false, 'label' => 'Door frames (chaukhat)', 'unit' => 'running ft', 'coefficient' => 0.4, 'tier' => 'semi', 'note' => 'Frame supply plus fixing, by frame type', 'options' => [
-            ['key' => 'bijolia', 'label' => 'Bijolia stone', 'detail' => 'Grey sandstone, set in mortar', 'rate' => 60, 'labour' => 75, 'default' => true, 'photo' => '/images/materials/frame-bijolia.svg'],
-            ['key' => 'granite', 'label' => 'Granite', 'detail' => 'Set in cement mortar', 'rate' => 62, 'labour' => 75, 'photo' => '/images/materials/frame-granite.svg'],
-            ['key' => 'wood', 'label' => 'Wood (sal)', 'detail' => 'Fixed with holdfasts', 'rate' => 250, 'labour' => 60, 'photo' => '/images/materials/frame-wood.svg'],
         ]],
         ['key' => 'grills', 'wastes' => false, 'label' => 'Grills & safety railings', 'unit' => 'sq ft', 'coefficient' => 0.08, 'tier' => 'semi', 'note' => 'Window safety grills, painted', 'options' => [
             ['key' => 'ms-plain', 'label' => 'MS plain', 'detail' => 'Painted mild steel', 'rate' => 300, 'photo' => '/images/materials/grills-msplain.jpg'],
