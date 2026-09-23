@@ -3,7 +3,7 @@
 import { Reveal, SplitText } from '@/components/motion';
 import { CtaLink } from '@/components/common';
 import { ROUTES } from '@/constants/routes';
-import { MepfSystemStrip } from './MepfSystemStrip';
+import { MepfSystemStack } from './MepfSystemStack';
 
 /**
  * MEPF on the home page — four photographs of the real thing.
@@ -16,7 +16,7 @@ import { MepfSystemStrip } from './MepfSystemStrip';
  * closer each time, still one picture for a heading that promises four systems.
  *
  * ── Why the single labelled photo is gone ───────────────────────────────────
- * The version before this one was one `aspect-[3/2]` photograph carrying three
+ * The version before that was one `aspect-[3/2]` photograph carrying three
  * hotspot pins, with a second photograph stamped over its bottom-right corner.
  * Measured on the running site, it failed at exactly the widths most visitors
  * use:
@@ -31,10 +31,37 @@ import { MepfSystemStrip } from './MepfSystemStrip';
  * right purely because the "Ductwork" pin occupied bottom left — a layout taking
  * orders from a photograph's contents.
  *
- * Four equal frames answer all of it at once: the heading's claim becomes true,
- * plumbing stops being the discipline nobody illustrated, nothing overlaps
- * anything, and the captions survive down to 360px. Total photography at 1440px
- * goes *up* — 4 × 314 × 393 against one 740 × 493.
+ * Four equal frames answered all of it at once: the heading's claim became
+ * true, plumbing stopped being the discipline nobody illustrated, nothing
+ * overlapped anything, and the captions survived down to 360px.
+ *
+ * ── Why those four frames are now four full-width cards ─────────────────────
+ * They were a 4-up row: 314px wide at 1440, 143px on a phone, a two-line
+ * caption under each. Honest, and too small to say anything. A 143px tile is a
+ * swatch rather than a photograph, and the row had no space beyond a name and
+ * four words — so the home page was showing about a fifth of the copy that
+ * data/mepf.ts had already written and argued over.
+ *
+ * One card per line, at the client's request and in the same anatomy as the
+ * "What we do" index above it, fits the promise and the one consequence beside
+ * a picture big enough to read. Total photography goes up again: four
+ * ~486 × 272 bleeds against four 314 × 393 tiles.
+ *
+ * The cards stack as you scroll — each one halts under the nav and the next
+ * slides over it. Why that is `position: sticky` and not a pinned GSAP rig is
+ * argued at the top of MepfSystemStack; the short version is that sticky costs
+ * zero extra scroll and does not touch the scroll rate, and this page has
+ * already thrown out one MEPF section that failed both tests.
+ *
+ * ── Why there is no longer a shell around all this ──────────────────────────
+ * There was one: `relative overflow-hidden rounded-2xl border bg-surface-2`,
+ * holding the blueprint grid and a cyan glow. `overflow-hidden` makes a box a
+ * scroll container, and a `position: sticky` descendant then sticks to *that
+ * box* rather than to the viewport — the deck simply does not move, with
+ * nothing in the console to say why. So the shell is gone and its two
+ * decorations moved onto the cards themselves, where the glow additionally
+ * became per-system colour. Do not reintroduce a wrapper with `overflow-hidden`
+ * around `<MepfSystemStack />`; it will silently break the section.
  *
  * The interactive twin stays on `/services/mepf-consultancy` and is still where
  * this links. The two are not competing: the photographs say "this is MEPF", the
@@ -44,82 +71,65 @@ import { MepfSystemStrip } from './MepfSystemStrip';
  * The old rule was that the home page must never pay for three.js (~150 KB
  * gzipped) and so got the flat SVG rather than the twin. Four photographs honour
  * the same rule for less: 252 KB of WebP across all four, lazily loaded, with no
- * scene graph to hydrate.
+ * scene graph to hydrate — and the stacking adds no JavaScript at all.
  */
 export function MepfTeaser() {
   return (
     <section className="section-sm">
       <div className="container">
         {/*
-          The card, its blueprint grid and its one cyan glow are kept exactly as
-          they were. That `bg-grid-light bg-grid-sm` texture is the only place it
-          appears on the home page — seven of the eight bands are near-identical
-          paper, so losing it would cost the section the one thing that already
-          set it apart.
+          Heading left, lead and CTA together on the right — deliberately not
+          `SectionHeader`.
+
+          `SectionHeader` was tried first and is the wrong tool twice over.
+          It hard-codes the lead *inside* the left title block and drops the
+          action beside the pair at `md:items-end`, which against a three-line
+          lead left the CTA marooned in the middle of the band with a screen's
+          width of empty paper beside it. And it is exactly what
+          `FeaturedProjects` renders two sections below, so both headers would
+          have arrived at the same shape a scroll apart.
+
+          A 6 / gutter / 5 split fixes both: the heading gets a column tall
+          enough to break where it wants, the lead and its CTA read as one block
+          instead of two stranded halves, and the band is a different shape from
+          the one under it.
+
+          The four coloured legend chips that used to sit under the lead are
+          gone. They named the same four systems the cards now label
+          individually, and saying it twice on one screen made the copy column
+          look padded.
+
+          Not the same line as the headline it links to ("Most of a house is
+          the part you never see"). A teaser that repeats its destination word
+          for word tells a visitor who has already been there that there is
+          nothing new to see.
         */}
-        <div className="relative overflow-hidden rounded-2xl border bg-[rgb(var(--c-surface-2))] px-6 py-10 md:px-12 md:py-14">
-          <div
-            className="pointer-events-none absolute inset-0 bg-grid-light bg-grid-sm opacity-50 dark:bg-grid-blueprint dark:opacity-[0.09]"
-            aria-hidden
-          />
-          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-cyan-500/[0.07] blur-[110px]" aria-hidden />
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
+          <div className="lg:col-span-6">
+            <Reveal>
+              <p className="overline">MEPF engineering</p>
+            </Reveal>
+            <h2 className="mt-3 text-display-md">
+              <SplitText text="Four systems you will never see again." />
+            </h2>
+          </div>
 
-          <div className="relative">
-            {/*
-              Heading left, lead and CTA together on the right — deliberately not
-              `SectionHeader`.
-
-              `SectionHeader` was tried first and is the wrong tool twice over.
-              It hard-codes the lead *inside* the left title block and drops the
-              action beside the pair at `md:items-end`, which against a
-              three-line lead left the CTA marooned in the middle of the band
-              with a screen's width of empty paper beside it. And it is exactly
-              what `FeaturedProjects` renders two sections below, so both headers
-              would have arrived at the same shape a scroll apart.
-
-              A 6 / gutter / 5 split fixes both: the heading gets a column tall
-              enough to break where it wants, the lead and its CTA read as one
-              block instead of two stranded halves, and the band is a different
-              shape from the one under it.
-
-              The four coloured legend chips that used to sit under the lead are
-              gone. They named the same four systems the strip now labels
-              individually, and saying it twice on one screen made the copy
-              column look padded.
-
-              Not the same line as the headline it links to ("Most of a house is
-              the part you never see"). A teaser that repeats its destination
-              word for word tells a visitor who has already been there that there
-              is nothing new to see.
-            */}
-            <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
-              <div className="lg:col-span-6">
-                <Reveal>
-                  <p className="overline">MEPF engineering</p>
-                </Reveal>
-                <h2 className="mt-3 text-display-md">
-                  <SplitText text="Four systems you will never see again." />
-                </h2>
-              </div>
-
-              <div className="lg:col-span-5 lg:col-start-8">
-                <Reveal delay={0.15}>
-                  <p className="max-w-lead text-muted">
-                    Air, water, power and fire safety run through every wall of your house. Designed together, you
-                    never notice them. Designed separately, you live with the result for thirty years.
-                  </p>
-                </Reveal>
-                <Reveal delay={0.25}>
-                  <CtaLink href={ROUTES.service('mepf-consultancy')} className="mt-6">
-                    Look inside the house
-                  </CtaLink>
-                </Reveal>
-              </div>
-            </div>
-
-            <MepfSystemStrip />
+          <div className="lg:col-span-5 lg:col-start-8">
+            <Reveal delay={0.15}>
+              <p className="max-w-lead text-muted">
+                Air, water, power and fire safety run through every wall of your house. Designed together, you
+                never notice them. Designed separately, you live with the result for thirty years.
+              </p>
+            </Reveal>
+            <Reveal delay={0.25}>
+              <CtaLink href={ROUTES.service('mepf-consultancy')} className="mt-6">
+                Look inside the house
+              </CtaLink>
+            </Reveal>
           </div>
         </div>
+
+        <MepfSystemStack />
       </div>
     </section>
   );

@@ -10,7 +10,7 @@ import { IMG } from '@/lib/media';
 /**
  * What each photograph shows, for the alt text.
  *
- * Deliberately not shared with the home page's `MepfSystemStrip`, which keeps
+ * Deliberately not shared with the home page's `MepfSystemStack`, which keeps
  * its own table. Three of the four files are the same, but `electrical` is not —
  * home uses a portrait frame of an electrician at a distribution board, and this
  * page crops into a wide band where that would come out as a slice of his chest.

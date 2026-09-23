@@ -48,8 +48,11 @@ export function HomeView() {
         at the top of `ServicesIndex`.
 
         What is left is one pass down the funnel with no repetition:
-          what you can hire us for → what we engineer → what we have built →
-          who we are → who vouches for us.
+          who we are → what you can hire us for → what we engineer →
+          what we have built → who vouches for us.
+
+        `OneSystem` led that pass from Sep 2026, at the client's request; before
+        that it sat after the projects, in the slot `ProcessSection` left.
 
         The pass used to end on "what it costs"; that section is commented out at
         the bottom of this file while published rates are hidden.
@@ -63,20 +66,19 @@ export function HomeView() {
       */}
       <Hero />
       {on('trust') && <TrustBar />}
-      {/* The offer, before any argument about it. Three rows, not four — MEPF is
-          the section immediately below, and listing it here as well would put it
-          on this page three times. */}
+      {/* Who we are, before what we sell — moved above the services index at the
+          client's request (Sep 2026); it used to close the page's argument after
+          the projects. Still the page's only dark band. */}
+      {on('one-system') && <OneSystem />}
+      {/* The offer. Three rows, not four — MEPF is the section immediately below,
+          and listing it here as well would put it on this page three times. */}
       {on('services-index') && <ServicesIndex />}
       {/* MEPF expands the one service the index deliberately leaves out: it is
           the firm's core discipline and the thing a visitor is least able to
-          picture, so it gets a band rather than a line. `OneSystem` names the
-          four disciplines it belongs to further down. */}
+          picture, so it gets a band rather than a line. `OneSystem` above names the
+          four disciplines it belongs to. */}
       {on('mepf') && <MepfTeaser />}
       {on('projects') && <FeaturedProjects />}
-      {/* The claim, now made after the evidence rather than before it. This is
-          the page's only dark band and its last argument before the people who
-          vouch for it. */}
-      {on('one-system') && <OneSystem />}
       {/* The claims, then the people backing them. This band is `--c-surface-2`,
           and with `Packages` switched off below it is now the page's last one —
           the tint carries straight into the footer, which is fine, but restoring

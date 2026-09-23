@@ -21,7 +21,7 @@
     "enabled": true,
     "heading": "Hand us one part, or the whole build.",
     "subheading": "Each of these is a team that already sits in the same office as the others.",
-    "order": 2
+    "order": 3
   },
   {
     "id": "hs_mepf",
@@ -33,7 +33,7 @@
     "enabled": true,
     "heading": "",
     "subheading": "",
-    "order": 3
+    "order": 4
   },
   {
     "id": "hs_projects",
@@ -45,7 +45,7 @@
     "enabled": true,
     "heading": "Built across Jaipur",
     "subheading": "From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.",
-    "order": 4
+    "order": 5
   },
   {
     "id": "hs_onesystem",
@@ -57,7 +57,7 @@
     "enabled": true,
     "heading": "",
     "subheading": "",
-    "order": 5
+    "order": 2
   },
   {
     "id": "hs_testimonials",

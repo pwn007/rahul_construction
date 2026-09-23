@@ -130,13 +130,24 @@ const ALT: Record<string, string> = {
  * five precisely because five leaves an empty cell. A list has no cells, so an
  * odd count costs nothing.
  *
- * ── Not the strip below it ──────────────────────────────────────────────────
- * `MepfTeaser` sits directly under this section and is itself four photographs.
- * These are landscape (16:10) stacked down the page with the text beside them;
- * those are portrait (4:5) in a horizontal row with captions underneath.
- * Different orientation, different axis — so seven pictures in a column do not
- * read as one undifferentiated block. `bg-grid-light` is still left alone: it
- * is the one thing that already sets `MepfTeaser` apart.
+ * ── Not the deck below it ───────────────────────────────────────────────────
+ * `MepfTeaser` sits directly under this section and is itself four
+ * photographs, and since it went to one card per line it shares this section's
+ * row anatomy on purpose — numeral, name, line, picture on the right. That
+ * makes the differences load-bearing rather than cosmetic:
+ *
+ *   · These are hairline rows on page ground (`border-y divide-y`, no
+ *     background). Those are opaque bordered cards, each on `--c-surface-2`
+ *     with the blueprint texture and a glow in its own system colour.
+ *   · The photograph here is an inset 15rem thumbnail with air around it.
+ *     There it bleeds the card's full height down the right-hand 38%.
+ *   · These rows sit still. Those stack — each card halts under the nav and
+ *     the next slides over it.
+ *
+ * So seven pictures in a column still do not read as one undifferentiated
+ * block. `bg-grid-light` is still left alone here: it is the one thing that
+ * already sets `MepfTeaser` apart, and it now sits on each of its four cards
+ * rather than on one shell around them.
  */
 export function ServicesIndex() {
   const services = useServices();
@@ -185,7 +196,7 @@ export function ServicesIndex() {
                   `MaskImage` carries the entrance on its own — no `Reveal`
                   around the row. Two wrappers would animate the same row twice
                   off two different viewport triggers, which is the mistake
-                  recorded at the top of MepfSystemStrip.
+                  recorded at the top of MepfSystemStack.
                 */}
                 <MaskImage
                   src={IMG.card(`home-service-${s.slug}`)}

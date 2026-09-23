@@ -80,10 +80,10 @@ export const homeSections: HomeSection[] = [
    * its copy is owned by the Hero & banners `home-hero` row.
    */
   { ...meta('hs_trust', '2026-01-01T09:00:00.000Z'), key: 'trust', label: 'Trust bar — client logos', enabled: true, heading: '', subheading: '', order: 1 },
-  { ...meta('hs_services', '2026-01-01T09:00:00.000Z'), key: 'services-index', label: 'What we do — services index', enabled: true, heading: 'Hand us one part, or the whole build.', subheading: 'Each of these is a team that already sits in the same office as the others.', order: 2 },
-  { ...meta('hs_mepf', '2026-01-01T09:00:00.000Z'), key: 'mepf', label: 'MEPF teaser band', enabled: true, heading: '', subheading: '', order: 3 },
-  { ...meta('hs_projects', '2026-01-01T09:00:00.000Z'), key: 'projects', label: 'Featured projects', enabled: true, heading: 'Built across Jaipur', subheading: 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.', order: 4 },
-  { ...meta('hs_onesystem', '2026-01-01T09:00:00.000Z'), key: 'one-system', label: 'One system — dark band', enabled: true, heading: '', subheading: '', order: 5 },
+  { ...meta('hs_services', '2026-01-01T09:00:00.000Z'), key: 'services-index', label: 'What we do — services index', enabled: true, heading: 'Hand us one part, or the whole build.', subheading: 'Each of these is a team that already sits in the same office as the others.', order: 3 },
+  { ...meta('hs_mepf', '2026-01-01T09:00:00.000Z'), key: 'mepf', label: 'MEPF teaser band', enabled: true, heading: '', subheading: '', order: 4 },
+  { ...meta('hs_projects', '2026-01-01T09:00:00.000Z'), key: 'projects', label: 'Featured projects', enabled: true, heading: 'Built across Jaipur', subheading: 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.', order: 5 },
+  { ...meta('hs_onesystem', '2026-01-01T09:00:00.000Z'), key: 'one-system', label: 'One system — dark band', enabled: true, heading: '', subheading: '', order: 2 },
   { ...meta('hs_testimonials', '2026-01-01T09:00:00.000Z'), key: 'testimonials', label: 'Testimonials', enabled: true, heading: 'Trusted by homeowners and businesses alike', subheading: 'Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.', order: 6 },
 ];
 

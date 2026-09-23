@@ -1,9 +1,9 @@
 'use client';
 
 import { Counter, Reveal, SplitText } from '@/components/motion';
-import { ProjectCard, SectionHeader, StatTile, TestimonialBand, CtaLink } from '@/components/common';
+import { StatTile, TestimonialBand } from '@/components/common';
+import { WorkRail } from './WorkRail';
 import { ACHIEVEMENTS } from '@/constants/site';
-import { ROUTES } from '@/constants/routes';
 import { useProjects } from '@/features/projects/useProjects';
 import { useTestimonials } from '@/hooks/useTestimonials';
 import { useHomeSections } from '@/hooks/useHomeSections';
@@ -15,38 +15,29 @@ import { useHomeSections } from '@/hooks/useHomeSections';
 export function FeaturedProjects() {
   const section = useHomeSections().find((s) => s.key === 'projects');
   /*
-    Six, not five, and that is a layout constraint rather than an editorial one.
+    Six.
 
-    This used to be a bento — one project at `lg:col-span-7` with a wider crop
-    and the rest arranged around it — and the client did not want one card
-    bigger than its neighbours. In a plain three-across grid the count decides
-    whether the last row is complete: six fills 2+2+2 on tablet and 3+3 on
-    desktop with no empty cell, where five leaves a hole at both.
+    It used to be six for a grid reason — the band was a three-across grid, where
+    the count decides whether the last row is complete, and six fills 2+2+2 on
+    tablet and 3+3 on desktop with no empty cell. (Before that it was a bento
+    with one project at `lg:col-span-7`, which the client rejected: no card was
+    to be bigger than its neighbours.)
+
+    `WorkRail` has no rows to fill, so that constraint is gone and the number is
+    now an editorial one — plus the end card, seven frames is what fits inside
+    the scroll budget the rail argues for in its own header. Raising it is a
+    change to that budget, not just to this line.
   */
   const projects = useProjects();
   const featured = projects.filter((p) => p.featured).slice(0, 6);
 
   return (
-    <section className="section-sm">
-      <div className="container">
-        <SectionHeader
-          overline="Selected work"
-          title={section?.heading || 'Built across Jaipur'}
-          lead={section?.subheading || 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.'}
-          action={
-            <CtaLink href={ROUTES.projects}>All projects</CtaLink>
-          }
-        />
-
-        {/* The same grid as /projects, so a project looks identical wherever it
-            is listed. `index` still drives the staggered image reveal. */}
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <WorkRail
+      projects={featured}
+      total={projects.length}
+      heading={section?.heading || 'Built across Jaipur'}
+      lead={section?.subheading || 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.'}
+    />
   );
 }
 
