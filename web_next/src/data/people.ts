@@ -1,4 +1,4 @@
-import type { Testimonial, TeamMember, ClientLogo } from '@/types/domain';
+import type { ClientVideo, Testimonial, TeamMember, ClientLogo } from '@/types/domain';
 import { IMG, logoMark, monogram } from '@/lib/media';
 
 const meta = (id: string, createdAt = '2025-01-15T09:00:00.000Z') => ({
@@ -21,23 +21,8 @@ export const testimonials: Testimonial[] = [
     projectId: 'prj_mansarovar',
     avatar: monogram('Dr. Ashok Verma'),
     image: IMG.card('mansarovar-cover'),
-    /*
-     * ⚠️ PLACEHOLDER — must not go live.
-     *
-     * This is 24 seconds of drone b-roll over earthworks. It is here so the
-     * video card can be seen working, and for no other reason.
-     *
-     * It is deliberately NOT footage of a person talking. Dr. Ashok Verma is a
-     * real, named client; putting a stranger's talking head under his name would
-     * fabricate testimony from an identifiable individual — the same objection
-     * `monogram()` in lib/media.ts documents for stock faces, only worse,
-     * because a video reads as evidence.
-     *
-     * Replace with the client's own recorded testimonial before launch, or
-     * delete this line and the file at public/video/.
-     */
-    videoUrl: '/video/testimonial-placeholder.mp4',
-    videoDuration: '0:24',
+    /* The placeholder video that used to sit here moved to `clientVideos`
+       below — recorded testimonials have their own band now. */
     featured: true,
     order: 1,
   },
@@ -94,6 +79,94 @@ export const testimonials: Testimonial[] = [
     image: IMG.card('malviya-cover'),
     featured: true,
     order: 4,
+  },
+];
+
+/**
+ * Recorded client testimonials — the home page's `ClientVideos` rail.
+ *
+ * ⚠️ PLACEHOLDER — every row below must be replaced before launch.
+ *
+ * All six play the same 24 seconds of drone b-roll over earthworks
+ * (public/video/testimonial-placeholder.mp4). They are here so the rail can be
+ * seen working, and for no other reason.
+ *
+ * The footage is deliberately NOT a person talking. The first four names are
+ * real clients; putting a stranger's talking head under their names would
+ * fabricate testimony from identifiable people — the same objection `monogram()`
+ * in lib/media.ts documents for stock faces, only worse, because a video reads
+ * as evidence. The last two are not names at all, for the same reason.
+ *
+ * Replace from Admin → Client videos with each client's own recording (a
+ * YouTube link is fine), then delete the file at public/video/.
+ */
+export const clientVideos: ClientVideo[] = [
+  {
+    ...meta('cv_ashok'),
+    name: 'Dr. Ashok Verma',
+    title: 'Homeowner',
+    locality: 'Mansarovar',
+    projectId: 'prj_mansarovar',
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    poster: IMG.portrait('mansarovar-cover'),
+    duration: '0:24',
+    order: 1,
+  },
+  {
+    ...meta('cv_uday'),
+    name: 'Uday Singh Chauhan',
+    title: 'Homeowner',
+    /* Same unconfirmed project link as his testimonial — see `tst_uday`. */
+    locality: 'Mansarovar',
+    projectId: 'prj_jagatpura',
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    poster: IMG.portrait('jagatpura-cover'),
+    duration: '0:24',
+    order: 2,
+  },
+  {
+    ...meta('cv_raghuraj'),
+    name: 'RaghuRaj Vijayvargiya',
+    title: 'Homeowner',
+    locality: 'Pratap Nagar (Gaushala)',
+    projectId: 'prj_gaushala',
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    poster: IMG.portrait('gaushala-cover'),
+    duration: '0:24',
+    order: 3,
+  },
+  {
+    ...meta('cv_pathan'),
+    name: 'Dr. A. A. Pathan',
+    title: 'Homeowner',
+    locality: 'Malviya Nagar',
+    projectId: 'prj_malviya',
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    poster: IMG.portrait('malviya-cover'),
+    duration: '0:24',
+    order: 4,
+  },
+  {
+    ...meta('cv_sanganer'),
+    name: 'Sanganer Block client',
+    title: 'Placeholder',
+    locality: 'Sanganer',
+    projectId: 'prj_sanganer',
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    poster: IMG.portrait('sanganer-cover'),
+    duration: '0:24',
+    order: 5,
+  },
+  {
+    ...meta('cv_tonk'),
+    name: 'Tonk Road office client',
+    title: 'Placeholder',
+    locality: 'Tonk Road',
+    projectId: 'prj_tonk_office',
+    videoUrl: '/video/testimonial-placeholder.mp4',
+    poster: IMG.portrait('tonk-cover'),
+    duration: '0:24',
+    order: 6,
   },
 ];
 

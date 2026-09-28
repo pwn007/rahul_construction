@@ -73,8 +73,8 @@ export const homeSections: HomeSection[] = [
    * One row per band actually on the home page, top to bottom — rewritten
    * Sep 2026 when the previous 13 rows still described a page (process
    * timeline, stats, monitoring…) that no longer exists. `enabled` switches a
-   * band off; heading/subheading flow into the three sections built on
-   * SectionHeader (services-index, projects, testimonials) and are '' where a
+   * band off; heading/subheading flow into the four sections built on
+   * SectionHeader (services-index, projects, testimonials, client-videos) and are '' where a
    * band composes its own copy (trust, mepf, one-system — see the note at the
    * top of MepfTeaser for why it refuses SectionHeader). The hero has no row:
    * its copy is owned by the Hero & banners `home-hero` row.
@@ -84,7 +84,8 @@ export const homeSections: HomeSection[] = [
   { ...meta('hs_mepf', '2026-01-01T09:00:00.000Z'), key: 'mepf', label: 'MEPF teaser band', enabled: true, heading: '', subheading: '', order: 4 },
   { ...meta('hs_projects', '2026-01-01T09:00:00.000Z'), key: 'projects', label: 'Featured projects', enabled: true, heading: 'Built across Jaipur', subheading: 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.', order: 5 },
   { ...meta('hs_onesystem', '2026-01-01T09:00:00.000Z'), key: 'one-system', label: 'One system — dark band', enabled: true, heading: '', subheading: '', order: 2 },
-  { ...meta('hs_testimonials', '2026-01-01T09:00:00.000Z'), key: 'testimonials', label: 'Testimonials', enabled: true, heading: 'Trusted by homeowners and businesses alike', subheading: 'Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.', order: 6 },
+  { ...meta('hs_testimonials', '2026-01-01T09:00:00.000Z'), key: 'testimonials', label: 'Testimonials', enabled: true, heading: 'Trusted by homeowners and businesses alike', subheading: 'Four projects, four families, and the part they chose to say out loud.', order: 6 },
+  { ...meta('hs_client_videos', '2026-09-27T09:00:00.000Z'), key: 'client-videos', label: 'Client videos — rail', enabled: true, heading: 'Hear it from our clients', subheading: 'In their own words, on camera — the people we built for, on what it was like.', order: 7 },
 ];
 
 export const navItems: NavItem[] = [
@@ -133,7 +134,7 @@ export const settings: Setting[] = [
 /* Access control                                                        */
 /* ==================================================================== */
 
-const MODULES = ['projects', 'services', 'blogs', 'gallery', 'testimonials', 'faqs', 'team', 'careers', 'applications', 'enquiries', 'estimates', 'downloads', 'media', 'seo', 'users', 'settings'];
+const MODULES = ['projects', 'services', 'blogs', 'gallery', 'testimonials', 'client-videos', 'faqs', 'team', 'careers', 'applications', 'enquiries', 'estimates', 'downloads', 'media', 'seo', 'users', 'settings'];
 
 const allPerms = MODULES.reduce<Record<string, ('view' | 'create' | 'edit' | 'delete' | 'publish')[]>>((acc, m) => {
   acc[m] = ['view', 'create', 'edit', 'delete', 'publish'];

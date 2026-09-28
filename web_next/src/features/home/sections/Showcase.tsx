@@ -114,7 +114,7 @@ export function Testimonials() {
     <TestimonialBand
       overline="What our clients say"
       title={section?.heading || 'Trusted by homeowners and businesses alike'}
-      lead={section?.subheading || 'Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.'}
+      lead={section?.subheading || 'Four projects, four families, and the part they chose to say out loud.'}
       items={testimonials}
     />
   );

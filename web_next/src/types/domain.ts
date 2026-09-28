@@ -136,6 +136,29 @@ export interface Testimonial extends BaseEntity {
   order: number;
 }
 
+/**
+ * A client's recorded testimonial — the home page's `ClientVideos` rail.
+ *
+ * Its own resource rather than the video fields on `Testimonial`: a client can
+ * send a film without a written quote (or the other way round), and the rail
+ * should not be capped at however many written testimonials there are. Those
+ * fields on `Testimonial` are now unrendered; see `TestimonialCard`.
+ */
+export interface ClientVideo extends BaseEntity {
+  name: string;
+  /** "Homeowner", "Director, XYZ Developers" — optional line under the name. */
+  title?: string;
+  locality: string;
+  projectId?: string;
+  /** YouTube, Vimeo or a direct file — `VideoLightbox` picks the player. */
+  videoUrl: string;
+  /** Portrait (9:16) poster frame. */
+  poster: string;
+  /** "1:24". Shown as a chip on the poster. */
+  duration?: string;
+  order: number;
+}
+
 export interface TeamMember extends BaseEntity {
   name: string;
   role: string;

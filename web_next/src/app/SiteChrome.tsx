@@ -3,7 +3,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { Navbar, Footer, FloatingRail, StickyContactBar, CommandPalette, useCommandPalette } from '@/components/common';
-import { LeadOfferModal } from '@/features/lead/LeadOfferModal';
+// import { LeadOfferModal } from '@/features/lead/LeadOfferModal';
 import { ScrollProgress } from '@/components/motion';
 import { useLenisScroll, getLenis } from '@/hooks/useLenis';
 import { HeroToneProvider } from './hero-tone';
@@ -53,7 +53,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <HeroToneProvider>
       <ScrollToTop />
       <ScrollProgress />
-      <Navbar onOpenPalette={() => setOpen(true)} />
+      <Navbar />
       <CommandPalette open={open} onClose={() => setOpen(false)} />
 
       <main id="main">{children}</main>
@@ -61,9 +61,10 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <Footer />
       <FloatingRail />
       <StickyContactBar />
-      {/* Mounted once, above the routes, so the offer survives navigation and
+      {/* Rate-card popup disabled — it kept reopening on idle.
+          Mounted once, above the routes, so the offer survives navigation and
           can never be rendered twice. See features/lead/useLeadOffer.ts. */}
-      <LeadOfferModal />
+      {/* <LeadOfferModal /> */}
     </HeroToneProvider>
   );
 }

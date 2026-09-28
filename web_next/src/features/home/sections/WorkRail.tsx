@@ -54,7 +54,7 @@ import type { Project } from '@/types/domain';
  * drives position, no index owns it, nothing to get out of step: the browser's
  * own momentum, snapping and focus-scrolling are better than anything written
  * here, and `scrollIntoView` on a link inside it just works. What is written
- * here is only the *reading* of that scroll — the progress bar, the counter and
+ * here is only the *reading* of that scroll — the progress bar, the dots and
  * the per-card parallax all derive from `scrollXProgress` and never write to it,
  * except through `goToIndex`, which sets `scrollLeft` like any other caller.
  *
@@ -195,23 +195,14 @@ function RailCard({
           {/* Two scrims, one per end, and the top one is not decoration: the
               bottom gradient fades to transparent long before the top edge, so
               white text up there sat directly on the photograph and vanished on
-              any pale cover. The index number and the stage pill both live in
-              that band. */}
+              any pale cover. The stage pill lives in that band. */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[28%] bg-gradient-to-b from-ink-950/55 to-transparent" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950/90 via-ink-950/25 to-transparent transition-opacity duration-500 group-hover:opacity-95" />
 
-          <div className="absolute inset-x-0 top-0 flex items-start justify-between p-5">
-            {/* A drawing callout, not a headline. The old numeral was 2.75rem at
-                25% white in the opposite corner: too faint to read on a pale
-                photograph and too large to be anything but noise when it did
-                read. The rule extends on hover, which is the only movement. */}
-            <span className="flex items-center gap-2" aria-hidden>
-              <span className="num text-caption font-semibold tracking-widest text-white">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span className="h-px w-6 bg-cyan-400 transition-all duration-500 ease-out-expo group-hover:w-10" />
-            </span>
-
+          {/* No index numeral here: the client asked for the 01 / 02 callout to
+              go, and the "01–04 / 07" counter under the rail with it. The progress
+              bar there still says how far along the list you are. */}
+          <div className="absolute inset-x-0 top-0 flex items-start justify-end p-5">
             {/* The only badge left on the card. A stage is a status; a locality is
                 a label, and labels belong in the eyebrow below rather than as a
                 chip stuck on top of the picture. */}
@@ -373,8 +364,8 @@ export function WorkRail({
 
     Not one per card. With four cards on screen at 1440, snapping card 5, 6 or 7
     to the left gutter all means the same thing — scroll to the end — so a dot
-    per card gives three dots that do nothing, and a counter that reads "04" at
-    the exact moment the progress bar is full. Deduplicating the clamped targets
+    per card gives three dots that do nothing once the progress bar is already
+    full. Deduplicating the clamped targets
     gives the stops a visitor can really reach, and every control below is driven
     from that one list, so they cannot disagree with each other.
   */
@@ -445,16 +436,6 @@ export function WorkRail({
   /** Which stop we are nearest — drives the dots and the arrows. */
   const [stop, setStop] = useState(0);
   /*
-    Which projects are on screen, as a range.
-
-    The counter says "01–04 / 07" rather than a single number because four of
-    them really are in front of you; naming only the leftmost would be the same
-    half-truth the per-card dots were. A card counts as shown once more than 60%
-    of it is inside the pane, so the sliver peeking past the right edge — which
-    is there to advertise that the rail moves — does not claim to have been read.
-  */
-  const [range, setRange] = useState({ first: 0, last: 0 });
-  /*
     Snapping is suspended while anything is moving, and comes back only once the
     rail has been still for a moment.
 
@@ -495,22 +476,7 @@ export function WorkRail({
 
   const onPaneScroll = useCallback(() => {
     const pane = paneRef.current;
-    const track = trackRef.current;
-    if (!pane || !track) return;
-
-    const paneRect = pane.getBoundingClientRect();
-    let first = -1;
-    let last = 0;
-    Array.from(track.children).forEach((node, i) => {
-      const r = (node as HTMLElement).getBoundingClientRect();
-      const shown = Math.min(r.right, paneRect.right) - Math.max(r.left, paneRect.left);
-      if (shown > r.width * 0.6) {
-        if (first < 0) first = i;
-        last = i;
-      }
-    });
-    if (first < 0) first = last;
-    setRange((prev) => (prev.first === first && prev.last === last ? prev : { first, last }));
+    if (!pane) return;
 
     let best = 0;
     let bestD = Infinity;
@@ -882,13 +848,6 @@ export function WorkRail({
           and arrows that cannot go anywhere are worse than no chrome at all. */}
       {scrollable && (
         <div className="container mt-6 flex items-center gap-4 lg:mt-8">
-          <span className="num shrink-0 text-caption tabular-nums text-subtle">
-            {String(range.first + 1).padStart(2, '0')}
-            {range.last > range.first && `–${String(range.last + 1).padStart(2, '0')}`}
-            <span className="text-subtle/50"> / </span>
-            {String(count).padStart(2, '0')}
-          </span>
-
           <div className="relative h-px flex-1 bg-[rgb(var(--c-border))]" aria-hidden>
             <motion.div style={{ scaleX: bar }} className="absolute inset-0 origin-left bg-cyan-500" />
           </div>

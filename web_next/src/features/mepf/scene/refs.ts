@@ -3,10 +3,11 @@
 /**
  * How the frame loop reaches the handful of things that move.
  *
- * Same contract as the hero's registry (`features/home/sections/hero-scene/refs.ts`),
- * and deliberately a separate copy rather than a shared import: the two scenes
- * have nothing in common but the technique, and a shared key union would make
- * every key in one scene a legal typo in the other.
+ * Same contract as the registry the old illustrated homepage hero used (removed
+ * in Sep 2026 for the photo hero; see git history for `hero-scene/refs.ts`). It
+ * was deliberately a separate copy rather than a shared import: the two scenes
+ * had nothing in common but the technique, and a shared key union would have
+ * made every key in one scene a legal typo in the other.
  *
  * The house takes `reg` and calls `ref={reg('water')}` on whatever the loop
  * needs to find. Everything discrete — which system is selected, which is

@@ -7,6 +7,7 @@ import { MepfTeaser } from '@/features/mepf/MepfTeaser';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
 import { FeaturedProjects, Testimonials } from './sections/Showcase';
+import { ClientVideos } from './sections/ClientVideos';
 import { useHomeSections } from '@/hooks/useHomeSections';
 
 export function HomeView() {
@@ -19,7 +20,7 @@ export function HomeView() {
   return (
     <>
       {/*
-        Seven sections, down from fourteen.
+        Eight sections, down from fourteen (the eighth, client videos, was split out of testimonials in Sep 2026).
         --------------------------------------------------------------
         The page was not long because any one section was verbose — it was long
         because four of them made the same argument. `Approach` restated
@@ -49,7 +50,7 @@ export function HomeView() {
 
         What is left is one pass down the funnel with no repetition:
           who we are → what you can hire us for → what we engineer →
-          what we have built → who vouches for us.
+          what we have built → who vouches for us (in writing, then on camera).
 
         `OneSystem` led that pass from Sep 2026, at the client's request; before
         that it sat after the projects, in the slot `ProcessSection` left.
@@ -80,10 +81,15 @@ export function HomeView() {
       {on('mepf') && <MepfTeaser />}
       {on('projects') && <FeaturedProjects />}
       {/* The claims, then the people backing them. This band is `--c-surface-2`,
-          and with `Packages` switched off below it is now the page's last one —
-          the tint carries straight into the footer, which is fine, but restoring
-          `Packages` is what puts it back between two sections on page ground. */}
+          sitting between the projects rail and the client videos, both on page
+          ground. (If the videos band is switched off it becomes the page's last
+          band and the tint carries straight into the footer, which is fine.) */}
       {on('testimonials') && <Testimonials />}
+      {/* The same people on camera. Split out of the testimonials band at the
+          client's request (Sep 2026): the band above is words only now, and
+          every recorded testimonial lives in this rail. Page ground, not
+          `--c-surface-2`, so the two read as separate bands. */}
+      {on('client-videos') && <ClientVideos />}
       {/*
         Published rates, hidden at the client's request.
 

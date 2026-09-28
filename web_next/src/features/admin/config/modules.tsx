@@ -10,6 +10,7 @@ import {
   blogsService,
   careersService,
   clientLogosService,
+  clientVideosService,
   downloadsService,
   enquiriesService,
   estimatesService,
@@ -537,15 +538,65 @@ export const MODULES: ResourceConfig<never>[] = [
         section: 'Basics',
         options: projects.map((p) => ({ value: p.id, label: `${p.title} — ${p.locality}` })),
       },
-      { name: 'avatar', label: 'Client photo', type: 'image', span: 6, section: 'Media' },
-      { name: 'image', label: 'Project image', type: 'image', span: 6, section: 'Media' },
-      /* Paste a YouTube/Vimeo link or a direct file URL — VideoLightbox works
-         out which player to use. Leave blank and the card shows its poster with
-         no play button, which is the normal case. */
-      { name: 'videoUrl', label: 'Video URL (YouTube, Vimeo or file)', type: 'url', span: 12, section: 'Media' },
-      { name: 'videoPoster', label: 'Video poster (falls back to project image)', type: 'image', span: 6, section: 'Media' },
-      { name: 'videoDuration', label: 'Video length', type: 'text', span: 6, section: 'Media', placeholder: '1:24' },
+      /* `span: 12` — the project image and the three video fields that used to
+         share this section are gone: the card is words only now (Sep 2026) and
+         recorded testimonials have their own module, Client videos, below.
+         The columns stay on the table; nothing renders them. */
+      { name: 'avatar', label: 'Client photo', type: 'image', span: 12, section: 'Media' },
       { name: 'featured', label: 'Show on homepage', type: 'boolean', span: 6, section: 'Publishing' },
+      orderField,
+      statusField,
+    ],
+  },
+
+  {
+    key: 'client-videos',
+    label: 'Client videos',
+    singular: 'Client video',
+    description: 'Recorded client testimonials — the scrolling video rail under the testimonials on the homepage.',
+    icon: 'Video',
+    group: 'Content',
+    service: clientVideosService as never,
+    filters: [{ key: 'status', label: 'Status', options: STATUS_OPTIONS }],
+    columns: [
+      {
+        key: 'name',
+        label: 'Client',
+        render: (row: never) => {
+          const v = row as unknown as { name: string; locality: string; poster?: string };
+          return (
+            <div className="flex items-center gap-3">
+              {/* Portrait thumb — the rail's cards are 9:16. */}
+              {v.poster && <img src={v.poster} alt="" className="h-12 w-[1.6875rem] shrink-0 rounded object-cover" loading="lazy" />}
+              <div className="min-w-0">
+                <p className="truncate font-medium">{v.name}</p>
+                <p className="text-caption text-subtle">{v.locality}</p>
+              </div>
+            </div>
+          );
+        },
+      },
+      { key: 'duration', label: 'Length', width: '90px', align: 'center' },
+      { key: 'order', label: 'Order', width: '80px', align: 'center' },
+      statusColumn as never,
+    ],
+    fields: [
+      { name: 'name', label: 'Client name', type: 'text', required: true, span: 6, section: 'Basics' },
+      { name: 'title', label: 'Designation / relation', type: 'text', span: 6, section: 'Basics', placeholder: 'Homeowner' },
+      { name: 'locality', label: 'Locality', type: 'text', required: true, span: 6, section: 'Basics' },
+      {
+        name: 'projectId',
+        label: 'Linked project',
+        type: 'select',
+        span: 6,
+        section: 'Basics',
+        options: projects.map((p) => ({ value: p.id, label: `${p.title} — ${p.locality}` })),
+      },
+      /* Paste a YouTube/Vimeo link or a direct file URL — VideoLightbox works
+         out which player to use. Shorts links work too. */
+      { name: 'videoUrl', label: 'Video URL (YouTube, Vimeo or file)', type: 'url', required: true, span: 12, section: 'Media' },
+      { name: 'poster', label: 'Poster (portrait, 9:16)', type: 'image', required: true, span: 6, section: 'Media' },
+      { name: 'duration', label: 'Video length', type: 'text', span: 6, section: 'Media', placeholder: '1:24' },
       orderField,
       statusField,
     ],

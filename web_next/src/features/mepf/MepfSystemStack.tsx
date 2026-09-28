@@ -1,7 +1,8 @@
 'use client';
 
-import type { CSSProperties } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import { MaskImage } from '@/components/motion';
+import { useIsoLayoutEffect } from '@/hooks';
 import { IMG } from '@/lib/media';
 import { SYSTEMS, SYSTEM_ORDER, type SystemKey } from '@/data/mepf';
 import { SYSTEM_STYLES } from './scene/systems';
@@ -82,9 +83,12 @@ const PAIN: Record<SystemKey, string> = {
  * facts, said properly.
  *
  * ── Why the cards stack rather than simply stacking ─────────────────────────
- * Each `<li>` is `lg:sticky` with a `top` that steps 14px per index. Card one
- * halts under the nav, card two slides over it, and each buried card leaves a
- * sliver — a deck being dealt, which is the effect the client asked for.
+ * Each `<li>` is sticky with a `top` that steps per index (8px, 14px from
+ * `lg`). Card one parks with the whole pile centred on screen, card two slides
+ * over it, and each buried card leaves a sliver — a deck being dealt, which is
+ * the effect the client asked for. It runs at every width; the centring maths
+ * and the guard for screens too short to hold a card live with `.mepf-deck` in
+ * globals.css.
  *
  * The important property is that it is **free**. `position: sticky` changes
  * where a box paints, not how far the page scrolls: the section is exactly as
@@ -97,8 +101,9 @@ const PAIN: Record<SystemKey, string> = {
  * literature both measure as a loss in accuracy and satisfaction. Sticky is not
  * scrolljacking at all — the wheel still means exactly what it says.
  *
- * So: no gsap, no useScroll, no scroll listener. The stacking is four CSS
- * declarations.
+ * So: no gsap, no useScroll, no scroll listener. The only script is a
+ * ResizeObserver that reports the tallest card's height, which runs when the
+ * width changes and never while scrolling.
  *
  * `WorkRail`, two sections below, reached the same conclusion from the other
  * direction: it was briefly a pinned horizontal rail driven by page scroll, and
@@ -110,9 +115,11 @@ const PAIN: Record<SystemKey, string> = {
  *   · **Opaque cards.** `--c-surface-2` at full opacity, not a tint. A
  *     translucent card shows the one it is covering, and four photographs
  *     bleeding through each other is not a stack, it is a mess.
- *   · **Equal heights** (`lg:h-[17rem]`). Ragged heights turn the stepped
- *     sliver into a random edge, and "Distribution board" — the one caption
- *     that wraps — is what would have set the tallest card.
+ *   · **Equal heights.** Ragged heights turn the stepped sliver into a random
+ *     edge. From `lg` that is `h-[17rem]`; below it the copy wraps differently
+ *     at every width (at 390px the Ductwork card comes out 21px shorter than
+ *     the other three), so the tallest card is measured and the rest take it
+ *     as a `min-height`.
  *   · **No `overflow-hidden` above this list.** An ancestor with it becomes a
  *     scroll container, and a sticky child then sticks to *that* box instead of
  *     the viewport: the effect vanishes silently, with nothing in the console.
@@ -140,32 +147,66 @@ const PAIN: Record<SystemKey, string> = {
  * offset still on purpose. The two would fight.
  */
 export function MepfSystemStack() {
+  const deckRef = useRef<HTMLOListElement>(null);
+
+  /*
+    The tallest card's natural height, handed to CSS as `--deck-card-h`. It
+    sets the equal `min-height` below `lg` and is what `.mepf-deck` centres.
+
+    Measured from each card's copy block, not the `<article>`: the article
+    carries that `min-height`, so reading it back would only ever report the
+    last answer and never shrink when the screen widens. The copy block's
+    bottom edge (`offsetTop + offsetHeight`, the article being its offset
+    parent) sits under the photograph below `lg` and fills the card from it,
+    so it is the card's content height either way; the difference between
+    the article's offset and client heights adds its border back on.
+
+    Observing the copy blocks catches every cause of a rewrap — a width change
+    and the web font arriving alike.
+  */
+  useIsoLayoutEffect(() => {
+    const deck = deckRef.current;
+    if (!deck) return;
+    const copies = Array.from(deck.querySelectorAll<HTMLElement>('[data-deck-copy]'));
+
+    const measure = () => {
+      let tallest = 0;
+      for (const copy of copies) {
+        const card = copy.offsetParent as HTMLElement | null;
+        if (!card) continue;
+        tallest = Math.max(tallest, copy.offsetTop + copy.offsetHeight + card.offsetHeight - card.clientHeight);
+      }
+      if (tallest) deck.style.setProperty('--deck-card-h', `${tallest}px`);
+    };
+
+    const ro = new ResizeObserver(measure);
+    copies.forEach((copy) => ro.observe(copy));
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <ol className="mt-10 space-y-4 md:mt-12 lg:space-y-6">
+    <ol
+      ref={deckRef}
+      /* `--deck-last` is how many slivers the pile shows below its top card,
+         which `.mepf-deck` needs to centre the pile rather than the top card. */
+      style={{ '--deck-last': SYSTEM_ORDER.length - 1 } as CSSProperties}
+      className="mepf-deck mt-10 space-y-4 md:mt-12 lg:space-y-6"
+    >
       {SYSTEM_ORDER.map((key, i) => (
         <li
           key={key}
-          /* `--i` drives the 14px-per-card step in the `top` below. Set inline
-             because the value is per-item; `calc()` multiplying a unitless
-             custom property by a length is valid CSS and needs no @property.
+          /* `--i` drives the per-card step in `.mepf-deck > li`'s `top`. Set
+             inline because the value is per-item; `calc()` multiplying a
+             unitless custom property by a length is valid CSS and needs no
+             @property.
 
              `zIndex` is belt and braces — positioned siblings already paint in
              DOM order, so later cards land on top without it. Writing it down
              stops a future `z-` on something inside a card from inverting the
              pile. */
           style={{ '--i': i, zIndex: i + 1 } as CSSProperties}
-          /* Sticky only from `lg`. Below it a card taller than the viewport
-             would have its top edge — the numeral and the name — clipped for
-             good, and there is no width at which that is worth the effect. The
-             codebase's other sticky (MepfTwin's house) is `lg:` for the same
-             reason.
-
-             `motion-reduce:static` flattens the deck to a plain column. The
-             scroll rate is native either way, but a card sliding over another
-             is precisely the kind of thing that setting is asking us not to do. */
-          className="lg:sticky lg:top-[calc(var(--nav-h)+1.5rem+var(--i)*0.875rem)] lg:motion-reduce:static"
         >
-          <article className="relative overflow-hidden rounded-2xl border bg-[rgb(var(--c-surface-2))] shadow-lg lg:h-[17rem]">
+          <article className="relative min-h-[var(--deck-card-h)] overflow-hidden rounded-2xl border bg-[rgb(var(--c-surface-2))] shadow-lg lg:h-[17rem]">
             {/* The blueprint texture, one copy per card rather than one for the
                 band. It is the only place this pattern appears on the home page
                 — seven of the eight bands are near-identical paper — so losing
@@ -196,7 +237,7 @@ export function MepfSystemStack() {
 
               A bleed rather than the inset thumbnail `ServicesIndex` uses. The
               two sections sit one after the other and share this row anatomy on
-              purpose — numeral, name, line, picture on the right — so the
+              purpose — name, line, picture on the right — so the
               treatment of the picture is what keeps them from reading as one
               undifferentiated run of photographs. It is also what gives the
               stack its punch: every card that slides up arrives carrying a
@@ -238,7 +279,10 @@ export function MepfSystemStack() {
               Which is also why the card is not shrunk to fit its copy. The slack
               is the runway.
             */}
-            <div className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-x-4 px-6 py-6 md:px-8 lg:h-full lg:content-start lg:gap-x-8 lg:px-10 lg:pb-8 lg:pr-[42%] lg:pt-9">
+            <div
+              data-deck-copy
+              className="relative grid grid-cols-[2.75rem_minmax(0,1fr)] gap-x-4 px-6 py-6 md:px-8 lg:h-full lg:content-start lg:gap-x-8 lg:px-10 lg:pb-8 lg:pr-[42%] lg:pt-9"
+            >
               {/* `pt-1` is optical, not structural: the numeral is 13px against
                   a display-scale name, so aligning their boxes leaves it
                   floating above the name's first line. */}

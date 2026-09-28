@@ -43,6 +43,13 @@
         "delete",
         "publish"
       ],
+      "client-videos": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
       "faqs": [
         "view",
         "create",
@@ -161,6 +168,13 @@
         "publish"
       ],
       "testimonials": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
+      "client-videos": [
         "view",
         "create",
         "edit",
@@ -291,6 +305,13 @@
         "delete",
         "publish"
       ],
+      "client-videos": [
+        "view",
+        "create",
+        "edit",
+        "delete",
+        "publish"
+      ],
       "faqs": [
         "view",
         "create",
@@ -401,6 +422,11 @@
         "create",
         "edit"
       ],
+      "client-videos": [
+        "view",
+        "create",
+        "edit"
+      ],
       "faqs": [
         "view",
         "create",
@@ -475,6 +501,9 @@
         "view"
       ],
       "testimonials": [
+        "view"
+      ],
+      "client-videos": [
         "view"
       ],
       "faqs": [

@@ -118,3 +118,12 @@ Full provenance, the sha256 the build pins, and the boundary-vintage caveat are 
 Every image resolves through `src/lib/media.ts`. Drop real photos into `public/images`
 using the same pool naming (`residential-01.jpg`, `interior-03.jpg` …) and regenerate
 `src/data/image-catalogue.ts`. **No component changes are required.**
+
+## Client-supplied photography
+
+| File | Source | Licence |
+| --- | --- | --- |
+| `hero/villa-dusk-desktop.webp`, `hero/villa-dusk-mobile.webp` | Neetu Archstone brochure (supplied by the client, Sep 2026) | Client-owned; used with permission |
+
+These two are served directly by the homepage hero (`src/features/home/sections/heroSlides.ts`)
+rather than through `src/lib/media.ts`, because each photo ships as a desktop and a phone crop.

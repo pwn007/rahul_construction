@@ -86,6 +86,9 @@ export default {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
         deva: ['"Noto Sans Devanagari"', 'Outfit', 'sans-serif'],
+        /* The homepage hero only (Design B, and the navbar while it sits over
+           that hero). Every other surface stays on Outfit / Inter. */
+        montserrat: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'display-xl': ['clamp(3.25rem, 9vw, 7.5rem)', { lineHeight: '0.92', letterSpacing: '-0.035em', fontWeight: '600' }],

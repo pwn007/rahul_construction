@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\{
-    Application, Banner, BaseRate, ClientLogo, Download, Enhancement, Enquiry, EstimatorPrice,
+    Application, Banner, BaseRate, ClientLogo, ClientVideo, Download, Enhancement, Enquiry, EstimatorPrice,
     EstimateRequest, Faq, FooterColumn, GalleryItem, HomeSection, Job,
     LocationMultiplier, MaterialSpec, MediaAsset, NavItem, Post, Project, Role,
     SeoMeta, Service, Setting, TeamMember, Testimonial, User
@@ -11,11 +11,11 @@ use App\Models\{
  * The entire API surface, as data.
  *
  * `ResourceController` reads this and implements list / show / store / update /
- * destroy for all 26 resources. There is no per-resource controller because there
+ * destroy for all 28 resources. There is no per-resource controller because there
  * is no per-resource behaviour: `web_next/src/services/resource.service.ts` builds
  * every service from one `createResourceService()` factory, and the mock adapter
  * answers all of them from one `applyQuery()`. A hand-written controller per
- * resource would be 26 chances to diverge from a contract that has exactly one shape.
+ * resource would be 28 chances to diverge from a contract that has exactly one shape.
  *
  * ── The keys are the frontend's, not Laravel's ─────────────────────────────
  * `careers`, not `jobs`. `blogs`, not `posts`. `team`, not `team-members`. These
@@ -54,6 +54,7 @@ return [
 
     /* ── Social proof ──────────────────────────────────────────────────── */
     'testimonials' => ['model' => Testimonial::class, 'public' => true, 'search' => ['name', 'title']],
+    'client-videos' => ['model' => ClientVideo::class, 'public' => true, 'search' => ['name', 'title']],
     'team' => ['model' => TeamMember::class, 'public' => true, 'search' => ['name']],
     'client-logos' => ['model' => ClientLogo::class, 'public' => true, 'search' => ['name']],
 

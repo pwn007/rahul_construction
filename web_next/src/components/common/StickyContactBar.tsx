@@ -3,6 +3,8 @@
 import { usePathname } from 'next/navigation';
 import { MessageCircle, Phone } from 'lucide-react';
 import { SITE } from '@/constants/site';
+import { useWithinFirstScreen } from '@/hooks';
+import { cn } from '@/lib/cn';
 import { track } from '@/lib/analytics';
 
 /**
@@ -20,6 +22,10 @@ import { track } from '@/lib/analytics';
  */
 export function StickyContactBar() {
   const pathname = usePathname();
+  /* The homepage hero ends in its own Call and WhatsApp buttons; the bar would
+     sit directly on top of them. It slides in once that screen scrolls away. */
+  const withinFirstScreen = useWithinFirstScreen();
+  const standDown = pathname === '/' && withinFirstScreen;
 
   /* The estimator owns its own bottom slot: a live-total bar that updates as
      the visitor plays with brands (see QuoteResult). Two stacked fixed bars is
@@ -50,7 +56,11 @@ export function StickyContactBar() {
 
       <nav
         aria-label="Contact us"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-[rgb(var(--c-border))] bg-[rgb(var(--c-surface))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className={cn(
+          'fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-[rgb(var(--c-border))] bg-[rgb(var(--c-surface))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md transition-transform duration-500 ease-out-expo md:hidden',
+          standDown && 'translate-y-full',
+        )}
+        inert={standDown}
       >
         <a
           href={`tel:${SITE.phoneRaw}`}

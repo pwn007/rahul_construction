@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 import { projects } from '../src/data/projects';
 import { services } from '../src/data/services';
-import { testimonials, team, clientLogos } from '../src/data/people';
+import { testimonials, clientVideos, team, clientLogos } from '../src/data/people';
 import { posts, faqs, jobs, gallery, downloads } from '../src/data/content';
 import {
   applications, banners, enquiries, estimateRequests, footerColumns,
@@ -44,6 +44,7 @@ const COLLECTIONS: Record<string, readonly unknown[]> = {
   projects,
   services,
   testimonials,
+  'client-videos': clientVideos,
   team,
   'client-logos': clientLogos,
   blogs: posts,

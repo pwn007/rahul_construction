@@ -1,13 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { ArrowUpRight, ChevronRight, Play, Quote, Star } from 'lucide-react';
+import { ArrowUpRight, ChevronRight, Quote, Star } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Badge, Button } from '@/components/ui';
 import { MaskImage, Reveal, SplitText, TiltCard } from '@/components/motion';
 import { DimensionLine } from './DimensionLine';
-import { VideoLightbox, resolveVideo } from './VideoLightbox';
 import { CtaLink } from './CtaLink';
 import { ROUTES } from '@/constants/routes';
 import { formatNumber } from '@/lib/format';
@@ -233,24 +231,20 @@ export function ProjectCard({ project, index = 0 }: { project: Project; index?: 
 export function TestimonialCard({ testimonial, className }: { testimonial: Testimonial; className?: string }) {
   const projects = useProjects();
   const isDevanagari = testimonial.language === 'hi';
-  const [playing, setPlaying] = useState(false);
 
   /*
-   * The media panel.
+   * Words only, at the client's request (Sep 2026).
    *
-   * `image` has held each client's own project cover since the data was written
-   * and was never rendered anywhere — so the panel had its content waiting for
-   * it. A project photograph is also the honest thing to put here: these are
-   * real, named clients with no portraits on file, and a stock face under a real
-   * name is the exact failure `monogram()` in lib/media.ts exists to avoid.
-   * Their house, not a stranger's face.
+   * This card used to carry a media panel — the client's project cover, or the
+   * poster of their recorded testimonial with a play button. The photos and
+   * films came out together: the card is now the quote, who said it and which
+   * project it was about. Recorded testimonials have their own band directly
+   * below, `ClientVideos`, fed by the separate `client-videos` resource.
    *
-   * When a real recorded testimonial arrives, `videoPoster` overrides it and the
-   * same panel becomes the video's poster frame. The layout does not change —
-   * that is the whole point of building it this way now.
+   * `image`, `videoUrl`, `videoPoster` and `videoDuration` are still on the type
+   * and the table — dropping columns is a destructive migration for no gain —
+   * but nothing renders them and the admin form no longer offers them.
    */
-  const poster = testimonial.videoPoster ?? testimonial.image ?? testimonial.avatar;
-  const hasVideo = Boolean(testimonial.videoUrl && resolveVideo(testimonial.videoUrl));
 
   /*
    * `projectId` has been on this type since the data was written and nothing has
@@ -268,72 +262,10 @@ export function TestimonialCard({ testimonial, className }: { testimonial: Testi
   return (
     <figure
       className={cn(
-        /*
-          Side by side only from `lg`.
-
-          It was `sm:flex-row`, which turned on at 640px — but from `md` the band
-          is already two columns, so each card was ~350px wide and a 38% media
-          split left barely 220px for the quote. The photographs stretched into
-          tall narrow strips and the client names ran out of the card. Below
-          `lg` the media goes back on top, where it has the full card width.
-        */
-        'surface group/t flex h-full flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-500 ease-out-expo hover:border-cyan-500/40 hover:shadow-md lg:flex-row',
+        'surface flex h-full flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-500 ease-out-expo hover:border-cyan-500/40 hover:shadow-md',
         className,
       )}
     >
-      {poster && (
-        <div className="relative h-48 shrink-0 lg:h-auto lg:w-[34%] xl:w-[38%]">
-          <img
-            src={poster}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover lg:absolute lg:inset-0"
-          />
-
-          {/*
-            A photograph of someone's project that does nothing when clicked is a
-            small lie about what it is. So it links — but only where the panel is
-            not already the play button, which cannot share the space.
-
-            `tabIndex={-1}` and `aria-hidden` because this goes exactly where the
-            caption link goes. A mouse gets a bigger target; a keyboard or screen
-            reader gets one link per card instead of the same destination twice.
-          */}
-          {project && !hasVideo && (
-            <Link
-              href={ROUTES.project(project.slug)}
-              tabIndex={-1}
-              aria-hidden
-              className="absolute inset-0"
-            />
-          )}
-
-          {hasVideo && (
-            <>
-              <button
-                type="button"
-                onClick={() => setPlaying(true)}
-                aria-label={`Play video testimonial from ${testimonial.name}`}
-                className="absolute inset-0 flex items-center justify-center bg-ink-950/20 transition-colors duration-500 hover:bg-ink-950/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
-              >
-                {/* `ml-0.5` optically centres a triangle in a circle; `fill-current`
-                    makes it solid. Lifted from the gallery so the site has one
-                    play button, not two. */}
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-navy-800 shadow-md transition-transform duration-500 ease-out-expo group-hover/t:scale-105">
-                  <Play className="ml-0.5 h-5 w-5 fill-current" />
-                </span>
-              </button>
-              {testimonial.videoDuration && (
-                <span className="num pointer-events-none absolute right-3 top-3 rounded bg-ink-950/70 px-2 py-0.5 text-[0.7rem] text-white backdrop-blur-sm">
-                  {testimonial.videoDuration}
-                </span>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
       <div className="flex flex-1 flex-col p-6 lg:p-7">
         <Quote className="h-7 w-7 shrink-0 text-cyan-500/30" aria-hidden />
         <blockquote
@@ -371,16 +303,6 @@ export function TestimonialCard({ testimonial, className }: { testimonial: Testi
           </CtaLink>
         )}
       </div>
-
-      {testimonial.videoUrl && (
-        <VideoLightbox
-          open={playing}
-          onClose={() => setPlaying(false)}
-          url={testimonial.videoUrl}
-          title={`${testimonial.name} — ${testimonial.locality}`}
-          poster={poster}
-        />
-      )}
     </figure>
   );
 }

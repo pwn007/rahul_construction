@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useLockBodyScroll } from '@/hooks';
+import { cn } from '@/lib/cn';
 
 /**
  * The site's video player. Click-to-play, and nothing before that.
@@ -29,15 +30,16 @@ import { useLockBodyScroll } from '@/hooks';
  * visitor who never pressed play on anything.
  */
 
-type Embed = { kind: 'embed'; src: string } | { kind: 'file'; src: string };
+/** `tall` marks a YouTube Shorts link — the one embed whose ratio the URL gives away. */
+type Embed = { kind: 'embed'; src: string; tall?: boolean } | { kind: 'file'; src: string };
 
-/** Exported for the card, which uses it to decide whether to show a play badge. */
+/** Exported for the cards, which use it to decide whether to show a play badge. */
 export function resolveVideo(url: string): Embed | null {
   const raw = url.trim();
   if (!raw) return null;
 
   const yt = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/.exec(raw);
-  if (yt) return { kind: 'embed', src: `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&rel=0&modestbranding=1` };
+  if (yt) return { kind: 'embed', src: `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&rel=0&modestbranding=1`, tall: /youtube\.com\/shorts\//.test(raw) };
 
   const vimeo = /vimeo\.com\/(?:video\/)?(\d+)/.exec(raw);
   if (vimeo) return { kind: 'embed', src: `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1` };
@@ -53,12 +55,21 @@ export function VideoLightbox({
   url,
   title,
   poster,
+  fitToVideo = false,
 }: {
   open: boolean;
   onClose: () => void;
   url: string;
   title: string;
   poster?: string;
+  /**
+   * Size the frame to the film instead of assuming 16:9 — for client
+   * recordings, which are as likely to be shot upright on a phone as not. A
+   * file is shown at its own ratio; a YouTube Shorts link gets a 9:16 frame;
+   * any other embed stays 16:9, since the URL says nothing about its shape and
+   * the provider's player letterboxes inside it anyway.
+   */
+  fitToVideo?: boolean;
 }) {
   useLockBodyScroll(open);
 
@@ -107,12 +118,29 @@ export function VideoLightbox({
           </div>
 
           <div className="flex flex-1 items-center justify-center px-4 pb-6" onClick={(e) => e.stopPropagation()}>
-            <div className="w-full max-w-5xl overflow-hidden rounded-xl bg-black shadow-xl">
+            <div
+              className={cn(
+                'overflow-hidden rounded-xl bg-black shadow-xl',
+                !fitToVideo
+                  ? 'w-full max-w-5xl'
+                  : video.kind === 'file'
+                    /* Shrink-wraps the <video>, which sizes itself from the file.
+                       `min(64rem,100%)` rather than two max-widths so a wide file
+                       on a phone cannot push the frame past the screen. */
+                    ? 'max-w-[min(64rem,100%)]'
+                    : video.tall
+                      /* Height-led: the height comes from the viewport and the
+                         width from the ratio, so an upright film fits a laptop
+                         screen instead of running off the bottom of it. */
+                      ? 'aspect-[9/16] h-[min(80vh,42rem)] max-w-full'
+                      : 'w-full max-w-5xl',
+              )}
+            >
               {video.kind === 'embed' ? (
                 <iframe
                   src={video.src}
                   title={title}
-                  className="aspect-video w-full"
+                  className={cn('w-full', fitToVideo && video.tall ? 'h-full' : 'aspect-video')}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
@@ -120,7 +148,7 @@ export function VideoLightbox({
                 <video
                   src={video.src}
                   poster={poster}
-                  className="aspect-video w-full bg-black"
+                  className={cn('bg-black', fitToVideo ? 'block max-h-[80vh] max-w-full' : 'aspect-video w-full')}
                   controls
                   autoPlay
                   muted

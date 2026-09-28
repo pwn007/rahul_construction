@@ -287,6 +287,57 @@
     stroke-dasharray: 6 4;
   }
 
+  /* ----------------------------------------------------------------
+     MEPF system deck — features/mepf/MepfSystemStack.
+
+     Every card is `position: sticky`, and the pile parks centred in what the
+     visitor can actually see: the viewport, less the mobile contact bar where
+     that bar exists. The nav is not subtracted. It slides away on every
+     downward scroll (see `hidden` in Navbar), which is the only direction
+     anyone meets this deck in, so centring under it would leave the pile
+     visibly low — which is what the client objected to in the version that
+     parked it just under the nav.
+
+     `100svh`, not `vh` or `dvh`. `dvh` follows the mobile toolbar as it
+     collapses mid-scroll and every parked card would twitch with it; `svh` is
+     the toolbar-out height, the smallest the screen ever gets, so the pile
+     holds still and the fit test below is honest.
+
+     `--deck-card-h` is the tallest card, measured by the component: copy wraps
+     differently at every width, so no constant holds below `lg`. Until it
+     arrives `top` is invalid, falls back to `auto`, and the list renders flat —
+     the right first paint for something this far below the fold.
+     ---------------------------------------------------------------- */
+  .mepf-deck {
+    --deck-step: 0.5rem;
+    --deck-floor: calc(3.5rem + env(safe-area-inset-bottom));
+    --deck-h: calc(var(--deck-card-h) + var(--deck-last) * var(--deck-step));
+    --deck-room: calc(100svh - var(--deck-floor));
+    /* 0 when the pile fits with 0.5rem to spare at each end, -100000px when it
+       does not — a step function, since CSS has no `if`. A card taller than the
+       room would park with its bottom edge off-screen, and the next card would
+       cover that part before anyone had read it. There the offset sends `top`
+       so far up that the card never parks and the deck is a plain list. A
+       phone held landscape is the case this exists for. */
+    --deck-off: clamp(-100000px, calc((var(--deck-room) - var(--deck-h) - 1rem) * 100000), 0px);
+  }
+  /* StickyContactBar is `md:hidden`. */
+  @media (min-width: 768px) {
+    .mepf-deck { --deck-floor: 0px; }
+  }
+  @media (min-width: 1024px) {
+    .mepf-deck { --deck-step: 0.875rem; }
+  }
+  .mepf-deck > li {
+    position: sticky;
+    top: calc((var(--deck-room) - var(--deck-h)) / 2 + var(--i) * var(--deck-step) + var(--deck-off));
+  }
+  /* A card sliding over another is exactly what this setting asks us not to
+     do. The scroll rate is native either way; this flattens it to a column. */
+  @media (prefers-reduced-motion: reduce) {
+    .mepf-deck > li { position: static; }
+  }
+
   /* The preloader worker's hammer swing, walk cycle and dust used to live here
      as keyframes. They are now computed in BuildScene.tsx instead: a CSS
      `transform` overrides the SVG `transform` attribute carrying his pose, and
@@ -365,6 +416,38 @@
     transform: translateX(-100%);
     background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.12), transparent);
     animation: shimmer 1.6s infinite;
+  }
+
+  /**
+   * The homepage hero's scrim: navy-800 over the photograph, heavy at the top
+   * (under the navbar) and at the bottom (under the copy), thin through the sky.
+   *
+   * Fitted, not eyeballed. Against the Design B renders the tint is a plain
+   * alpha overlay of navy-800 (r² ≈ 0.99 per channel), so these stops are its
+   * measured opacity at each height. Phones stack the copy at the bottom, so
+   * their ramp climbs earlier and harder than the desktop's.
+   */
+  .hero-scrim {
+    background-image: linear-gradient(
+      180deg,
+      theme('colors.navy.800 / 64%') 0%,
+      theme('colors.navy.800 / 8%') 15%,
+      theme('colors.navy.800 / 15%') 38%,
+      theme('colors.navy.800 / 82%') 62%,
+      theme('colors.navy.800 / 89%') 68%,
+      theme('colors.navy.800 / 99%') 100%
+    );
+  }
+  @media screen(lg) {
+    .hero-scrim {
+      background-image: linear-gradient(
+        180deg,
+        theme('colors.navy.800 / 61%') 0%,
+        theme('colors.navy.800 / 12%') 22.5%,
+        theme('colors.navy.800 / 28%') 62%,
+        theme('colors.navy.800 / 95%') 100%
+      );
+    }
   }
 }
 

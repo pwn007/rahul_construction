@@ -49,6 +49,34 @@ export function useHasFinePointer(): boolean {
   return useMediaQuery('(pointer: fine)');
 }
 
+/**
+ * True while the visitor is still within the first screen of the page — which,
+ * on the homepage, is its full-screen photo hero.
+ *
+ * On phones that hero ends in its own Call and WhatsApp buttons, so the mobile
+ * contact bar stands down until it has scrolled away (80px short of a full
+ * screen, so it is back before the hero's last edge leaves). A boolean snapshot
+ * rather than `useScrollInfo`: this re-renders when the answer flips, not on
+ * every scroll frame. The server snapshot is `true`, which is correct for the
+ * only first paint that exists — the top of the page.
+ */
+export function useWithinFirstScreen(): boolean {
+  const subscribe = useCallback((onChange: () => void) => {
+    window.addEventListener('scroll', onChange, { passive: true });
+    window.addEventListener('resize', onChange);
+    return () => {
+      window.removeEventListener('scroll', onChange);
+      window.removeEventListener('resize', onChange);
+    };
+  }, []);
+
+  return useSyncExternalStore(
+    subscribe,
+    () => window.scrollY < window.innerHeight - 80,
+    () => true,
+  );
+}
+
 /** Scroll position + direction, rAF-throttled. */
 export function useScrollInfo() {
   const [state, setState] = useState({ y: 0, direction: 'down' as 'up' | 'down', atTop: true });

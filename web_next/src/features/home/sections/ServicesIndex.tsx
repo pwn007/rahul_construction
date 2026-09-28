@@ -133,16 +133,17 @@ const ALT: Record<string, string> = {
  * ── Not the deck below it ───────────────────────────────────────────────────
  * `MepfTeaser` sits directly under this section and is itself four
  * photographs, and since it went to one card per line it shares this section's
- * row anatomy on purpose — numeral, name, line, picture on the right. That
- * makes the differences load-bearing rather than cosmetic:
+ * row anatomy on purpose — name, line, picture on the right. That makes the
+ * differences load-bearing rather than cosmetic:
  *
  *   · These are hairline rows on page ground (`border-y divide-y`, no
  *     background). Those are opaque bordered cards, each on `--c-surface-2`
  *     with the blueprint texture and a glow in its own system colour.
  *   · The photograph here is an inset 15rem thumbnail with air around it.
  *     There it bleeds the card's full height down the right-hand 38%.
- *   · These rows sit still. Those stack — each card halts under the nav and
- *     the next slides over it.
+ *   · These rows sit still. Those stack — each card parks mid-screen and the
+ *     next slides over it.
+ *   · These rows carry no index numeral. Those still number their cards.
  *
  * So seven pictures in a column still do not read as one undifferentiated
  * block. `bg-grid-light` is still left alone here: it is the one thing that
@@ -175,9 +176,13 @@ export function ServicesIndex() {
                   The whole row is the link, so the hit area is the row rather
                   than the words.
 
-                  Below `lg` the row is a small card — photograph first, then a
-                  numeral gutter with the name and the line beside it. From `lg`
-                  it is four tracks across: numeral, text, photograph, arrow.
+                  Below `lg` the row is a small card — photograph first, then the
+                  name and the line with the arrow beside them. From `lg` it is
+                  three tracks across: text, photograph, arrow.
+
+                  There is no index numeral. The rows used to open with a 01 / 02
+                  / 03 gutter; the client asked for it to go, and the name now
+                  starts at the container edge like the header above it.
 
                   The photograph is 15rem, down from 24rem over two passes, and
                   the row is `py-5` rather than `py-8`. At 24rem the picture stood
@@ -190,7 +195,7 @@ export function ServicesIndex() {
                   from `display-sm` (40px at this width) to `heading-lg` (28px) —
                   the size `ProjectCard` already uses.
                 */
-                className="group grid grid-cols-[2.75rem_minmax(0,1fr)_1.75rem] items-start gap-x-4 gap-y-2.5 py-5 lg:grid-cols-[3.5rem_minmax(0,1fr)_15rem_2rem] lg:items-center lg:gap-x-8 lg:py-5"
+                className="group grid grid-cols-[minmax(0,1fr)_1.75rem] items-start gap-x-4 gap-y-2.5 py-5 lg:grid-cols-[minmax(0,1fr)_15rem_2rem] lg:items-center lg:gap-x-8 lg:py-5"
               >
                 {/*
                   `MaskImage` carries the entrance on its own — no `Reveal`
@@ -207,19 +212,9 @@ export function ServicesIndex() {
                      gives each row a 728×455 photograph and the section runs to
                      2,100px — three billboards where three pictures were wanted.
                      On a phone full width is right, so the cap starts at `sm`. */
-                  className="col-span-3 row-start-1 rounded-lg sm:max-w-[26rem] lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:max-w-none lg:self-center"
+                  className="col-span-2 row-start-1 rounded-lg sm:max-w-[26rem] lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:max-w-none lg:self-center"
                   imgClassName="transition-transform duration-[1.2s] ease-out-expo group-hover:scale-[1.04]"
                 />
-
-                {/* `pt-2` is optical, not structural: the numeral is 13px and the
-                    name is display-scale, so aligning their boxes leaves the
-                    numeral floating above the name's first line. */}
-                <span
-                  className="num row-start-2 pt-2 text-caption text-[rgb(var(--c-brand-text))] lg:row-start-1 lg:pt-0"
-                  aria-hidden
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
 
                 {/* Name and line in one cell, not two grid rows. As separate rows
                     the image's height pushed them ~80px apart and they stopped
@@ -261,7 +256,7 @@ export function ServicesIndex() {
                 </div>
 
                 <span
-                  className="col-start-3 row-start-2 mt-2 flex h-7 w-7 lg:mt-0 items-center justify-center justify-self-end rounded-full border text-[rgb(var(--c-brand-text))] transition-all duration-300 ease-out-expo group-hover:border-[rgb(var(--c-brand-text))] group-hover:bg-[rgb(var(--c-brand-text))] group-hover:text-white lg:col-start-4 lg:row-start-1"
+                  className="col-start-2 row-start-2 mt-2 flex h-7 w-7 lg:mt-0 items-center justify-center justify-self-end rounded-full border text-[rgb(var(--c-brand-text))] transition-all duration-300 ease-out-expo group-hover:border-[rgb(var(--c-brand-text))] group-hover:bg-[rgb(var(--c-brand-text))] group-hover:text-white lg:col-start-3 lg:row-start-1"
                   aria-hidden
                 >
                   <ArrowUpRight className="h-4 w-4" />

@@ -68,7 +68,19 @@
     "label": "Testimonials",
     "enabled": true,
     "heading": "Trusted by homeowners and businesses alike",
-    "subheading": "Four projects, four families, and the part they chose to say out loud. Where a client has recorded their own, the film sits beside the words.",
+    "subheading": "Four projects, four families, and the part they chose to say out loud.",
     "order": 6
+  },
+  {
+    "id": "hs_client_videos",
+    "createdAt": "2026-09-27T09:00:00.000Z",
+    "updatedAt": "2026-09-27T09:00:00.000Z",
+    "status": "published",
+    "key": "client-videos",
+    "label": "Client videos — rail",
+    "enabled": true,
+    "heading": "Hear it from our clients",
+    "subheading": "In their own words, on camera — the people we built for, on what it was like.",
+    "order": 7
   }
 ]

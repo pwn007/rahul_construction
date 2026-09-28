@@ -19,7 +19,7 @@ import { AdminModuleScreen } from '@/features/admin/AdminModuleScreen';
  * you'll notice).
  */
 const MODULE_KEYS = [
-  'projects', 'services', 'blogs', 'gallery', 'testimonials', 'faqs',
+  'projects', 'services', 'blogs', 'gallery', 'testimonials', 'client-videos', 'faqs',
   'client-logos', 'downloads', 'team', 'careers', 'applications', 'enquiries',
   'estimates', 'hero', 'home-sections', 'navbar', 'footer', 'media', 'seo',
   'users', 'settings', 'estimator-prices',

@@ -5,7 +5,7 @@ import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
 
 import { projects } from '@/data/projects';
 import { services } from '@/data/services';
-import { testimonials, team, clientLogos } from '@/data/people';
+import { testimonials, clientVideos, team, clientLogos } from '@/data/people';
 import { posts, faqs, jobs, gallery, downloads } from '@/data/content';
 import {
   applications,
@@ -32,6 +32,7 @@ const SEED: Record<string, Row[]> = {
   projects: projects as unknown as Row[],
   services: services as unknown as Row[],
   testimonials: testimonials as unknown as Row[],
+  'client-videos': clientVideos as unknown as Row[],
   team: team as unknown as Row[],
   'client-logos': clientLogos as unknown as Row[],
   blogs: posts as unknown as Row[],

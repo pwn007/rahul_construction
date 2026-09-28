@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Loads `database/seeders/data/*.json` — 231 records across 26 resources.
+ * Loads `database/seeders/data/*.json` — 296 records across 28 resources.
  *
  * Those files are generated, not authored: `web_next/scripts/export-seed.mts`
  * dumps the frontend's typed `src/data/*.ts`, which is the authority for content
@@ -22,14 +22,14 @@ class DatabaseSeeder extends Seeder
      * Insertion order, and it is load-bearing.
      *
      * Foreign keys: `users.roleId` → roles; `applications.jobId` → careers;
-     * `testimonials.projectId` and `gallery.projectId` → projects. Anything that
-     * is pointed at has to exist first.
+     * `testimonials.projectId`, `client-videos.projectId` and `gallery.projectId`
+     * → projects. Anything that is pointed at has to exist first.
      */
     private const ORDER = [
         'roles', 'users',
         'projects', 'services',
         'careers', 'applications',
-        'testimonials', 'gallery',
+        'testimonials', 'client-videos', 'gallery',
         'team', 'client-logos', 'blogs', 'faqs', 'downloads', 'media',
         'enquiries', 'estimates',
         'banners', 'home-sections', 'navbar', 'footer', 'seo', 'settings',

@@ -88,10 +88,13 @@ export function LogoMark({ className }: { className?: string; tone?: LogoTone })
 
 export function Logo({
   className,
+  lockupClassName,
   compact,
   tone = 'auto',
 }: {
   className?: string;
+  /** Overrides the lockup's size (default `h-10`), e.g. over the homepage hero. */
+  lockupClassName?: string;
   compact?: boolean;
   tone?: LogoTone;
 }) {
@@ -109,7 +112,7 @@ export function Logo({
           viewBox={LOCKUP.viewBox}
           width={LOCKUP.width}
           height={LOCKUP.height}
-          className="h-10 w-auto shrink-0"
+          className={cn('h-10 w-auto shrink-0 transition-[height] duration-500 ease-out-expo', lockupClassName)}
           aria-hidden
         >
           <path

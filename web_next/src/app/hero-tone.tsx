@@ -13,9 +13,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
  * A page declares its hero tone with `useRegisterHeroTone('dark')`; the navbar
  * reads it and flips to a light-on-dark treatment. Registration resets to 'light'
  * on unmount, so a route change can never leave a stale tone behind.
+ *
+ * 'cinematic' is 'dark' plus the homepage's full-screen photo treatment: while
+ * the bar is transparent over it, the navbar also takes that hero's typography
+ * (uppercase tracked links, an outline CTA) and drops its utility controls.
  */
 
-type HeroTone = 'light' | 'dark';
+export type HeroTone = 'light' | 'dark' | 'cinematic';
 
 interface HeroToneValue {
   tone: HeroTone;

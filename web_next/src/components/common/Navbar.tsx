@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowUpRight, Calculator, ChevronDown, Menu, Moon, Phone, Search, Sun, X } from 'lucide-react';
+import { ArrowUpRight, Calculator, ChevronDown, Menu, Moon, Phone, Sun, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui';
 import { Logo } from './Logo';
@@ -42,14 +42,13 @@ function mergeNav(rows: NavItem[]): NavLinkType[] {
     });
 }
 
-export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
+export function Navbar() {
   const navRows = useNavItems();
   const nav = mergeNav(navRows);
   const cta = navRows.find((r) => r.highlight);
   const { atTop, direction, y } = useScrollInfo();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { resolved, toggle } = useTheme();
   const pathname = usePathname();
   const heroTone = useHeroTone();
 
@@ -57,8 +56,25 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
    * Transparent bar sitting over a forced-dark hero: everything must render
    * light-on-dark. Once the glass background appears on scroll, normal
    * theme-aware colours take over again.
+   *
+   * Only the colours switch here — never the geometry. Hovering a link opens its
+   * mega menu, which flips this off; if that also moved anything, every link
+   * would jump sideways under the pointer onto its neighbour, which would then
+   * open *its* menu.
    */
-  const overDark = heroTone === 'dark' && atTop && !openMenu;
+  const overDark = (heroTone === 'dark' || heroTone === 'cinematic') && atTop && !openMenu;
+
+  /**
+   * One header everywhere (Design B, made site-wide in Sep 2026): phones get
+   * menu · logo · estimate, desktop gets uppercase tracked links and an outline
+   * CTA, with no search, theme or greeting in the bar.
+   *
+   * The only thing that varies is height. The homepage's photo hero, at the top,
+   * uses the render's taller bar (72px phones / 101px desktop); everywhere else,
+   * and on that page once scrolled, it is `--nav-h` — which page heroes pad
+   * against and sticky panels offset from.
+   */
+  const tall = heroTone === 'cinematic' && atTop;
 
   useLockBodyScroll(mobileOpen);
 
@@ -81,32 +97,56 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
         <div
           className={cn(
             'transition-all duration-500 ease-out-expo',
-            atTop && !openMenu ? 'bg-transparent' : 'glass border-b shadow-sm',
+            /* Bottom edge only: `.glass` draws a 1px border on all four sides,
+               which nudged the whole row 1px right and down the moment the bar
+               turned to glass. */
+            atTop && !openMenu ? 'bg-transparent' : 'glass border-x-0 border-b border-t-0 shadow-sm',
           )}
         >
-          <div className="container flex h-[var(--nav-h)] items-center justify-between gap-6">
-            <Logo tone={overDark ? 'light' : 'auto'} />
+          <div
+            className={cn(
+              /* Below `lg`: menu · logo · estimate, where two equal `1fr` side
+                 columns hold the logo on the exact centre line. No gap — at 375px
+                 each side column needs all ~123px it gets.
+
+                 From `lg`: full-bleed with the render's 72px gutters, so the logo
+                 lines up with the homepage hero's edge-anchored caption on wide
+                 screens too. */
+              'container grid grid-cols-[1fr_auto_1fr] items-center transition-[height,padding] duration-500 ease-out-expo lg:flex lg:max-w-none lg:justify-between lg:gap-6 lg:px-10 xl:px-[72px]',
+              tall ? 'h-[72px] lg:h-[101px]' : 'h-[var(--nav-h)]',
+            )}
+          >
+            <button
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              className={cn(
+                'flex h-11 w-11 items-center justify-center justify-self-start rounded-full border transition-colors lg:hidden',
+                overDark
+                  ? 'border-white/40 text-white hover:bg-white/10'
+                  : 'border-[rgb(var(--c-text))]/25 hover:bg-[rgb(var(--c-text))]/[0.06]',
+              )}
+            >
+              <Menu className="h-[21px] w-[21px]" strokeWidth={1.75} />
+            </button>
+
+            <Logo tone={overDark ? 'light' : 'auto'} className="justify-self-center" lockupClassName="h-[30px] lg:h-[35px]" />
 
             {/* Desktop nav */}
-            <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
+            <nav className="hidden items-center lg:flex" aria-label="Main">
               {nav.map((item) => {
+                /* Bare uppercase words, no chevrons; hover and click still open
+                   the mega menu. */
                 const triggerClass = (lit: boolean) =>
                   cn(
-                    'flex items-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium transition-colors',
+                    'flex items-center px-3.5 py-2 font-montserrat text-[12.5px] font-medium uppercase tracking-[0.24em] transition-colors xl:px-[21px]',
                     lit
                       ? overDark
                         ? 'text-cyan-400'
                         : 'text-cyan-700 dark:text-cyan-400'
                       : overDark
-                        ? 'text-white/85 hover:text-cyan-300'
+                        ? 'text-white/90 hover:text-cyan-300'
                         : 'text-[rgb(var(--c-text))] hover:text-cyan-700 dark:hover:text-cyan-400',
                   );
-
-                const chevron = item.children && (
-                  <ChevronDown
-                    className={cn('h-3.5 w-3.5 transition-transform duration-300', openMenu === item.label && 'rotate-180')}
-                  />
-                );
 
                 return (
                   <div key={item.label} className="relative" onMouseEnter={() => setOpenMenu(item.children ? item.label : null)}>
@@ -129,7 +169,6 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
                         className={triggerClass(openMenu === item.label)}
                       >
                         {item.label}
-                        {chevron}
                       </button>
                     ) : (
                       <Link
@@ -144,7 +183,6 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
                         )}
                       >
                         {item.label}
-                        {chevron}
                       </Link>
                     )}
                   </div>
@@ -153,87 +191,40 @@ export function Navbar({ onOpenPalette }: { onOpenPalette: () => void }) {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
-              {/*
-                `xl`, not `lg`, and measured rather than guessed.
-
-                This row is search + theme + the primary CTA. At 1152px the CTA's
-                right edge already sits at 1132px, so a 14-character name pushed
-                it to 1203px and clipped it clean off the viewport — the greeting
-                was costing the site its main call to action. From 1280px up the
-                longest name we store still leaves the CTA at 1260px.
-
-                Between `lg` and `xl` there is no chip: the hero greeting still
-                personalizes that band, and the drawer covers everything below.
-              */}
-              <VisitorChip overDark={overDark} className="hidden xl:block" />
-
-              <button
-                onClick={onOpenPalette}
-                aria-label="Search (Command K)"
+            <div className="flex items-center justify-self-end">
+              {/* Desktop: a hairline outline, not the cyan fill — the homepage
+                  hero's own "Get Free Estimate" is the filled button there, and
+                  two cyan blocks in one viewport compete. */}
+              <Link
+                href={cta?.href ?? ROUTES.estimator}
                 className={cn(
-                  'hidden items-center gap-2 rounded-md border px-3 py-2 text-caption transition-colors md:flex',
+                  'hidden h-[41px] items-center border px-[21.5px] font-montserrat text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 lg:inline-flex',
                   overDark
-                    ? 'border-white/25 text-white/70 hover:border-cyan-400/70 hover:text-white'
-                    : 'text-subtle hover:border-cyan-500/50',
+                    ? 'border-white/55 text-white hover:border-cyan-400 hover:text-cyan-300'
+                    : 'border-[rgb(var(--c-text))]/30 text-[rgb(var(--c-text))] hover:border-cyan-500 hover:text-cyan-700 dark:hover:text-cyan-400',
                 )}
               >
-                <Search className="h-3.5 w-3.5" />
-                <span>Search</span>
-                <kbd
-                  className={cn(
-                    'num rounded px-1.5 py-0.5 text-[0.65rem]',
-                    overDark ? 'bg-white/15 text-white/80' : 'bg-[rgb(var(--c-text))]/[0.07]',
-                  )}
-                >
-                  ⌘K
-                </kbd>
-              </button>
-
-              <button
-                onClick={toggle}
-                aria-label={`Switch to ${resolved === 'dark' ? 'light' : 'dark'} theme`}
-                className={cn(
-                  'hidden h-11 w-11 items-center justify-center rounded-md transition-colors sm:flex',
-                  overDark ? 'text-white hover:bg-white/10' : 'hover:bg-[rgb(var(--c-text))]/[0.06]',
-                )}
-              >
-                {resolved === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
-              </button>
-
-              <Button href={cta?.href ?? ROUTES.estimator} variant="accent" size="md" className="hidden sm:inline-flex" leftIcon={<Calculator className="h-4 w-4" />}>
                 {cta?.label ?? 'Get Estimate'}
-              </Button>
+              </Link>
 
               {/*
-                The phone-width twin of the button above, so the estimator is one
-                tap away without opening the drawer (client ask). The label is a
-                short fixed word rather than the admin's nav label: a long label
-                there would break this row. Below 360px the row has no room for
-                it, so the word goes sr-only — kept in the DOM because Button's
-                href branch does not forward aria-label, and an icon-only link
-                would otherwise have no accessible name.
+                Below `lg`, the right-hand third of menu · logo · estimate —
+                compact enough (~105px) that the centred logo reads as centred.
+                The label is a short fixed word rather than the admin's nav label:
+                a long label there would break this row. Below 360px the row has
+                no room for it, so the word goes sr-only — kept in the DOM because
+                Button's href branch does not forward aria-label, and an icon-only
+                link would otherwise have no accessible name.
               */}
               <Button
                 href={cta?.href ?? ROUTES.estimator}
                 variant="accent"
                 size="sm"
-                className="sm:hidden"
+                className="lg:hidden"
                 leftIcon={<Calculator className="h-4 w-4" aria-hidden />}
               >
                 <span className="sr-only min-[360px]:not-sr-only">Estimate</span>
               </Button>
-
-              <button
-                onClick={() => setMobileOpen(true)}
-                aria-label="Open menu"
-                className={cn(
-                  'flex h-11 w-11 items-center justify-center rounded-md transition-colors lg:hidden',
-                  overDark ? 'text-white hover:bg-white/10' : 'hover:bg-[rgb(var(--c-text))]/[0.06]',
-                )}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
             </div>
           </div>
         </div>
@@ -312,6 +303,7 @@ function MegaMenuContent({ item }: { item?: NavLinkType }) {
   );
 }
 
+/* Slides in from the left — the side the menu button sits on. */
 function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navRows = useNavItems();
   const nav = mergeNav(navRows);
@@ -330,13 +322,15 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
         >
           <div className="absolute inset-0 bg-ink-950/50 backdrop-blur-sm" onClick={onClose} />
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            exit={{ x: '-100%' }}
             transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
-            className="surface absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l"
+            className="surface absolute left-0 top-0 flex h-full w-full max-w-sm flex-col border-r"
           >
-            <div className="flex items-center justify-between border-b px-5 py-4">
+            {/* The close button takes the corner the menu button was in, so the
+                same thumb that opened the drawer closes it. */}
+            <div className="flex flex-row-reverse items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-2">
                 <Logo compact />
                 {/* The mobile home for the greeting. Renders nothing without a name,

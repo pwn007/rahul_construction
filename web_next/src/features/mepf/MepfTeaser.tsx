@@ -47,11 +47,12 @@ import { MepfSystemStack } from './MepfSystemStack';
  * a picture big enough to read. Total photography goes up again: four
  * ~486 × 272 bleeds against four 314 × 393 tiles.
  *
- * The cards stack as you scroll — each one halts under the nav and the next
- * slides over it. Why that is `position: sticky` and not a pinned GSAP rig is
- * argued at the top of MepfSystemStack; the short version is that sticky costs
- * zero extra scroll and does not touch the scroll rate, and this page has
- * already thrown out one MEPF section that failed both tests.
+ * The cards stack as you scroll — each one parks in the middle of the screen
+ * and the next slides over it, on phones as well as desktop. Why that is
+ * `position: sticky` and not a pinned GSAP rig is argued at the top of
+ * MepfSystemStack; the short version is that sticky costs zero extra scroll
+ * and does not touch the scroll rate, and this page has already thrown out one
+ * MEPF section that failed both tests.
  *
  * ── Why there is no longer a shell around all this ──────────────────────────
  * There was one: `relative overflow-hidden rounded-2xl border bg-surface-2`,
@@ -71,7 +72,7 @@ import { MepfSystemStack } from './MepfSystemStack';
  * The old rule was that the home page must never pay for three.js (~150 KB
  * gzipped) and so got the flat SVG rather than the twin. Four photographs honour
  * the same rule for less: 252 KB of WebP across all four, lazily loaded, with no
- * scene graph to hydrate — and the stacking adds no JavaScript at all.
+ * scene graph to hydrate — and the stacking adds one ResizeObserver.
  */
 export function MepfTeaser() {
   return (

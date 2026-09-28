@@ -5,6 +5,7 @@ import type {
   BaseRate,
   EstimatorPrice,
   ClientLogo,
+  ClientVideo,
   Download,
   Enhancement,
   Enquiry,
@@ -41,6 +42,7 @@ export const RESOURCES = {
   projects: 'projects',
   services: 'services',
   testimonials: 'testimonials',
+  clientVideos: 'client-videos',
   team: 'team',
   clientLogos: 'client-logos',
   blogs: 'blogs',
@@ -71,6 +73,7 @@ export const RESOURCES = {
 export const projectsService = createResourceService<Project>(RESOURCES.projects);
 export const servicesService = createResourceService<Service>(RESOURCES.services);
 export const testimonialsService = createResourceService<Testimonial>(RESOURCES.testimonials);
+export const clientVideosService = createResourceService<ClientVideo>(RESOURCES.clientVideos);
 export const teamService = createResourceService<TeamMember>(RESOURCES.team);
 export const clientLogosService = createResourceService<ClientLogo>(RESOURCES.clientLogos);
 export const blogsService = createResourceService<Post>(RESOURCES.blogs);
