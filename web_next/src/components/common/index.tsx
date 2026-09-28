@@ -18,7 +18,7 @@ import type { ReactNode } from 'react';
 export { Logo, LogoMark, LogoWordmark } from './Logo';
 export { Navbar } from './Navbar';
 export { Footer } from './Footer';
-export { FloatingRail, CommandPalette, useCommandPalette } from './Chrome';
+export { Preloader, FloatingRail, CommandPalette, useCommandPalette } from './Chrome';
 export { StickyContactBar } from './StickyContactBar';
 export { ConsentCheckbox, CONSENT_REQUIRED } from './ConsentCheckbox';
 /* BuildingSystems is gone — the isometric house at features/mepf/scene/HouseIso

@@ -494,6 +494,15 @@
 }
 
 /* ============================================================
+   PRELOADER — skip before first paint
+   ============================================================ */
+/* `preloader-skip` is set on <html> by PRELOADER_BOOT_SCRIPT (see
+   components/common/Chrome.tsx) when the loader has already played this session
+   or motion is reduced. Outside any @layer so it always beats the `flex` utility
+   on the same element. */
+html.preloader-skip .preloader { display: none; }
+
+/* ============================================================
    REDUCED MOTION — single global gate
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

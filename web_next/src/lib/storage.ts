@@ -71,4 +71,9 @@ export const STORAGE_KEYS = {
   visitor: 'archstone.visitor',
   /** First-touch campaign attribution, held for the length of the visit. */
   attribution: 'archstone.attribution',
+  /**
+   * Set (in sessionStorage) the moment the preloader starts, so it plays once
+   * per visit. Read before first paint by `PRELOADER_BOOT_SCRIPT`.
+   */
+  preloaderSeen: 'archstone.preloader.seen',
 } as const;

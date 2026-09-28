@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { Navbar, Footer, FloatingRail, StickyContactBar, CommandPalette, useCommandPalette } from '@/components/common';
+import { Navbar, Footer, Preloader, FloatingRail, StickyContactBar, CommandPalette, useCommandPalette } from '@/components/common';
 // import { LeadOfferModal } from '@/features/lead/LeadOfferModal';
 import { ScrollProgress } from '@/components/motion';
 import { useLenisScroll, getLenis } from '@/hooks/useLenis';
@@ -51,6 +51,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
 
   return (
     <HeroToneProvider>
+      <Preloader />
       <ScrollToTop />
       <ScrollProgress />
       <Navbar />

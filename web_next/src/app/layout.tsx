@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { SITE } from '@/constants/site';
 import { AppProviders, THEME_BOOT_SCRIPT } from './providers';
+import { PRELOADER_BOOT_SCRIPT } from '@/components/common/Chrome';
 import { Boot } from './Boot';
 import { JsonLd } from '@/lib/seo';
 import '@/styles/globals.css';
@@ -73,6 +74,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Blocking, and before anything paints — see THEME_BOOT_SCRIPT. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: PRELOADER_BOOT_SCRIPT }} />
+        {/* Without JS nothing would ever lift the preloader off the page. */}
+        <noscript>
+          <style>{'.preloader{display:none}'}</style>
+        </noscript>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link

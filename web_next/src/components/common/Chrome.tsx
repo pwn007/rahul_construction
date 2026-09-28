@@ -18,13 +18,118 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { LogoMark } from './Logo';
+import { BuildScene } from './BuildScene';
 import { SITE } from '@/constants/site';
 import { ROUTES } from '@/constants/routes';
 import { useProjects } from '@/features/projects/useProjects';
 import { useServices } from '@/hooks/useServices';
 import { usePosts } from '@/hooks/usePosts';
 import { useHotkey, useLockBodyScroll } from '@/hooks';
+import { writeStore, STORAGE_KEYS } from '@/lib/storage';
 import { track, type AnalyticsEvent } from '@/lib/analytics';
+
+/* ==================================================================== */
+/* Preloader — once per session, never blocks longer than ~3.0s          */
+/* ==================================================================== */
+
+/**
+ * Runs synchronously in <head>, before first paint — same idea as
+ * `THEME_BOOT_SCRIPT`.
+ *
+ * The preloader is in the static HTML of every public page, so the server
+ * cannot know whether to leave it out. This marks <html> when the visitor has
+ * already seen it this session, or has asked for reduced motion, and a rule in
+ * globals.css hides it before it can flash. `Preloader` reads the same class
+ * on mount rather than storage, so the two can never disagree.
+ */
+export const PRELOADER_BOOT_SCRIPT = `(function(){try{
+if(sessionStorage.getItem('${STORAGE_KEYS.preloaderSeen}')||matchMedia('(prefers-reduced-motion: reduce)').matches)
+document.documentElement.classList.add('preloader-skip');
+}catch(e){}})();`;
+
+export function Preloader() {
+  /* Starts visible on the server and the client alike so hydration matches;
+     the mount effect below is what decides. */
+  const [visible, setVisible] = useState(true);
+  const [frame, setFrame] = useState({ progress: 0, now: 0 });
+
+  useEffect(() => {
+    if (document.documentElement.classList.contains('preloader-skip')) {
+      setVisible(false);
+      return;
+    }
+    writeStore(STORAGE_KEYS.preloaderSeen, true, 'session');
+
+    const start = performance.now();
+    const duration = 1900;
+    let raf = 0;
+    let hold = 0;
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      // Exponent 1.8 rather than a cubic: a cubic ease-out is already at 87% by
+      // the halfway mark, so the crane, scaffold and the worker's climb down —
+      // everything above 70% — flashed past in the last sliver. Left unrounded
+      // so the scene interpolates continuously instead of in 101 discrete steps.
+      setFrame({ progress: (1 - Math.pow(1 - t, 1.8)) * 100, now });
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else hold = window.setTimeout(() => setVisible(false), 300);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(hold);
+    };
+  }, []);
+
+  useLockBodyScroll(visible);
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          /* `preloader` is the hook for the skip and <noscript> rules.
+             `data-lenis-prevent`: Lenis ignores the body's overflow lock, so
+             without it a wheel over the loader scrolled the page underneath. */
+          className="preloader fixed inset-0 z-[300] flex flex-col items-center justify-center bg-ink-950"
+          data-lenis-prevent
+          exit={{ clipPath: 'inset(0% 0% 100% 0%)' }}
+          transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+        >
+          <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-30" aria-hidden />
+
+          {/*
+            The site builds itself while the page loads. Every element is keyed
+            to a percentage of `progress`, so this doubles as the progress
+            indicator rather than decorating one.
+          */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-[min(78vw,420px)]"
+          >
+            <BuildScene progress={frame.progress} now={frame.now} />
+          </motion.div>
+
+          <div className="relative mt-4 flex items-center gap-2.5">
+            <LogoMark className="h-7 w-7" />
+            <p className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
+              {SITE.wordmark.primary} <span className="text-cyan-500">{SITE.wordmark.secondary}</span>
+            </p>
+          </div>
+          <p className="relative mt-2 font-deva text-sm text-white/40">{SITE.taglineHi}</p>
+
+          <div className="relative mt-8 h-px w-56 overflow-hidden bg-white/15">
+            <motion.div className="h-full bg-cyan-500" style={{ width: `${frame.progress}%` }} />
+          </div>
+          <p className="num relative mt-3 text-caption text-white/40">{Math.round(frame.progress)}%</p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 /* ==================================================================== */
 /* Floating action rail                                                  */
