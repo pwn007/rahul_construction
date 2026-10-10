@@ -1,0 +1,17 @@
+# Deny the entire Laravel tree from the web.
+#
+# The app lives inside public_html (the client's chosen layout), which makes
+# every file here — .env with the database password first among them — a URL
+# unless this lock holds. backend/public/.htaccess re-allows only that folder,
+# and Apache/LiteSpeed give the deepest directory the last word, which is what
+# lets the /api rewrite through while everything else 403s.
+#
+# Both authorization syntaxes, module-guarded, because the host runs LiteSpeed:
+# whichever engine and module set serves the request, one of these applies.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

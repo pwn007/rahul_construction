@@ -1,0 +1,146 @@
+[
+  {
+    "id": "enh_elevation",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "elevation",
+    "label": "Premium Elevation",
+    "description": "Louvers, stone cladding, CNC panels and facade lighting.",
+    "icon": "LayoutPanelTop",
+    "pricingModel": "per-sqft",
+    "unitPrice": 165,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 1
+  },
+  {
+    "id": "enh_anti-termite",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "anti-termite",
+    "label": "Anti-Termite Treatment",
+    "description": "Pre- and post-construction chemical soil treatment.",
+    "icon": "Bug",
+    "pricingModel": "per-sqft",
+    "unitPrice": 16,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 2
+  },
+  {
+    "id": "enh_hvac",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "hvac",
+    "label": "Centralised HVAC",
+    "description": "VRF/ducted system with load calculation and duct routing.",
+    "icon": "Fan",
+    "pricingModel": "per-sqft",
+    "unitPrice": 210,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 3
+  },
+  {
+    "id": "enh_home-automation",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "home-automation",
+    "label": "Home Automation",
+    "description": "App-controlled lighting, curtains, and security integration.",
+    "icon": "Cpu",
+    "pricingModel": "lumpsum",
+    "unitPrice": 340000,
+    "appliesTo": [
+      "residential",
+      "mixed-use",
+      "interior-only"
+    ],
+    "order": 4
+  },
+  {
+    "id": "enh_solar",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "solar",
+    "label": "Rooftop Solar (3 kW)",
+    "description": "On-grid solar with net metering and 25-year panel warranty.",
+    "icon": "Sun",
+    "pricingModel": "lumpsum",
+    "unitPrice": 195000,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 5
+  },
+  {
+    "id": "enh_lift",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "lift",
+    "label": "Passenger Lift",
+    "description": "4–6 passenger lift with shaft, machine and installation.",
+    "icon": "ArrowUpDown",
+    "pricingModel": "per-floor",
+    "unitPrice": 260000,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 6
+  },
+  {
+    "id": "enh_boundary-wall",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "boundary-wall",
+    "label": "Boundary Wall & Gate",
+    "description": "RCC boundary with MS gate and entrance treatment.",
+    "icon": "Fence",
+    "pricingModel": "lumpsum",
+    "unitPrice": 340000,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 7
+  },
+  {
+    "id": "enh_landscaping",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "landscaping",
+    "label": "Landscaping & Driveway",
+    "description": "Paving, planters, soft landscape and outdoor lighting.",
+    "icon": "Trees",
+    "pricingModel": "lumpsum",
+    "unitPrice": 220000,
+    "appliesTo": [
+      "residential",
+      "commercial",
+      "mixed-use"
+    ],
+    "order": 8
+  }
+]

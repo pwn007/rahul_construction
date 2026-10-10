@@ -1,0 +1,86 @@
+[
+  {
+    "id": "hs_trust",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "trust",
+    "label": "Trust bar — client logos",
+    "enabled": true,
+    "heading": "",
+    "subheading": "",
+    "order": 1
+  },
+  {
+    "id": "hs_services",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "services-index",
+    "label": "What we do — services index",
+    "enabled": true,
+    "heading": "Hand us one part, or the whole build.",
+    "subheading": "Each of these is a team that already sits in the same office as the others.",
+    "order": 3
+  },
+  {
+    "id": "hs_mepf",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "mepf",
+    "label": "MEPF teaser band",
+    "enabled": true,
+    "heading": "",
+    "subheading": "",
+    "order": 4
+  },
+  {
+    "id": "hs_projects",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "projects",
+    "label": "Featured projects",
+    "enabled": true,
+    "heading": "Built across Jaipur",
+    "subheading": "From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.",
+    "order": 5
+  },
+  {
+    "id": "hs_onesystem",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "one-system",
+    "label": "One system — dark band",
+    "enabled": true,
+    "heading": "",
+    "subheading": "",
+    "order": 2
+  },
+  {
+    "id": "hs_testimonials",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-01-01T09:00:00.000Z",
+    "status": "published",
+    "key": "testimonials",
+    "label": "Testimonials",
+    "enabled": true,
+    "heading": "Trusted by homeowners and businesses alike",
+    "subheading": "Four projects, four families, and the part they chose to say out loud.",
+    "order": 6
+  },
+  {
+    "id": "hs_client_videos",
+    "createdAt": "2026-09-27T09:00:00.000Z",
+    "updatedAt": "2026-09-27T09:00:00.000Z",
+    "status": "published",
+    "key": "client-videos",
+    "label": "Client videos — rail",
+    "enabled": true,
+    "heading": "Hear it from our clients",
+    "subheading": "In their own words, on camera — the people we built for, on what it was like.",
+    "order": 7
+  }
+]

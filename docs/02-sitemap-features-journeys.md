@@ -202,7 +202,7 @@ trust established → consultation.
 
 ## 5. Non-Goals for Phase 1
 - Real authentication / sessions (mock only)
-- Real database (Prisma schema authored, not connected)
+- Real database (schema authored, not connected)
 - Real payments, real file storage, real email/SMS dispatch
 - Real 360°/drone media (placeholders with correct component contracts)
 - CMS-grade page builder drag-and-drop (config-driven section toggles instead)

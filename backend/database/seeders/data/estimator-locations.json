@@ -1,0 +1,134 @@
+[
+  {
+    "id": "loc_mansarovar",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "mansarovar",
+    "label": "Mansarovar",
+    "zone": "Jaipur — South West",
+    "multiplier": 1,
+    "order": 1
+  },
+  {
+    "id": "loc_jagatpura",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "jagatpura",
+    "label": "Jagatpura",
+    "zone": "Jaipur — South East",
+    "multiplier": 0.98,
+    "order": 2
+  },
+  {
+    "id": "loc_pratap-nagar",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "pratap-nagar",
+    "label": "Pratap Nagar",
+    "zone": "Jaipur — South",
+    "multiplier": 0.97,
+    "order": 3
+  },
+  {
+    "id": "loc_sanganer",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "sanganer",
+    "label": "Sanganer",
+    "zone": "Jaipur — South",
+    "multiplier": 0.96,
+    "order": 4
+  },
+  {
+    "id": "loc_malviya-nagar",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "malviya-nagar",
+    "label": "Malviya Nagar",
+    "zone": "Jaipur — South East",
+    "multiplier": 1.04,
+    "order": 5
+  },
+  {
+    "id": "loc_vaishali-nagar",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "vaishali-nagar",
+    "label": "Vaishali Nagar",
+    "zone": "Jaipur — West",
+    "multiplier": 1.03,
+    "order": 6
+  },
+  {
+    "id": "loc_c-scheme",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "c-scheme",
+    "label": "C-Scheme / Civil Lines",
+    "zone": "Jaipur — Central",
+    "multiplier": 1.09,
+    "order": 7
+  },
+  {
+    "id": "loc_jhotwara",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "jhotwara",
+    "label": "Jhotwara",
+    "zone": "Jaipur — North West",
+    "multiplier": 0.95,
+    "order": 8
+  },
+  {
+    "id": "loc_ajmer-road",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "ajmer-road",
+    "label": "Ajmer Road",
+    "zone": "Jaipur — West",
+    "multiplier": 0.97,
+    "order": 9
+  },
+  {
+    "id": "loc_tonk-road",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "tonk-road",
+    "label": "Tonk Road",
+    "zone": "Jaipur — South",
+    "multiplier": 1.02,
+    "order": 10
+  },
+  {
+    "id": "loc_jaipur-other",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "jaipur-other",
+    "label": "Other area in Jaipur",
+    "zone": "Jaipur",
+    "multiplier": 1,
+    "order": 11
+  },
+  {
+    "id": "loc_outside-jaipur",
+    "createdAt": "2026-01-01T09:00:00.000Z",
+    "updatedAt": "2026-06-01T09:00:00.000Z",
+    "status": "published",
+    "key": "outside-jaipur",
+    "label": "Outside Jaipur (Rajasthan)",
+    "zone": "Rajasthan",
+    "multiplier": 1.06,
+    "order": 12
+  }
+]

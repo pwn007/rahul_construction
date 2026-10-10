@@ -9,8 +9,8 @@
    schemas, types and logic; deleting a feature is one folder.
 2. **The UI never talks to a transport.** Components call feature hooks → hooks call
    `services/*` → services call an **adapter**. Phase 1 ships a `mock` adapter reading local JSON;
-   Phase 2 swaps in an `http` adapter. **Zero component changes.**
-3. **Contracts before implementations.** `types/` holds the domain model; the Prisma schema is
+   Production swaps in an `http` adapter. **Zero component changes.**
+3. **Contracts before implementations.** `types/` holds the domain model; the database schema is
    authored from the same model. Mock JSON is validated against the same shapes.
 4. **Server state ≠ client state.** TanStack Query owns server state (cache, loading, retry).
    Zustand-lite context owns UI state (theme, nav, palette). No global store dumping ground.
@@ -27,7 +27,7 @@
 ```
 Phase_1/
 ├── docs/                              ← this research & planning set
-├── web/                               ← React + Vite + TS frontend
+├── web_next/                          ← Next 15 + React 19 + TS frontend
 │   ├── public/
 │   ├── index.html
 │   ├── vite.config.ts
@@ -76,29 +76,30 @@ Phase_1/
 │       ├── constants/                 ← routes, nav, site config, estimator rates
 │       └── types/                     ← domain model
 │
-└── server/                            ← Node + Express + TS (API-shaped, mock-backed)
-    ├── prisma/schema.prisma           ← authored, not migrated (Phase 1)
-    └── src/
-        ├── index.ts · app.ts
-        ├── config/
-        ├── routes/                    ← thin, RESTful
-        ├── controllers/               ← request → service → response
-        ├── services/                  ← business logic
-        ├── repositories/              ← ★ swap point: JsonRepository → PrismaRepository
-        ├── middleware/                ← error, notFound, validate, cors, rate-limit
-        ├── data/                      ← mock JSON (mirrors web/src/data)
-        └── utils/
+└── backend/                           ← Laravel 13 · PHP 8.3+ · MySQL — JSON API only
+    ├── routes/api.php                 ← the whole surface; no routes/web.php
+    ├── config/resources.php           ← ★ 27 resources → Model, searchable fields, visibility
+    ├── app/Models/                    ← one per table, camelCase columns
+    ├── app/Http/Controllers/          ← ResourceController · LeadController · AuthController
+    ├── app/Http/Requests/             ← lead validation (consent + UTM included)
+    ├── app/Http/Middleware/           ← CheckPermission (roles.permissions JSON)
+    ├── app/Notifications/             ← lead email · generic {text} webhook · auto-reply
+    └── database/{migrations,seeders}/ ← seeded from web_next/src/data/*.ts
 ```
+
+The public site ships as a **static export**: `npm run build` in `web_next/` writes plain HTML to
+`out/`, which Apache serves directly. Node is a build-time tool, never a runtime one — which is what
+makes PHP shared hosting viable at all.
 
 ---
 
-## 3. The Data Access Seam (how Prisma drops in later)
+## 3. The Data Access Seam (one env var swaps the backend)
 
 **Frontend**
 ```ts
 // services/client.ts
-export const api = import.meta.env.VITE_API_MODE === 'http'
-  ? httpAdapter(import.meta.env.VITE_API_URL)
+export const api = process.env.NEXT_PUBLIC_API_MODE === 'http'
+  ? httpAdapter(process.env.NEXT_PUBLIC_API_URL)
   : mockAdapter();
 
 // services/projects.service.ts   ← never changes
@@ -108,20 +109,19 @@ export const projectsService = {
   create: (dto: ProjectDto)  => api.post<Project>('/projects', dto),
 };
 ```
-Flip one env var → the entire app talks to Express instead of JSON. Components untouched.
+Flip one env var → the entire app talks to Laravel instead of local seed data. Components untouched.
 
-**Backend**
-```ts
-interface Repository<T> { findMany(q): Promise<Paginated<T>>; findOne(id): Promise<T|null>;
-                          create(dto): Promise<T>; update(id,dto): Promise<T>; delete(id): Promise<void> }
-
-// Phase 1
-export const projectRepo: Repository<Project> = new JsonRepository<Project>('projects.json');
-// Phase 2 — one line
-export const projectRepo: Repository<Project> = new PrismaRepository<Project>(prisma.project);
+**Backend** — one generic controller, not 27 hand-written ones:
+```php
+// config/resources.php — the whole API surface as data
+'projects' => ['model' => Project::class, 'public' => true,
+               'search' => ['title', 'excerpt', 'locality']],
 ```
-Services and controllers are written against `Repository<T>` only. **The ORM is invisible above the
-repository line.** This is the single most important decision for Phase-2 cost.
+`ResourceController` reads that map and implements list / show / store / update / destroy for every
+resource. **The specification is `web_next/src/services/adapters/mock.adapter.ts`** — its
+`applyQuery()` defines pagination, the searchable-field list, sorting and the
+any-query-key-is-a-filter rule. The mock adapter is the contract; Laravel is one implementation of
+it, and a diff between the two is the test.
 
 ---
 
@@ -180,10 +180,9 @@ package). **Timeline** = `f(builtUpArea, floors, package)` in weeks, clamped 16�
 | **4 — Public secondary** | Gallery, Careers (+detail), Blog (+detail), Contact, Downloads, legal, 404 | Full nav coverage, no dead links |
 | **5 — Portal** | Client portal prototype (5 screens, mock auth) | Demo login → progress → invoices |
 | **6 — Admin** | Shell, dashboard, analytics, CRUD engine, 28 module configs, estimator config, theme, RBAC | Every module: add/edit/delete/preview |
-| **7 — Backend** | Express + repositories + routes mirroring the frontend service contract; Prisma schema authored | `GET /api/projects` returns the same shape the mock adapter does |
+| **7 — Backend** | Laravel API mirroring the frontend service contract; MySQL, Sanctum auth, lead notifications | `GET /api/projects` returns the same shape the mock adapter does |
 | **8 — Hardening** | Perf pass, a11y pass, SEO/JSON-LD, README, hand-off notes | Clean production build |
 
-### Phase 2 (post-prototype, for reference)
-Prisma + PostgreSQL migration · real auth (JWT + refresh, RBAC enforced server-side) ·
-S3/Cloudinary media · transactional email + WhatsApp Business API · real analytics ·
-CI/CD · i18n (EN/हिं) · CMS-grade page builder.
+### Still open (post-prototype)
+Real file uploads (media library + career résumés) · `/admin`'s four mock screens — analytics,
+roles, theme, estimator-config · real analytics · CI/CD · i18n (EN/हिं) · CMS-grade page builder.
