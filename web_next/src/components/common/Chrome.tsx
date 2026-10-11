@@ -48,6 +48,42 @@ if(sessionStorage.getItem('${STORAGE_KEYS.preloaderSeen}')||matchMedia('(prefers
 document.documentElement.classList.add('preloader-skip');
 }catch(e){}})();`;
 
+/**
+ * The moment the curtain starts to lift — or at once, when it is skipped.
+ *
+ * The homepage hero plays its entrance from here; started on mount, it would
+ * finish underneath the loader and nobody would see it. Recorded as a class on
+ * <html> as well as an event, so a component that mounts after the fact still
+ * knows.
+ */
+export const PRELOADER_DONE_EVENT = 'na:preloader-done';
+
+function markPreloaderDone() {
+  document.documentElement.classList.add('preloader-done');
+  window.dispatchEvent(new Event(PRELOADER_DONE_EVENT));
+}
+
+/** True once the preloader has started to lift, or was never shown. */
+export function usePreloaderDone(): boolean {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    const html = document.documentElement;
+    if (html.classList.contains('preloader-skip') || html.classList.contains('preloader-done')) {
+      setDone(true);
+      return;
+    }
+    const finish = () => setDone(true);
+    window.addEventListener(PRELOADER_DONE_EVENT, finish);
+    /* Belt and braces: the loader runs 2.2 s, so never hold the page longer. */
+    const fallback = window.setTimeout(finish, 4000);
+    return () => {
+      window.removeEventListener(PRELOADER_DONE_EVENT, finish);
+      window.clearTimeout(fallback);
+    };
+  }, []);
+  return done;
+}
+
 export function Preloader() {
   /* Starts visible on the server and the client alike so hydration matches;
      the mount effect below is what decides. */
@@ -57,6 +93,7 @@ export function Preloader() {
   useEffect(() => {
     if (document.documentElement.classList.contains('preloader-skip')) {
       setVisible(false);
+      markPreloaderDone();
       return;
     }
     writeStore(STORAGE_KEYS.preloaderSeen, true, 'session');
@@ -74,7 +111,11 @@ export function Preloader() {
       // so the scene interpolates continuously instead of in 101 discrete steps.
       setFrame({ progress: (1 - Math.pow(1 - t, 1.8)) * 100, now });
       if (t < 1) raf = requestAnimationFrame(tick);
-      else hold = window.setTimeout(() => setVisible(false), 300);
+      else
+        hold = window.setTimeout(() => {
+          setVisible(false);
+          markPreloaderDone();
+        }, 300);
     };
     raf = requestAnimationFrame(tick);
     return () => {

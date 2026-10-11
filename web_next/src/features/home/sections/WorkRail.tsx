@@ -749,6 +749,7 @@ export function WorkRail({
 
   return (
     <section
+      data-section="projects"
       className={cn(
         /* `work-rail` styles nothing — it is the handle to grab in the
            inspector, and what the QA checks measure against. */
@@ -793,6 +794,9 @@ export function WorkRail({
         ref={paneRef}
         role="region"
         aria-label="Selected projects"
+        /* Sideways only, for the section engine on phones: a vertical swipe
+           that starts here still moves the page a section. */
+        data-hscroll=""
         tabIndex={0}
         onScroll={onPaneScroll}
         onFocusCapture={onFocusCapture}

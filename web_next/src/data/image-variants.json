@@ -1,0 +1,202 @@
+{
+  "/images/v/elevation-g2-white-4k-1920.webp": {
+    "width": 3840,
+    "height": 2160,
+    "avif": [
+      [
+        640,
+        "/images/v/elevation-g2-white-4k-640.avif"
+      ],
+      [
+        960,
+        "/images/v/elevation-g2-white-4k-960.avif"
+      ],
+      [
+        1280,
+        "/images/v/elevation-g2-white-4k-1280.avif"
+      ],
+      [
+        1920,
+        "/images/v/elevation-g2-white-4k-1920.avif"
+      ],
+      [
+        2560,
+        "/images/v/elevation-g2-white-4k-2560.avif"
+      ],
+      [
+        3840,
+        "/images/v/elevation-g2-white-4k-3840.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/images/v/elevation-g2-white-4k-640.webp"
+      ],
+      [
+        960,
+        "/images/v/elevation-g2-white-4k-960.webp"
+      ],
+      [
+        1280,
+        "/images/v/elevation-g2-white-4k-1280.webp"
+      ],
+      [
+        1920,
+        "/images/v/elevation-g2-white-4k-1920.webp"
+      ],
+      [
+        2560,
+        "/images/v/elevation-g2-white-4k-2560.webp"
+      ],
+      [
+        3840,
+        "/images/v/elevation-g2-white-4k-3840.webp"
+      ]
+    ],
+    "portrait": {
+      "width": 1215,
+      "height": 2160,
+      "avif": [
+        [
+          640,
+          "/images/v/elevation-g2-white-4k-portrait-640.avif"
+        ],
+        [
+          960,
+          "/images/v/elevation-g2-white-4k-portrait-960.avif"
+        ],
+        [
+          1215,
+          "/images/v/elevation-g2-white-4k-portrait-1215.avif"
+        ]
+      ],
+      "webp": [
+        [
+          640,
+          "/images/v/elevation-g2-white-4k-portrait-640.webp"
+        ],
+        [
+          960,
+          "/images/v/elevation-g2-white-4k-portrait-960.webp"
+        ],
+        [
+          1215,
+          "/images/v/elevation-g2-white-4k-portrait-1215.webp"
+        ]
+      ]
+    }
+  },
+  "/images/v/elevation-villa-timber-1536.webp": {
+    "width": 1536,
+    "height": 1024,
+    "avif": [
+      [
+        640,
+        "/images/v/elevation-villa-timber-640.avif"
+      ],
+      [
+        960,
+        "/images/v/elevation-villa-timber-960.avif"
+      ],
+      [
+        1280,
+        "/images/v/elevation-villa-timber-1280.avif"
+      ],
+      [
+        1536,
+        "/images/v/elevation-villa-timber-1536.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/images/v/elevation-villa-timber-640.webp"
+      ],
+      [
+        960,
+        "/images/v/elevation-villa-timber-960.webp"
+      ],
+      [
+        1280,
+        "/images/v/elevation-villa-timber-1280.webp"
+      ],
+      [
+        1536,
+        "/images/v/elevation-villa-timber-1536.webp"
+      ]
+    ],
+    "portrait": {
+      "width": 768,
+      "height": 1024,
+      "avif": [
+        [
+          640,
+          "/images/v/elevation-villa-timber-portrait-640.avif"
+        ],
+        [
+          768,
+          "/images/v/elevation-villa-timber-portrait-768.avif"
+        ]
+      ],
+      "webp": [
+        [
+          640,
+          "/images/v/elevation-villa-timber-portrait-640.webp"
+        ],
+        [
+          768,
+          "/images/v/elevation-villa-timber-portrait-768.webp"
+        ]
+      ]
+    }
+  },
+  "/images/v/interior-living-lounge-1280.webp": {
+    "width": 1280,
+    "height": 852,
+    "avif": [
+      [
+        640,
+        "/images/v/interior-living-lounge-640.avif"
+      ],
+      [
+        960,
+        "/images/v/interior-living-lounge-960.avif"
+      ],
+      [
+        1280,
+        "/images/v/interior-living-lounge-1280.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/images/v/interior-living-lounge-640.webp"
+      ],
+      [
+        960,
+        "/images/v/interior-living-lounge-960.webp"
+      ],
+      [
+        1280,
+        "/images/v/interior-living-lounge-1280.webp"
+      ]
+    ],
+    "portrait": {
+      "width": 639,
+      "height": 852,
+      "avif": [
+        [
+          639,
+          "/images/v/interior-living-lounge-portrait-639.avif"
+        ]
+      ],
+      "webp": [
+        [
+          639,
+          "/images/v/interior-living-lounge-portrait-639.webp"
+        ]
+      ]
+    }
+  }
+}

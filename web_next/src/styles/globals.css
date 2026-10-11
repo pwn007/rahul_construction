@@ -43,6 +43,71 @@
 
     --radius-base: 16px;
     --nav-h: 76px;
+
+    /* ── Font roles ─────────────────────────────────────────────
+       The site's original faces, loaded by the Google Fonts link in the root
+       layout — the same stacks as `fontFamily` in tailwind.config. The chapter
+       styles below read these roles rather than naming a face. (The design
+       migration tried Cormorant Garamond and DM Sans; the client found them too
+       light for the site and they were reverted on 10 Oct 2026.) */
+    --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-deva: 'Noto Sans Devanagari', 'Outfit', sans-serif;
+
+    /* ── Viewport unit for full-screen chapters ─────────────────
+       1svh where supported (the screen with the browser bars showing), 1vh
+       before that. The section engine (lib/section-nav) overrides it on <html>
+       with the real inner height, which is what makes a chapter exactly one
+       screen. */
+    --vh: 1vh;
+
+    /* ── Chapter type scale ─────────────────────────────────────
+       The finalized design's sizes, as tokens, re-cut for Outfit at 600:
+       Outfit runs about a third wider than the serif the design was drawn in,
+       so each step is smaller, and the longest single word a heading carries
+       ("Architectural") still fits a 360px phone. Phones and short phones
+       override them below; components only ever read the token. */
+    --type-chapter-hero: clamp(3.25rem, 8vw, 8.5rem);
+    --type-chapter: clamp(2.5rem, 5.4vw, 5.5rem);
+    --type-chapter-sm: clamp(2.125rem, 4.2vw, 4.25rem);
+    --type-plate: clamp(2.25rem, 4vw, 3.75rem);
+    --type-figure: clamp(1.625rem, 2.5vw, 2.5rem);
+    --type-lede: clamp(0.9375rem, 1.15vw, 1.0625rem);
+    /* Labels never go below 12px: the client could not read 12px in a demo at
+       a smaller ratio to the heading (see `overline` in tailwind.config). */
+    --type-label: 0.8125rem;
+
+    /* ── Chapter scrims ─────────────────────────────────────────
+       navy-950 #040B21 at stepped opacities: dark enough under the copy to
+       pass contrast on a bright photo, clear across the top of the frame. */
+    --scrim: 4 11 33;
+  }
+
+  @supports (height: 1svh) {
+    :root { --vh: 1svh; }
+  }
+
+  @media (max-width: 767.98px) {
+    :root {
+      --type-chapter-hero: 14vw;
+      --type-chapter: 11vw;
+      --type-chapter-sm: 9vw;
+      --type-plate: 2.25rem;
+      --type-figure: 1.625rem;
+      --type-label: 0.75rem;
+    }
+  }
+
+  /* Short phones (iPhone SE, small Androids): the same stack, tighter, so a
+     chapter still fits one screen. */
+  @media (max-width: 767.98px) and (max-height: 700px) {
+    :root {
+      --type-chapter-hero: 12.5vw;
+      --type-chapter: 9.6vw;
+      --type-chapter-sm: 8vw;
+      --type-plate: 1.875rem;
+      --type-lede: 0.90625rem;
+    }
   }
 
   .dark,
@@ -418,36 +483,623 @@
     animation: shimmer 1.6s infinite;
   }
 
-  /**
-   * The homepage hero's scrim: navy-800 over the photograph, heavy at the top
-   * (under the navbar) and at the bottom (under the copy), thin through the sky.
-   *
-   * Fitted, not eyeballed. Against the Design B renders the tint is a plain
-   * alpha overlay of navy-800 (r² ≈ 0.99 per channel), so these stops are its
-   * measured opacity at each height. Phones stack the copy at the bottom, so
-   * their ramp climbs earlier and harder than the desktop's.
-   */
-  .hero-scrim {
-    background-image: linear-gradient(
-      180deg,
-      theme('colors.navy.800 / 64%') 0%,
-      theme('colors.navy.800 / 8%') 15%,
-      theme('colors.navy.800 / 15%') 38%,
-      theme('colors.navy.800 / 82%') 62%,
-      theme('colors.navy.800 / 89%') 68%,
-      theme('colors.navy.800 / 99%') 100%
-    );
+  /* ============================================================
+     HOMEPAGE HERO — the finalized design (features/home/sections/Hero.tsx)
+
+     One screen of photograph that settles in slowly, a two-way scrim (top for
+     the header, bottom for the copy), the headline and Hindi line high, and the
+     lede, actions and figures along the bottom edge.
+     ============================================================ */
+  .hero-v2 { min-height: calc(var(--vh) * 100); }
+  .hero-v2__scrim {
+    background:
+      linear-gradient(0deg, rgb(var(--scrim) / 0.88), rgb(var(--scrim) / 0.3) 40%, rgb(var(--scrim) / 0) 62%),
+      linear-gradient(180deg, rgb(var(--scrim) / 0.55), rgb(var(--scrim) / 0) 32%);
   }
-  @media screen(lg) {
-    .hero-scrim {
-      background-image: linear-gradient(
-        180deg,
-        theme('colors.navy.800 / 61%') 0%,
-        theme('colors.navy.800 / 12%') 22.5%,
-        theme('colors.navy.800 / 28%') 62%,
-        theme('colors.navy.800 / 95%') 100%
-      );
+  /* A bright slide (`tone: 'deep'` in heroSlides.ts; set per slide, so it
+     cross-fades with its photo): the navy multiplied into
+     the photograph, as for deep chapters, the side the headline sits on
+     darkened, and the bottom a little deeper than the plain hero so the lede
+     and the pills hold on short phones. Measured with the white G+2 elevation
+     at nine sizes, 360px phones to 1920px and phones on their side: every small
+     line 6.1:1 or better, the headline 4.4:1 or better (WCAG AA: 4.5:1 and
+     3:1). `.hero-v2__push` is a stacking context (it is transformed), so the
+     blend reaches the photograph only. */
+  .hero-v2__slide[data-tone='deep'] .hero-v2__push::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgb(var(--c-navy) / 0.3);
+    mix-blend-mode: multiply;
+  }
+  /* `shaded` (heroSlides.ts) is the same scrim without the grade. */
+  .hero-v2__slide[data-tone='deep'] .hero-v2__scrim,
+  .hero-v2__slide[data-tone='shaded'] .hero-v2__scrim {
+    background:
+      linear-gradient(0deg, rgb(var(--scrim) / 0.9), rgb(var(--scrim) / 0.42) 46%, rgb(var(--scrim) / 0) 68%),
+      linear-gradient(90deg, rgb(var(--scrim) / 0.72), rgb(var(--scrim) / 0.35) 45%, rgb(var(--scrim) / 0) 70%),
+      linear-gradient(180deg, rgb(var(--scrim) / 0.55), rgb(var(--scrim) / 0) 32%);
+  }
+  /* The photograph eases in from 112% over nine seconds. The global
+     reduced-motion rule collapses it to its end state. */
+  .hero-v2__push { animation: hero-push 9s cubic-bezier(0.2, 0.6, 0.3, 1) both; }
+  @keyframes hero-push {
+    from { transform: scale(1.12); }
+    to { transform: scale(1); }
+  }
+  .hero-v2__copy {
+    gap: 1.625rem;
+    /* Clears the header's tall state over the hero (72px phones, 101px desktop). */
+    padding-top: calc(72px + env(safe-area-inset-top, 0px) + 10vh);
+    padding-bottom: 5vh;
+  }
+  .hero-v2__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem 1.75rem;
+  }
+  .hero-v2__bottom > * { flex: 1 1 100%; }
+  /* Four figures in a row need about 31rem before "Professionals" runs into its
+     neighbour; narrower than that they sit two by two, whatever the screen. */
+  .hero-v2__figures { container-type: inline-size; }
+  @container (max-width: 31rem) {
+    .hero-v2__figures .chapter-figures[data-count='4'] { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.25rem; }
+  }
+  .hero-v2__hi {
+    margin: 1rem 0 0;
+    font: 400 1.6875rem / 1.45 var(--font-deva);
+    color: #fff;
+  }
+  .hero-v2__lede {
+    margin: 0;
+    max-width: 48ch;
+    font: 400 clamp(1.0625rem, 1.5vw, 1.375rem) / 1.45 var(--font-sans);
+    color: rgb(255 255 255 / 0.92);
+    text-wrap: pretty;
+  }
+  @media (min-width: 768px) {
+    .hero-v2__bottom > * { flex: 0 1 auto; }
+    .hero-v2__hi { margin-top: 1.375rem; font-size: clamp(1.625rem, 2.6vw, 2.5rem); }
+    /* The figures keep 72px clear of the right edge, where the site's floating
+       contact button sits from this width up. */
+    .hero-v2__figures { flex: 1 1 26rem; max-width: 35rem; margin-right: 4.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .hero-v2__copy {
+      gap: 2.25rem;
+      padding-top: calc(101px + env(safe-area-inset-top, 0px) + 12vh);
+      padding-bottom: 6vh;
     }
+  }
+  /* Phones on their side: the headline is sized by the screen's height, or it
+     would fill the whole view. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .hero-v2 .chapter-title[data-size='hero'] { font-size: 15vh; }
+    .hero-v2__copy { padding-top: calc(72px + env(safe-area-inset-top, 0px) + 3vh); }
+    .hero-v2__hi { font-size: 1.375rem; margin-top: 0.5rem; }
+  }
+  @media (max-width: 767.98px) and (max-height: 700px) {
+    .hero-v2__copy { gap: 1.125rem; padding-top: calc(72px + env(safe-area-inset-top, 0px) + 5vh); padding-bottom: 4vh; }
+    .hero-v2__hi { margin-top: 0.75rem; font-size: 1.5rem; }
+  }
+
+  /* The gutters the header uses, so chapter copy lines up under the logo at
+     every width: the container on phones and tablets, then full-bleed with
+     40px / 72px edges (components/common/Navbar.tsx). */
+  .chapter-gutters { @apply container lg:max-w-none lg:px-10 xl:px-[72px]; }
+
+  /* ── PILLS (components/chapter/PillLink.tsx) ── */
+  .pill {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    height: 2.75rem;
+    padding: 0.25rem;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.55);
+    border-radius: 999px;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.4s;
+  }
+  .pill__fill {
+    position: absolute;
+    inset-block: 0.25rem;
+    left: 0.25rem;
+    z-index: -1;
+    width: 2.125rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.28);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1), background-color 0.4s;
+  }
+  .pill__icon { display: grid; flex: none; place-items: center; width: 2.125rem; height: 2.125rem; }
+  .pill__icon svg { width: 0.9375rem; height: 0.9375rem; }
+  .pill__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 1.125rem 0 0.625rem;
+    font: 600 0.75rem / 1 var(--font-sans);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  @media (hover: hover) {
+    .pill:hover .pill__fill { width: calc(100% - 0.5rem); }
+  }
+  .pill:active .pill__fill { width: calc(100% - 0.5rem); }
+  .pill[data-solid] { border-color: #fff; background: #fff; color: rgb(var(--c-navy)); }
+  .pill[data-solid] .pill__fill { background: rgb(var(--c-navy)); }
+  .pill[data-solid] .pill__icon { color: #fff; }
+  @media (hover: hover) {
+    .pill[data-solid]:hover { color: #fff; }
+  }
+
+  /* ResponsiveImage: which part of a cropped photo survives the crop
+     (components/common/ResponsiveImage.tsx). The portrait query matches the one
+     that picks the portrait files. */
+  .rimg { object-position: var(--img-pos, 50% 50%); }
+  @media (max-width: 1023.98px) and (orientation: portrait) {
+    .rimg { object-position: var(--img-pos-portrait, var(--img-pos, 50% 50%)); }
+  }
+
+  /* ============================================================
+     CHAPTERS — full-bleed photographic sections (design migration, Phase 2)
+
+     The finalized design's building block: one screen of photograph, a scrim,
+     an optional chapter number in the top-left, and the copy resting low.
+     Rendered by components/chapter/Chapter.tsx; nothing here animates — the
+     reveals arrive with the section engine in Phase 3.
+     ============================================================ */
+  .chapter {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: flex-end;
+    /* At least one screen, and as tall as its content needs beyond that. */
+    min-height: calc(var(--vh) * 100);
+    overflow: hidden;
+    background-color: rgb(var(--c-navy));
+    color: #fff;
+  }
+
+  .chapter__media,
+  .chapter__media > picture,
+  .chapter__media img,
+  .chapter__media video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .chapter__media { z-index: -2; }
+  .chapter__media img,
+  .chapter__media video { object-fit: cover; }
+
+  .chapter__grid {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .chapter__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.34) 42%, rgb(var(--scrim) / 0) 68%),
+      linear-gradient(90deg, rgb(var(--scrim) / 0.55), rgb(var(--scrim) / 0) 52%);
+  }
+  .chapter[data-align='right'] .chapter__scrim {
+    background:
+      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.34) 42%, rgb(var(--scrim) / 0) 68%),
+      linear-gradient(270deg, rgb(var(--scrim) / 0.55), rgb(var(--scrim) / 0) 52%);
+  }
+  .chapter[data-align='center'] .chapter__scrim {
+    background: linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.34) 44%, rgb(var(--scrim) / 0.06) 70%);
+  }
+  /* Long text over a bright photograph (quotes, lists). */
+  .chapter__scrim[data-scrim='dense'] {
+    background: linear-gradient(0deg, rgb(var(--scrim) / 0.9), rgb(var(--scrim) / 0.62) 50%, rgb(var(--scrim) / 0.5));
+  }
+
+  .chapter__copy {
+    position: relative;
+    width: 100%;
+    /* Clears the fixed header and the chapter number above the copy. */
+    padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 9.5rem);
+    padding-bottom: 7vh;
+  }
+  .chapter__inner { max-width: 47.5rem; }
+  .chapter[data-align='right'] .chapter__inner { margin-left: auto; text-align: right; }
+  .chapter[data-align='center'] .chapter__inner { max-width: 48.75rem; margin-inline: auto; text-align: center; }
+
+  .chapter-plate {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 2.125rem);
+    z-index: 1;
+    text-shadow: 0 0.022em 0 rgb(var(--scrim) / 0.4);
+  }
+  .chapter-plate__num {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--type-plate);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: lining-nums;
+    color: rgb(255 255 255 / 0.8);
+  }
+  .chapter-plate__label {
+    display: block;
+    margin-top: 0.375rem;
+    font: 600 var(--type-label) / 1.4 var(--font-sans);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .chapter-eyebrow {
+    display: inline-block;
+    margin: 0 0 1.625rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.32);
+    font: 600 var(--type-label) / 1.5 var(--font-sans);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.85);
+  }
+  .chapter-eyebrow[data-plain] { border-bottom: 0; padding-bottom: 0; margin-bottom: 1.375rem; }
+
+  .chapter-title {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--type-chapter);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    color: #fff;
+    text-wrap: balance;
+    text-shadow: 0 0.022em 0 rgb(var(--scrim) / 0.4);
+  }
+  /* The second voice in a heading. The design set it in the serif's italic;
+     Outfit has no italic (a browser-slanted one looks broken), so the line
+     stays upright and steps down to the regular weight instead. */
+  .chapter-title em { font-style: normal; font-weight: 400; }
+  /* One span per line, so Phase 3 can move the lines independently. */
+  .chapter-title .ln { display: block; }
+  .chapter-title[data-size='sm'] { font-size: var(--type-chapter-sm); line-height: 0.98; }
+  .chapter-title[data-size='hero'] {
+    font-weight: 600;
+    font-size: var(--type-chapter-hero);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+  }
+  /* The one coloured word in a headline: brand cyan, never a third hue — and
+     at the headline's own weight, since the colour already sets it apart. */
+  .chapter-title[data-size='hero'] em { color: rgb(var(--c-brand)); font-weight: inherit; }
+
+  .chapter-lede {
+    margin: 0;
+    max-width: 48ch;
+    font: 400 var(--type-lede) / 1.6 var(--font-sans);
+    color: rgb(255 255 255 / 0.92);
+    text-wrap: pretty;
+  }
+  .chapter-lede + .chapter-lede { margin-top: 0.875rem; }
+  .chapter[data-align='center'] .chapter-lede { margin-inline: auto; }
+  .chapter[data-align='right'] .chapter-lede { margin-left: auto; }
+
+  .chapter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.375rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font: 500 var(--type-label) / 1.6 var(--font-sans);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.8);
+  }
+  .chapter[data-align='center'] .chapter-tags { justify-content: center; }
+  .chapter[data-align='right'] .chapter-tags { justify-content: flex-end; }
+
+  .chapter-figures {
+    display: grid;
+    grid-template-columns: repeat(var(--figure-count, 3), auto);
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 2.125rem 0 0;
+    padding-top: 1.375rem;
+    border-top: 1px solid rgb(255 255 255 / 0.32);
+  }
+  .chapter-figure {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+  .chapter-figure dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--type-figure);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: lining-nums;
+  }
+  .chapter-figure dd[data-long] { font-size: calc(var(--type-figure) * 0.72); line-height: 1.1; }
+  .chapter-figure dt {
+    font: 600 var(--type-label) / 1.35 var(--font-sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.72);
+  }
+  .chapter[data-align='right'] .chapter-figure { align-items: flex-end; text-align: right; }
+
+  /* Four figures share a row only where the labels have room for their longest
+     word ("Professionals"); below that they sit two by two. */
+  .chapter-figures[data-count='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  /* Centred copy rests a little higher than a side column does. */
+  .chapter[data-align='center'] .chapter__copy { padding-bottom: 9vh; }
+  /* From md up the floating contact button holds the bottom-right corner
+     (FloatingRail: 56px, 28px in from the edges) — exactly where right-aligned
+     copy ends, and at 1440 it sat on the last word. That copy rests above it. */
+  @media (min-width: 768px) {
+    .chapter[data-align='right'] .chapter__copy { padding-bottom: max(7vh, 6.5rem); }
+  }
+
+  /* ── Deep tone: a bright photograph graded into the navy ──────────────────
+     The scrim only darkens. Over a pale frame (grey concrete, white paper, a
+     white wall) that reads as a grey veil, and the copy still sits on a light
+     ground — measured on the design's services chapters, the small lines over
+     these photographs went as low as 2.6:1 (4.5:1 is the floor). Multiplying the brand navy into the photograph first turns its
+     light greys into the page's own blue while its darks stay dark and its
+     colours stay put, then a scrim, deepest under the copy, seats the words.
+
+     The numbers are measured, not chosen: every line of copy on every deep
+     chapter clears WCAG AA against the brightest 5% of the photograph behind
+     it, at 360–1920px — 4.5:1 for the lede and the labels (the closest is the
+     "Services" plate label, 5.3:1), 3:1 for the headings (all above 5.9:1).
+     Lighter than this and the plate label over the services scaffold drops
+     below 4.5:1 first.
+
+     `.chapter__media` is a stacking context (z-index -2), so the blend reaches
+     the photograph and nothing else. */
+  .chapter[data-tone='deep'] .chapter__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgb(var(--c-navy) / 0.3);
+    mix-blend-mode: multiply;
+  }
+  /* Up from the bottom, and in from the side the copy sits on… */
+  .chapter[data-tone='deep'] .chapter__scrim {
+    background:
+      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.36) 48%, rgb(var(--scrim) / 0.06)),
+      linear-gradient(90deg, rgb(var(--scrim) / 0.5), rgb(var(--scrim) / 0) 58%);
+  }
+  .chapter[data-tone='deep'][data-align='right'] .chapter__scrim {
+    background:
+      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.36) 48%, rgb(var(--scrim) / 0.06)),
+      linear-gradient(270deg, rgb(var(--scrim) / 0.5), rgb(var(--scrim) / 0) 58%);
+  }
+  /* …or, for centred copy, an ellipse behind it — and a deeper grade, since
+     centred copy has no darker side of the frame to sit on (MEPF's ceiling). */
+  .chapter[data-tone='deep'][data-align='center'] .chapter__media::after { background: rgb(var(--c-navy) / 0.38); }
+  .chapter[data-tone='deep'][data-align='center'] .chapter__scrim {
+    background:
+      radial-gradient(ellipse 62% 48% at 50% 66%, rgb(var(--scrim) / 0.44), rgb(var(--scrim) / 0) 100%),
+      linear-gradient(0deg, rgb(var(--scrim) / 0.88), rgb(var(--scrim) / 0.36) 46%, rgb(var(--scrim) / 0.12));
+  }
+
+  .chapter-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.875rem;
+    margin-top: 1.75rem;
+  }
+  .chapter[data-align='center'] .chapter-links { justify-content: center; }
+  .chapter[data-align='right'] .chapter-links { justify-content: flex-end; }
+  .chapter-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    font: 600 var(--type-label) / 1 var(--font-sans);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 999px;
+  }
+  .chapter-link:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 4px; }
+  .chapter-link__arrow {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.875rem;
+    height: 1.875rem;
+    border: 1px solid rgb(255 255 255 / 0.6);
+    border-radius: 50%;
+    transition: background-color 0.35s, color 0.35s, border-color 0.35s;
+  }
+  .chapter-link__arrow svg { width: 0.75rem; height: 0.75rem; }
+  @media (hover: hover) {
+    .chapter-link:hover .chapter-link__arrow { background: #fff; border-color: #fff; color: rgb(var(--c-navy)); }
+  }
+  .chapter-link:focus-visible .chapter-link__arrow { background: #fff; border-color: #fff; color: rgb(var(--c-navy)); }
+  /* The arrow alone (a service row's "open"): the ring is the whole target, so
+     it grows to the 44px a finger needs. */
+  .chapter-link[data-bare] { min-width: 2.75rem; justify-content: center; }
+  .chapter-link[data-bare] .chapter-link__arrow { width: 2.75rem; height: 2.75rem; }
+  .chapter-link[data-bare] .chapter-link__arrow svg { width: 1rem; height: 1rem; }
+
+  /* A heading that is itself the link: it reads as a heading until hovered. */
+  .chapter-title__link { color: inherit; text-decoration: none; border-radius: 0.125rem; }
+  .chapter-title__link:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 6px; }
+  @media (hover: hover) {
+    .chapter-title__link:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.14em;
+      text-decoration-color: rgb(255 255 255 / 0.55);
+    }
+  }
+
+  /* ── Chapter cards (components/chapter ChapterCards) ──────────────────────
+     An index of the parts a chapter introduces — MEPF's four systems — each a
+     link to that part's own chapter. A dark translucent panel rather than a
+     frosted one: backdrop blur over a full-bleed photo costs frames while
+     scrolling, and the deep-toned photo needs no more softening. */
+  .chapter-cards {
+    display: grid;
+    grid-template-columns: repeat(var(--card-count, 4), minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .chapter-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    padding: 0.875rem 1rem 1rem;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    border-radius: 0.875rem;
+    background: rgb(var(--scrim) / 0.62);
+    color: #fff;
+    text-align: left;
+    text-decoration: none;
+    transition: border-color 0.3s, background-color 0.3s, transform 0.3s;
+  }
+  .chapter-card:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 3px; }
+  @media (hover: hover) {
+    .chapter-card:hover { border-color: rgb(var(--c-brand) / 0.75); background: rgb(var(--scrim) / 0.78); transform: translateY(-2px); }
+  }
+  .chapter-card__num {
+    font: 600 var(--type-label) / 1 var(--font-sans);
+    letter-spacing: 0.16em;
+    color: rgb(var(--c-brand));
+  }
+  .chapter-card__icon { position: absolute; top: 0.75rem; right: 0.875rem; color: rgb(255 255 255 / 0.72); }
+  .chapter-card__icon svg { width: 1.25rem; height: 1.25rem; }
+  .chapter-card__title {
+    margin-top: 0.875rem;
+    font: 600 clamp(1.125rem, 1.45vw, 1.375rem) / 1.15 var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  .chapter-card__text {
+    margin-top: 0.25rem;
+    font: 400 0.8125rem / 1.4 var(--font-sans);
+    color: rgb(255 255 255 / 0.8);
+  }
+  @media (max-width: 767.98px) {
+    .chapter-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-top: 1.25rem; }
+    .chapter-card { padding: 0.75rem 0.75rem 0.8125rem; border-radius: 0.75rem; }
+    .chapter-card__icon { top: 0.625rem; right: 0.625rem; }
+    .chapter-card__icon svg { width: 1.125rem; height: 1.125rem; }
+    .chapter-card__title { margin-top: 0.625rem; font-size: 1.0625rem; }
+    .chapter-card__text { font-size: 0.75rem; }
+  }
+  @media (max-width: 767.98px) and (max-height: 700px) {
+    .chapter-cards { margin-top: 0.875rem; }
+    .chapter-card { padding: 0.625rem 0.75rem; }
+    .chapter-card__title { margin-top: 0.375rem; font-size: 1rem; }
+    .chapter-card__text { display: none; }
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    .chapter-cards { margin-top: 0.75rem; gap: 0.5rem; }
+    .chapter-card { padding: 0.5rem 0.75rem; }
+    .chapter-card__title { margin-top: 0.25rem; font-size: 1rem; }
+    .chapter-card__text { display: none; }
+  }
+
+  /* The step's numeral over its heading ("01" over "Air"). */
+  .chapter-idx {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(3rem, 5vw, 5rem);
+    line-height: 0.9;
+    font-variant-numeric: lining-nums;
+    color: rgb(255 255 255 / 0.92);
+    text-shadow: 0 0.022em 0 rgb(var(--scrim) / 0.4);
+  }
+
+  /* What goes wrong without it: the display face under a cyan hairline (upright:
+     Outfit has no italic). White at 80% rather than the design's coral, which
+     would have been a third hue. */
+  .chapter-aside {
+    max-width: 40ch;
+    margin: 1.5rem 0 0;
+    padding-top: 1.125rem;
+    border-top: 1px solid rgb(var(--c-brand) / 0.6);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.1875rem, 1.6vw, 1.5rem);
+    line-height: 1.3;
+    color: rgb(255 255 255 / 0.8);
+    text-wrap: pretty;
+  }
+  .chapter[data-align='center'] .chapter-aside { margin-inline: auto; }
+  .chapter[data-align='right'] .chapter-aside { margin-left: auto; }
+
+  @media (max-width: 767.98px) {
+    .chapter-figures[data-count='4'] { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.25rem; }
+    .chapter__copy { padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 5.75rem); }
+    .chapter-plate { top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 1rem); }
+    .chapter-title { line-height: 0.98; }
+    .chapter-idx { font-size: 3rem; }
+  }
+  @media (max-width: 767.98px) and (max-height: 700px) {
+    .chapter__copy,
+    .chapter[data-align='center'] .chapter__copy { padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 4rem); padding-bottom: 5vh; }
+    .chapter-plate { top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 0.625rem); }
+    .chapter-title { margin-bottom: 1rem; }
+    .chapter-eyebrow { margin-bottom: 1rem; padding-bottom: 0.625rem; }
+    .chapter-lede { line-height: 1.5; }
+    .chapter-figures { margin-top: 1.25rem; padding-top: 0.875rem; }
+    .chapter-tags,
+    .chapter-links { margin-top: 0.875rem; }
+    .chapter-aside { margin-top: 0.875rem; padding-top: 0.75rem; font-size: 1.0625rem; }
+    .chapter-idx { font-size: 2.5rem; }
+  }
+  /* A phone held sideways: a screen 360–430px tall, where the desktop's
+     clearances alone came to more than a third of it and every chapter ran to
+     a screen and a half. Sized by height here, as the hero is. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .chapter__copy,
+    .chapter[data-align='center'] .chapter__copy { padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 4.25rem); padding-bottom: 6vh; }
+    .chapter[data-align='right'] .chapter__copy { padding-bottom: 5.5rem; }
+    .chapter-plate { top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 0.5rem); }
+    .chapter-plate__num { font-size: 2.125rem; }
+    .chapter-title { font-size: min(var(--type-chapter), 11.5vh); margin-bottom: 0.75rem; }
+    .chapter-eyebrow { margin-bottom: 0.75rem; padding-bottom: 0.5rem; }
+    .chapter-idx { font-size: 9vh; margin-bottom: 0.25rem; }
+    .chapter-lede { line-height: 1.45; }
+    .chapter-tags,
+    .chapter-links,
+    .chapter-aside { margin-top: 0.625rem; }
+    .chapter-links { gap: 0.5rem 1.5rem; }
+    .chapter-aside { padding-top: 0.5rem; font-size: 1rem; }
   }
 }
 
@@ -501,6 +1153,36 @@
    or motion is reduced. Outside any @layer so it always beats the `flex` utility
    on the same element. */
 html.preloader-skip .preloader { display: none; }
+
+/* ============================================================
+   SECTION ENGINE — html.snapnav
+   ============================================================ */
+/* Set by lib/section-nav on touch-first devices, on the home page, while
+   motion is allowed. The engine writes the scroll position every frame, so:
+   - `scroll-behavior: auto` — the root's `scroll-smooth` would turn each of
+     those writes into a smooth scroll of its own;
+   - no scroll anchoring — the engine keeps the place itself when a section
+     above changes height, and the browser's correction would fight it;
+   - rails that scroll sideways take only sideways pans from the browser, so a
+     vertical swipe that starts on one stays the engine's to move the page;
+   - a section focused after a link glides there (tabindex -1, for screen
+     readers and the next Tab) draws no outline round the whole screen.
+   `--vh` is overridden on <html> with the real inner height, which makes every
+   chapter exactly one screen. */
+html.snapnav {
+  scroll-behavior: auto !important;
+}
+html.snapnav,
+html.snapnav body {
+  overscroll-behavior-y: none;
+  overflow-anchor: none;
+}
+html.snapnav [data-hscroll] {
+  touch-action: pan-x pinch-zoom;
+}
+html.snapnav [data-section][tabindex='-1']:focus {
+  outline: none;
+}
 
 /* ============================================================
    REDUCED MOTION — single global gate

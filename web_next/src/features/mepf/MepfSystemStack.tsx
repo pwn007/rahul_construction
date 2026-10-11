@@ -4,31 +4,8 @@ import { useRef, type CSSProperties } from 'react';
 import { MaskImage } from '@/components/motion';
 import { useIsoLayoutEffect } from '@/hooks';
 import { IMG } from '@/lib/media';
-import { SYSTEMS, SYSTEM_ORDER, type SystemKey } from '@/data/mepf';
+import { SYSTEMS, SYSTEM_CAPTION as CAPTION, SYSTEM_ORDER, SYSTEM_PAIN as PAIN, type SystemKey } from '@/data/mepf';
 import { SYSTEM_STYLES } from './scene/systems';
-
-/**
- * What is actually in each frame.
- *
- * The strong line names the object you are looking at; `SYSTEMS[key].legend`
- * beside it says what it does for you. That pairing is not new — it is exactly
- * how the old hotspot pills read ("Cable tray" in white, "Power & lighting" in
- * grey beside it). What is new is that it now exists at every width. The pills
- * lived in a `hidden lg:block` layer, so on a phone the section's entire
- * explanation was simply absent.
- *
- * Each label names the thing in *its own* photograph, not the discipline in
- * general. `electrical` says "Distribution board" and not "Cable tray", because
- * a board is what mepf-13 shows — and the trays that would have justified the
- * old wording are visible in the *fire* frame instead. A caption that names
- * something the reader cannot see in the picture is worse than no caption.
- */
-const CAPTION: Record<SystemKey, string> = {
-  hvac: 'Ductwork',
-  plumbing: 'Water manifold',
-  electrical: 'Distribution board',
-  fire: 'Sprinkler main',
-};
 
 /**
  * Where the subject sits in each frame.
@@ -42,29 +19,6 @@ const CAPTION: Record<SystemKey, string> = {
  */
 const FOCUS: Partial<Record<SystemKey, string>> = {
   hvac: 'object-[50%_30%]',
-};
-
-/**
- * One consequence each, in under ten words.
- *
- * `SYSTEMS[key].without` is the source, but it runs to two sentences and the
- * second is the twist — damp above the ceiling, a held-up certificate. That
- * twist earns its space on the service page, where the reader has already
- * decided to care; on a home-page card it is the line that pushes the card past
- * its height. These are the first clause of each, trimmed to what one line can
- * carry.
- *
- * Same two rules as data/mepf.ts, which is where the originals were written and
- * argued over: say the thing a person actually feels, with a number where there
- * is one, and use no word anybody has to look up. And never as a threat — a
- * firm that frightens people into hiring it has already lost the argument it is
- * making, which is why these describe a Tuesday and not a disaster.
- */
-const PAIN: Record<SystemKey, string> = {
-  hvac: 'Rooms still sit at 34°C on a June afternoon.',
-  plumbing: 'Upstairs taps only trickle, and drains gurgle.',
-  electrical: 'A thin wire overheats inside a wall nobody can open.',
-  fire: 'No alarm above the false ceiling, where fires start.',
 };
 
 /**

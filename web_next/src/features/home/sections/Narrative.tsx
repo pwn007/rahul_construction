@@ -13,7 +13,9 @@ export function TrustBar() {
   const clientLogos = useClientLogos();
   return (
     // border-b only: the hero already closes with a rule, so a border-t here would double it.
-    <section className="border-b bg-[rgb(var(--c-surface-2))] py-8">
+    // `data-section`: a stop for the section engine (lib/section-nav); too short
+    // to be one alone, it travels with the band below it.
+    <section data-section="trust" className="border-b bg-[rgb(var(--c-surface-2))] py-8">
       <div className="container">
         <p className="mb-6 text-center text-caption uppercase tracking-[0.18em] text-subtle">
           We build with materials you already trust
@@ -62,7 +64,7 @@ export function OneSystem() {
       client's request (Sep 2026); the paragraph above now names the four, so the
       claim still lands without the cards.
     */
-    <section id="intro" className="section on-dark grain relative overflow-hidden bg-navy-800 text-white">
+    <section id="intro" data-section="" className="section on-dark grain relative overflow-hidden bg-navy-800 text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
       <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-cyan-500/20 blur-[120px]" aria-hidden />
       <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-cyan-500/10 blur-[120px]" aria-hidden />

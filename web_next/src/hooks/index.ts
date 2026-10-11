@@ -59,6 +59,9 @@ export function useHasFinePointer(): boolean {
  * rather than `useScrollInfo`: this re-renders when the answer flips, not on
  * every scroll frame. The server snapshot is `true`, which is correct for the
  * only first paint that exists — the top of the page.
+ *
+ * Currently unused: the home page dropped the contact bar altogether in the
+ * design migration (decision 5). Kept for the day it comes back.
  */
 export function useWithinFirstScreen(): boolean {
   const subscribe = useCallback((onChange: () => void) => {

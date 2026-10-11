@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "build:districts": "node scripts/build-districts.mjs",
     "optimize:images": "node scripts/optimize-images.mjs",
+    "images:variants": "node scripts/build-image-variants.mjs",
     "check:estimator": "tsx scripts/check-estimator.ts",
     "export:seed": "tsx scripts/export-seed.mts",
     "check:contract": "tsx scripts/contract-diff.mts && tsx scripts/contract-queries.mts",

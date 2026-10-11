@@ -3,8 +3,6 @@
 import { usePathname } from 'next/navigation';
 import { MessageCircle, Phone } from 'lucide-react';
 import { SITE } from '@/constants/site';
-import { useWithinFirstScreen } from '@/hooks';
-import { cn } from '@/lib/cn';
 import { track } from '@/lib/analytics';
 
 /**
@@ -22,10 +20,6 @@ import { track } from '@/lib/analytics';
  */
 export function StickyContactBar() {
   const pathname = usePathname();
-  /* The homepage hero ends in its own Call and WhatsApp buttons; the bar would
-     sit directly on top of them. It slides in once that screen scrolls away. */
-  const withinFirstScreen = useWithinFirstScreen();
-  const standDown = pathname === '/' && withinFirstScreen;
 
   /* The estimator owns its own bottom slot: a live-total bar that updates as
      the visitor plays with brands (see QuoteResult). Two stacked fixed bars is
@@ -33,12 +27,22 @@ export function StickyContactBar() {
      already offers WhatsApp inline next to the PDF button. */
   if (pathname.startsWith('/estimator')) return null;
 
+  /* Not on the home page (design migration, decision 5). The home page is
+     becoming a run of full-screen chapters whose copy rests at the bottom of
+     the screen — exactly where this bar sits — so it covered the last line of
+     every chapter on a phone. On a phone, Call is in the menu and the footer
+     (the hero's own Call and WhatsApp pills were removed at the client's
+     request, 11 Oct 2026). It used to stand down only
+     while the hero was on screen and slide in after; one line brings that
+     back if the client wants it (`useWithinFirstScreen`, see git history). */
+  if (pathname === '/') return null;
+
   /*
    * A page-aware opener beats a generic one: the message arrives already
    * carrying what they were looking at, so the first reply can be about the
    * project rather than about establishing what the project is.
    */
-  const context = pathname === '/' ? '' : ` I was looking at ${SITE.url}${pathname}.`;
+  const context = ` I was looking at ${SITE.url}${pathname}.`;
   const whatsappHref = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
     `Hi, I'd like to discuss a construction project.${context}`,
   )}`;
@@ -56,11 +60,7 @@ export function StickyContactBar() {
 
       <nav
         aria-label="Contact us"
-        className={cn(
-          'fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-[rgb(var(--c-border))] bg-[rgb(var(--c-surface))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md transition-transform duration-500 ease-out-expo md:hidden',
-          standDown && 'translate-y-full',
-        )}
-        inert={standDown}
+        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-[rgb(var(--c-border))] bg-[rgb(var(--c-surface))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
       >
         <a
           href={`tel:${SITE.phoneRaw}`}

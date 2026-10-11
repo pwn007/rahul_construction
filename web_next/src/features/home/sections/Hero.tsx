@@ -1,325 +1,470 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Phone } from 'lucide-react';
-import { Counter } from '@/components/motion';
+import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useScroll,
+  useTransform,
+  type MotionValue,
+  type Variants,
+} from 'framer-motion';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ChapterEyebrow, ChapterFigures } from '@/components/chapter';
+import { usePreloaderDone } from '@/components/common/Chrome';
 import { SITE, ACHIEVEMENTS } from '@/constants/site';
-import { usePrefersReducedMotion } from '@/hooks';
+import { useMediaQuery, usePrefersReducedMotion } from '@/hooks';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { useHeroBanner } from '@/hooks/useHeroBanner';
-import { track } from '@/lib/analytics';
 import { cn } from '@/lib/cn';
-import { HERO_SLIDES } from './heroSlides';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { ResponsiveImage, hasImageVariants } from '@/components/common/ResponsiveImage';
+import { HERO_SLIDES, type HeroSlide } from './heroSlides';
 
 /**
- * Where the portrait crop takes over. It has to agree with the `max-lg:portrait:`
- * classes on the <img> below — the <source> picks the file, those classes place it.
+ * The homepage hero — the finalized design (Loam-style prototype, version 5),
+ * replacing Design B at the client's request (Phase 1, decision 6).
+ *
+ * One screen of photograph that settles in over nine seconds. The headline sits
+ * high — two lines in Outfit, the second in brand cyan — with the
+ * Hindi line under it; the lede and the four figures run along the bottom
+ * edge. Styles: `.hero-v2*` in globals.css.
+ *
+ * No Call / WhatsApp pills: the design had them under the lede, and the client
+ * asked for them to go (11 Oct 2026). Calls and WhatsApp stay one tap away
+ * elsewhere: the floating contact button from tablet width up, the Call button
+ * in the phone menu, and the footer.
+ *
+ * ── Entrance ────────────────────────────────────────────────────────────────
+ * Plays when the preloader starts to lift (`usePreloaderDone`), not on mount —
+ * on a first visit the loader covers the page for two seconds and the entrance
+ * would finish unseen. The headline's lines slide in from opposite sides out of
+ * a blur; the eyebrow, Hindi line, lede and figures rise a beat later, and
+ * the figures count up as they land. The prototype's timeline, at its 1.5×.
+ *
+ * ── Exit ────────────────────────────────────────────────────────────────────
+ * Tied to the scroll over the first 40% of the hero's height: the lines part
+ * sideways, the eyebrow drops, the rest lifts away. The blur on the way out is
+ * phones only; at desktop sizes a scroll-linked blur of 190px type costs frames.
+ *
+ * Reduced motion: everything is simply there — no slide, blur, count or exit.
+ *
+ * Kept from Design B: the admin banner's title and subtitle override the baked
+ * copy, `HERO_SLIDES` can hold several photographs (arrows appear at two), the
+ * portrait crop is used on portrait screens below `lg`, and the header is told
+ * this is a cinematic hero.
  */
+
+/** How long each photograph stays before the hero moves to the next. */
+const AUTOPLAY_MS = 5000;
+
+/** Where the portrait crop takes over: portrait screens below `lg`. */
 const PORTRAIT_CROP = '(max-width: 1023.98px) and (orientation: portrait)';
 
-const WHATSAPP_HREF = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-  'Hi, I would like to discuss a construction project.',
-)}`;
+const EXPO = [0.16, 1, 0.3, 1] as const;
+const OUT3 = [0.215, 0.61, 0.355, 1] as const;
+/* The prototype's timeline played at 1.5×: seconds below are already divided. */
+const RISE_AT = 1.07;
+const RISE_STEP = 0.1;
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const seg = (v: number, from: number, length: number) => clamp01((v - from) / length);
+const out2 = (t: number) => 1 - (1 - t) * (1 - t);
+const in2 = (t: number) => t * t;
+/* Alternate lines enter and leave from opposite sides. */
+const side = (i: number) => (i % 2 ? 1 : -1);
+
+/* The reduced variants still name x / y / filter: the first paint is rendered
+   before the reduced-motion query is known, so it carries the full variant's
+   offsets, and framer never clears a property a later variant stops mentioning
+   (the trap recorded on `Reveal` in components/motion). */
+function lineVariants(i: number, reduced: boolean): Variants {
+  if (reduced)
+    return {
+      hidden: { opacity: 0, x: '0vw', filter: 'blur(0px)' },
+      shown: { opacity: 1, x: '0vw', filter: 'blur(0px)', transition: { duration: 0.4 } },
+    };
+  return {
+    hidden: { opacity: 0, x: `${side(i) * 28}vw`, filter: 'blur(16px)' },
+    shown: { opacity: 1, x: '0vw', filter: 'blur(0px)', transition: { duration: 1.73, delay: 0.03, ease: EXPO } },
+  };
+}
+
+function riseVariants(delay: number, reduced: boolean): Variants {
+  if (reduced)
+    return {
+      hidden: { opacity: 0, y: 0, filter: 'blur(0px)' },
+      shown: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.4 } },
+    };
+  return {
+    hidden: { opacity: 0, y: 46, filter: 'blur(9px)' },
+    shown: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.21, delay, ease: OUT3 } },
+  };
+}
+
+/* ── Scroll-linked exit wrappers ──────────────────────────────────────────
+   Separate elements from the entrance ones inside them, so the two never write
+   the same `transform`. `q` runs 0 → 1 over the first 40% of the hero. */
+
+function ExitLine({ q, index, soft, active, children }: ExitProps & { index: number }) {
+  const x = useTransform(q, (v) => `${side(index) * 28 * out2(v)}vw`);
+  const opacity = useTransform(q, (v) => 1 - out2(v));
+  const filter = useTransform(q, (v) => (soft ? `blur(${(14 * out2(seg(v, 0, 0.5))).toFixed(1)}px)` : 'none'));
+  return (
+    <motion.span className="ln" style={active ? { x, opacity, filter } : undefined}>
+      {children}
+    </motion.span>
+  );
+}
+
+function ExitDrop({ q, soft, active, children }: ExitProps) {
+  const y = useTransform(q, (v) => 46 * out2(seg(v, 0, 0.4)));
+  const opacity = useTransform(q, (v) => 1 - seg(v, 0, 0.95));
+  const filter = useTransform(q, (v) => (soft ? `blur(${(9 * out2(seg(v, 0, 0.4))).toFixed(1)}px)` : 'none'));
+  return <motion.div style={active ? { y, opacity, filter } : undefined}>{children}</motion.div>;
+}
+
+function ExitLift({ q, order, soft, active, className, children }: ExitProps & { order: number; className?: string }) {
+  const m = (v: number) => in2(seg(v, 0.1 + order * 0.08, 0.5));
+  const y = useTransform(q, (v) => -26 * m(v));
+  const opacity = useTransform(q, (v) => 1 - m(v));
+  const filter = useTransform(q, (v) => (soft ? `blur(${(7 * m(v)).toFixed(1)}px)` : 'none'));
+  return (
+    <motion.div className={className} style={active ? { y, opacity, filter } : undefined}>
+      {children}
+    </motion.div>
+  );
+}
+
+interface ExitProps {
+  q: MotionValue<number>;
+  soft: boolean;
+  active: boolean;
+  children: ReactNode;
+}
 
 /**
- * The homepage hero — Design B, "Cinematic Full-Screen", as signed off by the
- * client (Neetu-Archstone-Hero-Designs-v2.pdf, p.3).
- *
- * Every size, gap and tint here was measured off that render (1440×900 and
- * 390×844, both at 2×) rather than estimated: type by fitting Montserrat's
- * glyph widths and ink weight, positions from ink bounds, the scrim by fitting
- * the render against the raw photograph. Fractional pixel values are those
- * measurements, not typos.
- *
- * Desktop centres the copy over the photo, above a frosted-glass stats bar;
- * call and WhatsApp stay with the site-wide floating button in the bottom-right
- * corner. Below `lg` the copy drops to the bottom of the frame and ends in Call /
- * WhatsApp buttons, with the stats bar beneath.
- *
- * Dropped from the render at the client's request: the left contact rail, the
- * Get Free Estimate / View Projects buttons and the featured-project caption
- * (estimates are one tap away in the header on every page).
+ * A figure that counts up as it lands. Big numbers start from nearby rather
+ * than zero (80 from 44), small ones from zero — the prototype's rule. The
+ * server and the first client render show the final value, so crawlers and
+ * reduced-motion visitors read "80+", never "0+".
  */
+function HeroCount({ value, play, reduced }: { value: number; play: boolean; reduced: boolean }) {
+  const [shown, setShown] = useState(value);
+  useEffect(() => {
+    if (!play || reduced) {
+      setShown(value);
+      return;
+    }
+    const from =
+      value > 20 ? Math.min(value - 1, Math.max(Math.ceil(value * 0.55), 10 ** (String(Math.round(value)).length - 1))) : 0;
+    setShown(from);
+    const delay = (RISE_AT + 2 * RISE_STEP) * 1000;
+    const duration = 1470;
+    let frame = 0;
+    const start = performance.now() + delay;
+    const tick = (now: number) => {
+      const t = clamp01((now - start) / duration);
+      setShown(Math.round(from + (value - from) * out2(t)));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [play, reduced, value]);
+  return <span className="num">{shown}</span>;
+}
+
 export function Hero() {
   const reduced = usePrefersReducedMotion();
+  const soft = useMediaQuery('(max-width: 767.98px)');
+  const play = usePreloaderDone();
 
   useRegisterHeroTone('cinematic');
 
-  /* From the admin's Hero & banners row when it differs, else the baked copy. */
+  /* From the admin's Hero & banners row when it differs, else the baked copy.
+     The last word becomes the italic cyan line ("Building / Dreams"). */
   const banner = useHeroBanner();
-  const words = (banner?.title ?? SITE.headline).split(' ');
+  const words = (banner?.title ?? SITE.headline).trim().split(/\s+/);
+  const lines = words.length > 1 ? [words.slice(0, -1).join(' '), words[words.length - 1]] : words;
   const subtitle = banner?.subtitle ?? SITE.promise;
-  const hindi = SITE.taglineHi.split(' ');
 
   /* ── Slides ────────────────────────────────────────────────────
      The arrows, counter and dashes exist only once there is something to step
-     to; with one photo the hero is simply that photo. */
+     to; with one photo the hero is simply that photo.
+
+     Advances on its own every five seconds (client, 11 Oct 2026), and can be
+     stepped by hand at any time: the arrows on desktop, a sideways swipe or
+     the dashes on phones. A manual step restarts the five seconds, so the
+     photo someone just chose stays up for a full turn. See the autoplay
+     effect below for when it holds still. */
   const slides = HERO_SLIDES;
   const multi = slides.length > 1;
   const [index, setIndex] = useState(0);
   const slide = slides[index];
   const step = useCallback((by: number) => setIndex((i) => (i + by + slides.length) % slides.length), [slides.length]);
 
-  /* Advances on its own, restarting the clock after every manual step. */
-  useEffect(() => {
-    if (!multi || reduced) return;
-    const t = window.setTimeout(() => step(1), 7000);
-    return () => window.clearTimeout(t);
-  }, [index, multi, reduced, step]);
+  /* A sideways swipe anywhere on the hero. Only a clearly horizontal stroke
+     counts, so scrolling the page past the hero never changes the photo; the
+     listener is passive and never blocks the scroll. A stroke that moved the
+     page is a scroll whatever its angle: on phones the section engine
+     (lib/section-nav) carries the page with a vertical drag and decides the
+     axis in the first few pixels, so a drag that set off downwards and then
+     swung sideways must not change the photo as well. */
+  const touch = useRef<{ x: number; y: number; sy: number } | null>(null);
+  const onTouchStart = (e: TouchEvent) => {
+    if (!multi || e.touches.length !== 1) return;
+    touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, sy: window.scrollY };
+  };
+  const onTouchEnd = (e: TouchEvent) => {
+    const from = touch.current;
+    touch.current = null;
+    if (!from || Math.abs(window.scrollY - from.sy) > 4) return;
+    const dx = e.changedTouches[0].clientX - from.x;
+    const dy = e.changedTouches[0].clientY - from.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > 1.5 * Math.abs(dy)) step(dx < 0 ? 1 : -1);
+  };
 
-  const enter = (delay: number) =>
-    reduced
-      ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.4 } }
-      : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, delay, ease: EASE } };
+  /* ── Scroll-linked exit ────────────────────────────────────── */
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const q = useTransform(scrollYProgress, [0, 0.4], [0, 1], { clamp: true });
+  const exit = { q, soft, active: !reduced };
+
+  /* ── Autoplay ─────────────────────────────────────────────────
+     Every AUTOPLAY_MS, starting once the preloader has lifted (so the first
+     photo gets its full turn on screen). It holds still:
+     - while the hero is mostly scrolled away — nothing to watch, and no reason
+       to cross-fade a photo nobody sees;
+     - while the tab is in the background;
+     - while keyboard focus is on the arrows or dashes, so a keyboard user is
+       never stepped past the photo they are choosing;
+     - for visitors who ask their device for reduced motion (WCAG 2.2.2) —
+       for them the photos change only by hand. */
+  const inView = useInView(ref, { amount: 0.35 });
+  const [tabVisible, setTabVisible] = useState(true);
+  useEffect(() => {
+    const sync = () => setTabVisible(document.visibilityState !== 'hidden');
+    sync();
+    document.addEventListener('visibilitychange', sync);
+    return () => document.removeEventListener('visibilitychange', sync);
+  }, []);
+  const [focusHold, setFocusHold] = useState(false);
+  const autoplaying = multi && !reduced && play && inView && tabVisible && !focusHold;
+  useEffect(() => {
+    if (!autoplaying) return;
+    const t = window.setTimeout(() => step(1), AUTOPLAY_MS);
+    return () => window.clearTimeout(t);
+  }, [index, autoplaying, step]);
+  /* Keyboard focus on a slide control holds the timer. Only keyboard focus
+     (`:focus-visible`): a mouse click also leaves the arrow focused, and that
+     must not stop the carousel for good. */
+  const onFocusCapture = (e: { target: EventTarget }) =>
+    setFocusHold(
+      e.target instanceof HTMLElement &&
+        e.target.closest('[data-slide-control]') !== null &&
+        e.target.matches(':focus-visible'),
+    );
+  const onBlurCapture = () => setFocusHold(false);
 
   return (
-    <section className="on-dark relative isolate flex h-[100svh] min-h-[560px] flex-col overflow-hidden bg-navy-800 text-white lg:min-h-[640px]">
+    <section
+      ref={ref}
+      id="top"
+      aria-label="Introduction"
+      data-section=""
+      aria-roledescription={multi ? 'carousel' : undefined}
+      onFocusCapture={multi ? onFocusCapture : undefined}
+      onBlurCapture={multi ? onBlurCapture : undefined}
+      onTouchStart={multi ? onTouchStart : undefined}
+      onTouchEnd={multi ? onTouchEnd : undefined}
+      className="hero-v2 on-dark relative isolate flex flex-col overflow-hidden bg-navy-800 text-white"
+    >
       {/* ── Photograph ─────────────────────────────────────────── */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-20 overflow-hidden">
         <AnimatePresence initial={false}>
+          {/* Each slide carries its own grade and scrim, so a bright photo and
+              a dark one cross-fade with the treatment each needs. */}
           <motion.div
             key={slide.desktop}
-            className="absolute inset-0"
+            className="hero-v2__slide absolute inset-0"
+            data-tone={slide.tone}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2, ease: 'easeInOut' }}
           >
-            {/* The settle-in lives on this wrapper, not the <img>: framer writes
-                an inline `transform`, which would wipe out the translate that
-                positions the portrait crop. */}
-            <motion.div
-              className="absolute inset-0"
-              initial={reduced ? false : { scale: 1.06 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 2.4, ease: EASE }}
-            >
-              <picture>
-                <source media={PORTRAIT_CROP} srcSet={slide.mobile} />
-                {/*
-                  Landscape: plain cover, sat 40% down the frame.
-
-                  Portrait: deliberately tighter than cover. The render frames
-                  the lit glazing and the roof slab, not the whole house — the
-                  photo is 136.5% of the frame's height, bottom-aligned, with
-                  58.65% of its width on the centre line.
-                */}
-                <img
-                  src={slide.desktop}
-                  alt={slide.alt}
-                  fetchPriority={index === 0 ? 'high' : undefined}
-                  decoding="async"
-                  className="absolute inset-0 h-full w-full object-cover object-[50%_40%] max-lg:portrait:inset-auto max-lg:portrait:bottom-0 max-lg:portrait:left-1/2 max-lg:portrait:h-[136.5%] max-lg:portrait:w-auto max-lg:portrait:max-w-none max-lg:portrait:-translate-x-[58.65%]"
-                />
-              </picture>
-            </motion.div>
+            <div className="hero-v2__push absolute inset-0">
+              <HeroPhoto slide={slide} priority={index === 0} />
+            </div>
+            <div className="hero-v2__scrim pointer-events-none absolute inset-0" aria-hidden />
           </motion.div>
         </AnimatePresence>
       </div>
-      <div className="hero-scrim pointer-events-none absolute inset-0 -z-10" aria-hidden />
+      {/* The other photographs, fetched once the page has settled, so a step to
+          them shows at once instead of waiting on the download. */}
+      {multi && play && (
+        <div hidden aria-hidden>
+          {slides.slice(1).map((s) => (
+            <HeroPhoto key={s.desktop} slide={s} warm />
+          ))}
+        </div>
+      )}
+      {multi && (
+        /* Silent while the photos turn on their own — a screen reader would
+           otherwise be interrupted every five seconds — and polite once the
+           visitor is stepping with the controls (keyboard focus holds autoplay). */
+        <p className="sr-only" aria-live={autoplaying ? 'off' : 'polite'}>
+          Photograph {index + 1} of {slides.length}
+        </p>
+      )}
 
       {/* ── Copy ───────────────────────────────────────────────── */}
-      {/*
-        Phones: stacked from the bottom up, above the stats bar. Desktop:
-        centred in what the header (`pt-[101px]`) and the stats bar leave —
-        at 1440×900 that lands the eyebrow within a few px of the render.
-      */}
-      <div className="relative flex flex-1 flex-col items-center justify-end px-5 pb-5 text-center lg:justify-center lg:px-10 lg:pb-0 lg:pt-[101px]">
-        {multi && (
-          <div className="mb-[17.75px] flex items-center gap-2 lg:hidden" aria-hidden>
-            {slides.map((s, i) => (
-              <span
-                key={s.desktop}
-                className={cn('h-[3px] transition-all duration-500', i === index ? 'w-[22px] bg-cyan-500' : 'w-2.5 bg-white/60')}
-              />
-            ))}
-          </div>
-        )}
-
-        <motion.p
-          {...enter(0.1)}
-          className="flex items-center justify-center font-montserrat text-[11.5px] font-medium uppercase leading-[14px] tracking-[0.27em] text-white/95 lg:gap-[17px] lg:text-[12.75px] lg:leading-4 lg:tracking-[0.37em]"
-        >
-          <span className="relative -top-[1.5px] hidden h-px w-11 bg-cyan-500 lg:block" aria-hidden />
-          <span>{SITE.tagline}</span>
-          <span className="relative -top-[1.5px] hidden h-px w-11 bg-cyan-500 lg:block" aria-hidden />
-        </motion.p>
-
-        {/*
-          Real words, uppercased by CSS, so a screen reader says "Building
-          Dreams" rather than spelling it. Each word is its own masked line for
-          the reveal; `pl-[<tracking>]` cancels the letter-spacing trailing the
-          last letter, which would otherwise pull each word off centre.
-        */}
-        <h1 className="mt-[13.25px] font-montserrat text-[40px] font-semibold uppercase leading-[45px] tracking-[0.12em] lg:mt-[24.5px] lg:text-[88.25px] lg:leading-[94.5px] lg:tracking-[0.115em]">
-          {words.map((word, i) => (
-            <span key={`${word}-${i}`} className="kinetic-line pl-[0.12em] lg:pl-[0.115em]">
-              <motion.span
-                className={i === 1 ? 'inline-block text-cyan-500' : 'inline-block'}
-                initial={reduced ? { opacity: 0 } : { y: '108%' }}
-                animate={reduced ? { opacity: 1 } : { y: '0%' }}
-                transition={{ duration: 1.05, delay: 0.18 + i * 0.1, ease: EASE }}
-              >
-                {word}
-              </motion.span>
-            </span>
-          ))}
-        </h1>
-
-        {/* नक़्शे से निर्माण तक — alternate words in cyan, as the brochure sets it. */}
-        <motion.p
-          {...enter(0.45)}
-          lang="hi"
-          className="mt-[17.75px] font-deva text-[20px] font-normal leading-[26px] lg:mt-[29px] lg:text-[25.5px] lg:leading-8"
-        >
-          {hindi.map((word, i) => (
-            <Fragment key={`${word}-${i}`}>
-              {i > 0 && ' '}
-              <span className={i % 2 === 1 ? 'text-cyan-500' : 'text-white'}>{word}</span>
-            </Fragment>
-          ))}
-        </motion.p>
-
-        <motion.p
-          {...enter(0.55)}
-          className="mt-1.5 font-montserrat text-[14.25px] font-normal leading-5 tracking-[0.015em] text-white/85 lg:mt-[8.5px] lg:text-[17.25px] lg:leading-6 lg:tracking-[0.03em]"
-        >
-          {subtitle}
-        </motion.p>
-
-        {/* Phones get the two actions they came for as full-size targets —
-            as wide as the stats bar beneath, so the two share their edges. */}
-        <motion.div {...enter(0.7)} className="mt-[21.25px] w-full md:w-[min(1100px,calc(100vw-200px))] lg:hidden">
-          <div className="grid grid-cols-2 gap-2.5">
-            <a
-              href={`tel:${SITE.phoneRaw}`}
-              onClick={() => track('call_click', { placement: 'hero' })}
-              className="flex h-12 items-center justify-center gap-[9px] border border-white/55 font-montserrat text-[12.5px] font-bold uppercase tracking-[0.1em] text-white transition-colors active:bg-white/10"
-            >
-              <Phone className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
-              Call
-            </a>
-            <a
-              href={WHATSAPP_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => track('whatsapp_click', { placement: 'hero' })}
-              className="flex h-12 items-center justify-center gap-[9px] border border-white/55 font-montserrat text-[12.5px] font-bold uppercase tracking-[0.1em] text-white transition-colors active:bg-white/10"
-            >
-              <WhatsAppGlyph className="h-4 w-4" />
-              WhatsApp
-            </a>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* ── Stats ──────────────────────────────────────────────────
-          Design A's glass stats bar, moved into this hero at the client's
-          request once its buttons and caption had gone — it fills the lower
-          frame with the firm's proof rather than leaving it empty.
-
-          Phones: the width of the Call / WhatsApp row. From `md`: a centred
-          card with 100px clear each side, so the site-wide floating contact
-          button (fixed, bottom-right) never lands on its corner. `threshold`
-          is 0 because the bar is on screen at first paint; the default would
-          leave it reading 0+ until the visitor scrolled. */}
       <motion.div
-        {...enter(0.85)}
-        className="relative mx-5 mb-5 border border-white/15 bg-white/[0.07] backdrop-blur-md md:mx-auto md:mb-10 md:w-[min(1100px,calc(100%-200px))]"
+        className="hero-v2__copy chapter-gutters relative flex w-full flex-1 flex-col justify-between"
+        initial="hidden"
+        animate={play ? 'shown' : 'hidden'}
       >
-        <dl className="grid grid-cols-2 sm:grid-cols-4">
-          {ACHIEVEMENTS.map((stat, i) => (
-            <div
-              key={stat.label}
-              className={cn(
-                /* Reversed so the number shows above its label while the markup keeps
-                   dt before dd; `justify-end` then packs from the top, so the four
-                   numbers share a line even when a label wraps. */
-                'flex flex-col-reverse justify-end border-white/15 px-4 py-3.5 text-left sm:px-6 lg:px-8 lg:py-6',
-                i % 2 === 1 && 'border-l',
-                i >= 2 && 'border-t sm:border-t-0',
-                i === 2 && 'sm:border-l',
-              )}
-            >
-              <dt className="mt-1.5 font-montserrat text-[10px] uppercase leading-snug tracking-[0.12em] text-white/60 lg:mt-2 lg:text-[11px] lg:tracking-[0.2em]">
-                {stat.label}
-              </dt>
-              <dd className="font-montserrat text-[24px] font-semibold leading-none text-white lg:text-[40px]">
-                <Counter value={stat.value} threshold={0} className="font-montserrat" />
-                <span className="text-cyan-500">{stat.suffix}</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <div>
+          <div className="relative">
+            {multi && (
+              /* Phones and tablets: the dashes share the eyebrow's line, at its
+                 right end, so a second photograph moves none of the copy (a row
+                 of its own pushed the eyebrow down into the bright facade).
+                 Each dash is a button with a 44px-tall target. */
+              <div className="hero-v2__dots absolute -right-2 -top-[13px] z-10 flex items-center lg:hidden">
+                {slides.map((s, i) => (
+                  <button
+                    key={s.desktop}
+                    type="button"
+                    data-slide-control
+                    onClick={() => setIndex(i)}
+                    aria-label={`Show photograph ${i + 1} of ${slides.length}`}
+                    aria-current={i === index ? 'true' : undefined}
+                    className="grid h-11 place-items-center px-2"
+                  >
+                    <span
+                      className={cn('block h-[3px] transition-all duration-500', i === index ? 'w-[22px] bg-cyan-500' : 'w-2.5 bg-white/75')}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+            <ExitDrop {...exit}>
+              <motion.div variants={riseVariants(RISE_AT, reduced)}>
+                <ChapterEyebrow plain>{SITE.tagline}</ChapterEyebrow>
+              </motion.div>
+            </ExitDrop>
+          </div>
+
+          <h1 className="chapter-title mb-0" data-size="hero">
+            {lines.map((line, i) => (
+              <Fragment key={`${line}-${i}`}>
+                <ExitLine {...exit} index={i}>
+                  <motion.span className="inline-block" variants={lineVariants(i, reduced)}>
+                    {i === lines.length - 1 && lines.length > 1 ? <em>{line}</em> : line}
+                  </motion.span>
+                </ExitLine>
+                {i < lines.length - 1 ? ' ' : null}
+              </Fragment>
+            ))}
+          </h1>
+
+          <ExitLift {...exit} order={0}>
+            <motion.p lang="hi" className="hero-v2__hi" variants={riseVariants(RISE_AT, reduced)}>
+              {SITE.taglineHi}
+            </motion.p>
+          </ExitLift>
+        </div>
+
+        <div className="hero-v2__bottom">
+          <ExitLift {...exit} order={1}>
+            <motion.div variants={riseVariants(RISE_AT + RISE_STEP, reduced)}>
+              <p className="hero-v2__lede">{subtitle}</p>
+            </motion.div>
+          </ExitLift>
+
+          <ExitLift {...exit} order={2} className="hero-v2__figures">
+            <motion.div variants={riseVariants(RISE_AT + 2 * RISE_STEP, reduced)}>
+              <ChapterFigures
+                className="mt-0 pt-[1.125rem]"
+                items={ACHIEVEMENTS.map((stat) => ({
+                  label: stat.label,
+                  value: (
+                    <>
+                      <HeroCount value={stat.value} play={play} reduced={reduced} />
+                      {stat.suffix}
+                    </>
+                  ),
+                }))}
+              />
+            </motion.div>
+          </ExitLift>
+        </div>
       </motion.div>
 
-      {/* ── Slide controls (desktop, 2+ slides) ────────────────── */}
+      {/* ── Slide controls (desktop, 2+ slides) ──────────────────
+          Arrows only: the 01 / 02 numbering that sat above them was removed at
+          the client's request (11 Oct 2026). Screen readers still hear
+          "Photograph n of N" from the live region. */}
       {multi && (
-        <>
-          <div className="absolute right-[52px] top-1/2 hidden -translate-y-1/2 flex-col items-center gap-4 lg:flex" aria-hidden>
-            <span className="h-[70px] w-px bg-white/25" />
-            {slides.map((s, i) => (
-              <span
-                key={s.desktop}
-                className={cn(
-                  'font-montserrat text-[12px] font-semibold tracking-[0.05em] transition-colors duration-500',
-                  i === index ? 'text-cyan-500' : 'text-white/55',
-                )}
-              >
-                {String(i + 1).padStart(2, '0')}
-              </span>
-            ))}
-            <span className="h-[70px] w-px bg-white/25" />
-          </div>
-
-          {/* Set in from the render's `right-[72px]` so the pair clears the
-              site's floating contact button in the bottom-right corner. */}
-          <div className="absolute bottom-[43px] right-[108px] hidden gap-3.5 lg:flex">
-            <button
-              type="button"
-              onClick={() => step(-1)}
-              aria-label="Previous project"
-              className="flex h-[50px] w-[50px] items-center justify-center rounded-full border border-white/45 text-white transition-colors duration-300 hover:border-cyan-400 hover:text-cyan-300"
-            >
-              <ArrowLeft className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={() => step(1)}
-              aria-label="Next project"
-              className="flex h-[50px] w-[50px] items-center justify-center rounded-full border border-white/45 text-white transition-colors duration-300 hover:border-cyan-400 hover:text-cyan-300"
-            >
-              <ArrowRight className="h-[18px] w-[18px]" strokeWidth={1.5} aria-hidden />
-            </button>
-          </div>
-        </>
+        <div className="absolute right-10 top-1/2 hidden -translate-y-1/2 flex-col items-center gap-4 lg:flex xl:right-[72px]">
+          <span className="h-14 w-px bg-white/25" aria-hidden />
+          <button
+            type="button"
+            data-slide-control
+            onClick={() => step(-1)}
+            aria-label="Previous photograph"
+            className="grid h-11 w-11 place-items-center rounded-full border border-white/60 transition-colors duration-300 hover:bg-white hover:text-navy-800"
+          >
+            <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden />
+          </button>
+          <button
+            type="button"
+            data-slide-control
+            onClick={() => step(1)}
+            aria-label="Next photograph"
+            className="grid h-11 w-11 place-items-center rounded-full border border-white/60 transition-colors duration-300 hover:bg-white hover:text-navy-800"
+          >
+            <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden />
+          </button>
+        </div>
       )}
     </section>
   );
 }
 
 /**
- * WhatsApp's mark as an outline glyph, to sit beside lucide's Phone at the same
- * stroke weight — lucide ships no brand icons. Paths from Tabler Icons
- * (`brand-whatsapp`, MIT).
+ * One slide's photograph: every width in AVIF and WebP plus the configured
+ * portrait crop when `npm run images:variants` has made them for it, else the
+ * slide's own two files (landscape, and the portrait crop below `lg`).
+ * `warm` loads it out of sight, at normal priority, for the next step.
  */
-function WhatsAppGlyph({ className, strokeWidth = 1.75 }: { className?: string; strokeWidth?: number }) {
+function HeroPhoto({ slide, priority = false, warm = false }: { slide: HeroSlide; priority?: boolean; warm?: boolean }) {
+  const alt = warm ? '' : slide.alt;
+  if (hasImageVariants(slide.desktop)) {
+    return (
+      <ResponsiveImage
+        src={slide.desktop}
+        alt={alt}
+        priority={priority}
+        eager={warm}
+        position={slide.position ?? '50% 40%'}
+        positionPortrait="50% 50%"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+    );
+  }
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
-      <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
-    </svg>
+    <picture>
+      <source media={PORTRAIT_CROP} srcSet={slide.mobile} />
+      <img
+        src={slide.desktop}
+        alt={alt}
+        fetchPriority={priority ? 'high' : undefined}
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: slide.position ?? '50% 40%' }}
+      />
+    </picture>
   );
 }

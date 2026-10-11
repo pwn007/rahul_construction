@@ -2,15 +2,21 @@
 
 import { Hero } from './sections/Hero';
 import { TrustBar, OneSystem } from './sections/Narrative';
-import { ServicesIndex } from './sections/ServicesIndex';
-import { MepfTeaser } from '@/features/mepf/MepfTeaser';
+import { ServicesChapters } from './sections/ServicesChapters';
+import { MepfChapters } from '@/features/mepf/MepfChapters';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
 import { FeaturedProjects, Testimonials } from './sections/Showcase';
 import { ClientVideos } from './sections/ClientVideos';
 import { useHomeSections } from '@/hooks/useHomeSections';
+import { useSectionNav } from '@/hooks/useSectionNav';
 
 export function HomeView() {
+  /* Phones and tablets move through this page one section per swipe; desktop
+     and reduced motion scroll natively. Every band below is a stop
+     (`data-section` on its root) and so is the footer. See lib/section-nav. */
+  useSectionNav();
+
   /* Admin's "Home page sections" rows gate each band below. `!== false` is
      fail-open: a missing row shows the band — hiding is an explicit act, and
      an API hiccup must not blank the home page. */
@@ -71,14 +77,18 @@ export function HomeView() {
           client's request (Sep 2026); it used to close the page's argument after
           the projects. Still the page's only dark band. */}
       {on('one-system') && <OneSystem />}
-      {/* The offer. Three rows, not four — MEPF is the section immediately below,
-          and listing it here as well would put it on this page three times. */}
-      {on('services-index') && <ServicesIndex />}
+      {/* The offer. Three services, not four — MEPF is the section immediately
+          below, and listing it here as well would put it on this page three
+          times. Four chapters since the design migration (the offer, then one
+          per service); `ServicesIndex` (the photo rows) is no longer rendered. */}
+      {on('services-index') && <ServicesChapters />}
       {/* MEPF expands the one service the index deliberately leaves out: it is
           the firm's core discipline and the thing a visitor is least able to
           picture, so it gets a band rather than a line. `OneSystem` above names the
-          four disciplines it belongs to. */}
-      {on('mepf') && <MepfTeaser />}
+          four disciplines it belongs to. Five chapters since the design
+          migration — the promise, then one per system; `MepfTeaser` (the
+          stacked cards) is no longer rendered here. */}
+      {on('mepf') && <MepfChapters />}
       {on('projects') && <FeaturedProjects />}
       {/* The claims, then the people backing them. This band is `--c-surface-2`,
           sitting between the projects rail and the client videos, both on page

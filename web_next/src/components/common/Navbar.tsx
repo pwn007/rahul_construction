@@ -88,6 +88,9 @@ export function Navbar() {
   return (
     <>
       <motion.header
+        /* How the section engine (lib/section-nav) finds the header, to keep a
+           link's target clear of it. */
+        data-site-header=""
         initial={false}
         animate={{ y: hidden ? '-100%' : '0%' }}
         transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
@@ -192,16 +195,16 @@ export function Navbar() {
 
             {/* Actions */}
             <div className="flex items-center justify-self-end">
-              {/* Desktop: a hairline outline, not the cyan fill — the homepage
-                  hero's own "Get Free Estimate" is the filled button there, and
-                  two cyan blocks in one viewport compete. */}
+              {/* Desktop: the label alone, no fill and — at the client's request
+                  (11 Oct 2026) — no outline either; it reads as the last item of
+                  the navigation and turns cyan on hover. */}
               <Link
                 href={cta?.href ?? ROUTES.estimator}
                 className={cn(
-                  'hidden h-[41px] items-center border px-[21.5px] font-montserrat text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 lg:inline-flex',
+                  'hidden h-[41px] items-center px-[21.5px] font-montserrat text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 lg:inline-flex',
                   overDark
-                    ? 'border-white/55 text-white hover:border-cyan-400 hover:text-cyan-300'
-                    : 'border-[rgb(var(--c-text))]/30 text-[rgb(var(--c-text))] hover:border-cyan-500 hover:text-cyan-700 dark:hover:text-cyan-400',
+                    ? 'text-white hover:text-cyan-300'
+                    : 'text-[rgb(var(--c-text))] hover:text-cyan-700 dark:hover:text-cyan-400',
                 )}
               >
                 {cta?.label ?? 'Get Estimate'}

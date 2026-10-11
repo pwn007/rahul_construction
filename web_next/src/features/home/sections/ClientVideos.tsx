@@ -108,6 +108,7 @@ export function ClientVideos() {
 
   return (
     <section
+      data-section="client-videos"
       className={cn(
         'client-videos section-sm',
         /* The same gutter WorkRail measures against — see the long note on its
@@ -128,6 +129,7 @@ export function ClientVideos() {
         ref={paneRef}
         role="region"
         aria-label="Client videos"
+        data-hscroll=""
         tabIndex={0}
         onScroll={onScroll}
         className={cn(

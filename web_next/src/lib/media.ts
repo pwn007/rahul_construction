@@ -83,6 +83,11 @@ const PINNED: Record<string, string> = {
   'home-mepf-plumbing': 'mepf-12.webp',
   'home-mepf-electrical': 'mepf-13.webp',
   'home-mepf-fire': 'mepf-14.webp',
+  /* The chapter that introduces the four (design migration): the landscape shot
+     of a worker on a lift running services into an open ceiling. It is a bright
+     grey frame, so MepfChapters grades it down into the navy (`tone="deep"`)
+     rather than relying on the scrim alone. */
+  'home-mepf-intro': 'mepf-09.webp',
   /* The service page carries the same four systems beside the interactive twin,
      so it pins the same four photographs — three of them byte-identical to the
      home page's, which are already in the visitor's cache by the time they get
@@ -129,9 +134,18 @@ const PINNED: Record<string, string> = {
    * living room — the best answer in the library to "Interior Design &
    * Execution" — so it goes back to work rather than being downloaded twice.
    */
-  'home-service-architectural-design': 'service-arch-01.webp',
-  'home-service-interior-design': 'interior-08.webp',
+  /* Architectural and Interior became the client's own design renders on
+     10 Oct 2026 (a timber-framed villa elevation and a living room), served
+     with responsive sizes from /images/v — see scripts/image-variants.config.mjs.
+     service-arch-01 and interior-08 are still in /images, unused here. */
+  'home-service-architectural-design': 'v/elevation-villa-timber-1536.webp',
+  'home-service-interior-design': 'v/interior-living-lounge-1280.webp',
   'home-service-project-management': 'service-pm-01.webp',
+  /* The chapter that introduces those three (design migration): two engineers
+     reading a drawing on site. Already in the mepf pool and shipping, reached
+     by no seed until now; pinning it shifts no other seed, because `PINNED` is
+     read before `poolFor`. */
+  'home-services-intro': 'mepf-10.webp',
 };
 
 /** Explicit routes win. Ordered: first matching pattern decides. */

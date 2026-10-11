@@ -59,7 +59,8 @@ export function TestimonialBand({
   );
 
   return (
-    <section className={cn('section-sm bg-[rgb(var(--c-surface-2))]', className)}>
+    // `data-section`: a stop for the home page's section engine (lib/section-nav); inert elsewhere.
+    <section data-section="testimonials" className={cn('section-sm bg-[rgb(var(--c-surface-2))]', className)}>
       <div className="container">
         {heading}
 

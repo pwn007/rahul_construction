@@ -39,7 +39,8 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="on-dark grain relative overflow-hidden bg-ink-950 text-white">
+    // `data-section`: the last stop on the home page (lib/section-nav); inert elsewhere.
+    <footer data-section="footer" className="on-dark grain relative overflow-hidden bg-ink-950 text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-[0.35]" aria-hidden />
       <div
         className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-cyan-500/10 blur-[120px]"
