@@ -419,12 +419,19 @@ export function Magnetic({
  *
  * Everything stays inside the bar's existing 2px, so nothing is clipped at the
  * top of the viewport and the chrome is no taller than before.
+ *
+ * The vial rides the bar's leading edge on a transform, not on `left`. It used
+ * to be `left: N%`, written on every frame of every scroll — and `left` is
+ * layout, so the page was laid out again sixty times a second for as long as
+ * it moved (measured on the home page: one layout a frame for a whole glide,
+ * two in all once this was gone). A carrier as wide as the screen slides by
+ * the same fraction of its own width, and the vial hangs off its left edge.
  */
 export function ScrollProgress({ className }: { className?: string }) {
   const reduced = usePrefersReducedMotion();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 220, damping: 40, restDelta: 0.001 });
-  const left = useTransform(scaleX, (v) => `${v * 100}%`);
+  const edge = useTransform(scaleX, (v) => `${v * 100}%`);
 
   const velocity = useVelocity(scrollYProgress);
   // Under-damped on purpose: damping this low is what produces the overshoot.
@@ -442,13 +449,13 @@ export function ScrollProgress({ className }: { className?: string }) {
         aria-hidden
       />
       {!reduced && (
-        <motion.div
-          style={{ left }}
-          className="pointer-events-none fixed top-0 z-[61] h-[2px] w-11 -translate-x-full overflow-hidden rounded-full bg-navy-900/30"
-          aria-hidden
-        >
-          <motion.span style={{ x: drift }} className="absolute left-4 top-0 h-[2px] w-3 rounded-full bg-white/80" />
-        </motion.div>
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-[61] h-[2px]" aria-hidden>
+          <motion.div style={{ x: edge }} className="absolute inset-0">
+            <div className="absolute right-full top-0 h-[2px] w-11 overflow-hidden rounded-full bg-navy-900/30">
+              <motion.span style={{ x: drift }} className="absolute left-4 top-0 h-[2px] w-3 rounded-full bg-white/80" />
+            </div>
+          </motion.div>
+        </div>
       )}
     </>
   );

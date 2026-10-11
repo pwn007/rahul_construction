@@ -57,9 +57,20 @@ export function SiteChrome({ children }: { children: ReactNode }) {
       <Navbar />
       <CommandPalette open={open} onClose={() => setOpen(false)} />
 
-      <main id="main">{children}</main>
+      {/* The section engine's stage (lib/section-nav, "The stage"). On a touch
+          device, on the home page, with the stage switched on, the outer box is
+          fixed over the screen and the inner one is what the engine moves.
+          Everywhere else they are two plain boxes. Nothing `position: fixed`
+          may go inside: a moved box becomes what fixed is measured from —
+          which is why the header, the rail and the contact bar stay out here
+          (overlays are portalled to the body). */}
+      <div data-nav-stage="">
+        <div data-nav-surface="">
+          <main id="main">{children}</main>
 
-      <Footer />
+          <Footer />
+        </div>
+      </div>
       <FloatingRail />
       <StickyContactBar />
       {/* Rate-card popup disabled — it kept reopening on idle.

@@ -13,11 +13,18 @@ import { createSectionNav } from '@/lib/section-nav';
  * lib/section-nav/engine.ts for the behaviour and what marks a stop.
  *
  * `?navdebug` in the URL exposes the engine's state as `window.__nav` for the
- * touch tests.
+ * touch tests, and puts its meter in the corner of the screen: what the last
+ * few drags and glides cost on the device in hand.
+ *
+ * `?navstage=1` moves the page with a transform instead of the scroll position
+ * (engine.ts, "The stage") — off unless asked for, until it has been compared
+ * with the present way on an iPhone. The two go together:
+ * `/?navdebug&navstage=1` against `/?navdebug`.
  */
 export function useSectionNav() {
   useEffect(() => {
-    const nav = createSectionNav({ debug: /[?&]navdebug\b/.test(window.location.search) });
+    const q = window.location.search;
+    const nav = createSectionNav({ debug: /[?&]navdebug\b/.test(q), stage: /[?&]navstage=1\b/.test(q) });
     return () => nav.destroy();
   }, []);
 }

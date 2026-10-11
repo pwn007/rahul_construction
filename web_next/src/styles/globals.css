@@ -1431,6 +1431,21 @@ html.snapnav-measure .note-pile > *,
 html.snapnav-measure .note-band__head {
   top: auto;
 }
+/* The stage (engine.ts, "The stage"; the two boxes are in app/SiteChrome.tsx). With it up the page is
+   not scrolled into place but moved there: the outer box is fixed over the screen and the engine sets a
+   transform on the inner one. `hidden`, not `clip`: as a scroll container that never scrolls, the box
+   is also what the sticky boxes inside would stick to — so they stay exactly where the flow puts them,
+   whatever the real scroll position is doing, and the engine alone decides where they are drawn (it
+   reads their insets and holds them itself). The body takes the surface's height from the engine. */
+html.snapnav-stage [data-nav-stage] {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+html.snapnav-stage [data-nav-surface] {
+  position: relative;
+  will-change: transform;
+}
 
 /* ============================================================
    REDUCED MOTION — single global gate

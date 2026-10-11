@@ -96,6 +96,38 @@
  *   late; if the page is still not where the engine left it once that window
  *   has passed, it is treated as someone else's scroll and tidied.
  * The tests reproduce the iPhone by delaying `scrollTo` by two frames.
+ *
+ * ── The stage ────────────────────────────────────────────────────────────────
+ * `stage: true` (the page's `?navstage=1` until it has been compared on an
+ * iPhone) changes one thing: what moves the page. Not the scroll position —
+ * a transform, as on Loam, whose content sits in a fixed wrapper that
+ * ScrollSmoother slides while its real scroll moves nothing on screen.
+ *
+ * Why: measured against Loam on 11 Oct 2026, this page is the lighter of the
+ * two (under 4 ms of main thread a frame at six times slower CPU, no dropped
+ * frames) and still the less smooth on an iPhone, in the drag, the glide and
+ * the stop. The whole difference is this last step. A scroll position is a
+ * whole number of CSS pixels — three device pixels on an iPhone — so the slow
+ * tail of the glide ticks 1, 1, 0, 1 where a transform draws 0.9, 0.4, 0.1;
+ * and a scroll position written from script reaches an iPhone's screen by way
+ * of its UI process, a frame or two late and unevenly (see above), worst while
+ * a finger is down. A transform takes neither road.
+ *
+ * With the stage up (`html.snapnav-stage`, globals.css):
+ * - `[data-nav-stage]` is fixed over the screen and `[data-nav-surface]`, the
+ *   page's content inside it, is what `setY` moves — to the exact position,
+ *   fractions and all;
+ * - the body is given the surface's height and the real scroll position
+ *   follows every move, rounded, moving nothing: the header's hide-on-scroll,
+ *   the progress bar and the hero's scroll-linked exit all still read it;
+ * - a scroll from outside (find-in-page, the status-bar tap, assistive tech)
+ *   is copied onto the stage as it happens, then tidied as before;
+ * - `position: sticky` has nothing to stick to inside a fixed box, so the
+ *   engine holds those boxes itself (`pins`): each is shifted by exactly what
+ *   sticky would have shifted it, from the same inset and the same bounds.
+ * Zones, gestures and timing are the same code either way. With the engine off
+ * (a mouse, reduced motion) the wrappers are plain boxes and the page is as
+ * it always was.
  */
 
 type Zone = { a: number; b: number; els: HTMLElement[] };
@@ -156,8 +188,15 @@ export interface SectionNavOptions {
   stops?: string;
   /** The fixed site header, for the offset when a link targets something inside a section. */
   header?: string;
-  /** Exposes `window.__nav` for the tests (the page's `?navdebug`). */
+  /** Exposes `window.__nav` for the tests, and puts the meter on screen (the page's `?navdebug`). */
   debug?: boolean;
+  /**
+   * Move the page with a transform instead of the scroll position — see "The stage". Needs the content
+   * inside `[data-nav-stage] > [data-nav-surface]`; without them it is ignored.
+   */
+  stage?: boolean;
+  /** The `position: sticky` boxes inside the surface, which the stage has to hold itself. */
+  sticky?: string;
 }
 
 export interface SectionNav {
@@ -203,11 +242,22 @@ const SLOPE: Record<Ease, (s: number) => number> = {
   sine: (s) => (Math.PI / 2) * Math.cos((s * Math.PI) / 2),
 };
 
-/** Distance from the top of the document, ignoring transforms. */
-function pageTop(el: HTMLElement): number {
+/** Distance from the top of the document — or of `root`, an offset parent of `el` — ignoring transforms. */
+function pageTop(el: HTMLElement, root: HTMLElement | null = null): number {
   let y = 0;
-  for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+  for (let n: HTMLElement | null = el; n && n !== root; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
   return y;
+}
+
+/** A sticky box the stage holds: where it sits in the flow, its inset, and how far its container lets it go. */
+type Pin = { el: HTMLElement; at: number; top: number; max: number; v: number };
+
+/** How far down a box's own transforms draw it: its `transform` (framer's reveals) and its `translate` (the stage's hold). */
+function ownShift(el: HTMLElement): number {
+  const cs = getComputedStyle(el);
+  const byTransform = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform).m42 : 0;
+  const byTranslate = cs.translate && cs.translate !== 'none' ? parseFloat(cs.translate.split(' ')[1] ?? '0') || 0 : 0;
+  return byTransform + byTranslate;
 }
 
 /** The element under the finger, or an ancestor, scrolls sideways. */
@@ -226,6 +276,8 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   const SEL = opts.stops ?? '[data-section]';
   const HDR = opts.header ?? '[data-site-header]';
   const DEBUG = !!opts.debug;
+  const STAGE = !!opts.stage;
+  const STICKY = opts.sticky ?? '.chapter-stack > .chapter, .note-pile > *, .note-band__head';
 
   const html = document.documentElement;
   const touchMq = window.matchMedia('(hover: none) and (pointer: coarse)');
@@ -265,6 +317,12 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   let running = false;
   let destroyed = false;
   const dbg: { frames: [number, number, string][]; release: unknown; glide: unknown } = { frames: [], release: null, glide: null };
+  let stage: { box: HTMLElement; surface: HTMLElement } | null = null; // while the stage is up
+  let pins: Pin[] = [];
+  let ghost = NaN; // the scroll position last written to follow the stage
+  let stageRO: ResizeObserver | null = null;
+  /** Where an element sits: in the document, or on the surface while that is what moves. */
+  const topOf = (el: HTMLElement) => pageTop(el, stage?.surface ?? null);
 
   const stopsNow = () =>
     Array.from(document.querySelectorAll<HTMLElement>(SEL)).filter(
@@ -289,10 +347,28 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   // `behavior: 'instant'` beats the root's `scroll-smooth` even without the html.snapnav rule; a browser
   // that does not know the value throws, and then the plain form is used (snapnav's CSS keeps it instant).
   let instantOK = true;
+  /* The stage: put the surface at exactly y, and each sticky box where sticky would have had it. */
+  function render(y: number) {
+    if (!stage) return;
+    stage.surface.style.transform = `translate3d(0,${(-y).toFixed(3)}px,0)`;
+    for (const p of pins) {
+      const v = clamp(y + p.top - p.at, 0, p.max);
+      if (v === p.v) continue;
+      p.v = v;
+      p.el.style.translate = v ? `0 ${v.toFixed(3)}px` : '';
+    }
+  }
   function setY(y: number) {
     wrote = y;
     wroteT = performance.now();
     ext = false;
+    if (stage) {
+      render(y);
+      // the real scroll position follows in whole pixels, and only when that changes
+      y = Math.round(y);
+      if (y === ghost) return;
+      ghost = y;
+    }
     if (instantOK) {
       try {
         window.scrollTo({ top: y, left: 0, behavior: 'instant' as ScrollBehavior });
@@ -307,12 +383,14 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   /* ── Zones ─────────────────────────────────────────────────── */
   function measure() {
     const vh = VH();
+    // the stage is out of the flow: the page is as long as the surface says
+    if (stage) document.body.style.height = `${stage.surface.offsetHeight}px`;
     const maxY = Math.max(0, scroller().scrollHeight - vh);
     // a few px of bottom padding past the screen is not "tall"
     const tol = Math.min(40, vh * 0.06);
     const secs = inFlow(() =>
       stopsNow().map((el) => {
-        const top = pageTop(el);
+        const top = topOf(el);
         // drawn as one screen (a chapter, the hero): never folded into another stop
         const screen = parseFloat(getComputedStyle(el).minHeight) >= vh - 1;
         return { el, top, bot: top + el.offsetHeight, screen };
@@ -349,6 +427,42 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     cur = clamp(cur, 0, Math.max(0, iv.length - 1));
     dirty = false;
     observe(secs.map((s) => s.el));
+    if (stage) {
+      pins = pinsNow();
+      render(here());
+    }
+  }
+  /* The boxes the stage has to hold. Their insets are read as they stand, sticky; their places with the
+     insets gone (inFlow), like the stops'. A box may travel until its foot meets the foot of its
+     container's content — sticky's own bound. One that is not sticky just now (a width where it is not,
+     a height that has not arrived) is let go.
+
+     Places to the fraction of a pixel, not offsetTop's whole ones: a note in a pile sits at a fraction,
+     and a pile held a pixel out of true shows a seam between two notes. So the container is placed by
+     layout (which no transform can move), and the box within it by what is drawn — less what the box's
+     own transforms add, the one thing it does not share with its container. */
+  function pinsNow(): Pin[] {
+    const surface = stage!.surface;
+    const els = Array.from(surface.querySelectorAll<HTMLElement>(STICKY));
+    const tops = els.map((el) => {
+      const cs = getComputedStyle(el);
+      return cs.position === 'sticky' ? parseFloat(cs.top) : NaN;
+    });
+    return inFlow(() =>
+      els.flatMap((el, i): Pin[] => {
+        const box = el.parentElement;
+        if (!Number.isFinite(tops[i]) || !box || !el.offsetHeight) {
+          if (el.style.translate) el.style.translate = '';
+          return [];
+        }
+        const r = el.getBoundingClientRect();
+        const b = box.getBoundingClientRect();
+        const cs = getComputedStyle(box);
+        const rel = r.top - ownShift(el) - b.top; // from the container's top edge
+        const foot = b.height - parseFloat(cs.borderBottomWidth) - parseFloat(cs.paddingBottom);
+        return [{ el, at: pageTop(box, surface) + rel, top: tops[i], max: Math.max(0, foot - rel - r.height), v: NaN }];
+      }),
+    );
   }
   function zoneOf(el: Element | null): number {
     const s = el?.closest(SEL) ?? null;
@@ -390,6 +504,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       return;
     }
     anim = { kind: o.kind, y0, y1, t0: performance.now(), dur: o.dur, ease: o.ease, from: o.from, to: o.to };
+    if (DEBUG) meter.glide = []; // a glide cut short by the next one is not part of it
     if (DEBUG) dbg.glide = { kind: o.kind, ease: o.ease, dur: Math.round(o.dur), from: Math.round(y0), to: Math.round(y1) };
     kick();
   }
@@ -412,10 +527,14 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const s = clamp(t / A.dur);
     return ((A.y1 - A.y0) * SLOPE[A.ease](s)) / A.dur;
   }
-  function navStep(): boolean {
+  /* `now` is the frame's own time, not the moment this callback got its turn: other callbacks run first
+     and take what they take, and a curve read at the later moment is read at an uneven one — an uneven
+     step on screen, biggest where the page is fastest. (A glide begins on the clock of the event that
+     started it, which can be a hair after the frame's: the clamps below read that as "not started".) */
+  function navStep(now: number): boolean {
     const A = anim;
     if (!A) return false;
-    const now = performance.now();
+    const seen = DEBUG ? sy() : 0;
     let y: number;
     let done: boolean;
     if (A.kind === 'free') {
@@ -438,12 +557,71 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     if (DEBUG) {
       dbg.frames.push([Math.round(now), +y.toFixed(2), A.kind]);
       if (dbg.frames.length > 2000) dbg.frames.splice(0, 1000);
+      meter.glide.push([now, y, performance.now() - now, seen]);
     }
     if (done) {
       anim = null;
+      if (DEBUG) meterGlide();
       rested();
     }
     return !done;
+  }
+
+  /* ── The meter (debug only): what this phone did, read off this phone ──────
+     `?navdebug` writes the last few gestures in the corner of the screen. The numbers are the ones that
+     cannot be had from a desk: how long the phone made a finger wait, how many frames of a glide came
+     late, and how far behind the browser's own scroll position was running — the last is what the stage
+     exists to take off the screen. Reading `scrollY` every frame costs a little, so it is debug's alone. */
+  const meter = { drag: [] as number[][], glide: [] as number[][], lines: [] as string[], box: null as HTMLElement | null };
+  function meterLine(text: string) {
+    meter.lines = [...meter.lines.slice(-3), text];
+    if (!meter.box) {
+      const box = (meter.box = document.createElement('pre'));
+      box.setAttribute('data-nav-meter', '');
+      box.style.cssText =
+        'position:fixed;left:6px;bottom:6px;z-index:400;margin:0;padding:6px 8px;max-width:calc(100vw - 12px);white-space:pre-wrap;' +
+        'font:10px/1.35 ui-monospace,Menlo,monospace;color:#fff;background:rgba(0,0,0,.74);border-radius:6px;pointer-events:none';
+      document.body.append(box);
+    }
+    meter.box.textContent = meter.lines.join('\n');
+  }
+  /* A drag: [when the finger moved, when the page heard of it]. */
+  function meterDrag() {
+    const d = meter.drag;
+    meter.drag = [];
+    if (d.length < 3) return;
+    let gap = 0;
+    let late = 0;
+    d.forEach((m, i) => {
+      if (i) gap = Math.max(gap, m[0] - d[i - 1][0]);
+      late = Math.max(late, m[1] - m[0]);
+    });
+    meterLine(`drag  ${d.length} moves, longest wait ${gap.toFixed(0)} ms, heard up to ${late.toFixed(0)} ms late`);
+  }
+  /* A glide: [frame time, position, how late the callback ran, scrollY as the browser had it before this frame's write]. */
+  function meterGlide() {
+    const f = meter.glide;
+    meter.glide = [];
+    if (f.length < 8) return;
+    let slow = 0;
+    let gap = 0;
+    let behind = 0;
+    let lag = 0;
+    let late = 0;
+    for (let i = 1; i < f.length; i++) {
+      const dt = f[i][0] - f[i - 1][0];
+      if (dt > 20) slow++;
+      gap = Math.max(gap, dt);
+      const off = Math.abs(f[i][3] - Math.round(f[i - 1][1])); // what it showed against what it had been given
+      if (off > 1) behind++;
+      lag = Math.max(lag, off);
+      late += f[i][2];
+    }
+    const n = f.length - 1;
+    meterLine(
+      `glide ${f.length} frames in ${Math.round(f[n][0] - f[0][0])} ms, ${slow} slow (longest ${gap.toFixed(0)} ms), callback ${(late / n).toFixed(1)} ms late\n` +
+        `      scrollY behind on ${Math.round((100 * behind) / n)}% (up to ${lag.toFixed(0)} px) · ${stage ? 'stage: drawn to the sub-pixel' : 'scroll: drawn in whole px'}`,
+    );
   }
   function rested() {
     if (dirty && !g) relayout();
@@ -657,6 +835,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     g.p = p;
     g.S.push({ t: evTime(e), p });
     if (g.S.length > 32) g.S.shift();
+    if (DEBUG) meter.drag.push([evTime(e), performance.now()]);
     setY(clamp(p, g.lo, g.hi));
   }
   function tEnd(e: TouchEvent) {
@@ -664,6 +843,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     if (!g || (e.touches && e.touches.length)) return; // wait for the last finger
     const G = g;
     g = null;
+    if (DEBUG) meterDrag();
     if (G.native) {
       ext = true;
       nativeSwipe = { k: G.k, y0: G.sy0 };
@@ -844,7 +1024,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const k = zoneOf(el);
     const { a, b, els } = iv[k];
     const sec = els.find((s) => s.contains(el));
-    const top = inFlow(() => pageTop(el));
+    const top = inFlow(() => topOf(el));
     // a stop rests at its own top (the header floats over the photograph); anything inside one clears the header
     const y1 = clamp(Math.round(sec === el ? top : top - hdrH() - 24), a, b);
     const from = anim && anim.to != null ? anim.to : nearest(here());
@@ -902,6 +1082,8 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   function external() {
     ext = true;
     anim = null;
+    ghost = NaN;
+    render(sy()); // the stage goes where the page was taken
     extPending = true;
     clearTimeout(extT);
     extT = setTimeout(tidy, 160);
@@ -984,8 +1166,8 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   }
 
   /* ── The frame loop: runs only while something moves ─────── */
-  function frame() {
-    if (navStep()) raf = requestAnimationFrame(frame);
+  function frame(now: number) {
+    if (navStep(now)) raf = requestAnimationFrame(frame);
     else running = false;
   }
   function kick() {
@@ -998,7 +1180,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   let roFirst = true;
   function observe(els: HTMLElement[]) {
     if (!ro) return;
-    const next = new Set<Element>([document.body, ...els]);
+    const next = new Set<Element>([document.body, ...(stage ? [stage.surface] : []), ...els]);
     observed.forEach((el) => {
       if (!next.has(el)) ro?.unobserve(el);
     });
@@ -1026,7 +1208,55 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   };
   const onFocusIn = () => {
     focusT = performance.now();
+    /* On the stage the browser cannot bring a focused link into view — scrolling the page moves nothing —
+       so the engine does it, by the road an outside scroll takes (tidy keeps what has focus in view).
+       Only for focus that came from the keyboard and landed off the screen: a tap focuses what is under
+       the finger, and the page must not move for that. */
+    const ae = document.activeElement;
+    if (!stage || g || anim || !(ae instanceof HTMLElement) || !ae.matches(':focus-visible')) return;
+    const r = ae.getBoundingClientRect();
+    if (r.bottom > 0 && r.top < VH()) return;
+    clearTimeout(extT);
+    extT = setTimeout(tidy, 80);
   };
+  /* The stage's box can still be scrolled from script — a browser bringing a field into view does it —
+     and anything but 0 slides the whole page off its place. It stays at 0. */
+  const pinBox = () => {
+    if (stage && (stage.box.scrollTop || stage.box.scrollLeft)) stage.box.scrollTo(0, 0);
+  };
+  function stageUp() {
+    if (!STAGE || stage) return;
+    const box = document.querySelector<HTMLElement>('[data-nav-stage]');
+    const surface = box?.querySelector<HTMLElement>('[data-nav-surface]');
+    if (!box || !surface) return;
+    // the page's length first, then the surface out of the flow: the scroll position never has to move
+    document.body.style.height = `${surface.offsetHeight}px`;
+    stage = { box, surface };
+    ghost = NaN;
+    html.classList.add('snapnav-stage');
+    box.addEventListener('scroll', pinBox, passive);
+    /* The page's length follows the surface's at once, on its own: zones can wait for the page to be at
+       rest (relayout), but a body shorter than its content would stop the scroll position short of where
+       the stage has gone. */
+    if ('ResizeObserver' in window) {
+      stageRO = new ResizeObserver(() => {
+        if (stage) document.body.style.height = `${stage.surface.offsetHeight}px`;
+      });
+      stageRO.observe(surface);
+    }
+  }
+  function stageDown() {
+    if (!stage) return;
+    stage.box.removeEventListener('scroll', pinBox, passive);
+    stageRO?.disconnect();
+    stageRO = null;
+    stage.surface.style.transform = '';
+    pins.forEach((p) => (p.el.style.translate = ''));
+    pins = [];
+    html.classList.remove('snapnav-stage');
+    document.body.style.height = '';
+    stage = null;
+  }
 
   const nonPassive: AddEventListenerOptions = { passive: false };
   const passive: AddEventListenerOptions = { passive: true };
@@ -1064,7 +1294,10 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     onZoom();
     document.fonts?.ready.then(() => relayout());
 
+    const y0 = sy(); // where the page is, read before the stage takes it out of the flow
+    stageUp();
     measure();
+    render(y0);
     if (!iv.length) return;
     const h0 =
       first && location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
@@ -1072,10 +1305,10 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       cur = zoneOf(h0);
       setY(iv[cur].a);
     } else if (first) {
-      cur = nearest(sy());
-      setY(clamp(sy(), iv[cur].a, iv[cur].b));
+      cur = nearest(y0);
+      setY(clamp(y0, iv[cur].a, iv[cur].b));
     } else {
-      cur = nearest(sy());
+      cur = nearest(y0);
       settle(cur, 0);
     }
     warm(cur);
@@ -1093,6 +1326,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     cancelAnimationFrame(raf);
     running = false;
     html.classList.remove('snapnav', 'snapnav-zoom');
+    stageDown(); // the scroll position has followed the stage all along: the page is where it was
     window.visualViewport?.removeEventListener('resize', onZoom);
     nativeSwipe = null;
     html.style.removeProperty('--vh');
@@ -1135,6 +1369,10 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     busy: () => boolean;
     kind: () => string | null;
     on: () => boolean;
+    stage: () => boolean;
+    pos: () => number;
+    put: (y: number) => void;
+    meter: () => string[];
     release: () => unknown;
     glide: () => unknown;
     frames: [number, number, string][];
@@ -1147,6 +1385,10 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       busy: () => !!(anim || g),
       kind: () => (anim ? anim.kind : null),
       on: () => NAV,
+      stage: () => !!stage,
+      pos: () => here(),
+      put: (y: number) => setY(y), // the tests place the page, by whichever road is in use
+      meter: () => meter.lines,
       release: () => dbg.release,
       glide: () => dbg.glide,
       frames: dbg.frames,

@@ -46,7 +46,7 @@ export function Navbar() {
   const navRows = useNavItems();
   const nav = mergeNav(navRows);
   const cta = navRows.find((r) => r.highlight);
-  const { atTop, direction, y } = useScrollInfo();
+  const { atTop, direction, past } = useScrollInfo();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -83,7 +83,7 @@ export function Navbar() {
     setOpenMenu(null);
   }, [pathname]);
 
-  const hidden = direction === 'down' && y > 400 && !openMenu && !mobileOpen;
+  const hidden = direction === 'down' && past && !openMenu && !mobileOpen;
 
   return (
     <>
