@@ -2,8 +2,13 @@
  * Section navigation: one section per swipe on phones and tablets.
  *
  * Ported from the finalized design's prototype (proto2/app.js, "Section
- * navigation"), where it was tuned and tested; the numbers below are its
- * numbers. What it does:
+ * navigation"), and since 11 Oct 2026 timed against the benchmark the client
+ * named, Loam House's own mobile chapter navigation
+ * (residences.loamhouse.com.au, editorial.js `touchNav`, read 11 Oct 2026:
+ * GSAP Observer, drag 1:1, release → project the flick 0.25 s ahead → nearest
+ * chapter, any flick over 250 px/s advances one; glide power3.out matched to
+ * the release speed, at least 0.7 s, or sine.out 1.3 s per screen when the hand
+ * is too slow to carry the distance). What it does:
  *
  * - On touch-first devices — `(hover: none) and (pointer: coarse)` — with motion
  *   allowed, touch, wheel and keys move the page exactly one section per
@@ -20,10 +25,14 @@
  *
  * - a touch drag follows the finger 1:1 but can never reach past the
  *   neighbouring section;
- * - on release, distance + release speed decide: next, previous or back home —
- *   never anything in between;
- * - every move is a velocity-matched glide (a cubic Hermite: it leaves at the
- *   finger's speed and lands at rest);
+ * - on release, Loam's rule decides: a flick faster than 250 px/s goes on;
+ *   otherwise the page goes to whichever rest point the release would coast
+ *   nearer to (half way, after a 0.25 s throw) — next, previous or back home,
+ *   never anything in between, and never more than one section;
+ * - every move is Loam's glide: a quartic ease-out ("power3.out") that leaves
+ *   at the finger's speed and lands at rest over 0.7–1.6 s, or, when the hand
+ *   was too slow to carry the distance, Loam's soft step (sine ease-out, 1.3 s
+ *   per screen);
  * - a new gesture during a glide can reverse it or carry on one more section;
  *   a tap lets it finish — and, as with a native fling, is not a click: the
  *   link that happened to be passing under the finger does not open;
@@ -31,6 +40,14 @@
  *   inertia, and hand over only from their edge;
  * - wheel: one section per wheel gesture, a trackpad's inertia tail absorbed;
  *   keys likewise.
+ *
+ * Where it parts from Loam, on purpose: a swipe never travels more than one
+ * section (Loam's projection can skip one on a hard flick; the client asked for
+ * one section per swipe); a section taller than the screen scrolls inside
+ * (Loam has none on phones); a flick back after dragging forward comes home
+ * rather than going to the previous section; pinch-zoom stays (Loam's
+ * `touch-action: none` blocks it); and the page itself scrolls — Loam also
+ * runs ScrollSmoother, which moves its content with a transform.
  *
  * The scroll position stays the browser's own (`window.scrollTo`); only the
  * input is taken over. Sideways swipes are left alone, so horizontal rails
@@ -55,17 +72,36 @@
  * Positions are layout positions (`offsetTop`), not `getBoundingClientRect`, so
  * the page-enter transition's transform (app/(public)/template.tsx) never
  * shifts a stop.
+ *
+ * ── Where the page is ────────────────────────────────────────────────────────
+ * While the engine moves the page it trusts the position it last wrote, not
+ * `window.scrollY`. On iPhones (WKWebView — Safari and Chrome alike) a
+ * programmatic scroll reaches `scrollY` a frame or two late. The first port
+ * compared the two to tell its own scrolls from anyone else's; on an iPhone
+ * every glide looked like someone else's scroll once it moved more than 2px a
+ * frame, so it stopped itself, restarted 160 ms later from rest, stopped again —
+ * the page crept a few pixels every quarter second for seconds instead of
+ * gliding, and a swipe that should have gone on fell back (client's screen
+ * recording, 11 Oct 2026). Now:
+ * - `here()` is the engine's own last write while it is in charge, and the
+ *   browser's position only after someone else has moved the page;
+ * - scroll events during a glide or a drag are never "someone else";
+ * - a scroll event shortly after the engine's last write is that write arriving
+ *   late; if the page is still not where the engine left it once that window
+ *   has passed, it is treated as someone else's scroll and tidied.
+ * The tests reproduce the iPhone by delaying `scrollTo` by two frames.
  */
 
 type Zone = { a: number; b: number; els: HTMLElement[] };
 
+type Ease = 'quart' | 'sine';
 type Glide = {
   kind: 'nav' | 'settle';
   y0: number;
   y1: number;
   t0: number;
   dur: number;
-  m: number;
+  ease: Ease;
   from?: number;
   to?: number;
 };
@@ -130,12 +166,36 @@ const COAST_T = 360; // ms, inertia time constant inside tall sections (iOS sits
 const SLOP = 6; // px of finger travel before a touch counts as a drag
 const SHORT = 0.5; // a band under half a screen travels with the next one
 
+/* Loam House's mobile numbers (editorial.js: NAV_DUR, NAV_EASE, SETTLE_*, touchCoast, touchThrow). */
+const THROW = 0.25; // px/ms (250 px/s): a release this fast always goes on, in its direction
+const PROJECT = 250; // ms (0.25 s): how far ahead a release is projected to pick the nearer rest point
+const SETTLE_MS = 700; // the softest a velocity-matched glide lands
+const V0 = 4; // initial slope of the quartic ease-out, so the glide leaves at the release speed
+const MAX_MS = 1600; // per screen: past this the hand cannot honestly carry the distance
+const NAV_MS = 1300; // the soft step (sine ease-out), per screen of travel
+const JUMP_MS = 180; // anchor links: per extra section, up to LINK_MAX_MS
+const LINK_MAX_MS = 2200;
+
 const clamp = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
+/** When the finger was actually there: the event's own time stamp (taken when the touch happened, on the
+    performance.now() clock), so a busy main thread that hands over several moves at once — just after
+    load, say — does not read as a finger that stopped before letting go. */
+const evTime = (e: Event) => {
+  const now = performance.now();
+  const t = e.timeStamp;
+  return t > 0 && t <= now + 1 && now - t < 1000 ? t : now;
+};
 const elOf = (t: EventTarget | null): Element | null => (t instanceof Element ? t : null);
 
-/** Cubic Hermite 0→1 leaving with slope m (1 = the move's average speed) and arriving at rest.
-    m ≤ 3 never overshoots; negative m first carries on the old way a little (momentum), then returns. */
-const herm = (s: number, m: number) => m * (s * s * s - 2 * s * s + s) + 3 * s * s - 2 * s * s * s;
+/** Position 0→1 and its slope, per ease: Loam's power3.out (a quartic) and sine.out. */
+const EASE: Record<Ease, (s: number) => number> = {
+  quart: (s) => 1 - (1 - s) ** 4,
+  sine: (s) => Math.sin((s * Math.PI) / 2),
+};
+const SLOPE: Record<Ease, (s: number) => number> = {
+  quart: (s) => 4 * (1 - s) ** 3,
+  sine: (s) => (Math.PI / 2) * Math.cos((s * Math.PI) / 2),
+};
 
 /** Distance from the top of the document, ignoring transforms. */
 function pageTop(el: HTMLElement): number {
@@ -168,13 +228,18 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
 
   const VH = () => window.innerHeight;
   const sy = () => window.scrollY;
+  /** Where the page is: the engine's own last write while it is in charge (see "Where the page is"). */
+  const here = () => (!ext && Number.isFinite(wrote) ? wrote : sy());
+  const ECHO_MS = 220; // a scroll event this soon after the engine's own write is that write arriving late
   const scroller = () => document.scrollingElement || html;
 
   let NAV = false;
   let iv: Zone[] = []; // navigable zones: rest at a arriving from above, at b arriving from below (a < b only when taller than the screen)
   let cur = 0; // the zone at rest, or the one being travelled to
   let anim: Anim | null = null; // the running motion
-  let wrote = NaN; // the last position this engine wrote, to tell its own scrolls from anyone else's
+  let wrote = NaN; // the last position this engine wrote
+  let wroteT = -1e9; // when
+  let ext = true; // someone else moved the page since (or the engine never has): read the browser's position
   let g: Gesture | null = null; // the live touch gesture
   let wg: WheelGesture | null = null; // the live wheel gesture
   let dirty = false; // layout changed mid-motion: re-measure at rest
@@ -182,7 +247,9 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   let mouseDown = false;
   let extT: ReturnType<typeof setTimeout> | undefined;
   let extPending = false;
+  let verT: ReturnType<typeof setTimeout> | undefined;
   let swallowUntil = 0; // a tap that caught a moving page is not a click
+  let nativeSwipe: { k: number; y0: number } | null = null; // a swipe the browser scrolled itself (see tidy)
   let lastW = window.innerWidth;
   let lastH = window.innerHeight;
   let prevRestoration: ScrollRestoration | null = null;
@@ -191,7 +258,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   let raf = 0;
   let running = false;
   let destroyed = false;
-  const dbg: { frames: [number, number, string][]; release: unknown } = { frames: [], release: null };
+  const dbg: { frames: [number, number, string][]; release: unknown; glide: unknown } = { frames: [], release: null, glide: null };
 
   const stopsNow = () =>
     Array.from(document.querySelectorAll<HTMLElement>(SEL)).filter(
@@ -202,9 +269,22 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   function setVh() {
     html.style.setProperty('--vh', `${VH() / 100}px`);
   }
+  // `behavior: 'instant'` beats the root's `scroll-smooth` even without the html.snapnav rule; a browser
+  // that does not know the value throws, and then the plain form is used (snapnav's CSS keeps it instant).
+  let instantOK = true;
   function setY(y: number) {
     wrote = y;
-    window.scrollTo({ top: y, left: 0, behavior: 'instant' as ScrollBehavior });
+    wroteT = performance.now();
+    ext = false;
+    if (instantOK) {
+      try {
+        window.scrollTo({ top: y, left: 0, behavior: 'instant' as ScrollBehavior });
+        return;
+      } catch {
+        instantOK = false;
+      }
+    }
+    window.scrollTo(0, y);
   }
 
   /* ── Zones ─────────────────────────────────────────────────── */
@@ -277,27 +357,32 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     html.style.overflow === 'hidden' ||
     !!document.querySelector('[aria-modal="true"]');
   const zoomed = () => !!window.visualViewport && window.visualViewport.scale > 1.02;
+  /* html.snapnav takes pans away from the browser (globals.css) so a swipe is the engine's from its first
+     pixel; once the visitor has pinched in, panning the zoomed page is theirs again. */
+  const onZoom = () => html.classList.toggle('snapnav-zoom', zoomed());
 
   /* ── Motion ────────────────────────────────────────────────── */
-  function glide(
-    y1: number,
-    o: { kind: 'nav' | 'settle'; v?: number; dur: number; match?: boolean; min?: number; m0?: number; from?: number; to?: number },
-  ) {
-    const y0 = sy();
-    const D = y1 - y0;
-    const AD = Math.abs(D);
+  function glide(y1: number, o: { kind: 'nav' | 'settle'; dur: number; ease: Ease; from?: number; to?: number }) {
+    const y0 = here();
     if (o.to != null) cur = o.to;
-    if (AD < 0.5) {
+    if (Math.abs(y1 - y0) < 0.5) {
       setY(y1);
       anim = null;
       return;
     }
-    const along = (o.v || 0) * Math.sign(D); // current speed along the move, px/ms
-    let dur = o.dur;
-    if (o.match && along > 0) dur = clamp((2.4 * AD) / along, o.min || 360, o.dur); // hard flicks arrive sooner
-    const m = o.m0 != null && !o.v ? o.m0 : clamp((along * dur) / AD, -0.8, 2.6);
-    anim = { kind: o.kind, y0, y1, t0: performance.now(), dur, m, from: o.from, to: o.to };
+    anim = { kind: o.kind, y0, y1, t0: performance.now(), dur: o.dur, ease: o.ease, from: o.from, to: o.to };
+    if (DEBUG) dbg.glide = { kind: o.kind, ease: o.ease, dur: Math.round(o.dur), from: Math.round(y0), to: Math.round(y1) };
     kick();
+  }
+  /* Loam's release glide: leave at the hand's speed (v, px/ms, signed) on a quartic ease-out when that
+     speed can honestly carry the distance, landing no sooner than 0.7 s; otherwise the soft step. */
+  function release(y1: number, v: number, o: { kind: 'nav' | 'settle'; from?: number; to?: number }) {
+    const AD = Math.abs(y1 - here());
+    const screens = Math.max(1, AD / VH());
+    const along = v * Math.sign(y1 - here());
+    const dur = along > 0.06 ? (AD * V0) / along : NAV_MS;
+    if (dur > MAX_MS * screens) glide(y1, { ...o, dur: NAV_MS * screens, ease: 'sine' });
+    else glide(y1, { ...o, dur: Math.max(SETTLE_MS, dur), ease: 'quart' });
   }
   function animSpeed(): number {
     // px/ms, signed
@@ -306,7 +391,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const t = performance.now() - A.t0;
     if (A.kind === 'free') return A.v * Math.exp(-t / COAST_T);
     const s = clamp(t / A.dur);
-    return ((A.y1 - A.y0) * (A.m * (3 * s * s - 4 * s + 1) + 6 * s - 6 * s * s)) / A.dur;
+    return ((A.y1 - A.y0) * SLOPE[A.ease](s)) / A.dur;
   }
   function navStep(): boolean {
     const A = anim;
@@ -328,7 +413,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     } else {
       const s = clamp((now - A.t0) / A.dur);
       done = s >= 1;
-      y = done ? A.y1 : A.y0 + (A.y1 - A.y0) * herm(s, A.m);
+      y = done ? A.y1 : A.y0 + (A.y1 - A.y0) * EASE[A.ease](s);
     }
     setY(y);
     if (DEBUG) {
@@ -360,39 +445,29 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     }
   }
 
-  /* One step between zones. from/to are zone indexes; m0 is the start slope when there is no speed to match. */
-  function travel(to: number, from: number, v: number, m0: number, brisk = false) {
+  /* One step between zones; from/to are zone indexes. A touch release glides Loam's way; a wheel notch or a
+     key (a tablet with a keyboard or trackpad) is briskER than Loam's desktop 1.3 s step, since several
+     notches in a row each count and should not queue up behind a slow glide. */
+  function travel(to: number, from: number, v: number, brisk = false) {
     to = clamp(to, 0, iv.length - 1);
     const y1 = land(to, from);
-    const jumps = Math.abs(to - from);
-    const D = Math.abs(y1 - sy());
-    // touch: 0.54–0.84 s by distance; wheel and keys a touch brisker, since nothing carries the page there
-    const dur =
-      jumps > 1
-        ? Math.min(1600, 860 + 140 * (jumps - 1))
-        : brisk
-          ? 460 + 240 * Math.min(1, D / VH())
-          : 540 + 300 * Math.min(1, D / VH());
-    glide(y1, { kind: 'nav', v, dur, match: true, min: 420, m0, from, to });
+    if (!brisk) return release(y1, v, { kind: 'nav', from, to });
+    const D = Math.abs(y1 - here());
+    glide(y1, { kind: 'nav', dur: 460 + 240 * Math.min(1, D / VH()), ease: 'sine', from, to });
   }
   function settle(k: number, v: number) {
     // back onto the nearest point of zone k
     const { a, b } = iv[k];
-    const y = sy();
-    const y1 = clamp(y, a, b);
-    glide(y1, {
-      kind: 'settle',
-      v,
-      dur: 380 + 280 * Math.min(1, Math.abs(y1 - y) / (0.5 * VH())),
-      match: true,
-      min: 260,
-      m0: 0,
-      to: k,
-    });
+    release(clamp(here(), a, b), v, { kind: 'settle', to: k });
+  }
+  /* Anchor links, Home/End: Loam's link glide — 1.3 s, +0.18 s per extra section, at most 2.2 s. */
+  function linkGlide(y1: number, from: number, to: number) {
+    const jumps = Math.max(1, Math.abs(to - from));
+    glide(y1, { kind: 'nav', dur: Math.min(NAV_MS + JUMP_MS * (jumps - 1), LINK_MAX_MS), ease: 'sine', from, to });
   }
   function coast(k: number, v: number) {
     // inertia inside a tall section, never past its edges
-    const y0 = sy();
+    const y0 = here();
     const { a, b } = iv[k];
     const end = y0 + v * COAST_T;
     cur = k;
@@ -401,11 +476,11 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       kick();
       return;
     }
-    glide(clamp(end, a, b), { kind: 'settle', v, dur: 900, match: true, min: 240, to: k });
+    release(clamp(end, a, b), v, { kind: 'settle', to: k });
   }
   function legOf(A: Glide): Leg {
     const d = Math.sign(A.y1 - A.y0) || 1;
-    const y = sy();
+    const y = here();
     const n = iv.length;
     let to: number;
     let from: number;
@@ -430,28 +505,27 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   /* Wheel or key while travelling: every deliberate gesture counts. The other way → straight back; the
      same way → one more section, but never more than one past the section that is arriving. */
   function more(s: number, L: Leg, v: number) {
-    if (s === -L.d) return travel(L.from, L.to, v, 1.2, true);
+    if (s === -L.d) return travel(L.from, L.to, v, true);
     if (L.final != null && (L.final - L.to) * L.d > 1) return; // a long jump already goes further
     const t = clamp(L.to + L.d, 0, iv.length - 1);
-    if (t !== L.final) travel(t, L.from, v, 1.2, true);
+    if (t !== L.final) travel(t, L.from, v, true);
   }
   /* A fresh touch while travelling: the other way → straight back; the same way → one more section, but
      only once the current one is more than half on screen (a quick double swipe stays one). A long jump keeps its target. */
-  function redirect(s: number, L: Leg, v: number, m0: number) {
-    if (s === -L.d) return travel(L.from, L.to, v, m0);
+  function redirect(s: number, L: Leg, v: number) {
+    if (s === -L.d) return travel(L.from, L.to, v);
     let t = s === L.d && L.p >= 0.5 ? L.to + L.d : L.to;
     if (L.final != null && (L.final - t) * L.d > 0) t = L.final;
-    travel(t, L.from, v, m0);
+    travel(t, L.from, v);
   }
 
-  /* Distance moved (+ = on through the page) and release speed → +1 / -1 / 0 */
+  /* A second swipe during a glide (distance moved, + = on; release speed) → +1 / -1 / 0, by Loam's
+     rule: a flick goes its way; otherwise only a throw that would carry past half a screen counts. */
   function intentOf(d: number, v: number): number {
-    const s = Math.sign(d);
-    const ad = Math.abs(d);
-    const along = v * s;
-    if (ad < 10 || along < -0.1) return 0; // a twitch, or pulled back before letting go
-    if (ad > 0.3 * VH() || along > 0.35 || (ad > 0.1 * VH() && along > 0.05)) return s;
-    return 0;
+    if (Math.abs(d) < SLOP) return 0; // a touch that only caught the page
+    if (Math.abs(v) > THROW) return Math.sign(v);
+    const p = d + v * PROJECT;
+    return Math.abs(p) > 0.5 * VH() ? Math.sign(p) : 0;
   }
   /* Release speed: finger travel over the last 80 ms, px/ms. A finger that stopped before lifting reads 0. */
   function releaseSpeed(S: Gesture['S'], tEnd: number): number {
@@ -475,6 +549,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   function tStart(e: TouchEvent) {
     if (!NAV) return;
     swallowUntil = 0; // a new touch: whatever the last tap was, it is over
+    nativeSwipe = null;
     if (e.touches.length > 1) {
       if (g) g.multi = true;
       return;
@@ -491,10 +566,10 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const caught = !!anim;
     if (anim) {
       if (anim.kind === 'nav') leg = legOf(anim);
-      k = anim.to != null ? anim.to : nearest(sy());
+      k = anim.to != null ? anim.to : nearest(here());
       anim = null; // the finger catches the page where it is
-    } else k = nearest(sy());
-    const y = sy();
+    } else k = nearest(here());
+    const y = here();
     const n = iv.length;
     let lo: number;
     let hi: number;
@@ -507,7 +582,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       lo = Math.min(y, k > 0 ? iv[k - 1].b : iv[0].a);
       hi = Math.max(y, k < n - 1 ? iv[k + 1].a : iv[n - 1].b);
     }
-    const now = performance.now();
+    const now = evTime(e);
     g = {
       id: t.identifier,
       x0: t.clientX,
@@ -555,12 +630,13 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     }
     if (!e.cancelable) {
       g.native = true; // the browser already owns this touch
+      ext = true;
       return;
     }
     e.preventDefault();
     const p = g.sy0 - (dy - g.off);
     g.p = p;
-    g.S.push({ t: performance.now(), p });
+    g.S.push({ t: evTime(e), p });
     if (g.S.length > 32) g.S.shift();
     setY(clamp(p, g.lo, g.hi));
   }
@@ -570,6 +646,9 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const G = g;
     g = null;
     if (G.native) {
+      ext = true;
+      nativeSwipe = { k: G.k, y0: G.sy0 };
+      if (DEBUG) dbg.release = { native: true, moved: Math.round(sy() - G.sy0) };
       clearTimeout(extT);
       extT = setTimeout(tidy, 160);
       return;
@@ -577,16 +656,16 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     if (!iv.length) return;
     const drag = G.axis === 'y' && !G.multi;
     if (G.caught && !G.axis) swallowUntil = performance.now() + 500;
-    const v = drag && e.type === 'touchend' ? releaseSpeed(G.S, performance.now()) : 0;
+    const v = drag && e.type === 'touchend' ? releaseSpeed(G.S, evTime(e)) : 0;
     if (DEBUG) dbg.release = { v: +v.toFixed(3), moved: Math.round(G.p - G.sy0), samples: G.S.length, leg: G.leg && { ...G.leg } };
     if (G.leg) {
       const s = drag ? intentOf(G.p - G.sy0, v) : 0;
-      redirect(s, G.leg, v, 0);
+      redirect(s, G.leg, v);
       return;
     }
     const k = Math.min(G.k, iv.length - 1);
     const { a, b } = iv[k];
-    const y = sy();
+    const y = here();
     const d = y > b ? y - b : y < a ? y - a : 0;
     if (!d) {
       // inside a tall section: plain scrolling with inertia
@@ -595,10 +674,25 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       return;
     }
     const s = Math.sign(d);
+    const nb = k + s;
+    if (!drag || nb < 0 || nb >= iv.length) {
+      settle(k, v);
+      return;
+    }
     const fromEdge = s > 0 ? G.sy0 >= b - 2 : G.sy0 <= a + 2;
-    // from the edge: the normal intent rule. From inside a tall section: only a deliberate pull past the edge hands over.
-    const go = drag && (fromEdge ? intentOf(d, v) === s : Math.abs(d) > 0.18 * VH() && v * s > -0.1);
-    if (go && k + s >= 0 && k + s < iv.length) travel(k + s, k, v, 0);
+    let go: boolean;
+    if (fromEdge) {
+      // Loam's release: a flick on through the page goes on; a flick back comes home; otherwise the page
+      // goes to whichever rest point — home or the neighbour — the release would coast nearer to.
+      const home = s > 0 ? b : a;
+      const span = Math.abs(land(nb, k) - home);
+      const along = v * s;
+      go = along > THROW || (along >= -THROW && Math.abs(d) + along * PROJECT > span / 2);
+    } else {
+      // started inside a tall section: only a deliberate pull past its edge hands over
+      go = Math.abs(d) > 0.18 * VH() && v * s > -0.1;
+    }
+    if (go) travel(nb, k, v);
     else settle(k, v);
   }
 
@@ -633,7 +727,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
         more(s, legOf(anim), animSpeed());
         return;
       }
-      const y = anim && anim.kind === 'inner' ? anim.target : sy();
+      const y = anim && anim.kind === 'inner' ? anim.target : here();
       const k = anim && anim.to != null ? anim.to : nearest(y);
       if (anim && anim.kind !== 'inner') anim = null;
       const { a, b } = iv[k];
@@ -651,7 +745,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       wg.sum += dy;
       if (Math.abs(wg.sum) >= 14) {
         wg.mode = 'done';
-        if (wg.k + s >= 0 && wg.k + s < iv.length) travel(wg.k + s, wg.k, 0, 1.2, true);
+        if (wg.k + s >= 0 && wg.k + s < iv.length) travel(wg.k + s, wg.k, 0, true);
       }
       return;
     }
@@ -659,7 +753,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   }
   function inner(k: number, delta: number) {
     const { a, b } = iv[k];
-    if (!anim || anim.kind !== 'inner') anim = { kind: 'inner', y: sy(), target: sy(), last: performance.now(), to: k };
+    if (!anim || anim.kind !== 'inner') anim = { kind: 'inner', y: here(), target: here(), last: performance.now(), to: k };
     anim.target = clamp(anim.target + delta, a, b);
     cur = k;
     kick();
@@ -696,10 +790,9 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       case 'Home':
       case 'End': {
         e.preventDefault();
-        const from = anim && anim.to != null ? anim.to : nearest(sy());
+        const from = anim && anim.to != null ? anim.to : nearest(here());
         const to = e.key === 'Home' ? 0 : iv.length - 1;
-        const jumps = Math.max(1, Math.abs(to - from));
-        glide(to ? iv[to].b : 0, { kind: 'nav', v: animSpeed(), dur: Math.min(1600, 860 + 140 * (jumps - 1)), m0: 1.2, from, to });
+        linkGlide(to ? iv[to].b : 0, from, to);
         return;
       }
       default:
@@ -710,7 +803,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       more(s, legOf(anim), animSpeed());
       return;
     }
-    const y = anim && anim.kind === 'inner' ? anim.target : sy();
+    const y = anim && anim.kind === 'inner' ? anim.target : here();
     const k = anim && anim.to != null ? anim.to : nearest(y);
     const { a, b } = iv[k];
     if (s > 0 ? y < b - 1 : y > a + 1) {
@@ -718,7 +811,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       return;
     }
     if (anim && anim.kind !== 'inner') anim = null;
-    if (k + s >= 0 && k + s < iv.length) travel(k + s, k, 0, 1.2, true);
+    if (k + s >= 0 && k + s < iv.length) travel(k + s, k, 0, true);
   }
 
   /* ── Links to places on the page glide there ──────────────── */
@@ -735,9 +828,8 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const top = pageTop(el);
     // a stop rests at its own top (the header floats over the photograph); anything inside one clears the header
     const y1 = clamp(Math.round(sec === el ? top : top - hdrH() - 24), a, b);
-    const from = anim && anim.to != null ? anim.to : nearest(sy());
-    const jumps = Math.max(1, Math.abs(k - from));
-    glide(y1, { kind: 'nav', v: animSpeed(), dur: Math.min(1600, 860 + 140 * (jumps - 1)), m0: 1.2, from, to: k });
+    const from = anim && anim.to != null ? anim.to : nearest(here());
+    linkGlide(y1, from, k);
   }
   function focusTarget(t: HTMLElement) {
     if (!t.matches('a, button, input, select, textarea, [tabindex]')) t.setAttribute('tabindex', '-1');
@@ -775,12 +867,31 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   /* ── Someone else moved the page ───────────────────────────────
      The scrollbar, find-in-page, keyboard focus, assistive tech: once it stops, put it on a section. */
   function onScroll() {
-    if (!NAV || Math.abs(sy() - wrote) <= 2) return; // our own write
-    if (g && g.axis === 'y' && !g.native) return;
+    if (!NAV) return;
+    if (anim || (g && g.axis === 'y' && !g.native)) return; // the engine is moving the page: its own scroll
+    if (!ext) {
+      const late = performance.now() - wroteT < ECHO_MS;
+      if (late || Math.abs(sy() - wrote) <= 2) {
+        // the engine's own write, arriving late (iPhones): look again once it should have landed
+        clearTimeout(verT);
+        verT = setTimeout(verify, Math.max(40, ECHO_MS - (performance.now() - wroteT)) + 40);
+        return;
+      }
+    }
+    external();
+  }
+  function external() {
+    ext = true;
     anim = null;
     extPending = true;
     clearTimeout(extT);
     extT = setTimeout(tidy, 160);
+  }
+  /* The page should be where the engine left it by now; if not, someone else moved it (or the browser
+     put back a stale position): tidy it onto a section like any other outside scroll. */
+  function verify() {
+    if (!NAV || anim || g || ext) return;
+    if (Math.abs(sy() - wrote) > 1.5) external();
   }
   function tidy() {
     if (!NAV) return;
@@ -792,13 +903,25 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     if (g || anim || blocked() || zoomed()) return;
     relayout(true);
     if (!iv.length) return;
-    const y = sy();
+    const y = here(); // someone else moved the page: this is the browser's position
+    // The browser took a swipe for itself (it had already begun scrolling — a busy page just after load,
+    // say — so the swipe could not be held back). It still means one section that way: once its momentum
+    // has died, finish on the neighbour it was headed for, never further and never back home.
+    const N = nativeSwipe;
+    nativeSwipe = null;
+    if (N && N.k < iv.length && Math.abs(y - N.y0) > 2 * SLOP) {
+      const { a, b } = iv[N.k];
+      if (y < a - 1 || y > b + 1) {
+        travel(clamp(N.k + Math.sign(y - N.y0), 0, iv.length - 1), N.k, 0);
+        return;
+      }
+    }
     const ae = document.activeElement as HTMLElement | null;
     if (ae && ae !== document.body && ae.closest(SEL) && performance.now() - focusT < 1500) {
       const k = zoneOf(ae); // keep the focused element in view
       const { a, b } = iv[k];
       const y1 = a === b ? a : clamp(Math.round(ae.getBoundingClientRect().top + y - VH() * 0.3), a, b);
-      glide(y1, { kind: 'settle', v: 0, dur: 520, m0: 0, to: k });
+      glide(y1, { kind: 'settle', dur: SETTLE_MS, ease: 'quart', to: k });
       return;
     }
     settle(nearest(y), 0);
@@ -812,13 +935,13 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       return;
     }
     const k = Math.min(cur, Math.max(0, iv.length - 1));
-    const rel = iv.length ? (Number.isFinite(wrote) ? wrote : sy()) - iv[k].a : 0;
+    const rel = iv.length ? here() - iv[k].a : 0;
     measure();
     if (!iv.length || keepY) return;
     const t = Math.min(k, iv.length - 1);
     cur = t;
     const y1 = clamp(iv[t].a + rel, iv[t].a, iv[t].b);
-    if (Math.abs(y1 - sy()) > 0.5) setY(y1);
+    if (Math.abs(y1 - here()) > 0.5) setY(y1);
   }
   function onResize() {
     if (!NAV) return;
@@ -832,7 +955,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const A = anim;
     setVh();
     const k = A && A.to != null ? A.to : cur;
-    const rel = iv.length ? (Number.isFinite(wrote) ? wrote : sy()) - iv[Math.min(k, iv.length - 1)].a : 0;
+    const rel = iv.length ? here() - iv[Math.min(k, iv.length - 1)].a : 0;
     anim = null;
     measure();
     if (!iv.length) return;
@@ -918,6 +1041,8 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     document.addEventListener('focusin', onFocusIn);
     window.addEventListener('load', onLoad);
     window.addEventListener('pageshow', onPageShow);
+    window.visualViewport?.addEventListener('resize', onZoom);
+    onZoom();
     document.fonts?.ready.then(() => relayout());
 
     measure();
@@ -944,9 +1069,13 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     wg = null;
     extPending = false;
     clearTimeout(extT);
+    clearTimeout(verT);
+    ext = true;
     cancelAnimationFrame(raf);
     running = false;
-    html.classList.remove('snapnav');
+    html.classList.remove('snapnav', 'snapnav-zoom');
+    window.visualViewport?.removeEventListener('resize', onZoom);
+    nativeSwipe = null;
     html.style.removeProperty('--vh');
     if (prevRestoration && 'scrollRestoration' in history) history.scrollRestoration = prevRestoration;
     prevRestoration = null;
@@ -988,6 +1117,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     kind: () => string | null;
     on: () => boolean;
     release: () => unknown;
+    glide: () => unknown;
     frames: [number, number, string][];
   };
   const w = window as unknown as { __nav?: NavDebug };
@@ -999,6 +1129,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       kind: () => (anim ? anim.kind : null),
       on: () => NAV,
       release: () => dbg.release,
+      glide: () => dbg.glide,
       frames: dbg.frames,
     };
   }

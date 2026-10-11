@@ -122,11 +122,11 @@ export function Navbar() {
             <button
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
+              /* The bare icon — no ring, no fill (client, 11 Oct 2026). The 44px
+                 box stays as the finger's target. */
               className={cn(
-                'flex h-11 w-11 items-center justify-center justify-self-start rounded-full border transition-colors lg:hidden',
-                overDark
-                  ? 'border-white/40 text-white hover:bg-white/10'
-                  : 'border-[rgb(var(--c-text))]/25 hover:bg-[rgb(var(--c-text))]/[0.06]',
+                '-ml-2.5 flex h-11 w-11 items-center justify-center justify-self-start transition-colors duration-300 lg:hidden',
+                overDark ? 'text-white hover:text-cyan-300' : 'hover:text-cyan-700 dark:hover:text-cyan-400',
               )}
             >
               <Menu className="h-[21px] w-[21px]" strokeWidth={1.75} />
@@ -195,39 +195,28 @@ export function Navbar() {
 
             {/* Actions */}
             <div className="flex items-center justify-self-end">
-              {/* Desktop: the label alone, no fill and — at the client's request
-                  (11 Oct 2026) — no outline either; it reads as the last item of
-                  the navigation and turns cyan on hover. */}
+              {/*
+                The estimate link, at every width: the calculator alone, bare —
+                no fill, no ring — like the phone's menu button it faces (client,
+                11 Oct 2026 — it was a cyan "Estimate" pill on phones and a "Get
+                Estimate" label on desktop). The 44px box stays as the finger's
+                target, pulled out by its padding so the glyph, not the box,
+                lines up with the gutter. Its name comes from
+                aria-label, and `title` tells a mouse what the icon is. A plain
+                Link rather than Button, because Button's href branch does not
+                forward aria-label.
+              */}
               <Link
                 href={cta?.href ?? ROUTES.estimator}
+                aria-label={cta?.label ?? 'Get Estimate'}
+                title={cta?.label ?? 'Get Estimate'}
                 className={cn(
-                  'hidden h-[41px] items-center px-[21.5px] font-montserrat text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors duration-300 lg:inline-flex',
-                  overDark
-                    ? 'text-white hover:text-cyan-300'
-                    : 'text-[rgb(var(--c-text))] hover:text-cyan-700 dark:hover:text-cyan-400',
+                  '-mr-2.5 flex h-11 w-11 items-center justify-center transition-colors duration-300',
+                  overDark ? 'text-white hover:text-cyan-300' : 'hover:text-cyan-700 dark:hover:text-cyan-400',
                 )}
               >
-                {cta?.label ?? 'Get Estimate'}
+                <Calculator className="h-[21px] w-[21px]" strokeWidth={1.75} aria-hidden />
               </Link>
-
-              {/*
-                Below `lg`, the right-hand third of menu · logo · estimate —
-                compact enough (~105px) that the centred logo reads as centred.
-                The label is a short fixed word rather than the admin's nav label:
-                a long label there would break this row. Below 360px the row has
-                no room for it, so the word goes sr-only — kept in the DOM because
-                Button's href branch does not forward aria-label, and an icon-only
-                link would otherwise have no accessible name.
-              */}
-              <Button
-                href={cta?.href ?? ROUTES.estimator}
-                variant="accent"
-                size="sm"
-                className="lg:hidden"
-                leftIcon={<Calculator className="h-4 w-4" aria-hidden />}
-              >
-                <span className="sr-only min-[360px]:not-sr-only">Estimate</span>
-              </Button>
             </div>
           </div>
         </div>
@@ -400,9 +389,10 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
             <div className="space-y-3 border-t px-5 py-5">
               {/* Label deliberately not wired to the CTA row: the drawer says
-                  "Get Free Estimate" where the desktop bar says "Get Estimate",
-                  and freezing today's copy beats silently unifying it. The
-                  destination is the row's. */}
+                  "Get Free Estimate" where the bar's icon is named "Get
+                  Estimate", and freezing today's copy beats silently unifying
+                  it. The destination is the row's. This is now the only place
+                  on a phone where the estimate is spelled out. */}
               <Button href={cta?.href ?? ROUTES.estimator} variant="accent" size="lg" full leftIcon={<Calculator className="h-4 w-4" />}>
                 Get Free Estimate
               </Button>

@@ -1180,6 +1180,16 @@ html.snapnav body {
 html.snapnav [data-hscroll] {
   touch-action: pan-x pinch-zoom;
 }
+/* The page itself takes no pans from the browser (Loam House sets `touch-action: none` on html and
+   body on phones): a swipe is the engine's from its first pixel, even on a busy page where the browser
+   would otherwise have started scrolling before the engine could hold it. Pinch-zoom stays (Loam's
+   `none` blocks it), and once zoomed in (`snapnav-zoom`) panning is the browser's again. Scrollers
+   inside — the rails above, the menu's list — keep their own pans: touch-action reaches only up to
+   the nearest scroller. */
+html.snapnav:not(.snapnav-zoom),
+html.snapnav:not(.snapnav-zoom) body {
+  touch-action: pinch-zoom;
+}
 html.snapnav [data-section][tabindex='-1']:focus {
   outline: none;
 }
