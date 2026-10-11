@@ -403,6 +403,172 @@
     .mepf-deck > li { position: static; }
   }
 
+  /* ----------------------------------------------------------------
+     Note band — components/common/TestimonialBand.
+
+     The testimonials are a pile of sticky notes: each one tinted paper at its
+     own slight angle, parked in the middle of the screen while the next
+     slides up and lands on it. After the last, the pile leaves as one. From
+     `md` the heading stands beside the pile and holds with it; on a phone it
+     is above, and scrolls away as a heading does.
+
+     The same free mechanism as the deck above and the chapter stack below:
+     `position: sticky`, so no box moves in the flow, the band is no longer
+     than its notes in a column, and it is one stop for the section engine.
+
+     Every note shares one `top` and one height, and that is what makes the
+     pile leave together: the last note reaches `top` exactly as the pile's
+     own bottom edge reaches the foot of the notes parked there. So the
+     scatter is paint only — `rotate` and `translate` on the figure — and
+     never a step in `top`. On the figure, not the sticky box: that box is the
+     band's `Reveal`, where framer writes a `transform` of its own.
+
+     `--note-h` is the tallest note, measured by the component. Until it
+     arrives, and for good with fewer than two notes, `top`, `min-height` and
+     the engine's padding below are all invalid and everything lies flat.
+     ---------------------------------------------------------------- */
+  .note-band {
+    /* The tallest note, and room for the scatter: the furthest nudge down
+       (8px) and what a tilt swings a corner out by (about 7px, top and
+       bottom). */
+    --pile-h: calc(var(--note-h) + 1.5rem);
+    /* What the pile leaves of the screen. `--pile-floor` is the mobile
+       contact bar, there on every page but the home page, which zeroes it
+       (Showcase). Its 3.5rem and not the safe-area inset under it: the inset
+       grows as Safari's toolbar slides away, and every parked note would
+       drift with it. */
+    --pile-free: calc(var(--vh) * 100 - var(--pile-floor, 3.5rem) - var(--pile-h));
+    /* Half of what is left, so the pile sits centred — while there is
+       anything left. Where there is not (a phone held sideways, a short
+       window, a long quote) the number is negative and a note parks by its
+       foot instead, once all of it has been on screen, as a long chapter
+       does. */
+    --pile-top: min(calc(var(--pile-free) / 2), var(--pile-free));
+    /* What `.section-sm` leaves under the band, for the engine's padding at
+       the end of this block. */
+    --band-foot: 3rem;
+  }
+  /* StickyContactBar is `md:hidden`. */
+  @media (min-width: 768px) {
+    .note-band { --pile-floor: 0px; --band-foot: 3.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .note-band { --band-foot: 4rem; }
+  }
+  .note-pile > * {
+    position: sticky;
+    top: var(--pile-top);
+  }
+  /* The heading, where it stands beside the pile. It holds where the notes
+     hold and is as tall as one, its lines centred in that — so it sits level
+     with the pile, and the foot of the band takes it away at the moment it
+     takes the notes. */
+  @media (min-width: 768px) {
+    .note-band__head {
+      position: sticky;
+      top: var(--pile-top);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: var(--note-h);
+    }
+  }
+  /* Tab can put focus on the link at the foot of a note the pile has
+     covered. The note comes to the top while it holds that focus. */
+  .note-pile > *:has(:focus-visible) {
+    z-index: 1;
+  }
+  /* `Reveal` fades each card in as it enters, which is as a note begins to
+     cross the one parked there — and a note you can see through is not
+     paper. The first has nothing under it and keeps its fade. */
+  @media (prefers-reduced-motion: no-preference) {
+    .note-pile > * + * { opacity: 1 !important; }
+  }
+  /* One note sliding over another is what this setting asks us not to do.
+     They stay notes, in a column. The heading still holds beside them — it
+     covers nothing, and without it the column would run down one half of an
+     empty band. */
+  @media (prefers-reduced-motion: reduce) {
+    .note-pile > * { position: static; }
+  }
+
+  /* The scatter and the paper, on a cycle of four: the list is the client's
+     to lengthen. Tilts stay under 2.5deg — at that a 560px note swings its
+     corners 11px into a 20px gutter, and the text still sets cleanly. */
+  .note-pile > :nth-child(4n + 1) { --note-tilt: -2deg; --note-x: 0px; --note-y: 0px; --note-paper: 251 241 199; }
+  .note-pile > :nth-child(4n + 2) { --note-tilt: 1.5deg; --note-x: 3px; --note-y: 6px; --note-paper: 221 241 250; }
+  .note-pile > :nth-child(4n + 3) { --note-tilt: -1deg; --note-x: -3px; --note-y: 2px; --note-paper: 251 228 220; }
+  .note-pile > :nth-child(4n) { --note-tilt: 2.2deg; --note-x: 2px; --note-y: 8px; --note-paper: 224 242 226; }
+  .dark .note-pile > :nth-child(4n + 1) { --note-paper: 42 39 22; }
+  .dark .note-pile > :nth-child(4n + 2) { --note-paper: 17 41 58; }
+  .dark .note-pile > :nth-child(4n + 3) { --note-paper: 51 32 31; }
+  .dark .note-pile > :nth-child(4n) { --note-paper: 23 41 30; }
+
+  /* The note itself: TestimonialCard's figure, re-dressed. `:hover` is named
+     so the card's own hover border and shadow do not come back.
+
+     The strip across the top is the gummed edge. The shadow is short at the
+     top, where a note is stuck down, and long at the foot, where it lifts —
+     and light, in ink rather than the house navy: a full pile throws four of
+     them onto the same strip of page, and navy at the cards' usual weight
+     added up to a violet bar.
+
+     `--c-text-subtle` is re-cut for paper that is no longer white: the
+     page's own measures 4.25:1 on the blush note and 3.9:1 on the dark ones.
+     These are 5.3:1 and 5.4:1 at worst. */
+  .note-pile > * > figure,
+  .note-pile > * > figure:hover {
+    --c-text-subtle: 86 94 113;
+    min-height: var(--note-h);
+    rotate: var(--note-tilt);
+    translate: var(--note-x) var(--note-y);
+    border-width: 0;
+    border-radius: 3px;
+    background-color: rgb(var(--note-paper));
+    background-image: linear-gradient(rgb(var(--c-text) / 0.05) 0 1.75rem, transparent 0);
+    box-shadow: 0 1px 1px rgb(15 20 32 / 0.06), 0 10px 16px -10px rgb(15 20 32 / 0.16);
+  }
+  .dark .note-pile > * > figure,
+  .dark .note-pile > * > figure:hover {
+    --c-text-subtle: 148 156 174;
+    box-shadow: 0 1px 1px rgb(0 0 0 / 0.25), 0 10px 16px -10px rgb(0 0 0 / 0.4);
+  }
+  /* The card's content block keeps its own height, so the spare paper of a
+     short quote falls at the note's foot — and the component can read the
+     tallest note off these without the `min-height` above answering for
+     it. */
+  .note-pile > * > figure > div {
+    flex: none;
+  }
+  .note-pile figcaption {
+    border-color: rgb(var(--c-text) / 0.12);
+  }
+  /* CtaLink's pill, one step darker on tinted paper. Its cyan-700 label is
+     measured at 4.60:1 on white and comes to 3.98:1 on the blush note;
+     cyan-800 is 5.44:1 there. Its cyan-600 border, there to clear 3:1, comes
+     to 2.82:1; cyan-700 is 4.22:1. Both are what the pill already turns on
+     hover. The dark theme's own `dark:` colours outrank this and pass as
+     they are. */
+  .note-pile > * > figure a {
+    color: #076179;
+    border-color: #027797;
+  }
+
+  /* Under the section engine (the home page, by touch) the band is a tall
+     zone, and the page can rest no lower than the band's bottom edge on the
+     screen's. Left alone the last note would still be short of the pile
+     there. This is the space that puts it exactly on: what a parked note has
+     beneath it — half of what the pile leaves, the floor, and the scatter's
+     own 1.5rem — less what `.section-sm` already leaves under the band.
+     Elsewhere the page scrolls on and the note lands without it.
+
+     On the band, not the pile: from `md` the heading's room to travel is the
+     row it shares with the pile, and space added inside the pile would let
+     the heading outstay the notes. */
+  html.snapnav .note-band {
+    padding-bottom: max(0px, calc(var(--pile-free) / 2 + var(--pile-floor, 3.5rem) + 1.5rem - var(--band-foot)));
+  }
+
   /* The preloader worker's hammer swing, walk cycle and dust used to live here
      as keyframes. They are now computed in BuildScene.tsx instead: a CSS
      `transform` overrides the SVG `transform` attribute carrying his pose, and
@@ -1257,8 +1423,12 @@ html.snapnav [data-section][tabindex='-1']:focus {
 /* Chapters in a stack are `position: sticky`, and a stuck box reports where it is stuck, not where it
    sits in the flow. The engine sets `snapnav-measure` for the length of a read (`inFlow` in engine.ts):
    with no inset a sticky box has no offset, so each stop is measured where the flow puts it. Only the
-   inset goes — the boxes stay sticky, so nothing the browser built for them is thrown away. */
-html.snapnav-measure .chapter-stack > .chapter {
+   inset goes — the boxes stay sticky, so nothing the browser built for them is thrown away.
+   The notes in a `.note-pile` and the heading beside them are not stops, but anything measured inside
+   one gets the same answer. */
+html.snapnav-measure .chapter-stack > .chapter,
+html.snapnav-measure .note-pile > *,
+html.snapnav-measure .note-band__head {
   top: auto;
 }
 

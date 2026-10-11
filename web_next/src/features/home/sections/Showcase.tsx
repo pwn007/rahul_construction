@@ -116,6 +116,10 @@ export function Testimonials() {
       title={section?.heading || 'Trusted by homeowners and businesses alike'}
       lead={section?.subheading || 'Four projects, four families, and the part they chose to say out loud.'}
       items={testimonials}
+      /* On a phone the notes pile up centred in what is left of the screen above the mobile contact
+         bar (`.note-band` in globals.css). StickyContactBar stands down on this page, so here that
+         is the whole screen. */
+      className="[--pile-floor:0px]"
     />
   );
 }
