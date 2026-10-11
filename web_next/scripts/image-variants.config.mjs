@@ -40,5 +40,13 @@ export default {
     { source: 'elevation-g2-white-4k.jpg', key: '/images/v/elevation-g2-white-4k-1920.webp', portrait: { focus: [0.47, 0.5] } },
     { source: 'elevation-villa-timber.jpg', key: '/images/v/elevation-villa-timber-1536.webp', portrait: { focus: [0.555, 0.5], aspect: 3 / 4 } },
     { source: 'interior-living-lounge.jpg', key: '/images/v/interior-living-lounge-1280.webp', portrait: { focus: [0.466, 0.5], aspect: 3 / 4 } },
+    /* The Services intro (11 Oct 2026). Stock, not the client's: a drawing
+       compass on a navy blueprint, from Pexels (licence and author in
+       public/images/ATTRIBUTION.md). The source here is the 4609 px original
+       brought down to 3840, so its largest variant matches the hero's. The
+       portrait crop sits left of centre: a phone shows only the middle of it,
+       and there the compass's near leg is whole, with the far one coming in
+       at the top — two legs read as a compass, one as a black bar. */
+    { source: 'services-blueprint-compass.jpg', key: '/images/v/services-blueprint-compass-1920.webp', portrait: { focus: [0.37, 0.5] } },
   ],
 };

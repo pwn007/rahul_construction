@@ -141,11 +141,15 @@ const PINNED: Record<string, string> = {
   'home-service-architectural-design': 'v/elevation-villa-timber-1536.webp',
   'home-service-interior-design': 'v/interior-living-lounge-1280.webp',
   'home-service-project-management': 'service-pm-01.webp',
-  /* The chapter that introduces those three (design migration): two engineers
-     reading a drawing on site. Already in the mepf pool and shipping, reached
-     by no seed until now; pinning it shifts no other seed, because `PINNED` is
-     read before `poolFor`. */
-  'home-services-intro': 'mepf-10.webp',
+  /* The chapter that introduces those three: a drawing compass on a navy
+     blueprint (11 Oct 2026; Pexels, see ATTRIBUTION.md), served with responsive
+     sizes from /images/v like the two renders above. It replaced mepf-10 — two
+     engineers reading a drawing on site — which was 1400 px wide under a
+     full-bleed chapter, and whose yellow scaffold fought the navy the chapter
+     is graded into. A new filename, never an overwrite: /images/* is immutable
+     for a year. mepf-10 stays in its pool, reached by no seed again; taking it
+     out would change the pool's length and move other seeds. */
+  'home-services-intro': 'v/services-blueprint-compass-1920.webp',
 };
 
 /** Explicit routes win. Ordered: first matching pattern decides. */

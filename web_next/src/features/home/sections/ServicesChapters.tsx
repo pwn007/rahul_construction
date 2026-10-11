@@ -6,6 +6,7 @@ import {
   ChapterLede,
   ChapterLink,
   ChapterLinks,
+  ChapterStack,
   ChapterTags,
   ChapterTitle,
   chapterLines,
@@ -29,8 +30,12 @@ import { IMG } from '@/lib/media';
  *
  * Photographs: Architectural and Interior show the client's own design renders
  * since 10 Oct 2026 (a timber-framed villa, a living room — `PINNED` in
- * lib/media.ts); the intro's site team and Project Management's supervisor are
- * still stock, because the renders show no people and no site.
+ * lib/media.ts); Project Management's supervisor is still stock, because the
+ * renders show no site. The intro is stock too: since 11 Oct 2026 a drawing
+ * compass on a navy blueprint, in place of two engineers on a site whose
+ * photograph was 1400 px wide and yellow where the page is navy. Deliberately
+ * not a team: under "a team that already sits in the same office" a stock
+ * photograph of strangers would read as ours.
  *
  * ── Legibility ───────────────────────────────────────────────────────────────
  * All four of the design's photographs were bright where the copy sits — the
@@ -43,6 +48,18 @@ import { IMG } from '@/lib/media';
  * of every line of copy against the brightest 5% of the photograph behind it
  * was measured at seven widths: all of it clears WCAG AA — 4.5:1 for the lede
  * and the labels, 3:1 for the headings — with the closest at 5.3:1.
+ *
+ * The intro was measured again over its new photograph, at seven sizes from a
+ * 360 px phone to 1920 px: its copy sits on the blueprint's navy (the eyebrow
+ * 8.4:1 at worst, the heading and lede above 12:1). The plate does not — it
+ * sits on the pale paper along the top of the frame, where its label measured
+ * 2.7:1 — so the intro asks for the plate's band (`plate.band`), and with it
+ * the label is 4.5:1 at worst (a phone held sideways) and 4.8–6.0:1 elsewhere.
+ *
+ * The four are one `ChapterStack` (11 Oct 2026): the offer holds still while
+ * the first service slides up over it, and so on down, and each carries the
+ * "Services" plate with a tick per service — the same device as MEPF's
+ * chapters below, so a visitor two screens in still knows whose part this is.
  *
  * Each service's name is its link, as in the design, with the arrow beside the
  * deliverables as the second, finger-sized way in. The headings are h3 under
@@ -105,15 +122,20 @@ function titleLines(title: string): ChapterLine[] {
 export function ServicesChapters() {
   const section = useHomeSections().find((s) => s.key === 'services-index');
   const listed = useServices().filter((s) => s.slug !== OMIT_SLUG);
+  /* One plate for the offer and its services: a tick per service beside the
+     label, lit up to the one on screen, so each still reads as part of "Services". The
+     name alone: the section's number ("02") came off on 11 Oct 2026. */
+  const plate = { label: 'Services', parts: listed.length };
 
   return (
-    <>
+    <ChapterStack>
       <Chapter
         id="services"
         tone="deep"
-        plate={{ num: '02', label: 'Services' }}
+        /* The band: this photograph is pale paper where the plate sits. */
+        plate={{ ...plate, band: true }}
         aria-labelledby="services-h"
-        media={<ResponsiveImage src={IMG.wide('home-services-intro')} alt="" position="42% 50%" />}
+        media={<ResponsiveImage src={IMG.wide('home-services-intro')} alt="" position="50% 78%" />}
       >
         <ChapterEyebrow>What we do</ChapterEyebrow>
         <ChapterTitle id="services-h" lines={chapterLines(section?.heading, TITLE)} />
@@ -136,6 +158,7 @@ export function ServicesChapters() {
             /* Alternating sides, as in the design: Architectural left, Interior right, … */
             align={i % 2 ? 'right' : 'left'}
             tone="deep"
+            plate={{ ...plate, part: i + 1 }}
             aria-labelledby={headingId}
             media={
               <ResponsiveImage
@@ -155,6 +178,6 @@ export function ServicesChapters() {
           </Chapter>
         );
       })}
-    </>
+    </ChapterStack>
   );
 }

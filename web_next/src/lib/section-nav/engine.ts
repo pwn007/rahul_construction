@@ -73,6 +73,12 @@
  * the page-enter transition's transform (app/(public)/template.tsx) never
  * shifts a stop.
  *
+ * And they are positions in the flow. Chapters in a stack
+ * (components/chapter/ChapterStack.tsx) are `position: sticky`, and a stuck box
+ * reports where it is stuck — every chapter of a stack the page has passed
+ * would read as sitting at the same place. Stops are read through `inFlow`,
+ * which unsticks them for the length of the read.
+ *
  * ── Where the page is ────────────────────────────────────────────────────────
  * While the engine moves the page it trusts the position it last wrote, not
  * `window.scrollY`. On iPhones (WKWebView — Safari and Chrome alike) a
@@ -265,6 +271,17 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       (el) => !el.parentElement?.closest(SEL) && el.offsetHeight > 0,
     );
   const hdrH = () => (document.querySelector<HTMLElement>(HDR)?.offsetHeight ?? 0);
+  /* Read positions with sticky stops (a chapter stack) where the flow puts them, not where they are
+     stuck: html.snapnav-measure (globals.css) takes their inset away for the length of the read. The
+     class comes and goes inside one task, so nothing of it is ever painted. */
+  function inFlow<T>(read: () => T): T {
+    html.classList.add('snapnav-measure');
+    try {
+      return read();
+    } finally {
+      html.classList.remove('snapnav-measure');
+    }
+  }
 
   function setVh() {
     html.style.setProperty('--vh', `${VH() / 100}px`);
@@ -293,12 +310,14 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const maxY = Math.max(0, scroller().scrollHeight - vh);
     // a few px of bottom padding past the screen is not "tall"
     const tol = Math.min(40, vh * 0.06);
-    const secs = stopsNow().map((el) => {
-      const top = pageTop(el);
-      // drawn as one screen (a chapter, the hero): never folded into another stop
-      const screen = parseFloat(getComputedStyle(el).minHeight) >= vh - 1;
-      return { el, top, bot: top + el.offsetHeight, screen };
-    });
+    const secs = inFlow(() =>
+      stopsNow().map((el) => {
+        const top = pageTop(el);
+        // drawn as one screen (a chapter, the hero): never folded into another stop
+        const screen = parseFloat(getComputedStyle(el).minHeight) >= vh - 1;
+        return { el, top, bot: top + el.offsetHeight, screen };
+      }),
+    );
     const out: Zone[] = [];
     let i = 0;
     while (i < secs.length) {
@@ -825,7 +844,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const k = zoneOf(el);
     const { a, b, els } = iv[k];
     const sec = els.find((s) => s.contains(el));
-    const top = pageTop(el);
+    const top = inFlow(() => pageTop(el));
     // a stop rests at its own top (the header floats over the photograph); anything inside one clears the header
     const y1 = clamp(Math.round(sec === el ? top : top - hdrH() - 24), a, b);
     const from = anim && anim.to != null ? anim.to : nearest(here());

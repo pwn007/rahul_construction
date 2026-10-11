@@ -198,5 +198,101 @@
         ]
       ]
     }
+  },
+  "/images/v/services-blueprint-compass-1920.webp": {
+    "width": 3840,
+    "height": 2560,
+    "avif": [
+      [
+        640,
+        "/images/v/services-blueprint-compass-640.avif"
+      ],
+      [
+        960,
+        "/images/v/services-blueprint-compass-960.avif"
+      ],
+      [
+        1280,
+        "/images/v/services-blueprint-compass-1280.avif"
+      ],
+      [
+        1920,
+        "/images/v/services-blueprint-compass-1920.avif"
+      ],
+      [
+        2560,
+        "/images/v/services-blueprint-compass-2560.avif"
+      ],
+      [
+        3840,
+        "/images/v/services-blueprint-compass-3840.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/images/v/services-blueprint-compass-640.webp"
+      ],
+      [
+        960,
+        "/images/v/services-blueprint-compass-960.webp"
+      ],
+      [
+        1280,
+        "/images/v/services-blueprint-compass-1280.webp"
+      ],
+      [
+        1920,
+        "/images/v/services-blueprint-compass-1920.webp"
+      ],
+      [
+        2560,
+        "/images/v/services-blueprint-compass-2560.webp"
+      ],
+      [
+        3840,
+        "/images/v/services-blueprint-compass-3840.webp"
+      ]
+    ],
+    "portrait": {
+      "width": 1440,
+      "height": 2560,
+      "avif": [
+        [
+          640,
+          "/images/v/services-blueprint-compass-portrait-640.avif"
+        ],
+        [
+          960,
+          "/images/v/services-blueprint-compass-portrait-960.avif"
+        ],
+        [
+          1280,
+          "/images/v/services-blueprint-compass-portrait-1280.avif"
+        ],
+        [
+          1440,
+          "/images/v/services-blueprint-compass-portrait-1440.avif"
+        ]
+      ],
+      "webp": [
+        [
+          640,
+          "/images/v/services-blueprint-compass-portrait-640.webp"
+        ],
+        [
+          960,
+          "/images/v/services-blueprint-compass-portrait-960.webp"
+        ],
+        [
+          1280,
+          "/images/v/services-blueprint-compass-portrait-1280.webp"
+        ],
+        [
+          1440,
+          "/images/v/services-blueprint-compass-portrait-1440.webp"
+        ]
+      ]
+    }
   }
 }

@@ -17,6 +17,11 @@ import { cn } from '@/lib/cn';
  * one out. Bands that are not chapters (the trust strip, the projects rail, …)
  * carry `data-section` on their own root for the same reason.
  *
+ * A chapter that introduces parts of its own (Services, MEPF) goes in a
+ * `ChapterStack` with them: there each chapter holds still while the next one
+ * slides up over it, and all of them carry the same plate, with a tick per
+ * part beside its label. See ChapterStack.tsx.
+ *
  *   <Chapter id="about" plate={{ num: '01', label: 'About' }}
  *            media={<ResponsiveImage src={…} alt="" />} aria-labelledby="about-h">
  *     <ChapterEyebrow>About Neetu Archstone</ChapterEyebrow>
@@ -40,8 +45,8 @@ export interface ChapterProps extends Omit<HTMLAttributes<HTMLElement>, 'title'>
    */
   tone?: 'natural' | 'deep';
   align?: 'left' | 'right' | 'center';
-  /** The chapter number and label in the top-left ("01 · About"). */
-  plate?: { num: string; label: string };
+  /** The label in the top-left, under the chapter's number if it is given one ("01 · About"). */
+  plate?: ChapterPlateProps;
   /** A stop for the section engine. On by default. */
   navigable?: boolean;
   innerClassName?: string;
@@ -68,6 +73,7 @@ export function Chapter({
       className={cn('chapter on-dark', className)}
       data-align={align}
       data-tone={tone === 'deep' ? 'deep' : undefined}
+      data-plate-band={plate?.part || plate?.band ? '' : undefined}
       data-section={navigable ? '' : undefined}
     >
       {media && <div className="chapter__media">{media}</div>}
@@ -75,7 +81,7 @@ export function Chapter({
       {scrim !== 'none' && (
         <div className="chapter__scrim" data-scrim={scrim === 'dense' ? 'dense' : undefined} aria-hidden />
       )}
-      {plate && <ChapterPlate num={plate.num} label={plate.label} />}
+      {plate && <ChapterPlate {...plate} />}
       <div className="chapter__copy">
         <div className="chapter-gutters">
           <div className={cn('chapter__inner', innerClassName)}>{children}</div>
@@ -85,14 +91,41 @@ export function Chapter({
   );
 }
 
+export interface ChapterPlateProps {
+  /** The chapter's number over the label ("01"). Left out, the label stands alone. */
+  num?: string;
+  label: string;
+  /** In a stack: how many parts the chapter introduces — one tick each, beside the label. */
+  parts?: number;
+  /** In a stack: which part this chapter is, from 1. The ticks up to it are lit; the entry lights none. */
+  part?: number;
+  /**
+   * A band of scrim down from the top of the chapter, behind the plate — for a
+   * photograph that is bright where the plate sits. A part of a stack always
+   * has it; this asks for it on any other chapter.
+   */
+  band?: boolean;
+}
+
 /* The number repeats what the heading already says, so it is hidden from
-   assistive technology; the heading carries the section's name. */
-export function ChapterPlate({ num, label }: { num: string; label: string }) {
+   assistive technology; the heading carries the section's name. The ticks sit
+   on the label's own line: under it they would need room that a short phone's
+   chapter does not have. */
+export function ChapterPlate({ num, label, parts = 0, part = 0 }: ChapterPlateProps) {
   return (
     <div className="chapter-plate" aria-hidden>
       <div className="chapter-gutters">
-        <span className="chapter-plate__num">{num}</span>
-        <span className="chapter-plate__label">{label}</span>
+        {num ? <span className="chapter-plate__num">{num}</span> : null}
+        <span className="chapter-plate__label">
+          {label}
+          {parts > 0 ? (
+            <span className="chapter-plate__parts">
+              {Array.from({ length: parts }, (_, i) => (
+                <span key={i} data-on={i < part || undefined} />
+              ))}
+            </span>
+          ) : null}
+        </span>
       </div>
     </div>
   );

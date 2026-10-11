@@ -749,6 +749,34 @@
     text-transform: uppercase;
     color: rgb(255 255 255 / 0.8);
   }
+  /* A plate without its number: the label starts where the number would. */
+  .chapter-plate__label:first-child { margin-top: 0; }
+  /* A stack's plate (ChapterStack): a tick per part on the label's own line,
+     lit up to the part on screen. */
+  .chapter-plate__parts {
+    display: inline-flex;
+    gap: 0.3125rem;
+    margin-left: 0.75rem;
+    vertical-align: 0.3em;
+  }
+  .chapter-plate__parts > span {
+    width: 1rem;
+    height: 2px;
+    border-radius: 1px;
+    background: rgb(255 255 255 / 0.35);
+  }
+  .chapter-plate__parts > span[data-on] { background: rgb(var(--c-brand)); }
+  /* A part's photograph was graded for the copy at its foot; the plate it now
+     carries sits at the top, so it gets the band the hero puts behind the
+     header — longer, to reach under the label. So does any chapter that asks
+     for it (`plate.band`): the Services intro, whose blueprint photograph is
+     pale paper along the top — its label measured 2.7:1 without, 4.8:1 with. */
+  .chapter[data-plate-band] .chapter__scrim::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0) 42%);
+  }
 
   .chapter-eyebrow {
     display: inline-block;
@@ -959,6 +987,39 @@
       text-underline-offset: 0.14em;
       text-decoration-color: rgb(255 255 255 / 0.55);
     }
+  }
+
+  /* ── Chapter stack (components/chapter/ChapterStack.tsx) ──────────────────
+     A chapter and its parts as one pile: each holds still while the next
+     slides up over it, and after the last the pile leaves as one. Sticky moves
+     no box in the flow, so the page is as long as it was and every chapter is
+     the stop it was for the section engine — which measures them unstuck (see
+     `snapnav-measure` under SECTION ENGINE below).
+
+     `--chapter-h` is the chapter's own height, set by the component. One that
+     fits the screen sticks at its top; one that runs longer (a phone held
+     sideways, a long admin heading) sticks at its foot, once all of it has
+     been on screen. No fallback, on purpose: until the height arrives `top` is
+     invalid, falls back to `auto`, and the chapters scroll flat — a long one
+     stuck at its top would hide its own foot under the next. */
+  .chapter-stack > .chapter {
+    position: sticky;
+    top: min(0px, calc(var(--vh) * 100 - var(--chapter-h)));
+  }
+  /* The edge of the chapter coming up, drawn inside it. A shadow thrown
+     outside would lie across the foot of the chapter before it while the page
+     rests, and would stop the browser skipping the chapters underneath. */
+  .chapter-stack > .chapter + .chapter::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: rgb(255 255 255 / 0.14);
+    pointer-events: none;
+  }
+  /* One chapter sliding over another is what this setting asks us not to do. */
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-stack > .chapter { position: relative; top: auto; }
   }
 
   /* ── Chapter cards (components/chapter ChapterCards) ──────────────────────
@@ -1192,6 +1253,13 @@ html.snapnav:not(.snapnav-zoom) body {
 }
 html.snapnav [data-section][tabindex='-1']:focus {
   outline: none;
+}
+/* Chapters in a stack are `position: sticky`, and a stuck box reports where it is stuck, not where it
+   sits in the flow. The engine sets `snapnav-measure` for the length of a read (`inFlow` in engine.ts):
+   with no inset a sticky box has no offset, so each stop is measured where the flow puts it. Only the
+   inset goes — the boxes stay sticky, so nothing the browser built for them is thrown away. */
+html.snapnav-measure .chapter-stack > .chapter {
+  top: auto;
 }
 
 /* ============================================================

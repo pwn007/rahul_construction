@@ -48,23 +48,24 @@ export function Footer() {
       />
 
       {/* Main */}
-      <div className="relative container py-12">
-        <div className="grid gap-10 lg:grid-cols-12">
+      <div className="relative container py-8 lg:py-10">
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-4">
             <Logo tone="light" />
-            <p className="mt-3 text-caption uppercase tracking-[0.22em] text-cyan-400">{SITE.tagline}</p>
+            <p className="mt-2 text-caption uppercase tracking-[0.22em] text-cyan-400">{SITE.tagline}</p>
             {/* `SITE.description` used to sit here — it is the hero sub-headline again,
                 three screens later, and it was the tallest thing in this column. */}
-            <p className="mt-3 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
+            <p className="mt-2 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
 
-            <div className="mt-6 space-y-2.5">
-              <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 py-2 text-sm text-white/70 transition-colors hover:text-cyan-400">
+            <div className="mt-4 space-y-1">
+              <a href={`tel:${SITE.phoneRaw}`} className="flex items-center gap-3 py-1.5 text-sm text-white/70 transition-colors hover:text-cyan-400 lg:py-1">
                 <Phone className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.phone}
               </a>
-              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 py-2 text-sm text-white/70 transition-colors hover:text-cyan-400">
+              <a href={`mailto:${SITE.email}`} className="flex items-center gap-3 py-1.5 text-sm text-white/70 transition-colors hover:text-cyan-400 lg:py-1">
                 <Mail className="h-4 w-4 shrink-0 text-cyan-500" /> {SITE.email}
               </a>
-              <p className="flex items-start gap-3 text-sm text-white/70">
+              {/* The top padding matches the links above, so the three rows sit at one pitch. */}
+              <p className="flex items-start gap-3 pt-1.5 text-sm text-white/70 lg:pt-1">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-cyan-500" />
                 <span>
                   {SITE.address.full}
@@ -75,14 +76,18 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-3 lg:col-span-5">
+          {/* Two columns on a phone. Stacked one under another, the three lists
+              were the tallest thing in the footer — over 650px of a 1500px block. */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-8 lg:col-span-5">
             {footerColumns.map((col) => (
               <div key={col.heading}>
                 <h3 className="text-overline uppercase text-white/40">{col.heading}</h3>
-                <ul className="mt-4 space-y-2">
+                {/* No gap between the rows: the links' own padding is the spacing,
+                    so none of the pitch is dead space a finger can miss into. */}
+                <ul className="mt-2">
                   {col.links.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href} className="link-underline inline-block py-2 text-sm text-white/70 transition-colors hover:text-white">
+                      <Link href={link.href} className="link-underline inline-block py-1.5 text-sm text-white/70 transition-colors hover:text-white lg:py-1">
                         {link.label}
                       </Link>
                     </li>
@@ -94,7 +99,7 @@ export function Footer() {
 
           <div className="lg:col-span-3">
             <h3 className="text-overline uppercase text-white/40">Stay informed</h3>
-            <p className="mt-4 text-sm text-white/60">
+            <p className="mt-3 text-sm text-white/60">
               Practical guides on building in Jaipur — costs, timelines and the decisions that matter. No noise.
             </p>
             {/*
@@ -104,7 +109,7 @@ export function Footer() {
               inbox as every other enquiry.
             */}
             <form
-              className="mt-4 flex gap-2"
+              className="mt-3 flex gap-2"
               onSubmit={async (e) => {
                 e.preventDefault();
                 const address = email.trim();
@@ -191,7 +196,7 @@ export function Footer() {
           (up to 12rem tall plus an 80px margin, purely decorative) and the social
           row that sat on its own under the newsletter. Every link survives.
         */}
-        <div className="mt-8 flex flex-col items-center gap-5 border-t border-white/10 pt-6 text-caption text-white/40 md:flex-row md:justify-between">
+        <div className="mt-6 flex flex-col items-center gap-3 border-t border-white/10 pt-5 text-caption text-white/40 md:flex-row md:justify-between md:pt-4">
           <p className="order-3 md:order-1">
             © {year} {SITE.legalName}. All rights reserved.
           </p>
@@ -204,7 +209,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
-                className="flex h-11 w-11 items-center justify-center rounded-md border border-white/12 text-white/60 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-md border border-white/12 text-white/60 transition-all duration-300 hover:border-cyan-500 hover:bg-cyan-500 hover:text-white"
               >
                 <s.icon className="h-4 w-4" />
               </a>
@@ -214,13 +219,13 @@ export function Footer() {
           {/* `md:pr-16` keeps the last link clear of the fixed FloatingRail button,
               which sits over the bottom-right of the viewport. */}
           <div className="order-2 flex items-center gap-6 md:order-3 md:pr-16">
-            <Link href={ROUTES.privacy} className="inline-block py-2 transition-colors hover:text-white">
+            <Link href={ROUTES.privacy} className="inline-block py-1.5 transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link href={ROUTES.terms} className="inline-block py-2 transition-colors hover:text-white">
+            <Link href={ROUTES.terms} className="inline-block py-1.5 transition-colors hover:text-white">
               Terms & Conditions
             </Link>
-            <Link href={ROUTES.admin} className="inline-block py-2 transition-colors hover:text-white">
+            <Link href={ROUTES.admin} className="inline-block py-1.5 transition-colors hover:text-white">
               Admin
             </Link>
           </div>
