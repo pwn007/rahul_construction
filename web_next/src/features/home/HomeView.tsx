@@ -97,8 +97,10 @@ export function HomeView() {
       {on('testimonials') && <Testimonials />}
       {/* The same people on camera. Split out of the testimonials band at the
           client's request (Sep 2026): the band above is words only now, and
-          every recorded testimonial lives in this rail. Page ground, not
-          `--c-surface-2`, so the two read as separate bands. */}
+          every recorded testimonial lives here — a row of cards from `md`, and
+          on a phone one screen with one film filling it (the client's
+          prototype, Oct 2026). Page ground, not `--c-surface-2`, so the two
+          read as separate bands. */}
       {on('client-videos') && <ClientVideos />}
       {/*
         Published rates, hidden at the client's request.

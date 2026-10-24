@@ -10,6 +10,10 @@ import { cn } from '@/lib/cn';
 /**
  * The site's video player. Click-to-play, and nothing before that.
  *
+ * The home page's client stories no longer open this: since Oct 2026 they have
+ * their own full-screen player (features/home/sections/ClientStoryPlayer),
+ * built to the client's prototype. `resolveVideo` below is still theirs.
+ *
  * ── Why a lightbox and not an inline player ─────────────────────────────────
  * A paused embed is a few hundred KB of player before a single frame is
  * watched; the poster it replaces is a few KB. So the card ships an image, and

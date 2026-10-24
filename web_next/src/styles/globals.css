@@ -715,6 +715,598 @@
     .review-stack > * { grid-area: auto; opacity: 1; filter: none; transform: none; visibility: visible; }
   }
 
+  /* ----------------------------------------------------------------
+     Client stories — features/home/sections/ClientVideos and its
+     ClientStoryPlayer.
+
+     Built to the client's prototype on the page's own ground: the cards keep
+     its navy and cyan (they sit on photographs), the band round them does
+     not. Two layouts, swapped here rather than in script so the server's
+     markup holds at every width: from `md`, a row of cards (`.cs-rail`); on a
+     phone held upright, a single screen (`.cs-stage`) with one card in the
+     middle and the outer 5% of its neighbours either side. A phone held
+     sideways has no height for that and gets the row.
+     ---------------------------------------------------------------- */
+  .client-stories {
+    /* The container's own gutter (20px at every width — `container.screens`
+       has only 2xl, so its per-breakpoint padding never applies), so the
+       row's first card stands under the heading. Past 1440px the container
+       stops growing and centres. */
+    --cs-edge: 1.25rem;
+    --cs-gap: 1.25rem;
+  }
+  @media (min-width: 1440px) { .client-stories { --cs-edge: calc((100vw - 1440px) / 2 + 1.25rem); } }
+
+  .cs-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  /* The prototype's overline has its rule beside it, not above. */
+  .overline.cs-overline {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    letter-spacing: 0.2em;
+  }
+  .overline.cs-overline::before {
+    width: 2.25rem;
+    margin: 0;
+  }
+  .cs-title {
+    margin-top: 0.75rem;
+    font-family: theme(fontFamily.display);
+    font-size: clamp(2rem, 4.2vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+  .cs-head__aside {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .cs-head__aside > p { margin-right: 1rem; }
+  @media (min-width: 768px) {
+    .cs-head__aside { display: flex; }
+  }
+  .cs-arrow {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--c-text) / 0.2);
+    color: rgb(var(--c-text));
+    transition: border-color 300ms, background-color 300ms, color 300ms;
+  }
+  .cs-arrow:hover:not(:disabled) {
+    border-color: theme(colors.cyan.600);
+    background-color: theme(colors.cyan.500 / 7%);
+    color: theme(colors.cyan.700);
+  }
+  .cs-arrow:disabled { cursor: not-allowed; opacity: 0.35; }
+
+  /* The row: a card is a quarter of the container on a laptop, a third on a
+     tablet. Widths come from the scroller's own width (`cqw`), so four cards
+     fill it exactly whatever the scrollbar takes. */
+  .cs-rail {
+    container-type: inline-size;
+    margin-top: 2.5rem;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--cs-edge);
+  }
+  .cs-rail > ol {
+    display: flex;
+    width: max-content;
+    gap: var(--cs-gap);
+    padding: 0 var(--cs-edge) 0.25rem;
+  }
+  .cs-rail li {
+    flex: none;
+    scroll-snap-align: start;
+    width: calc((100cqw - 2 * var(--cs-edge) - 3 * var(--cs-gap)) / 4);
+  }
+  @media (max-width: 1023px) {
+    .cs-rail li { width: calc((100cqw - 2 * var(--cs-edge) - 2 * var(--cs-gap)) / 3); }
+  }
+  @media (max-width: 767px) {
+    .cs-rail li { width: 11rem; }
+  }
+
+  /* A card's frame. What is inside it is a `.cs-face`. */
+  .cs-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 1rem;
+    background-color: theme(colors.navy.900);
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cs-card:focus-visible {
+    outline: 2px solid theme(colors.cyan.500);
+    outline-offset: 3px;
+  }
+  .cs-card--row {
+    aspect-ratio: 9 / 15;
+    border: 1px solid theme(colors.navy.800 / 18%);
+    box-shadow: 0 1px 2px rgb(15 20 32 / 0.06), 0 16px 28px -18px theme(colors.navy.800 / 55%);
+    transition: box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cs-card--row:hover {
+    box-shadow: 0 0 0 1px theme(colors.cyan.500 / 45%), 0 22px 36px -18px theme(colors.navy.800 / 60%);
+  }
+
+  .cs-face {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .cs-face > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cs-card--row:hover .cs-face > img { transform: scale(1.05); }
+  /* Navy pooled at the foot, under the name, and a breath of it over the
+     whole photograph, as on the prototype's cards. */
+  .cs-face__shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, theme(colors.navy.800 / 95%) 0%, theme(colors.navy.800 / 62%) 24%, theme(colors.navy.800 / 0%) 52%),
+      linear-gradient(theme(colors.navy.800 / 10%), theme(colors.navy.800 / 10%));
+  }
+  .cs-face__count {
+    position: absolute;
+    top: 0.875rem;
+    right: 0.875rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: 1.5px solid theme(colors.cyan.500);
+    background-color: theme(colors.navy.800 / 85%);
+    color: #fff;
+    font: 600 0.75rem/1 theme(fontFamily.display);
+  }
+  .cs-face__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+  .cs-face__play > span {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 9999px;
+    border: 2px solid theme(colors.cyan.500);
+    background-color: theme(colors.navy.900 / 50%);
+    color: theme(colors.cyan.500);
+    box-shadow: 0 0 24px theme(colors.cyan.500 / 25%);
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cs-card--row:hover .cs-face__play > span { transform: scale(1.08); }
+  /* The phone's card draws its play button plainer, with a label. */
+  .cs-face__play--stage > span {
+    border-color: rgb(255 255 255 / 0.35);
+    background-color: theme(colors.ink.950 / 40%);
+    color: #fff;
+    box-shadow: none;
+  }
+  .cs-face__play > small {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgb(255 255 255 / 0.9);
+  }
+  .cs-face__name {
+    position: absolute;
+    left: 1.25rem;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    display: block;
+    border-left: 3px solid theme(colors.cyan.500);
+    padding-left: 0.875rem;
+    color: #fff;
+    font: 600 1.25rem/1.25 theme(fontFamily.display);
+    letter-spacing: -0.01em;
+  }
+  .cs-face__name > span {
+    display: block;
+    color: theme(colors.cyan.500);
+  }
+  @media (max-width: 1279px) {
+    .cs-card--row .cs-face__name { left: 1rem; right: 1rem; bottom: 1rem; font-size: 1.125rem; }
+  }
+
+  /* The phone's screen. The band is exactly one screen tall — a stop of its
+     own for the section engine, which counts anything with a screen-tall
+     `min-height` as one — and the card takes what the heading, the strip
+     and the controls leave. Doubled where `section-sm`'s padding utilities
+     would otherwise win. */
+  .cs-stage { display: none; }
+  @media (max-width: 767px) and (min-height: 521px) {
+    .client-stories.client-stories {
+      display: flex;
+      flex-direction: column;
+      height: calc(var(--vh) * 100);
+      min-height: calc(var(--vh) * 100);
+      padding: calc(var(--nav-h) + 0.25rem) 0 max(1rem, env(safe-area-inset-bottom));
+    }
+    .cs-head { justify-content: center; }
+    .cs-head .overline { display: none; }
+    .cs-title { margin-top: 0; text-align: center; font-size: 1.375rem; letter-spacing: 0.1em; }
+    .cs-rail { display: none; }
+    .cs-stage {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+  }
+  /* "5% | ◂ 90% center video stage ▸ | 5%", over the card and its neighbours. */
+  .cs-strip {
+    display: grid;
+    grid-template-columns: 1fr 18fr 1fr;
+    gap: 0.25rem;
+    margin: 0.625rem 0.375rem 0;
+    font: 600 0.5625rem/1 theme(fontFamily.mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--c-brand-text));
+  }
+  .cs-strip > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.125rem;
+    border: 1px solid theme(colors.cyan.500 / 45%);
+    border-radius: 0.1875rem;
+    white-space: nowrap;
+  }
+  .cs-strip > span:nth-child(odd) { font-size: 0.5rem; letter-spacing: 0; }
+  .cs-strip > span:nth-child(2) { justify-content: space-between; padding: 0 0.375rem; }
+  .cs-stage__area {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin-top: 0.375rem;
+    overflow: hidden;
+  }
+  .cs-card--stage {
+    position: absolute;
+    top: 0.375rem;
+    bottom: 0.375rem;
+    left: 5%;
+    width: 90%;
+    border: 2px solid theme(colors.cyan.500 / 75%);
+    box-shadow: 0 0 0 3px theme(colors.cyan.500 / 10%), 0 10px 28px -12px theme(colors.cyan.500 / 50%);
+  }
+  /* A neighbour: the same card, parked so only its outer 5% is on screen. */
+  .cs-peek {
+    position: absolute;
+    top: 1.125rem;
+    bottom: 1.125rem;
+    width: 90%;
+    border: 1px solid theme(colors.cyan.500 / 35%);
+  }
+  .cs-peek--prev { right: calc(95% + 0.375rem); }
+  .cs-peek--next { left: calc(95% + 0.375rem); }
+  .cs-card--stage .cs-face__count { top: 0.75rem; right: 0.75rem; width: 2.25rem; height: 2.25rem; }
+  .cs-card--stage .cs-face__name { left: 1rem; right: 1rem; bottom: 1rem; }
+  /* Every film's face is stacked in the frame, and stepping cross-fades them
+     — the prototype's change of film, which never slides. */
+  .cs-fade {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+  .cs-fade > .cs-face {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 500ms ease, visibility 0s 500ms;
+  }
+  .cs-fade > .cs-face[data-on] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 500ms ease, visibility 0s;
+  }
+  .cs-stage__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    margin-top: 0.375rem;
+    padding: 0 5%;
+  }
+  .cs-step {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--c-text) / 0.25);
+    color: rgb(var(--c-text));
+    transition: background-color 200ms, border-color 200ms, color 200ms;
+  }
+  .cs-step:hover,
+  .cs-step:active {
+    border-color: theme(colors.cyan.500);
+    background-color: theme(colors.cyan.500);
+    color: #fff;
+  }
+  .cs-dot {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1rem;
+    height: 2rem;
+    transition: width 300ms;
+  }
+  .cs-dot::before {
+    content: '';
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--c-text) / 0.25);
+    transition: width 300ms, background-color 300ms;
+  }
+  .cs-dot[aria-current] { width: 1.75rem; }
+  .cs-dot[aria-current]::before {
+    width: 1.25rem;
+    background-color: theme(colors.cyan.500);
+  }
+  .cs-step:focus-visible,
+  .cs-dot:focus-visible {
+    outline: 2px solid theme(colors.cyan.500);
+    outline-offset: 2px;
+  }
+  /* The prototype's notes on its proportions, in its small mono type. */
+  .cs-note {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: 600 0.5625rem/1 theme(fontFamily.mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--c-brand-text));
+  }
+
+  /* The full-screen player. Dark whatever the band is: a film is watched in
+     the dark. */
+  .cs-player {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
+    color: #fff;
+    background:
+      radial-gradient(120% 70% at 50% 0%, theme(colors.navy.700 / 70%), transparent 70%),
+      linear-gradient(180deg, theme(colors.navy.800), theme(colors.navy.950));
+  }
+  .cs-player button:focus-visible {
+    outline: 2px solid theme(colors.cyan.400);
+    outline-offset: 2px;
+  }
+  .cs-player__bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    height: calc(var(--nav-h) + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) 1.25rem 0;
+  }
+  .cs-player__close {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    background-color: theme(colors.cyan.500);
+    color: theme(colors.navy.900);
+    box-shadow: 0 0 20px theme(colors.cyan.500 / 45%);
+  }
+  .cs-player__title {
+    flex: none;
+    text-align: center;
+    font: 600 1.125rem/1 theme(fontFamily.display);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: theme(colors.cyan.400);
+  }
+  .cs-player__stage {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    min-height: 0;
+    padding: 1rem 1rem 0;
+  }
+  .cs-player__name {
+    flex: none;
+    margin: 1rem 1.25rem 1.25rem;
+    border-left: 3px solid theme(colors.cyan.500);
+    padding-left: 0.875rem;
+  }
+  .cs-player__name > p:first-child { font: 600 1.5rem/1.15 theme(fontFamily.display); }
+  .cs-player__name > p:first-child > span { display: block; }
+  .cs-player__name > p:last-child {
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: rgb(255 255 255 / 0.7);
+  }
+  /* The frame fills what is left on a phone; on a laptop it is the film's own
+     upright shape, as tall as the room allows, and the name lines up under it. */
+  .cs-reel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    border: 1px solid theme(colors.cyan.400 / 45%);
+    background-color: #000;
+    box-shadow: 0 0 0 4px theme(colors.cyan.500 / 8%), 0 0 48px theme(colors.cyan.500 / 18%);
+  }
+  @media (min-width: 768px) {
+    .cs-reel { width: auto; max-width: 100%; aspect-ratio: 9 / 16; }
+    .cs-player__name { width: min(100% - 2.5rem, 24rem); margin-inline: auto; }
+  }
+  .cs-reel > video { animation: cs-reel-in 350ms ease both; }
+  .cs-reel__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(24px) brightness(0.5);
+    transform: scale(1.2);
+  }
+  @keyframes cs-reel-in {
+    from { opacity: 0; }
+  }
+  .cs-reel__scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 7rem;
+    pointer-events: none;
+  }
+  .cs-reel__scrim--top { top: 0; background: linear-gradient(to bottom, theme(colors.navy.950 / 55%), transparent); }
+  .cs-reel__scrim--bottom { bottom: 0; background: linear-gradient(to top, theme(colors.navy.950 / 75%), transparent); }
+  .cs-reel__chip {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2rem;
+    padding: 0 0.875rem;
+    border-radius: 9999px;
+    border: 1px solid theme(colors.cyan.400 / 40%);
+    background-color: theme(colors.navy.800 / 85%);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .cs-reel__count {
+    position: absolute;
+    top: 0.875rem;
+    right: 0.875rem;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background-color: theme(colors.cyan.500);
+    color: theme(colors.navy.900);
+    font: 700 0.75rem/1 theme(fontFamily.display);
+    box-shadow: 0 0 18px theme(colors.cyan.500 / 50%);
+  }
+  .cs-reel__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 9999px;
+    border: 2px solid theme(colors.cyan.500);
+    background-color: theme(colors.navy.800 / 55%);
+    color: #fff;
+    box-shadow: 0 0 24px theme(colors.cyan.500 / 35%);
+    transform: translate(-50%, -50%);
+  }
+  .cs-reel__step {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    background-color: theme(colors.navy.800 / 70%);
+    color: #fff;
+    transform: translateY(-50%);
+  }
+  .cs-reel__foot {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+  }
+  .cs-reel__times {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+    font: 700 0.6875rem/1 theme(fontFamily.mono);
+  }
+  .cs-reel__times .cs-note { color: theme(colors.cyan.400); }
+  .cs-range {
+    display: block;
+    width: 100%;
+    height: 1rem;
+    margin: 0;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  .cs-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: linear-gradient(to right, theme(colors.cyan.500) var(--p), rgb(255 255 255 / 0.28) var(--p));
+  }
+  .cs-range::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+    margin-top: -4px;
+    border-radius: 9999px;
+    background: #fff;
+    box-shadow: 0 0 0 3px theme(colors.cyan.500 / 40%);
+    appearance: none;
+  }
+  .cs-range::-moz-range-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.28);
+  }
+  .cs-range::-moz-range-progress {
+    height: 4px;
+    border-radius: 9999px;
+    background: theme(colors.cyan.500);
+  }
+  .cs-range::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: 0;
+    border-radius: 9999px;
+    background: #fff;
+  }
+  .cs-range:focus-visible {
+    outline: 2px solid theme(colors.cyan.400);
+    outline-offset: 4px;
+  }
+
   /* The preloader worker's hammer swing, walk cycle and dust used to live here
      as keyframes. They are now computed in BuildScene.tsx instead: a CSS
      `transform` overrides the SVG `transform` attribute carrying his pose, and

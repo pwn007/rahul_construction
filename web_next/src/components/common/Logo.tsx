@@ -86,6 +86,44 @@ export function LogoMark({ className }: { className?: string; tone?: LogoTone })
   );
 }
 
+/**
+ * The full lockup on its own, not a link — for a surface where going home
+ * would be wrong, such as the client stories' full-screen player. `Logo` wraps
+ * it in the link.
+ */
+export function LogoLockup({ className, tone = 'auto' }: { className?: string; tone?: LogoTone }) {
+  const wordTone =
+    tone === 'light' ? 'text-white' : tone === 'dark' ? 'text-navy-800' : 'text-navy-800 dark:text-white';
+
+  return (
+    /* width/height attributes give the SVG an intrinsic ratio, so `w-auto`
+       resolves from the height instead of falling back to 300px. */
+    <svg
+      viewBox={LOCKUP.viewBox}
+      width={LOCKUP.width}
+      height={LOCKUP.height}
+      className={cn('h-10 w-auto shrink-0 transition-[height] duration-500 ease-out-expo', className)}
+      aria-hidden
+    >
+      <path
+        d={LOCKUP.mark}
+        fill="currentColor"
+        className="text-cyan-500 transition-transform duration-500 ease-out-expo [transform-box:fill-box] [transform-origin:center] group-hover:rotate-[-6deg]"
+      />
+      <g fill="currentColor" className={cn('transition-colors', wordTone)}>
+        {LOCKUP.primary.map((d, i) => (
+          <path key={i} d={d} />
+        ))}
+      </g>
+      <g fill="currentColor" className="text-cyan-500">
+        {LOCKUP.secondary.map((d, i) => (
+          <path key={i} d={d} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 export function Logo({
   className,
   lockupClassName,
@@ -98,39 +136,12 @@ export function Logo({
   compact?: boolean;
   tone?: LogoTone;
 }) {
-  const wordTone =
-    tone === 'light' ? 'text-white' : tone === 'dark' ? 'text-navy-800' : 'text-navy-800 dark:text-white';
-
   return (
     <Link href="/" className={cn('group flex items-center', className)} aria-label={`${SITE.name} — home`}>
       {compact ? (
         <LogoMark className="h-9 w-9 shrink-0 transition-transform duration-500 ease-out-expo group-hover:rotate-[-6deg]" />
       ) : (
-        /* width/height attributes give the SVG an intrinsic ratio, so `w-auto`
-           resolves from the height instead of falling back to 300px. */
-        <svg
-          viewBox={LOCKUP.viewBox}
-          width={LOCKUP.width}
-          height={LOCKUP.height}
-          className={cn('h-10 w-auto shrink-0 transition-[height] duration-500 ease-out-expo', lockupClassName)}
-          aria-hidden
-        >
-          <path
-            d={LOCKUP.mark}
-            fill="currentColor"
-            className="text-cyan-500 transition-transform duration-500 ease-out-expo [transform-box:fill-box] [transform-origin:center] group-hover:rotate-[-6deg]"
-          />
-          <g fill="currentColor" className={cn('transition-colors', wordTone)}>
-            {LOCKUP.primary.map((d, i) => (
-              <path key={i} d={d} />
-            ))}
-          </g>
-          <g fill="currentColor" className="text-cyan-500">
-            {LOCKUP.secondary.map((d, i) => (
-              <path key={i} d={d} />
-            ))}
-          </g>
-        </svg>
+        <LogoLockup className={lockupClassName} tone={tone} />
       )}
     </Link>
   );

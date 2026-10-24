@@ -15,7 +15,7 @@ import { useServices } from '@/hooks/useServices';
 import type { Project, Testimonial } from '@/types/domain';
 import type { ReactNode } from 'react';
 
-export { Logo, LogoMark, LogoWordmark } from './Logo';
+export { Logo, LogoLockup, LogoMark, LogoWordmark } from './Logo';
 export { Navbar } from './Navbar';
 export { Footer } from './Footer';
 export { Preloader, FloatingRail, CommandPalette, useCommandPalette } from './Chrome';
