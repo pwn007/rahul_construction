@@ -277,7 +277,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   const HDR = opts.header ?? '[data-site-header]';
   const DEBUG = !!opts.debug;
   const STAGE = !!opts.stage;
-  const STICKY = opts.sticky ?? '.chapter-stack > .chapter, .note-pile > *, .note-band__head';
+  const STICKY = opts.sticky ?? '.chapter-stack > .chapter, .note-pile > *, .note-band__head, .review-stage';
 
   const html = document.documentElement;
   const touchMq = window.matchMedia('(hover: none) and (pointer: coarse)');

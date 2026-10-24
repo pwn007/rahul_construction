@@ -1,8 +1,9 @@
 'use client';
 
 import { Counter, Reveal, SplitText } from '@/components/motion';
-import { StatTile, TestimonialBand } from '@/components/common';
+import { StatTile } from '@/components/common';
 import { WorkRail } from './WorkRail';
+import { ClientReviews } from './ClientReviews';
 import { ACHIEVEMENTS } from '@/constants/site';
 import { useProjects } from '@/features/projects/useProjects';
 import { useTestimonials } from '@/hooks/useTestimonials';
@@ -107,19 +108,20 @@ export function Achievements() {
 /* ==================================================================== */
 
 export function Testimonials() {
-  const testimonials = useTestimonials();
+  /*
+    Four. Each review is a scroll of its own here (ClientReviews), so the count
+    is how many scrolls the band holds the page for — the client's prototype
+    had four, and so does the seed. /about still shows every one, as the pile.
+  */
+  const testimonials = useTestimonials().slice(0, 4);
   const section = useHomeSections().find((s) => s.key === 'testimonials');
 
   return (
-    <TestimonialBand
+    <ClientReviews
       overline="What our clients say"
       title={section?.heading || 'Trusted by homeowners and businesses alike'}
       lead={section?.subheading || 'Four projects, four families, and the part they chose to say out loud.'}
       items={testimonials}
-      /* On a phone the notes pile up centred in what is left of the screen above the mobile contact
-         bar (`.note-band` in globals.css). StickyContactBar stands down on this page, so here that
-         is the whole screen. */
-      className="[--pile-floor:0px]"
     />
   );
 }

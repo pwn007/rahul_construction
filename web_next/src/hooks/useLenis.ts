@@ -1,13 +1,43 @@
 'use client';
 
 import { useEffect } from 'react';
-import Lenis from 'lenis';
+import Lenis, { type VirtualScrollData } from 'lenis';
 import { usePrefersReducedMotion } from './index';
 
 let lenisInstance: Lenis | null = null;
 
 export function getLenis(): Lenis | null {
   return lenisInstance;
+}
+
+type ScrollClaim = (data: VirtualScrollData) => boolean;
+const claims = new Set<ScrollClaim>();
+
+/**
+ * Take wheel events away from Lenis. Each claim sees every event Lenis would
+ * smooth and returns true to keep it: Lenis then leaves it alone, and the
+ * browser's own scroll is cancelled here, since Lenis only cancels the events
+ * it handles. A claim is module-level, so it outlives Lenis standing down and
+ * starting again (a pointer change). Returns the release.
+ *
+ * The home page's client reviews use it to move one review per wheel gesture
+ * (features/home/sections/ClientReviews.tsx).
+ */
+export function claimLenisScroll(claim: ScrollClaim): () => void {
+  claims.add(claim);
+  return () => {
+    claims.delete(claim);
+  };
+}
+
+function unclaimed(data: VirtualScrollData): boolean {
+  for (const claim of claims) {
+    if (claim(data)) {
+      if (data.event.cancelable) data.event.preventDefault();
+      return false;
+    }
+  }
+  return true;
 }
 
 /**
@@ -39,6 +69,7 @@ export function useLenisScroll() {
         smoothWheel: true,
         wheelMultiplier: 1,
         touchMultiplier: 1.6,
+        virtualScroll: unclaimed,
       });
       lenis = l;
       lenisInstance = l;

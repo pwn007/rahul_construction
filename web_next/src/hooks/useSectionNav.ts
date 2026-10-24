@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { createSectionNav } from '@/lib/section-nav';
+import { createSectionNav, type SectionNav } from '@/lib/section-nav';
+
+let current: SectionNav | null = null;
+
+/** The mounted page's engine, for a control that moves the page to a stop (the client reviews' dots). */
+export function getSectionNav(): SectionNav | null {
+  return current;
+}
 
 /**
  * One section per swipe on phones and tablets, for as long as the calling page
@@ -25,6 +32,10 @@ export function useSectionNav() {
   useEffect(() => {
     const q = window.location.search;
     const nav = createSectionNav({ debug: /[?&]navdebug\b/.test(q), stage: /[?&]navstage=1\b/.test(q) });
-    return () => nav.destroy();
+    current = nav;
+    return () => {
+      if (current === nav) current = null;
+      nav.destroy();
+    };
   }, []);
 }

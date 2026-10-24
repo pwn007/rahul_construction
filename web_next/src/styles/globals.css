@@ -569,6 +569,152 @@
     padding-bottom: max(0px, calc(var(--pile-free) / 2 + var(--pile-floor, 3.5rem) + 1.5rem - var(--band-foot)));
   }
 
+  /* ----------------------------------------------------------------
+     Client reviews — features/home/sections/ClientReviews.
+
+     One review at a time, dissolving into the next. The band is a screen
+     per review: the stage holds over all of them, and the empty stops
+     under it are what the page — and the section engine — scroll through.
+     The stops are pulled up under the stage so the band is exactly that
+     many screens, and let every click through to it.
+
+     The dissolve is the client prototype's, timing and all: the review
+     going leaves completely (420ms) before the one coming starts (after
+     380ms, over 480ms). Its 8px blur is 4px here — a blur repaints the
+     whole quote every frame, and on a phone this runs during the engine's
+     glide. Every review shares the stack's one grid cell, so the stack is
+     as tall as the longest quote. `visibility` takes a review out of
+     hit-testing once it has gone, and keeps the next one out until it
+     starts to arrive.
+     ---------------------------------------------------------------- */
+  .review-stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    height: calc(var(--vh) * 100);
+    padding: calc(var(--nav-h) + 1rem) 0 2rem;
+  }
+  .review-stops {
+    margin-top: calc(var(--vh) * -100);
+    pointer-events: none;
+  }
+  .review-stops > * {
+    min-height: calc(var(--vh) * 100);
+  }
+  .review-stack {
+    display: grid;
+  }
+  .review-stack > * {
+    --review-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    grid-area: 1 / 1;
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(-4px) scale(0.985);
+    visibility: hidden;
+    transition:
+      opacity 420ms var(--review-ease),
+      filter 420ms var(--review-ease),
+      transform 420ms var(--review-ease),
+      visibility 0s 420ms;
+  }
+  .review-stack > [data-on] {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+    visibility: visible;
+    transition:
+      opacity 480ms var(--review-ease) 380ms,
+      filter 480ms var(--review-ease) 380ms,
+      transform 480ms var(--review-ease) 380ms,
+      visibility 0s 380ms;
+  }
+
+  /* The dots: a pill for the review showing on a phone, where they sit in a
+     row under it; from `md` a column beside it, the one showing larger and
+     pulsing, as in the prototype. Ink, not cyan, for the rest: brand cyan
+     is 2.1:1 on this surface, short of the 3:1 a control needs. The button
+     is the 28px round the dot sits in. */
+  .review-dot {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+  }
+  .review-dot::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--c-text) / 0.28);
+    transition: width 300ms, background-color 300ms, transform 300ms;
+  }
+  .review-dot:hover::before {
+    background-color: rgb(var(--c-text) / 0.5);
+  }
+  .review-dot[aria-current]::before {
+    width: 1.25rem;
+    background-color: rgb(var(--c-brand));
+  }
+  .review-dot:focus-visible {
+    outline: 2px solid rgb(var(--c-brand));
+    outline-offset: 0;
+  }
+  @media (min-width: 768px) {
+    .review-dot[aria-current]::before {
+      width: 0.5rem;
+      transform: scale(1.35);
+      animation: review-dot-pulse 2.4s infinite;
+    }
+  }
+  @keyframes review-dot-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(var(--c-brand) / 0.45); }
+    50% { box-shadow: 0 0 0 5px rgb(var(--c-brand) / 0); }
+  }
+
+  /* A phone stacks the heading over the review in one screen, and the
+     longest quote has to fit it with everything else. Where that screen is
+     short the lead goes first, then the quote mark, and the quote steps down
+     to body size (measured: an iPhone SE's 667px overflowed by 41px with
+     all of them). Font sizes are doubled to outrank the `text-heading-md`
+     utility on the same element. */
+  @media (max-width: 767px) and (max-height: 760px) {
+    .review-stage { padding-top: var(--nav-h); padding-bottom: 1rem; }
+    .review-stage > .container { row-gap: 1.5rem; }
+    .review-lead, .review-mark { display: none; }
+    .review-text.review-text { font-size: 1rem; margin-top: 0; }
+  }
+  /* A phone held sideways goes further: the heading beside the review again,
+     the dots beside it as on desktop, and the project link left to the
+     project pages — 360px less the header is not room for all of it. */
+  @media (max-height: 520px) and (min-width: 600px) {
+    .review-stage { padding-top: var(--nav-h); padding-bottom: 0.5rem; }
+    .review-stage > .container { grid-template-columns: 5fr 7fr; align-items: center; column-gap: 2rem; }
+    .review-lead, .review-mark, .review-stack > figure > a { display: none; }
+    .review-text.review-text { font-size: 0.9375rem; margin-top: 0; }
+    .review-body { padding-right: 2.5rem; }
+    .review-dots.review-dots {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      flex-direction: column;
+      margin-top: 0;
+      transform: translateY(-50%);
+    }
+  }
+
+  /* No hold and no dissolve: the stage lies in the page as a band, and the
+     reviews are a list down it. No stops, so no dots. */
+  @media (prefers-reduced-motion: reduce) {
+    .review-stage { position: static; height: auto; padding: 3rem 0; }
+    .review-stage > .container { align-items: start; }
+    /* Doubled to outrank the dots' `flex` utility. */
+    .review-stops, .review-dots.review-dots { display: none; }
+    .review-stack { gap: 2.5rem; }
+    .review-stack > * { grid-area: auto; opacity: 1; filter: none; transform: none; visibility: visible; }
+  }
+
   /* The preloader worker's hammer swing, walk cycle and dust used to live here
      as keyframes. They are now computed in BuildScene.tsx instead: a CSS
      `transform` overrides the SVG `transform` attribute carrying his pose, and
@@ -1425,10 +1571,12 @@ html.snapnav [data-section][tabindex='-1']:focus {
    with no inset a sticky box has no offset, so each stop is measured where the flow puts it. Only the
    inset goes — the boxes stay sticky, so nothing the browser built for them is thrown away.
    The notes in a `.note-pile` and the heading beside them are not stops, but anything measured inside
-   one gets the same answer. */
+   one gets the same answer — as does the client reviews' stage, which the stage renderer (below) holds
+   by where the flow puts it. */
 html.snapnav-measure .chapter-stack > .chapter,
 html.snapnav-measure .note-pile > *,
-html.snapnav-measure .note-band__head {
+html.snapnav-measure .note-band__head,
+html.snapnav-measure .review-stage {
   top: auto;
 }
 /* The stage (engine.ts, "The stage"; the two boxes are in app/SiteChrome.tsx). With it up the page is
