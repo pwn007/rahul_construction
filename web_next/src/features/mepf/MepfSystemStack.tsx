@@ -59,11 +59,12 @@ const FOCUS: Partial<Record<SystemKey, string>> = {
  * ResizeObserver that reports the tallest card's height, which runs when the
  * width changes and never while scrolling.
  *
- * `WorkRail`, two sections below, reached the same conclusion from the other
- * direction: it was briefly a pinned horizontal rail driven by page scroll, and
- * that came out because a visitor cannot tell what a downward wheel turn did
- * when the answer is sideways. It is now a rail they move themselves. Between
- * the two sections the page has now rejected scroll-driven pinning three times.
+ * The selected work, two sections below, reached the same conclusion from the
+ * other direction: it was briefly a pinned horizontal rail driven by page
+ * scroll, and that came out because a visitor cannot tell what a downward wheel
+ * turn did when the answer is sideways. It is now a deck they move themselves
+ * (StoryDeck). Between the two sections the page has now rejected scroll-driven
+ * pinning three times.
  *
  * ── Three things the deck cannot do without ─────────────────────────────────
  *   · **Opaque cards.** `--c-surface-2` at full opacity, not a tint. A

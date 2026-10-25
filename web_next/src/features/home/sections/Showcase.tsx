@@ -1,8 +1,12 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { Counter, Reveal, SplitText } from '@/components/motion';
 import { StatTile } from '@/components/common';
-import { WorkRail } from './WorkRail';
+import { CtaLink } from '@/components/common/CtaLink';
+import { ROUTES } from '@/constants/routes';
+import { DeckFace, StoryDeck } from './StoryDeck';
+import { ProjectPhotoViewer } from './ProjectPhotoViewer';
 import { ClientReviews } from './ClientReviews';
 import { ACHIEVEMENTS } from '@/constants/site';
 import { useProjects } from '@/features/projects/useProjects';
@@ -24,21 +28,67 @@ export function FeaturedProjects() {
     with one project at `lg:col-span-7`, which the client rejected: no card was
     to be bigger than its neighbours.)
 
-    `WorkRail` has no rows to fill, so that constraint is gone and the number is
-    now an editorial one — plus the end card, seven frames is what fits inside
-    the scroll budget the rail argues for in its own header. Raising it is a
-    change to that budget, not just to this line.
+    It is the client stories' deck now (StoryDeck, at the client's request, Oct
+    2026 — it was a rail of its own, `WorkRail`, with parallax and an end card),
+    so the number is an editorial one: four on a laptop screen and two more
+    behind the arrows, or six cards to step through on a phone.
   */
   const projects = useProjects();
   const featured = projects.filter((p) => p.featured).slice(0, 6);
+  /* The admin's heading, set like "Client Stories": its first word in cyan. */
+  const heading = (section?.heading || 'Built across Jaipur').trim();
+  const [first, ...rest] = heading.split(/\s+/);
+  /* The full-screen photograph: which card it is showing, or closed. */
+  const [viewing, setViewing] = useState<number | null>(null);
+  const close = useCallback(() => setViewing(null), []);
+
+  if (!featured.length) return null;
 
   return (
-    <WorkRail
-      projects={featured}
-      total={projects.length}
-      heading={section?.heading || 'Built across Jaipur'}
-      lead={section?.subheading || 'From a narrow 25-foot plot in Pratap Nagar to a mixed-use block in Sanganer — every project documented properly.'}
-    />
+    <>
+      <StoryDeck
+        items={featured}
+        dataSection="projects"
+        label={{ row: 'Selected projects', items: 'Projects', item: 'Project' }}
+        overline="Selected work"
+        title={
+          <>
+            <span className="text-[rgb(var(--c-brand-text))]">{first}</span> {rest.join(' ')}
+          </>
+        }
+        /* The stories' "Click any card for Cinema Popup", for a photograph. */
+        hint="Click any card for Photo Popup"
+        aside={
+          <CtaLink href={ROUTES.projects} className="ml-2">
+            All projects
+          </CtaLink>
+        }
+        /* The phone's way to the archive, which the header's button is not on. */
+        foot={
+          <CtaLink href={ROUTES.projects} size="sm">
+            All projects
+          </CtaLink>
+        }
+        stripLabel="90% Center Photo Stage"
+        face={(p, i, stage, on) => (
+          <DeckFace
+            image={p.coverImage}
+            n={i + 1}
+            total={featured.length}
+            stage={stage}
+            on={on}
+            icon="expand"
+            stageLabel="Photo"
+            eyebrow={`${p.locality} · ${p.year}`}
+            name={p.title}
+          />
+        )}
+        nameOf={(p) => p.title}
+        cardLabel={(p) => `Open photo of ${p.title}, ${p.locality}`}
+        onOpen={setViewing}
+      />
+      <ProjectPhotoViewer projects={featured} title={heading} index={viewing} onIndex={setViewing} onClose={close} />
+    </>
   );
 }
 

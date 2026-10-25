@@ -1,30 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play, Volume2, VolumeX, X } from 'lucide-react';
-import { LogoLockup } from '@/components/common/Logo';
+import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { resolveVideo } from '@/components/common/VideoLightbox';
-import { useLockBodyScroll } from '@/hooks';
 import { cn } from '@/lib/cn';
 import type { ClientVideo } from '@/types/domain';
+import { PopupSteps, StoryPopup } from './StoryPopup';
 
 /**
- * The client stories' full-screen player — the prototype's "100% popup".
- *
- * It takes the whole screen on every device: the lockup and the close button
- * across the top, the band's title, the film in a frame that fills what is
- * left, and the client's name under it. In the frame: the sound chip, the
- * counter, play/pause, the previous and next films (running round, like the
- * band), and the time with a seek bar. On a laptop the frame is the film's
- * own upright shape, centred; the prototype only drew the phone.
- *
- * The plumbing is `VideoLightbox`'s: a portal, mounted only while open, the
- * body locked (which also stands the section engine down — lib/section-nav
- * `blocked()`), Escape to leave, and focus handed back to the card that
- * opened it. `data-lenis-prevent` because Lenis ignores the body lock — see
- * the preloader in Chrome.tsx.
+ * The client stories' full-screen player: the decks' popup (StoryPopup) with a
+ * film in its frame. In the frame: the sound chip, the counter, play/pause,
+ * the previous and next films (running round, like the deck), and the time
+ * with a seek bar.
  *
  * It starts muted, as browsers require for a film that starts itself; the chip
  * turns the sound on, and the choice holds for the next film.
@@ -41,91 +28,25 @@ export function ClientStoryPlayer({
   onClose: () => void;
 }) {
   const count = videos.length;
-  const open = index !== null && count > 0;
-  const at = open ? Math.min(index, count - 1) : 0;
+  const at = index === null ? 0 : Math.min(index, count - 1);
+  const video = index === null ? undefined : videos[at];
   const [muted, setMuted] = useState(true);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  useLockBodyScroll(open);
+  const step = count > 1 ? (by: 1 | -1) => onIndex((at + by + count) % count) : undefined;
 
-  useEffect(() => {
-    if (!open) return;
-    const opener = document.activeElement as HTMLElement | null;
-    closeRef.current?.focus();
-    /* Send focus back where it came from — the card that opened this. */
-    return () => opener?.focus?.();
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowLeft' && count > 1) onIndex((at - 1 + count) % count);
-      else if (e.key === 'ArrowRight' && count > 1) onIndex((at + 1) % count);
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, at, count, onIndex, onClose]);
-
-  if (typeof document === 'undefined') return null;
-
-  const video = videos[at];
-  const [first, last] = video ? splitName(video.name) : ['', ''];
-
-  return createPortal(
-    <AnimatePresence>
-      {open && video && (
-        <motion.div
-          key="client-story-player"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-          className="cs-player"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Client story — ${video.name}, ${video.locality}`}
-          data-lenis-prevent
-        >
-          <div className="cs-player__bar">
-            <span className="w-11" aria-hidden />
-            <LogoLockup tone="light" className="h-8" />
-            <button ref={closeRef} type="button" className="cs-player__close" onClick={onClose} aria-label="Close Full-Screen Video">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <p className="cs-player__title">Client Stories</p>
-
-          <div className="cs-player__stage">
-            <Reel
-              key={video.id}
-              video={video}
-              n={at + 1}
-              total={count}
-              muted={muted}
-              onMuted={setMuted}
-              onStep={count > 1 ? (by) => onIndex((at + by + count) % count) : undefined}
-            />
-          </div>
-
-          <div className="cs-player__name">
-            <p>
-              {first}
-              {last && <span>{last}</span>}
-            </p>
-            <p>Client Story</p>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body,
+  return (
+    <StoryPopup
+      open={!!video}
+      title="Client Stories"
+      label={video ? `Client story — ${video.name}, ${video.locality}` : ''}
+      closeLabel="Close Full-Screen Video"
+      name={video?.name ?? ''}
+      line="Client Story"
+      onClose={onClose}
+      onStep={step}
+    >
+      {video && <Reel key={video.id} video={video} n={at + 1} total={count} muted={muted} onMuted={setMuted} onStep={step} />}
+    </StoryPopup>
   );
-}
-
-/** "Dr. Ashok Verma" → ["Dr. Ashok", "Verma"]: the prototype sets the last word on a line of its own (in cyan on the cards). */
-export function splitName(name: string): [string, string] {
-  const words = name.trim().split(/\s+/);
-  return words.length > 1 ? [words.slice(0, -1).join(' '), words[words.length - 1]] : [name.trim(), ''];
 }
 
 const time = (s: number) => {
@@ -171,16 +92,7 @@ function Reel({
   };
 
   const counter = <span className="cs-reel__count">{`${n}/${total}`}</span>;
-  const steps = onStep && (
-    <>
-      <button type="button" className="cs-reel__step left-3" onClick={() => onStep(-1)} aria-label="Previous video">
-        <ChevronLeft className="h-4 w-4" />
-      </button>
-      <button type="button" className="cs-reel__step right-3" onClick={() => onStep(1)} aria-label="Next video">
-        <ChevronRight className="h-4 w-4" />
-      </button>
-    </>
-  );
+  const steps = onStep && <PopupSteps onStep={onStep} noun="video" />;
 
   if (source?.kind === 'embed') {
     return (

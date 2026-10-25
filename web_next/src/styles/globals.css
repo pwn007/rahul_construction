@@ -298,6 +298,44 @@
     border: 1px solid rgb(255 255 255 / 0.12);
   }
 
+  /* The header's veil (Navbar). No bar, no edge: what scrolls under the
+     header blurs and fades towards the top of the screen and is clear again
+     just below the bar — after the client's reference (Oct 2026, the Gemini
+     app's top bar). One blurred layer, faded by a mask, rather than a stack
+     of them graded by strength: each layer is a blur of the page redone every
+     frame of a scroll, and this one costs what the old glass bar did. It
+     ends at the bar's own edge — fully blurred to the bar's middle, clear by
+     its foot — so what rests just under the header, such as a deck's title
+     on a phone, is sharp. (It once reached 1.75rem further, and softened
+     exactly those titles.) Tinted from the page ground, or from ink over a
+     dark band (`data-tone`, which the navbar sets from what it is over). */
+  .nav-veil {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms ease;
+    background: linear-gradient(to bottom, rgb(var(--c-bg) / 0.82), rgb(var(--c-bg) / 0.4) 60%, rgb(var(--c-bg) / 0));
+    backdrop-filter: blur(14px) saturate(1.5);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
+    mask-image: linear-gradient(to bottom, #000 50%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent);
+  }
+  .nav-veil[data-on] { opacity: 1; }
+  .nav-veil[data-tone='dark'] {
+    background: linear-gradient(to bottom, rgb(5 7 13 / 0.6), rgb(5 7 13 / 0.25) 60%, rgb(5 7 13 / 0));
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .nav-veil {
+      background: rgb(var(--c-bg) / 0.97);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+    .nav-veil[data-tone='dark'] { background: rgb(5 7 13 / 0.95); }
+  }
+
   /* Film grain for cinematic dark sections */
   .grain::after {
     content: '';
@@ -716,18 +754,18 @@
   }
 
   /* ----------------------------------------------------------------
-     Client stories — features/home/sections/ClientVideos and its
-     ClientStoryPlayer.
+     Story deck — features/home/sections/StoryDeck: the client stories
+     (ClientVideos, and its ClientStoryPlayer) and the selected work.
 
-     Built to the client's prototype on the page's own ground: the cards keep
-     its navy and cyan (they sit on photographs), the band round them does
-     not. Two layouts, swapped here rather than in script so the server's
+     Built to the client's prototype on the page's own ground, and in the
+     site's own ink rather than the prototype's navy (client, Oct 2026): the
+     cards keep its cyan, over the same dark the project cards always had. Two layouts, swapped here rather than in script so the server's
      markup holds at every width: from `md`, a row of cards (`.cs-rail`); on a
      phone held upright, a single screen (`.cs-stage`) with one card in the
      middle and the outer 5% of its neighbours either side. A phone held
      sideways has no height for that and gets the row.
      ---------------------------------------------------------------- */
-  .client-stories {
+  .story-deck {
     /* The container's own gutter (20px at every width — `container.screens`
        has only 2xl, so its per-breakpoint padding never applies), so the
        row's first card stands under the heading. Past 1440px the container
@@ -735,7 +773,7 @@
     --cs-edge: 1.25rem;
     --cs-gap: 1.25rem;
   }
-  @media (min-width: 1440px) { .client-stories { --cs-edge: calc((100vw - 1440px) / 2 + 1.25rem); } }
+  @media (min-width: 1440px) { .story-deck { --cs-edge: calc((100vw - 1440px) / 2 + 1.25rem); } }
 
   .cs-head {
     display: flex;
@@ -823,7 +861,7 @@
     width: 100%;
     overflow: hidden;
     border-radius: 1rem;
-    background-color: theme(colors.navy.900);
+    background-color: theme(colors.ink.900);
     text-align: left;
     -webkit-tap-highlight-color: transparent;
   }
@@ -833,12 +871,12 @@
   }
   .cs-card--row {
     aspect-ratio: 9 / 15;
-    border: 1px solid theme(colors.navy.800 / 18%);
-    box-shadow: 0 1px 2px rgb(15 20 32 / 0.06), 0 16px 28px -18px theme(colors.navy.800 / 55%);
+    border: 1px solid rgb(var(--c-border));
+    box-shadow: 0 1px 2px rgb(15 20 32 / 0.06), 0 16px 28px -18px theme(colors.ink.900 / 55%);
     transition: box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .cs-card--row:hover {
-    box-shadow: 0 0 0 1px theme(colors.cyan.500 / 45%), 0 22px 36px -18px theme(colors.navy.800 / 60%);
+    box-shadow: 0 0 0 1px theme(colors.cyan.500 / 45%), 0 22px 36px -18px theme(colors.ink.900 / 60%);
   }
 
   .cs-face {
@@ -855,14 +893,16 @@
     transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .cs-card--row:hover .cs-face > img { transform: scale(1.05); }
-  /* Navy pooled at the foot, under the name, and a breath of it over the
-     whole photograph, as on the prototype's cards. */
+  /* Ink pooled at the foot, under the name, and a short band of it at the
+     top, under the counter — the project cards' two scrims: the foot's fades
+     out long before the top edge, and a pale photograph there would take the
+     counter with it. */
   .cs-face__shade {
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(to top, theme(colors.navy.800 / 95%) 0%, theme(colors.navy.800 / 62%) 24%, theme(colors.navy.800 / 0%) 52%),
-      linear-gradient(theme(colors.navy.800 / 10%), theme(colors.navy.800 / 10%));
+      linear-gradient(to bottom, theme(colors.ink.950 / 55%), theme(colors.ink.950 / 0%) 28%),
+      linear-gradient(to top, theme(colors.ink.950 / 90%) 0%, theme(colors.ink.950 / 25%) 50%, theme(colors.ink.950 / 0%) 100%);
   }
   .cs-face__count {
     position: absolute;
@@ -874,7 +914,7 @@
     height: 2.5rem;
     border-radius: 9999px;
     border: 1.5px solid theme(colors.cyan.500);
-    background-color: theme(colors.navy.800 / 85%);
+    background-color: theme(colors.ink.950 / 70%);
     color: #fff;
     font: 600 0.75rem/1 theme(fontFamily.display);
   }
@@ -894,7 +934,7 @@
     height: 3.5rem;
     border-radius: 9999px;
     border: 2px solid theme(colors.cyan.500);
-    background-color: theme(colors.navy.900 / 50%);
+    background-color: theme(colors.ink.950 / 45%);
     color: theme(colors.cyan.500);
     box-shadow: 0 0 24px theme(colors.cyan.500 / 25%);
     transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -929,6 +969,13 @@
     display: block;
     color: theme(colors.cyan.500);
   }
+  .cs-face__name > .cs-face__eyebrow {
+    margin-bottom: 0.375rem;
+    font: 500 0.6875rem/1.3 theme(fontFamily.sans);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.65);
+  }
   @media (max-width: 1279px) {
     .cs-card--row .cs-face__name { left: 1rem; right: 1rem; bottom: 1rem; font-size: 1.125rem; }
   }
@@ -940,7 +987,7 @@
      would otherwise win. */
   .cs-stage { display: none; }
   @media (max-width: 767px) and (min-height: 521px) {
-    .client-stories.client-stories {
+    .story-deck.story-deck {
       display: flex;
       flex-direction: column;
       height: calc(var(--vh) * 100);
@@ -1033,6 +1080,12 @@
     margin-top: 0.375rem;
     padding: 0 5%;
   }
+  /* The selected work's way to the archive, on a phone. */
+  .cs-stage__foot {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.375rem;
+  }
   .cs-step {
     display: grid;
     flex: none;
@@ -1099,8 +1152,8 @@
     padding-bottom: env(safe-area-inset-bottom);
     color: #fff;
     background:
-      radial-gradient(120% 70% at 50% 0%, theme(colors.navy.700 / 70%), transparent 70%),
-      linear-gradient(180deg, theme(colors.navy.800), theme(colors.navy.950));
+      radial-gradient(120% 70% at 50% 0%, theme(colors.ink.800 / 70%), transparent 70%),
+      linear-gradient(180deg, theme(colors.ink.900), theme(colors.ink.950));
   }
   .cs-player button:focus-visible {
     outline: 2px solid theme(colors.cyan.400);
@@ -1121,7 +1174,7 @@
     height: 2.75rem;
     border-radius: 9999px;
     background-color: theme(colors.cyan.500);
-    color: theme(colors.navy.900);
+    color: theme(colors.ink.950);
     box-shadow: 0 0 20px theme(colors.cyan.500 / 45%);
   }
   .cs-player__title {
@@ -1147,11 +1200,13 @@
   }
   .cs-player__name > p:first-child { font: 600 1.5rem/1.15 theme(fontFamily.display); }
   .cs-player__name > p:first-child > span { display: block; }
-  .cs-player__name > p:last-child {
+  .cs-player__name > p:nth-child(2) {
     margin-top: 0.25rem;
     font-size: 0.8125rem;
     color: rgb(255 255 255 / 0.7);
   }
+  /* The project's page, under a photograph's name. */
+  .cs-player__action { margin-top: 0.75rem; }
   /* The frame fills what is left on a phone; on a laptop it is the film's own
      upright shape, as tall as the room allows, and the name lines up under it. */
   .cs-reel {
@@ -1168,7 +1223,8 @@
     .cs-reel { width: auto; max-width: 100%; aspect-ratio: 9 / 16; }
     .cs-player__name { width: min(100% - 2.5rem, 24rem); margin-inline: auto; }
   }
-  .cs-reel > video { animation: cs-reel-in 350ms ease both; }
+  .cs-reel > video,
+  .cs-reel > .cs-reel__photo { animation: cs-reel-in 350ms ease both; }
   .cs-reel__backdrop {
     position: absolute;
     inset: 0;
@@ -1188,8 +1244,8 @@
     height: 7rem;
     pointer-events: none;
   }
-  .cs-reel__scrim--top { top: 0; background: linear-gradient(to bottom, theme(colors.navy.950 / 55%), transparent); }
-  .cs-reel__scrim--bottom { bottom: 0; background: linear-gradient(to top, theme(colors.navy.950 / 75%), transparent); }
+  .cs-reel__scrim--top { top: 0; background: linear-gradient(to bottom, theme(colors.ink.950 / 55%), transparent); }
+  .cs-reel__scrim--bottom { bottom: 0; background: linear-gradient(to top, theme(colors.ink.950 / 75%), transparent); }
   .cs-reel__chip {
     position: absolute;
     top: 1rem;
@@ -1201,7 +1257,7 @@
     padding: 0 0.875rem;
     border-radius: 9999px;
     border: 1px solid theme(colors.cyan.400 / 40%);
-    background-color: theme(colors.navy.800 / 85%);
+    background-color: theme(colors.ink.950 / 75%);
     font-size: 0.75rem;
     font-weight: 600;
   }
@@ -1215,7 +1271,7 @@
     height: 2.5rem;
     border-radius: 9999px;
     background-color: theme(colors.cyan.500);
-    color: theme(colors.navy.900);
+    color: theme(colors.ink.950);
     font: 700 0.75rem/1 theme(fontFamily.display);
     box-shadow: 0 0 18px theme(colors.cyan.500 / 50%);
   }
@@ -1229,7 +1285,7 @@
     height: 3.5rem;
     border-radius: 9999px;
     border: 2px solid theme(colors.cyan.500);
-    background-color: theme(colors.navy.800 / 55%);
+    background-color: theme(colors.ink.950 / 50%);
     color: #fff;
     box-shadow: 0 0 24px theme(colors.cyan.500 / 35%);
     transform: translate(-50%, -50%);
@@ -1243,7 +1299,7 @@
     height: 2rem;
     border-radius: 9999px;
     border: 1px solid rgb(255 255 255 / 0.25);
-    background-color: theme(colors.navy.800 / 70%);
+    background-color: theme(colors.ink.950 / 60%);
     color: #fff;
     transform: translateY(-50%);
   }
@@ -2157,6 +2213,20 @@ html.snapnav:not(.snapnav-zoom) body {
 }
 html.snapnav [data-section][tabindex='-1']:focus {
   outline: none;
+}
+/* The header stays on screen (client, Oct 2026) and the engine rests a band at its top, so a band whose
+   first words sit higher than the header gets the header's height above them. Only under the engine: a
+   page that scrolls freely passes its bands under the header's veil, as it should. The trust strip
+   travels with the band after it (engine.ts, "Stops"), so it is the top of that stop. The decks
+   (StoryDeck) need it where they are a row — a tablet, a phone held sideways — and not as a phone's
+   screen, which clears the header itself; so do the chapters and the client reviews' screen. */
+html.snapnav [data-section='trust'] {
+  padding-top: calc(var(--nav-h) + 1.25rem);
+}
+@media not all and (max-width: 767px) and (min-height: 521px) {
+  html.snapnav .story-deck {
+    padding-top: calc(var(--nav-h) + 1.25rem);
+  }
 }
 /* Chapters in a stack are `position: sticky`, and a stuck box reports where it is stuck, not where it
    sits in the flow. The engine sets `snapnav-measure` for the length of a read (`inFlow` in engine.ts):

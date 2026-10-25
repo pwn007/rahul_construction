@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -46,23 +46,28 @@ export function Navbar() {
   const navRows = useNavItems();
   const nav = mergeNav(navRows);
   const cta = navRows.find((r) => r.highlight);
-  const { atTop, direction, past } = useScrollInfo();
+  const { atTop } = useScrollInfo();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const heroTone = useHeroTone();
+  const headerRef = useRef<HTMLElement>(null);
+  const toneUnder = useToneUnder(headerRef);
 
   /**
-   * Transparent bar sitting over a forced-dark hero: everything must render
-   * light-on-dark. Once the glass background appears on scroll, normal
-   * theme-aware colours take over again.
+   * The bar is see-through at every scroll position (client, Oct 2026), so it
+   * takes its colours from whatever is under it: light-on-dark over a dark band
+   * (`.on-dark` — the heroes, OneSystem, the chapters, the footer), the
+   * theme's own colours over the rest. At the top that is the page's hero,
+   * which the page declares (`useRegisterHeroTone`) — read from there rather
+   * than measured, so the first paint is already right.
    *
    * Only the colours switch here — never the geometry. Hovering a link opens its
    * mega menu, which flips this off; if that also moved anything, every link
    * would jump sideways under the pointer onto its neighbour, which would then
    * open *its* menu.
    */
-  const overDark = (heroTone === 'dark' || heroTone === 'cinematic') && atTop && !openMenu;
+  const overDark = (atTop ? heroTone === 'dark' || heroTone === 'cinematic' : toneUnder === 'dark') && !openMenu;
 
   /**
    * One header everywhere (Design B, made site-wide in Sep 2026): phones get
@@ -83,27 +88,36 @@ export function Navbar() {
     setOpenMenu(null);
   }, [pathname]);
 
-  const hidden = direction === 'down' && past && !openMenu && !mobileOpen;
-
   return (
     <>
-      <motion.header
+      {/*
+        Fixed, and never slides away (client, Oct 2026 — it used to leave on the
+        way down and come back on the way up). Nothing behind the bar but the
+        veil: once the page has moved, the content going under it blurs and
+        fades towards the top edge (`.nav-veil`, globals.css), after the
+        reference the client gave. A mega menu is still read off glass.
+      */}
+      <header
+        ref={headerRef}
         /* How the section engine (lib/section-nav) finds the header, to keep a
            link's target clear of it. */
         data-site-header=""
-        initial={false}
-        animate={{ y: hidden ? '-100%' : '0%' }}
-        transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
         className="fixed inset-x-0 top-0 z-50"
         onMouseLeave={() => setOpenMenu(null)}
       >
+        <span
+          className="nav-veil"
+          data-on={!atTop && !openMenu ? '' : undefined}
+          data-tone={overDark ? 'dark' : undefined}
+          aria-hidden
+        />
         <div
           className={cn(
-            'transition-all duration-500 ease-out-expo',
+            'relative transition-all duration-500 ease-out-expo',
             /* Bottom edge only: `.glass` draws a 1px border on all four sides,
                which nudged the whole row 1px right and down the moment the bar
                turned to glass. */
-            atTop && !openMenu ? 'bg-transparent' : 'glass border-x-0 border-b border-t-0 shadow-sm',
+            openMenu ? 'glass border-x-0 border-b border-t-0 shadow-sm' : 'bg-transparent',
           )}
         >
           <div
@@ -237,11 +251,52 @@ export function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
+      </header>
 
       <MobileDrawer open={mobileOpen} onClose={() => setMobileOpen(false)} />
     </>
   );
+}
+
+/**
+ * What the bar is over: 'dark' when the page under its middle is an `.on-dark`
+ * band, 'light' otherwise; null until the page has scrolled.
+ *
+ * A hit-test at the bar's mid-height, taking the first element that is not
+ * the header's own, once a frame at most while the page moves. It reads what
+ * is drawn there, so it follows the sticky chapters and the section engine's
+ * stage (lib/section-nav, `?navstage=1`) without knowing about either. The
+ * state moves only when the answer changes — a few times on the whole page —
+ * so the navbar does not re-render with the scroll.
+ */
+function useToneUnder(headerRef: RefObject<HTMLElement | null>): 'dark' | 'light' | null {
+  const [tone, setTone] = useState<'dark' | 'light' | null>(null);
+
+  useEffect(() => {
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const header = headerRef.current;
+      const bar = header?.querySelector<HTMLElement>(':scope > div');
+      if (!header || !bar) return;
+      const under = document
+        .elementsFromPoint(window.innerWidth / 2, bar.offsetHeight / 2)
+        .find((el) => !header.contains(el));
+      if (under) setTone(under.closest('.on-dark') ? 'dark' : 'light');
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(read);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [headerRef]);
+
+  return tone;
 }
 
 function MegaMenuContent({ item }: { item?: NavLinkType }) {

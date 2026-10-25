@@ -383,6 +383,13 @@ export function Hero() {
             </motion.div>
           </ExitLift>
 
+          {/*
+            The figures (80+ projects, 30+ years, 10+ professionals, 98%
+            satisfaction), hidden at the client's request for now (Oct 2026).
+            Uncomment to bring them back — `ChapterFigures`, `ACHIEVEMENTS` and
+            `HeroCount` are still imported and defined for it. The lede above
+            needs no change either way: `.hero-v2__bottom` is a flex row.
+
           <ExitLift {...exit} order={2} className="hero-v2__figures">
             <motion.div variants={riseVariants(RISE_AT + 2 * RISE_STEP, reduced)}>
               <ChapterFigures
@@ -399,6 +406,7 @@ export function Hero() {
               />
             </motion.div>
           </ExitLift>
+          */}
         </div>
       </motion.div>
 

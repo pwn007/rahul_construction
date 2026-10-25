@@ -82,17 +82,20 @@ export function useWithinFirstScreen(): boolean {
 
 /** Scroll position + direction, rAF-throttled. */
 /**
- * Which way the page is scrolling, and whether it is at the top or well down it.
+ * Whether the page is at its top.
  *
- * Three facts, not the position. The position changes on every frame of a
- * scroll, and holding it in state re-rendered the caller (the navbar) sixty
- * times a second for the whole of every glide — on a phone that is work the
- * main thread does instead of drawing the scroll. These change a handful of
- * times on a whole trip down the page, and the state only moves when one does.
+ * A fact, not the position. The position changes on every frame of a scroll,
+ * and holding it in state re-rendered the caller (the navbar) sixty times a
+ * second for the whole of every glide — on a phone that is work the main
+ * thread does instead of drawing the scroll. This changes twice on a whole trip
+ * down the page, and the state only moves when it does.
+ *
+ * It also knew the direction and whether the page was well down, for the
+ * header that slid away on the way down; the header stays put now (client,
+ * Oct 2026).
  */
 export function useScrollInfo() {
-  const [state, setState] = useState({ direction: 'down' as 'up' | 'down', atTop: true, past: false });
-  const lastY = useRef(0);
+  const [state, setState] = useState({ atTop: true });
   const ticking = useRef(false);
 
   useEffect(() => {
@@ -100,15 +103,8 @@ export function useScrollInfo() {
       if (ticking.current) return;
       ticking.current = true;
       requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const direction = y > lastY.current ? 'down' : 'up';
-        const atTop = y < 12;
-        /* Far enough down that the header may slide away (Navbar's `hidden`). */
-        const past = y > 400;
-        setState((prev) =>
-          prev.direction === direction && prev.atTop === atTop && prev.past === past ? prev : { direction, atTop, past },
-        );
-        lastY.current = y;
+        const atTop = window.scrollY < 12;
+        setState((prev) => (prev.atTop === atTop ? prev : { atTop }));
         ticking.current = false;
       });
     };
