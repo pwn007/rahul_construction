@@ -1395,6 +1395,46 @@
   .section { @apply py-16 md:py-20 lg:py-24; }
   .section-sm { @apply py-12 md:py-14 lg:py-16; }
 
+  /* OneSystem on a phone: a screen of its own, like every band of the home
+     page there (client, Oct 2026). Its copy sits in the middle of what the
+     header leaves, and the trust strip's logos — which run along its foot on a
+     phone, the strip itself being hidden there (`.trust-bar`) — at the bottom.
+     A screen-tall `min-height` is also what makes the section engine give it
+     a stop of its own. Doubled to outrank `.section`'s padding. */
+  @media (max-width: 767px) {
+    .trust-bar { display: none; }
+    .one-system.one-system {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(var(--vh) * 100);
+      padding: calc(var(--nav-h) + 1rem) 0 max(1.5rem, env(safe-area-inset-bottom));
+    }
+    .one-system > .container { margin-block: auto; }
+    .one-system__logos { padding-top: 1.5rem; }
+  }
+  /* A phone browser with its toolbars showing leaves about 660px, and the
+     band's copy measured 767px with its logos: so on shorter screens it steps
+     down — smaller type, tighter gaps — and below 680px the two links share a
+     line at the pill's small size. Doubled where utilities on the same
+     elements would win. */
+  @media (max-width: 767px) and (max-height: 800px) {
+    .one-system.one-system {
+      padding-top: calc(var(--nav-h) + 0.5rem);
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    .one-system.one-system > .container > div { gap: 1.25rem; }
+    .one-system.one-system h2 { font-size: 1.75rem; }
+    .one-system.one-system .text-body-lg { margin-top: 1rem; font-size: 0.9375rem; line-height: 1.55; }
+    .one-system__payoff.one-system__payoff { margin-top: 0.75rem; font-size: 0.9375rem; }
+    .one-system__logos { padding-top: 1rem; }
+    .one-system__logos.one-system__logos > p { margin-bottom: 0.625rem; }
+  }
+  @media (max-width: 767px) and (max-height: 680px) {
+    .one-system.one-system h2 { font-size: 1.625rem; }
+    .one-system__ctas.one-system__ctas { flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
+    .one-system__ctas.one-system__ctas > a { padding: 0.375rem 0.875rem; font-size: 0.8125rem; }
+  }
+
   .hairline { @apply h-px w-full bg-current opacity-10; }
 
   /* Kinetic type: each word/line masked.

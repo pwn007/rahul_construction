@@ -72,11 +72,11 @@ export function HomeView() {
         into `WhyChooseUs` and are back on their own band.
       */}
       <Hero />
-      {on('trust') && <TrustBar />}
+      {on('trust') && <TrustBar alone={!on('one-system')} />}
       {/* Who we are, before what we sell — moved above the services index at the
           client's request (Sep 2026); it used to close the page's argument after
           the projects. Still the page's only dark band. */}
-      {on('one-system') && <OneSystem />}
+      {on('one-system') && <OneSystem logos={on('trust')} />}
       {/* The offer. Three services, not four — MEPF is the section immediately
           below, and listing it here as well would put it on this page three
           times. Four chapters since the design migration (the offer, then one
