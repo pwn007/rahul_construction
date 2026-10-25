@@ -107,7 +107,7 @@ export function PostDetailView({ slug }: { slug: string }) {
   if (!post) {
     return (
       <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
-        <p className="text-heading-lg font-semibold">This article is no longer available.</p>
+        <p className="font-display text-heading-lg font-semibold">This article is no longer available.</p>
         <Button href={ROUTES.blog} variant="accent">
           See all articles
         </Button>

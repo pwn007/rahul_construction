@@ -45,7 +45,14 @@ export function ProjectPhotoViewer({
       line={project ? `${project.locality} · ${project.year}` : ''}
       action={
         project && (
-          <CtaLink href={ROUTES.project(project.slug)} tone="light" size="sm">
+          /* A white outline here, not the light tone's cyan: the popup is neutral like the
+             cards that open it (25 Oct 2026). tailwind-merge lets these win over the tone. */
+          <CtaLink
+            href={ROUTES.project(project.slug)}
+            tone="light"
+            size="sm"
+            className="border-white/40 bg-white/5 text-white hover:border-white/70 hover:bg-white/10 focus-visible:outline-white"
+          >
             View Project
           </CtaLink>
         )
@@ -93,11 +100,6 @@ function Still({ src, alt, n, total, onStep }: { src: string; alt: string; n: nu
       <span className="cs-reel__scrim cs-reel__scrim--bottom" aria-hidden />
       <span className="cs-reel__count">{`${n}/${total}`}</span>
       {onStep && <PopupSteps onStep={onStep} noun="photo" />}
-      <div className="cs-reel__foot">
-        <div className="cs-reel__times justify-center">
-          <span className="cs-note">100% Full-Screen Gallery</span>
-        </div>
-      </div>
     </div>
   );
 }

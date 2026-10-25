@@ -313,8 +313,11 @@ export function Counter({
     return () => cancelAnimationFrame(frame);
   }, [inView, value, duration, reduced]);
 
+  /* The family is the caller's (25 Oct 2026): a marketing stat sits in Outfit, an admin
+     figure in mono (`.num` on its parent). It used to force mono here, which overrode the
+     stat rows' Outfit. Tabular digits keep the width steady while it counts, in either. */
   return (
-    <span ref={ref} className={cn('num tabular-nums', className)}>
+    <span ref={ref} className={cn('tabular-nums', className)}>
       {prefix}
       {formatNumber(display, decimals)}
       {suffix}

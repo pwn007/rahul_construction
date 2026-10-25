@@ -18,7 +18,7 @@ import type { ReactNode } from 'react';
 export { Logo, LogoLockup, LogoMark, LogoWordmark } from './Logo';
 export { Navbar } from './Navbar';
 export { Footer } from './Footer';
-export { Preloader, FloatingRail, CommandPalette, useCommandPalette } from './Chrome';
+export { Preloader, CommandPalette, useCommandPalette } from './Chrome';
 export { StickyContactBar } from './StickyContactBar';
 export { ConsentCheckbox, CONSENT_REQUIRED } from './ConsentCheckbox';
 /* BuildingSystems is gone — the isometric house at features/mepf/scene/HouseIso
@@ -119,7 +119,7 @@ export function StatTile({
   return (
     <div className={cn('group flex flex-col', className)}>
       <span className="relative inline-flex self-start">
-        <span className={cn('num text-display-sm font-semibold leading-none', tone === 'light' ? 'text-white' : 'text-navy-800 dark:text-white')}>
+        <span className={cn('font-display tabular-nums text-display-sm font-semibold leading-none', tone === 'light' ? 'text-white' : 'text-navy-800 dark:text-white')}>
           {value}
         </span>
         <DimensionLine tone={tone} />

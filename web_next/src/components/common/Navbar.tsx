@@ -155,7 +155,9 @@ export function Navbar() {
                    the mega menu. */
                 const triggerClass = (lit: boolean) =>
                   cn(
-                    'flex items-center px-3.5 py-2 font-montserrat text-[12.5px] font-medium uppercase tracking-[0.24em] transition-colors xl:px-[21px]',
+                    /* Inter, the site's label face, since 25 Oct 2026 — it was Montserrat,
+                       a fifth family loaded for these five words. */
+                    'flex items-center px-3.5 py-2 font-sans text-[12.5px] font-medium uppercase tracking-[0.24em] transition-colors xl:px-[21px]',
                     lit
                       ? overDark
                         ? 'text-cyan-400'

@@ -196,7 +196,7 @@ export function ProjectsHero({
                   i === 0 && 'lg:border-l-0 lg:pl-0',
                 )}
               >
-                <dd className="num text-2xl font-semibold leading-none text-navy-800 dark:text-white md:text-3xl">
+                <dd className="font-display tabular-nums text-2xl font-semibold leading-none text-navy-800 dark:text-white md:text-3xl">
                   {stat.label === 'Sq ft built' ? formatNumber(stat.value) : <Counter value={stat.value} />}
                 </dd>
                 <dt className="mt-1.5 text-caption text-subtle">{stat.label}</dt>

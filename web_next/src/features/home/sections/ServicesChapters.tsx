@@ -38,23 +38,22 @@ import { IMG } from '@/lib/media';
  * photograph of strangers would read as ours.
  *
  * ── Legibility ───────────────────────────────────────────────────────────────
- * All four of the design's photographs were bright where the copy sits — the
- * yellow scaffold and a white drawing behind the intro, white paper under
- * "Plans your site…", a white wall behind "Interior Design", a pale plastered
- * room behind the site supervisor. Measured on the design, the small lines over them went as
- * low as 2.6:1 (the "Services" label on the scaffold) and the ledes to about
- * 4.2:1. So every chapter here takes `tone="deep"` (the brand navy multiplied
- * into the photograph, then a scrim deepest under the copy), and the contrast
- * of every line of copy against the brightest 5% of the photograph behind it
- * was measured at seven widths: all of it clears WCAG AA — 4.5:1 for the lede
- * and the labels, 3:1 for the headings — with the closest at 5.3:1.
+ * The photographs are bright where the copy sits — white paper behind the
+ * intro's plate, a white wall and ceiling behind "Interior Design", a pale
+ * plastered room behind the site supervisor. Until 25 Oct 2026 they were
+ * graded into the navy (`tone="deep"`) to carry the copy; the client found the
+ * page's colours inconsistent and asked for it lighter, so every chapter on
+ * the page now takes one natural grade (globals.css, "Chapter grade"): no wash,
+ * shade only under the copy, and a patch of it behind the plate.
  *
- * The intro was measured again over its new photograph, at seven sizes from a
- * 360 px phone to 1920 px: its copy sits on the blueprint's navy (the eyebrow
- * 8.4:1 at worst, the heading and lede above 12:1). The plate does not — it
- * sits on the pale paper along the top of the frame, where its label measured
- * 2.7:1 — so the intro asks for the plate's band (`plate.band`), and with it
- * the label is 4.5:1 at worst (a phone held sideways) and 4.8–6.0:1 elsewhere.
+ * Measured, not chosen: the contrast of every line of copy on all nine home
+ * chapters against the brightest 5% of the photograph behind it, at 360×780,
+ * 390×844, 390×664, 430×932, 768×1024, 1024×768, 1440×900 and 1920×1080. All of
+ * it clears WCAG AA — 4.5:1 for ledes, tags and labels (closest 5.0:1: the
+ * interior tags at 1024 and the MEPF eyebrow at 1920), 3:1 for headings
+ * (closest 3.5:1: "Architectural Design" on a 360 px phone). The plate label
+ * was the line that failed first, at 3.7:1, until it went full white and got
+ * its patch.
  *
  * The four are one `ChapterStack` (11 Oct 2026): the offer holds still while
  * the first service slides up over it, and so on down, and each carries the
@@ -131,9 +130,7 @@ export function ServicesChapters() {
     <ChapterStack>
       <Chapter
         id="services"
-        tone="deep"
-        /* The band: this photograph is pale paper where the plate sits. */
-        plate={{ ...plate, band: true }}
+        plate={plate}
         aria-labelledby="services-h"
         media={<ResponsiveImage src={IMG.wide('home-services-intro')} alt="" position="50% 78%" />}
       >
@@ -157,7 +154,6 @@ export function ServicesChapters() {
             id={`service-${service.slug}`}
             /* Alternating sides, as in the design: Architectural left, Interior right, … */
             align={i % 2 ? 'right' : 'left'}
-            tone="deep"
             plate={{ ...plate, part: i + 1 }}
             aria-labelledby={headingId}
             media={

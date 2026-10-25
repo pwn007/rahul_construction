@@ -7,9 +7,7 @@ import {
   ArrowRight,
   Calculator,
   MessageCircle,
-  Phone,
   Search,
-  X,
   Building2,
   FileText,
   Layers,
@@ -27,7 +25,6 @@ import { useServices } from '@/hooks/useServices';
 import { usePosts } from '@/hooks/usePosts';
 import { useHotkey, useLockBodyScroll } from '@/hooks';
 import { writeStore, STORAGE_KEYS } from '@/lib/storage';
-import { track, type AnalyticsEvent } from '@/lib/analytics';
 
 /* ==================================================================== */
 /* Preloader — once per session, never blocks longer than ~3.0s          */
@@ -169,96 +166,6 @@ export function Preloader() {
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-/* ==================================================================== */
-/* Floating action rail                                                  */
-/* ==================================================================== */
-
-/**
- * Desktop only.
- *
- * Its Call and WhatsApp actions are the same two the mobile `StickyContactBar`
- * pins to the bottom of the viewport, so below `md` both rendered at once —
- * two components offering the same two things, one of them behind an extra tap.
- * The rail keeps the pointer-driven viewport, where a collapsed FAB is the
- * right trade; the bar keeps the thumb-driven one, where it isn't.
- */
-export function FloatingRail() {
-  const [expanded, setExpanded] = useState(false);
-
-  const actions: {
-    label: string;
-    href: string;
-    icon: typeof MessageCircle;
-    className: string;
-    external: boolean;
-    event?: AnalyticsEvent;
-  }[] = [
-    {
-      label: 'WhatsApp',
-      href: `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent('Hi, I would like to discuss a construction project.')}`,
-      icon: MessageCircle,
-      className: 'bg-[#25D366] text-white',
-      external: true,
-      event: 'whatsapp_click',
-    },
-    {
-      label: 'Call',
-      href: `tel:${SITE.phoneRaw}`,
-      icon: Phone,
-      className: 'bg-navy-800 text-white',
-      external: true,
-      event: 'call_click',
-    },
-    /* No event: an internal navigation to the estimator is already measured by
-       `estimator_start` when the page it lands on begins. */
-    { label: 'Estimate', href: ROUTES.estimator, icon: Calculator, className: 'bg-cyan-500 text-white', external: false },
-  ];
-
-  return (
-    <div className="fixed bottom-5 right-5 z-40 hidden flex-col items-end gap-3 md:flex sm:bottom-7 sm:right-7">
-      <AnimatePresence>
-        {expanded &&
-          actions.map((action, i) => (
-            <motion.a
-              key={action.label}
-              href={action.href}
-              target={action.external ? '_blank' : undefined}
-              rel={action.external ? 'noopener noreferrer' : undefined}
-              onClick={() => action.event && track(action.event, { placement: 'floating-rail' })}
-              initial={{ opacity: 0, y: 12, scale: 0.85 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.85 }}
-              transition={{ duration: 0.28, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-              className={cn(
-                'group flex h-12 items-center gap-2 rounded-full px-4 shadow-lg transition-transform hover:scale-105',
-                action.className,
-              )}
-            >
-              <action.icon className="h-5 w-5" />
-              <span className="text-sm font-medium">{action.label}</span>
-            </motion.a>
-          ))}
-      </AnimatePresence>
-
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
-        aria-label={expanded ? 'Close quick actions' : 'Open quick actions'}
-        className={cn(
-          'relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-400 ease-out-expo',
-          expanded ? 'rotate-90 bg-navy-800 text-white' : 'bg-cyan-500 text-white hover:scale-105',
-        )}
-      >
-        {/* Inset so the 2.2x pulse stays inside the button's own box. At `inset-0`
-            it reached ~33px past the rail, and the rail is pinned to the right
-            edge of the viewport — enough to widen the document on a 360px phone. */}
-        {!expanded && <span className="absolute inset-[22%] animate-pulse-ring rounded-full bg-cyan-500/40" aria-hidden />}
-        {expanded ? <X className="h-6 w-6" /> : <MessageCircle className="relative h-6 w-6" />}
-      </button>
-    </div>
   );
 }
 

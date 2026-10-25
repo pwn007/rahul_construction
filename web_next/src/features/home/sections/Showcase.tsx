@@ -56,8 +56,6 @@ export function FeaturedProjects() {
             <span className="text-[rgb(var(--c-brand-text))]">{first}</span> {rest.join(' ')}
           </>
         }
-        /* The stories' "Click any card for Cinema Popup", for a photograph. */
-        hint="Click any card for Photo Popup"
         aside={
           <CtaLink href={ROUTES.projects} className="ml-2">
             All projects
@@ -69,7 +67,6 @@ export function FeaturedProjects() {
             All projects
           </CtaLink>
         }
-        stripLabel="90% Center Photo Stage"
         face={(p, i, stage, on) => (
           <DeckFace
             image={p.coverImage}

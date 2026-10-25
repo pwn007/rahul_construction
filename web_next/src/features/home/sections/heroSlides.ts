@@ -20,8 +20,9 @@ export interface HeroSlide {
   /**
    * How much help the copy needs from the photograph:
    * - `deep` grades a bright photograph into the navy and darkens the side the
-   *   headline sits on, as `tone="deep"` does for chapters — for a light frame
-   *   behind the headline;
+   *   headline sits on — for a light frame behind the headline (the chapters
+   *   had the same wash until 25 Oct 2026; the hero keeps it, as the client
+   *   asked for the hero to stay as it is);
    * - `shaded` darkens the same areas without grading, for a photograph whose
    *   colour is right but whose middle is too bright for the lede and pills.
    * Left out, the plain hero scrim. Choose by measuring (svc/contrast.py).

@@ -86,9 +86,10 @@ export default {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
         deva: ['"Noto Sans Devanagari"', 'Outfit', 'sans-serif'],
-        /* The homepage hero only (Design B, and the navbar while it sits over
-           that hero). Every other surface stays on Outfit / Inter. */
-        montserrat: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        /* Four families and no more (25 Oct 2026): Outfit for headings and big
+           figures, Inter for text, UI and every small caps label, mono only for
+           tabular numbers, Noto for Hindi. Montserrat, once here for the navbar,
+           is gone. See docs/03-design-system.md §2. */
       },
       fontSize: {
         'display-xl': ['clamp(3.25rem, 9vw, 7.5rem)', { lineHeight: '0.92', letterSpacing: '-0.035em', fontWeight: '600' }],
@@ -99,14 +100,13 @@ export default {
         'heading-md': ['clamp(1.125rem, 1.4vw, 1.375rem)', { lineHeight: '1.3', letterSpacing: '-0.012em', fontWeight: '600' }],
         'body-lg': ['clamp(1.0625rem, 1.1vw, 1.1875rem)', { lineHeight: '1.65' }],
         caption: ['0.8125rem', { lineHeight: '1.5' }],
-        /* 14px, not 12. At 12px against a `display-md` heading the label was 21% of
-           the thing it introduced, where the convention for an eyebrow is 12–14px
-           and a good deal closer to the heading than that; the client could not
-           see it in a demo. Tracking comes in from 0.18em at the same time —
-           short uppercase reads best around 0.05em, and 0.18em was pulling the
-           word apart into letters. 0.10em keeps the house's wide-tracked look
-           without costing the word its shape. */
-        overline: ['0.875rem', { lineHeight: '1.2', letterSpacing: '0.10em', fontWeight: '600' }],
+        /* The site's one small caps label (25 Oct 2026): 13px, 0.2em, 600 — the
+           chapters' label, which the client has read on the home page since the
+           design migration. It was 14px at 0.10em here while the chapters, the
+           decks and the hero used 13px at 0.2–0.22em, so one page carried seven
+           versions of the same label. Still above the 12px the client could not
+           read in a demo (it was 21% of a `display-md` heading then). */
+        overline: ['0.8125rem', { lineHeight: '1.2', letterSpacing: '0.2em', fontWeight: '600' }],
       },
       borderRadius: {
         sm: '6px',

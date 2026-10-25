@@ -60,7 +60,7 @@ export function PackagePlans({
 
       {showClosing && model === 'turnkey' && (
         <Reveal delay={0.25}>
-          <p className="mt-10 text-center font-display text-heading-lg font-medium italic text-muted">
+          <p className="mt-10 text-center font-display text-heading-lg font-medium text-muted">
             {COMMERCIAL_MODEL.turnkeyClosing}
           </p>
         </Reveal>

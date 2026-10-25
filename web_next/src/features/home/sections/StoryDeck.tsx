@@ -2,7 +2,6 @@
 
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Maximize2, Play } from 'lucide-react';
-import { cn } from '@/lib/cn';
 import { usePrefersReducedMotion } from '@/hooks';
 
 /**
@@ -29,10 +28,12 @@ import { usePrefersReducedMotion } from '@/hooks';
  * is the same at every width and nothing changes after hydration.
  *
  * ── The labels ──────────────────────────────────────────────────────────────
- * "5% | 90% center … stage | 5%" and "5% · 90% center · 5%" are the
- * prototype's notes on its own proportions, kept word for word at the client's
- * request (Oct 2026) — they are not placeholder copy left behind. Each deck
- * passes its own stage label and hint.
+ * The prototype's notes on its own proportions — "5% | 90% center … stage |
+ * 5%", "5% · 90% center · 5%" — and its "Click any card for … Popup" hints were
+ * kept word for word at the client's request (Oct 2026), and taken off on
+ * 25 Oct 2026, when the band went neutral on the light page: they read as a
+ * designer's annotations to a visitor. Restore them from git if the client
+ * wants them back.
  *
  * Every card opens its deck's full-screen popup (StoryPopup) on itself — the
  * stories' player, the work's photograph — and the popup steps through the
@@ -44,9 +45,7 @@ export function StoryDeck<T extends { id: string }>({
   label,
   overline,
   title,
-  hint,
   aside,
-  stripLabel,
   foot,
   face,
   nameOf,
@@ -60,12 +59,8 @@ export function StoryDeck<T extends { id: string }>({
   label: { row: string; items: string; item: string };
   overline: string;
   title: ReactNode;
-  /** The line beside the arrows. */
-  hint: string;
   /** More of the header's right-hand side, after the arrows. */
   aside?: ReactNode;
-  /** The words between the arrowheads of the phone's strip. */
-  stripLabel: string;
   /** Under the phone's controls. */
   foot?: ReactNode;
   /** A card's face — usually a `DeckFace`. `on` is whether it is the one showing, where faces are stacked. */
@@ -171,7 +166,6 @@ export function StoryDeck<T extends { id: string }>({
           <h2 className="cs-title">{title}</h2>
         </div>
         <div className="cs-head__aside">
-          <p className="text-sm font-semibold">{hint}</p>
           {[
             { dir: -1 as const, text: `Previous ${label.items.toLowerCase()}`, Icon: ArrowLeft, disabled: edges.atStart },
             { dir: 1 as const, text: `Next ${label.items.toLowerCase()}`, Icon: ArrowRight, disabled: edges.atEnd },
@@ -192,7 +186,7 @@ export function StoryDeck<T extends { id: string }>({
         data-hscroll=""
         tabIndex={0}
         onScroll={onScroll}
-        className="cs-rail no-scrollbar overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
+        className="cs-rail no-scrollbar overflow-x-auto overscroll-x-contain focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--c-text))]"
       >
         <ol>
           {items.map((item, i) => (
@@ -203,16 +197,6 @@ export function StoryDeck<T extends { id: string }>({
 
       {/* ── The stage (a phone) ── */}
       <div className="cs-stage">
-        <div className="cs-strip" aria-hidden>
-          <span>5%</span>
-          <span>
-            <span>◂</span>
-            {stripLabel}
-            <span>▸</span>
-          </span>
-          <span>5%</span>
-        </div>
-
         <div className="cs-stage__area" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           {count > 1 && (
             <button
@@ -257,9 +241,6 @@ export function StoryDeck<T extends { id: string }>({
             <button type="button" className="cs-step" onClick={() => step(1)} aria-label={`Next ${label.item.toLowerCase()}`}>
               <ChevronRight className="h-4 w-4" />
             </button>
-            <span className="cs-note ml-auto" aria-hidden>
-              • 5% • 90% Center • 5% •
-            </span>
           </div>
         )}
         {foot && <div className="cs-stage__foot">{foot}</div>}
@@ -268,7 +249,7 @@ export function StoryDeck<T extends { id: string }>({
   );
 }
 
-/** "Dr. Ashok Verma" → ["Dr. Ashok", "Verma"]: the prototype sets the last word on a line of its own (in cyan on the cards). */
+/** "Dr. Ashok Verma" → ["Dr. Ashok", "Verma"]: the prototype sets the last word on a line of its own (in a lighter weight on the cards). */
 export function splitName(name: string): [string, string] {
   const words = name.trim().split(/\s+/);
   return words.length > 1 ? [words.slice(0, -1).join(' '), words[words.length - 1]] : [name.trim(), ''];
@@ -312,7 +293,7 @@ export function DeckFace({
       <span className="cs-face__count">
         {n}/{total}
       </span>
-      <span className={cn('cs-face__play', stage && 'cs-face__play--stage')}>
+      <span className="cs-face__play">
         <span>
           {/* `ml-0.5` optically centres the triangle. */}
           {icon === 'play' ? <Play className="ml-0.5 h-5 w-5 fill-current" /> : <Maximize2 className="h-5 w-5" />}

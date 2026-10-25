@@ -173,7 +173,7 @@ function AtlasCanvasImpl({
             >
               {count > 0 && (
                 <span
-                  className="num flex items-center justify-center rounded-full font-bold leading-none text-white ring-[3px] ring-[rgb(var(--c-atlas-void))]"
+                  className="num flex items-center justify-center rounded-full font-semibold leading-none text-white ring-[3px] ring-[rgb(var(--c-atlas-void))]"
                   style={{
                     width: discSize(count),
                     height: discSize(count),

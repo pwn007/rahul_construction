@@ -85,8 +85,8 @@ const PINNED: Record<string, string> = {
   'home-mepf-fire': 'mepf-14.webp',
   /* The chapter that introduces the four (design migration): the landscape shot
      of a worker on a lift running services into an open ceiling. It is a bright
-     grey frame, so MepfChapters grades it down into the navy (`tone="deep"`)
-     rather than relying on the scrim alone. */
+     grey frame, so its centred copy sits on an ellipse of shade (globals.css,
+     "Chapter grade"). */
   'home-mepf-intro': 'mepf-09.webp',
   /* The service page carries the same four systems beside the interactive twin,
      so it pins the same four photographs — three of them byte-identical to the

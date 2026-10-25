@@ -108,7 +108,7 @@ export function AboutView() {
                 In today's fast-paced lifestyle, managing construction can be overwhelming. Our mission is to
                 simplify this process by delivering transparent, reliable and stress-free construction services.
               </p>
-              <p className="relative mt-4 italic leading-relaxed text-white/70">
+              <p className="relative mt-4 leading-relaxed text-white/70">
                 We handle every detail with professionalism, allowing you to focus on your life while we build
                 your vision.
               </p>

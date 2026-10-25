@@ -26,6 +26,20 @@ export function HomeView() {
   return (
     <>
       {/*
+        The page's colours, since 25 Oct 2026: two kinds of band, each always
+        dressed the same way. Full-screen photographs (the hero and the chapters)
+        under one light grade, and content bands on "mist" — a cool off-white
+        drawn from the logo navy's own hue — with navy-black text and cyan
+        accents. The footer is the one solid navy. The client had found the page
+        inconsistent: three different darks, and a warm cream that is neither
+        brand colour.
+
+        This marker turns the mist ground on (globals.css, "The home page's
+        ground"). A marker rather than a wrapper: the chapter stacks need the
+        page itself as their sticky container.
+      */}
+      <span hidden data-ground="mist" />
+      {/*
         Eight sections, down from fourteen (the eighth, client videos, was split out of testimonials in Sep 2026).
         --------------------------------------------------------------
         The page was not long because any one section was verbose — it was long
@@ -75,7 +89,8 @@ export function HomeView() {
       {on('trust') && <TrustBar alone={!on('one-system')} />}
       {/* Who we are, before what we sell — moved above the services index at the
           client's request (Sep 2026); it used to close the page's argument after
-          the projects. Still the page's only dark band. */}
+          the projects. On the mist ground since 25 Oct 2026 (it was the page's
+          one dark band, in saturated navy with blurred glows). */}
       {on('one-system') && <OneSystem logos={on('trust')} />}
       {/* The offer. Three services, not four — MEPF is the section immediately
           below, and listing it here as well would put it on this page three
@@ -90,17 +105,17 @@ export function HomeView() {
           stacked cards) is no longer rendered here. */}
       {on('mepf') && <MepfChapters />}
       {on('projects') && <FeaturedProjects />}
-      {/* The claims, then the people backing them. This band is `--c-surface-2`,
-          sitting between the projects rail and the client videos, both on page
-          ground. (If the videos band is switched off it becomes the page's last
-          band and the tint carries straight into the footer, which is fine.) */}
+      {/* The claims, then the people backing them. This band is `--c-surface-2`
+          (mist-2, one step darker than the mist around it), sitting between the
+          projects rail and the client videos, both on page ground: a change of
+          topic, marked quietly. */}
       {on('testimonials') && <Testimonials />}
       {/* The same people on camera. Split out of the testimonials band at the
           client's request (Sep 2026): the band above is words only now, and
           every recorded testimonial lives here — a row of cards from `md`, and
           on a phone one screen with one film filling it (the client's
-          prototype, Oct 2026). Page ground, not `--c-surface-2`, so the two
-          read as separate bands. */}
+          prototype, Oct 2026). Page ground (mist), not `--c-surface-2`, so the
+          two read as separate bands. */}
       {on('client-videos') && <ClientVideos />}
       {/*
         Published rates, hidden at the client's request.

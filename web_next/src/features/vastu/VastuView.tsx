@@ -49,7 +49,7 @@ export function VastuView() {
                 <div className="mt-6 space-y-4 text-body-lg leading-relaxed text-muted">
                   <p>
                     There is a version of Vastu that improves houses and a version that ruins them. The
-                    difference is entirely about <em>when</em> it enters the process.
+                    difference is entirely about <em className="font-semibold not-italic">when</em> it enters the process.
                   </p>
                   <p>
                     Treated as a constraint at concept stage, Vastu behaves like any other spatial rule — a
@@ -126,7 +126,7 @@ export function VastuView() {
                       );
                     })}
 
-                    <text x="100" y="96" textAnchor="middle" fill="white" fontSize="11" fontFamily="Outfit, sans-serif" fontWeight="600">
+                    <text x="100" y="96" textAnchor="middle" fill="white" fontSize="11" fontFamily="'Noto Sans Devanagari', sans-serif" fontWeight="600">
                       ब्रह्म
                     </text>
                     <text x="100" y="110" textAnchor="middle" fill="rgb(255 255 255 / 0.45)" fontSize="7" fontFamily="Outfit, sans-serif">

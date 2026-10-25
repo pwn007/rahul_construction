@@ -156,7 +156,6 @@ function Reel({
       <div className="cs-reel__foot">
         <div className="cs-reel__times">
           <span>{time(at)}</span>
-          <span className="cs-note">100% Full-Screen Reel</span>
           <span>{time(length)}</span>
         </div>
         <input

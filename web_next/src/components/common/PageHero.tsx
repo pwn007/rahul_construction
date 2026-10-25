@@ -266,7 +266,8 @@ export function PageHero({
                 >
                   <dd
                     className={cn(
-                      'num text-2xl font-semibold leading-none md:text-3xl',
+                      /* Outfit, like the home page's figures (25 Oct 2026); mono is for tables. */
+                      'font-display tabular-nums text-2xl font-semibold leading-none md:text-3xl',
                       dark ? 'text-white' : 'text-navy-800 dark:text-white',
                     )}
                   >

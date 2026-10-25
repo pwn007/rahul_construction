@@ -20,7 +20,8 @@ const claims = new Set<ScrollClaim>();
  * it handles. A claim is module-level, so it outlives Lenis standing down and
  * starting again (a pointer change). Returns the release.
  *
- * The home page's client reviews use it to move one review per wheel gesture
+ * The home page's client reviews use it on desktop to keep a gesture over the
+ * reviews' half from the page, turning one review instead
  * (features/home/sections/ClientReviews.tsx).
  */
 export function claimLenisScroll(claim: ScrollClaim): () => void {

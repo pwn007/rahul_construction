@@ -44,7 +44,7 @@ export function ProjectDetailView({ slug }: { slug: string }) {
 
     return (
       <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
-        <p className="text-heading-lg font-semibold">This project is no longer available.</p>
+        <p className="font-display text-heading-lg font-semibold">This project is no longer available.</p>
         <Button href={ROUTES.projects} variant="accent">
           Browse all projects
         </Button>

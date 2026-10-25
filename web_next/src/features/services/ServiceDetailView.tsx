@@ -26,7 +26,7 @@ export function ServiceDetailView({ slug }: { slug: string }) {
   if (!service) {
     return (
       <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
-        <p className="text-heading-lg font-semibold">This service is no longer offered.</p>
+        <p className="font-display text-heading-lg font-semibold">This service is no longer offered.</p>
         <Button href={ROUTES.services} variant="accent">
           See all services
         </Button>

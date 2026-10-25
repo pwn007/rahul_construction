@@ -10,14 +10,15 @@ import {
   type MotionValue,
   type Variants,
 } from 'framer-motion';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { ChapterEyebrow, ChapterFigures } from '@/components/chapter';
+import { ArrowLeft, ArrowRight, MessageCircle, Phone } from 'lucide-react';
+import { ChapterEyebrow, ChapterFigures, PillLink } from '@/components/chapter';
 import { usePreloaderDone } from '@/components/common/Chrome';
 import { SITE, ACHIEVEMENTS } from '@/constants/site';
 import { useMediaQuery, usePrefersReducedMotion } from '@/hooks';
 import { useRegisterHeroTone } from '@/app/hero-tone';
 import { useHeroBanner } from '@/hooks/useHeroBanner';
 import { cn } from '@/lib/cn';
+import { track } from '@/lib/analytics';
 import { ResponsiveImage, hasImageVariants } from '@/components/common/ResponsiveImage';
 import { HERO_SLIDES, type HeroSlide } from './heroSlides';
 
@@ -30,10 +31,10 @@ import { HERO_SLIDES, type HeroSlide } from './heroSlides';
  * Hindi line under it; the lede and the four figures run along the bottom
  * edge. Styles: `.hero-v2*` in globals.css.
  *
- * No Call / WhatsApp pills: the design had them under the lede, and the client
- * asked for them to go (11 Oct 2026). Calls and WhatsApp stay one tap away
- * elsewhere: the floating contact button from tablet width up, the Call button
- * in the phone menu, and the footer.
+ * Call and WhatsApp sit under the lede, as the design drew them — the client
+ * had them taken off on 11 Oct 2026 and asked for them back on 25 Oct, when the
+ * site's floating contact button went. Call is the one filled pill. On a phone
+ * they are the home page's only contact (its bottom contact bar is off here).
  *
  * ── Entrance ────────────────────────────────────────────────────────────────
  * Plays when the preloader starts to lift (`usePreloaderDone`), not on mount —
@@ -54,6 +55,9 @@ import { HERO_SLIDES, type HeroSlide } from './heroSlides';
  * portrait crop is used on portrait screens below `lg`, and the header is told
  * this is a cinematic hero.
  */
+
+/** WhatsApp opens on a chat with this message ready to send. */
+const WHATSAPP_HREF = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent('Hi, I would like to discuss a construction project.')}`;
 
 /** How long each photograph stays before the hero moves to the next. */
 const AUTOPLAY_MS = 5000;
@@ -377,11 +381,36 @@ export function Hero() {
         </div>
 
         <div className="hero-v2__bottom">
-          <ExitLift {...exit} order={1}>
-            <motion.div variants={riseVariants(RISE_AT + RISE_STEP, reduced)}>
-              <p className="hero-v2__lede">{subtitle}</p>
-            </motion.div>
-          </ExitLift>
+          {/* The lede and, under it, the two ways to reach the firm. */}
+          <div className="hero-v2__lead">
+            <ExitLift {...exit} order={1}>
+              <motion.div variants={riseVariants(RISE_AT + RISE_STEP, reduced)}>
+                <p className="hero-v2__lede">{subtitle}</p>
+              </motion.div>
+            </ExitLift>
+            <ExitLift {...exit} order={2}>
+              <motion.div className="hero-v2__actions" variants={riseVariants(RISE_AT + 2 * RISE_STEP, reduced)}>
+                <PillLink
+                  href={`tel:${SITE.phoneRaw}`}
+                  icon={<Phone strokeWidth={1.75} />}
+                  solid
+                  onClick={() => track('call_click', { placement: 'hero' })}
+                  ariaLabel={`Call us on ${SITE.phone}`}
+                >
+                  Call us
+                </PillLink>
+                <PillLink
+                  href={WHATSAPP_HREF}
+                  icon={<MessageCircle strokeWidth={1.75} />}
+                  external
+                  onClick={() => track('whatsapp_click', { placement: 'hero' })}
+                  ariaLabel="Chat with us on WhatsApp (opens in a new tab)"
+                >
+                  WhatsApp
+                </PillLink>
+              </motion.div>
+            </ExitLift>
+          </div>
 
           {/*
             The figures (80+ projects, 30+ years, 10+ professionals, 98%

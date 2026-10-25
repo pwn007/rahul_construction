@@ -16,7 +16,10 @@ import { DeckFace, StoryDeck } from './StoryDeck';
  *
  * "Desktop responsive layout" over the title, "Click any card for Cinema
  * Popup", the phone's "90% center video stage" and the player's "100%
- * full-screen reel" are the prototype's words, kept at the client's request.
+ * full-screen reel" were the prototype's words, kept at the client's request
+ * (Oct 2026). They came off on 25 Oct 2026 when the band went neutral, read as
+ * a designer's annotations; the eyebrow is "On camera" now. Restore from git
+ * if the client wants them back.
  *
  * Any card opens `ClientStoryPlayer`, the full-screen player, on that film.
  * The films are files (the client confirmed none will be YouTube), so the
@@ -44,14 +47,14 @@ export function ClientVideos() {
         items={videos}
         dataSection="client-videos"
         label={{ row: 'Client videos', items: 'Videos', item: 'Video' }}
-        overline="Desktop responsive layout"
+        /* "Desktop responsive layout" until 25 Oct 2026 — the prototype's
+           note on its own layout, which had come through as the eyebrow. */
+        overline="On camera"
         title={
           <>
-            <span className="text-[rgb(var(--c-brand-text))]">Client</span> Stories
+            <span className="text-[rgb(var(--c-brand-text))]">Client</span> stories
           </>
         }
-        hint="Click any card for Cinema Popup"
-        stripLabel="90% Center Video Stage"
         face={(v, i, stage, on) => (
           <DeckFace image={v.poster} n={i + 1} total={videos.length} stage={stage} on={on} icon="play" stageLabel="Video" name={v.name} />
         )}

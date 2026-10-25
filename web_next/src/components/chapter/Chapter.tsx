@@ -37,13 +37,6 @@ export interface ChapterProps extends Omit<HTMLAttributes<HTMLElement>, 'title'>
   grid?: boolean;
   /** `dense` for long text over a bright photograph; `none` when the photo needs no help. */
   scrim?: 'default' | 'dense' | 'none';
-  /**
-   * `deep` grades a bright photograph down into the brand navy before the scrim
-   * goes over it — for a pale frame (grey concrete, white walls) under copy
-   * that would otherwise sit on a light ground. The photograph keeps its
-   * darks and its colour; only the light greys turn blue.
-   */
-  tone?: 'natural' | 'deep';
   align?: 'left' | 'right' | 'center';
   /** The label in the top-left, under the chapter's number if it is given one ("01 · About"). */
   plate?: ChapterPlateProps;
@@ -58,7 +51,6 @@ export function Chapter({
   media,
   grid = false,
   scrim = 'default',
-  tone = 'natural',
   align = 'left',
   plate,
   navigable = true,
@@ -72,8 +64,10 @@ export function Chapter({
       {...rest}
       className={cn('chapter on-dark', className)}
       data-align={align}
-      data-tone={tone === 'deep' ? 'deep' : undefined}
-      data-plate-band={plate?.part || plate?.band ? '' : undefined}
+      /* Every photograph is graded the same way (globals.css, "Chapter grade"):
+         natural, with shade only where words sit. The plate at the top gets its
+         own patch of it. */
+      data-plate-band={plate ? '' : undefined}
       data-section={navigable ? '' : undefined}
     >
       {media && <div className="chapter__media">{media}</div>}
@@ -99,12 +93,6 @@ export interface ChapterPlateProps {
   parts?: number;
   /** In a stack: which part this chapter is, from 1. The ticks up to it are lit; the entry lights none. */
   part?: number;
-  /**
-   * A band of scrim down from the top of the chapter, behind the plate — for a
-   * photograph that is bright where the plate sits. A part of a stack always
-   * has it; this asks for it on any other chapter.
-   */
-  band?: boolean;
 }
 
 /* The number repeats what the heading already says, so it is hidden from

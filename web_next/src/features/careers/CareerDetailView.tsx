@@ -52,7 +52,7 @@ export function CareerDetailView({ slug }: { slug: string }) {
   if (!job) {
     return (
       <div className="container flex min-h-[60vh] flex-col items-center justify-center gap-5 text-center">
-        <p className="text-heading-lg font-semibold">This role is no longer open.</p>
+        <p className="font-display text-heading-lg font-semibold">This role is no longer open.</p>
         <Button href={ROUTES.careers} variant="accent">
           See all openings
         </Button>

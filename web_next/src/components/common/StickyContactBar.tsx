@@ -13,10 +13,12 @@ import { track } from '@/lib/analytics';
  * for nothing — which is exactly the shape Google's interstitial guidance
  * permits, and the shape that carries no dark-pattern exposure at all.
  *
- * Mobile only. `FloatingRail` keeps the desktop, with its own Call and WhatsApp
- * actions hidden below `md` so the same two affordances never appear twice in
- * one viewport — the stacked-overlay failure NN/G names as the most common way
- * good individual components add up to a bad page.
+ * Mobile only. The desktop had a floating contact button (`FloatingRail`)
+ * until 25 Oct 2026, when the client had it removed: there, Call and WhatsApp
+ * sit in the home hero, and the header's Contact link and the footer's number
+ * serve every other page. Never two of the same affordance in one viewport —
+ * the stacked-overlay failure NN/G names as the most common way good
+ * individual components add up to a bad page.
  */
 export function StickyContactBar() {
   const pathname = usePathname();

@@ -593,7 +593,7 @@ function QuoteResult({
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--c-text))]/[0.04] sm:h-11 sm:w-11">
                     <MaterialArt name={line.key} className="h-7 w-7 sm:h-8 sm:w-8" />
                   </span>
-                  <h4 className="truncate text-heading-sm font-semibold">{line.label}</h4>
+                  <h4 className="truncate font-semibold">{line.label}</h4>
                 </div>
                 {/* The per-sqft thumb-rule chip lived here until Sep 2026.
                     It existed to justify the "+20%" buffer beside it; once the
@@ -622,12 +622,12 @@ function QuoteResult({
                               does approximation with words. The rounded
                               headline + exact sub-line below is also the
                               trust-safe pairing for an estimate. */}
-                          <span className="text-heading-sm font-medium text-muted">about</span> {line.buyQty}{' '}
-                          <span className="text-heading-sm font-medium text-muted">{line.buyUnit}</span>
+                          <span className="font-medium text-muted">about</span> {line.buyQty}{' '}
+                          <span className="font-medium text-muted">{line.buyUnit}</span>
                         </>
                       ) : (
                         <>
-                          {formatNumber(line.qty)} <span className="text-heading-sm font-medium text-muted">{line.unit}</span>
+                          {formatNumber(line.qty)} <span className="font-medium text-muted">{line.unit}</span>
                         </>
                       )}
                     </p>

@@ -40,19 +40,19 @@ export function Footer() {
 
   return (
     // `data-section`: the last stop on the home page (lib/section-nav); inert elsewhere.
-    <footer data-section="footer" className="on-dark grain relative overflow-hidden bg-ink-950 text-white">
-      <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-[0.35]" aria-hidden />
-      <div
-        className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-cyan-500/10 blur-[120px]"
-        aria-hidden
-      />
+    // `--c-night` (25 Oct 2026): the site's one solid navy, in the logo's hue — it was ink-950,
+    // a near-neutral black and a third dark beside the home page's navy. The blurred cyan glow
+    // went with it; the faint blueprint grid stays. Small text is white/60 or more, which is
+    // 6.8:1 here (white/40 had been 3.7:1 even on the old black).
+    <footer data-section="footer" className="on-dark grain relative overflow-hidden bg-[rgb(var(--c-night))] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
 
       {/* Main */}
       <div className="relative container py-8 lg:py-10">
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-4">
             <Logo tone="light" />
-            <p className="mt-2 text-caption uppercase tracking-[0.22em] text-cyan-400">{SITE.tagline}</p>
+            <p className="mt-2 text-caption font-semibold uppercase tracking-[0.2em] text-cyan-400">{SITE.tagline}</p>
             {/* `SITE.description` used to sit here — it is the hero sub-headline again,
                 three screens later, and it was the tallest thing in this column. */}
             <p className="mt-2 font-deva text-lg text-cyan-400">{SITE.taglineHi}</p>
@@ -70,7 +70,7 @@ export function Footer() {
                 <span>
                   {SITE.address.full}
                   <br />
-                  <span className="text-caption text-white/45">{SITE.hours}</span>
+                  <span className="text-caption text-white/60">{SITE.hours}</span>
                 </span>
               </p>
             </div>
@@ -81,7 +81,7 @@ export function Footer() {
           <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-8 lg:col-span-5">
             {footerColumns.map((col) => (
               <div key={col.heading}>
-                <h3 className="text-overline uppercase text-white/40">{col.heading}</h3>
+                <h3 className="font-sans text-overline uppercase text-white/60">{col.heading}</h3>
                 {/* No gap between the rows: the links' own padding is the spacing,
                     so none of the pitch is dead space a finger can miss into. */}
                 <ul className="mt-2">
@@ -98,7 +98,7 @@ export function Footer() {
           </div>
 
           <div className="lg:col-span-3">
-            <h3 className="text-overline uppercase text-white/40">Stay informed</h3>
+            <h3 className="font-sans text-overline uppercase text-white/60">Stay informed</h3>
             <p className="mt-3 text-sm text-white/60">
               Practical guides on building in Jaipur — costs, timelines and the decisions that matter. No noise.
             </p>
@@ -159,7 +159,7 @@ export function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 aria-label="Email address"
-                className="border-white/15 bg-white/5 text-white placeholder:text-white/35"
+                className="border-white/15 bg-white/5 text-white placeholder:text-white/55"
               />
               <Button type="submit" variant="accent" size="md" aria-label="Subscribe">
                 <Send className="h-4 w-4" />
@@ -196,7 +196,7 @@ export function Footer() {
           (up to 12rem tall plus an 80px margin, purely decorative) and the social
           row that sat on its own under the newsletter. Every link survives.
         */}
-        <div className="mt-6 flex flex-col items-center gap-3 border-t border-white/10 pt-5 text-caption text-white/40 md:flex-row md:justify-between md:pt-4">
+        <div className="mt-6 flex flex-col items-center gap-3 border-t border-white/10 pt-5 text-caption text-white/60 md:flex-row md:justify-between md:pt-4">
           <p className="order-3 md:order-1">
             © {year} {SITE.legalName}. All rights reserved.
           </p>
@@ -216,9 +216,7 @@ export function Footer() {
             ))}
           </div>
 
-          {/* `md:pr-16` keeps the last link clear of the fixed FloatingRail button,
-              which sits over the bottom-right of the viewport. */}
-          <div className="order-2 flex items-center gap-6 md:order-3 md:pr-16">
+          <div className="order-2 flex items-center gap-6 md:order-3">
             <Link href={ROUTES.privacy} className="inline-block py-1.5 transition-colors hover:text-white">
               Privacy Policy
             </Link>

@@ -18,6 +18,10 @@
     --c-brand: 0 187 238;
     --c-brand-deep: 0 150 191;
     --c-navy: 3 9 78;
+    /* The site's one solid navy ground (the footer): the logo navy's hue, less
+       saturated and a touch lighter, so it reads as navy rather than black.
+       White/60 on it is 6.8:1, cyan-400 8.5:1. */
+    --c-night: 12 25 60;
 
     /**
      * Accent for *text and focus rings*, which need contrast rather than vibrancy.
@@ -124,6 +128,32 @@
     --c-text: 240 242 247;
     --c-text-muted: 158 166 184;
     --c-text-subtle: 122 130 149;
+  }
+
+  /**
+   * The home page's ground: "mist" (25 Oct 2026).
+   *
+   * The client found the home page's colours inconsistent — three different
+   * darks, and a warm cream (hue 95°, from the sand family) that is neither of
+   * the brand's two colours — and asked for it lighter, with navy as the
+   * accent. So every neutral here is drawn from the logo navy's own hue (266°)
+   * at a whisper of chroma: a cool off-white ground, one step darker for a
+   * change of topic, and navy-black text. Contrast on mist / mist-2:
+   *   text 15.7 / 14.7 · muted 7.0 / 6.5 · subtle 5.1 / 4.8 · brand text 5.2 / 4.9
+   *
+   * HomeView renders the marker; `:has()` lets the scope reach <html>, so the
+   * body ground and the header's veil turn too, on the static export, with no
+   * flash. Browsers without `:has()` keep the cream. Dark theme is untouched.
+   * The rest of the site keeps the cream for now.
+   */
+  html:not(.dark):has([data-ground='mist']) {
+    --c-bg: 245 247 251;          /* #F5F7FB */
+    --c-surface-2: 237 240 247;   /* #EDF0F7 */
+    --c-border: 219 224 235;      /* #DBE0EB */
+    --c-text: 13 27 65;           /* #0D1B41 */
+    --c-text-muted: 73 85 111;    /* #49556F */
+    --c-text-subtle: 95 105 126;  /* #5F697E */
+    --c-brand-text: 2 113 143;    /* #02718F — cyan-700 a shade deeper, for mist-2 */
   }
 
   /**
@@ -322,8 +352,9 @@
     -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent);
   }
   .nav-veil[data-on] { opacity: 1; }
+  /* Over a photograph or the footer: the same navy as the photographs' shade. */
   .nav-veil[data-tone='dark'] {
-    background: linear-gradient(to bottom, rgb(5 7 13 / 0.6), rgb(5 7 13 / 0.25) 60%, rgb(5 7 13 / 0));
+    background: linear-gradient(to bottom, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0.25) 60%, rgb(var(--scrim) / 0));
   }
   @media (prefers-reduced-transparency: reduce) {
     .nav-veil {
@@ -333,7 +364,7 @@
       mask-image: none;
       -webkit-mask-image: none;
     }
-    .nav-veil[data-tone='dark'] { background: rgb(5 7 13 / 0.95); }
+    .nav-veil[data-tone='dark'] { background: rgb(var(--scrim) / 0.95); }
   }
 
   /* Film grain for cinematic dark sections */
@@ -610,11 +641,13 @@
   /* ----------------------------------------------------------------
      Client reviews — features/home/sections/ClientReviews.
 
-     One review at a time, dissolving into the next. The band is a screen
-     per review: the stage holds over all of them, and the empty stops
-     under it are what the page — and the section engine — scroll through.
-     The stops are pulled up under the stage so the band is exactly that
-     many screens, and let every click through to it.
+     One review at a time, dissolving into the next. On touch the band is a
+     screen per review: the stage holds over all of them, and the empty
+     stops under it are what the page — and the section engine — scroll
+     through. The stops are pulled up under the stage so the band is
+     exactly that many screens, and let every click through to it. On
+     desktop it is one screen, and a scroll over the reviews' half turns
+     them in place (ClientReviews `useReviewWheel`).
 
      The dissolve is the client prototype's, timing and all: the review
      going leaves completely (420ms) before the one coming starts (after
@@ -639,6 +672,13 @@
   }
   .review-stops > * {
     min-height: calc(var(--vh) * 100);
+  }
+  /* Desktop (anything but a touch-first device — the section engine's own test): one ordinary screen,
+     no hold and no stops (25 Oct 2026). The heading's half scrolls the page; a scroll over the reviews'
+     half turns one review while the page holds, and goes on to the page after the last. */
+  @media not all and (hover: none) and (pointer: coarse) {
+    .review-stage { position: relative; height: auto; min-height: calc(var(--vh) * 100); }
+    .review-stops { display: none; }
   }
   .review-stack {
     display: grid;
@@ -757,9 +797,16 @@
      Story deck — features/home/sections/StoryDeck: the client stories
      (ClientVideos, and its ClientStoryPlayer) and the selected work.
 
-     Built to the client's prototype on the page's own ground, and in the
-     site's own ink rather than the prototype's navy (client, Oct 2026): the
-     cards keep its cyan, over the same dark the project cards always had. Two layouts, swapped here rather than in script so the server's
+     Built to the client's prototype on the page's own ground (client, Oct
+     2026). The cards are neutral since 25 Oct 2026: the prototype's cyan —
+     a ring on the counter, a glowing ring on the button, a side bar, a cyan
+     surname, a cyan hover ring, six times a card — over a shade that
+     darkened the top and the bottom half of every photo read as a dark widget
+     dropped onto the light page, and the client asked for it gone. Now the
+     photograph carries the colour; what sits on it is white on a short navy
+     shade (`--scrim`, the chapters' shade) and dark-glass controls; state is
+     navy, the page's accent. The brand's one touch per section stays in the
+     heading, the eyebrow and the "All projects" pill. Two layouts, swapped here rather than in script so the server's
      markup holds at every width: from `md`, a row of cards (`.cs-rail`); on a
      phone held upright, a single screen (`.cs-stage`) with one card in the
      middle and the outer 5% of its neighbours either side. A phone held
@@ -786,27 +833,27 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    letter-spacing: 0.2em;
   }
   .overline.cs-overline::before {
     width: 2.25rem;
     margin: 0;
   }
+  /* A section heading like every other on the page (25 Oct 2026): sentence
+     case at `display-md`, tight. It was the page's only all-caps heading,
+     tracked open, from the prototype. */
   .cs-title {
     margin-top: 0.75rem;
     font-family: theme(fontFamily.display);
     font-size: clamp(2rem, 4.2vw, 3.5rem);
     font-weight: 600;
-    line-height: 1;
-    letter-spacing: 0.01em;
-    text-transform: uppercase;
+    line-height: 1.04;
+    letter-spacing: -0.028em;
   }
   .cs-head__aside {
     display: none;
     align-items: center;
     gap: 0.75rem;
   }
-  .cs-head__aside > p { margin-right: 1rem; }
   @media (min-width: 768px) {
     .cs-head__aside { display: flex; }
   }
@@ -821,10 +868,10 @@
     transition: border-color 300ms, background-color 300ms, color 300ms;
   }
   .cs-arrow:hover:not(:disabled) {
-    border-color: theme(colors.cyan.600);
-    background-color: theme(colors.cyan.500 / 7%);
-    color: theme(colors.cyan.700);
+    border-color: rgb(var(--c-text) / 0.6);
+    background-color: rgb(var(--c-text) / 0.05);
   }
+  .cs-arrow:focus-visible { outline: 2px solid rgb(var(--c-text)); outline-offset: 2px; }
   .cs-arrow:disabled { cursor: not-allowed; opacity: 0.35; }
 
   /* The row: a card is a quarter of the container on a laptop, a third on a
@@ -861,22 +908,24 @@
     width: 100%;
     overflow: hidden;
     border-radius: 1rem;
-    background-color: theme(colors.ink.900);
+    /* A light placeholder while the photograph loads, not a dark box; the
+       name already sits on its own shade. */
+    background-color: rgb(var(--c-border));
     text-align: left;
     -webkit-tap-highlight-color: transparent;
   }
   .cs-card:focus-visible {
-    outline: 2px solid theme(colors.cyan.500);
+    outline: 2px solid rgb(var(--c-text));
     outline-offset: 3px;
   }
   .cs-card--row {
     aspect-ratio: 9 / 15;
     border: 1px solid rgb(var(--c-border));
-    box-shadow: 0 1px 2px rgb(15 20 32 / 0.06), 0 16px 28px -18px theme(colors.ink.900 / 55%);
+    box-shadow: 0 1px 2px rgb(var(--scrim) / 0.06), 0 16px 28px -18px rgb(var(--scrim) / 0.3);
     transition: box-shadow 500ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .cs-card--row:hover {
-    box-shadow: 0 0 0 1px theme(colors.cyan.500 / 45%), 0 22px 36px -18px theme(colors.ink.900 / 60%);
+    box-shadow: 0 1px 2px rgb(var(--scrim) / 0.08), 0 26px 40px -20px rgb(var(--scrim) / 0.42);
   }
 
   .cs-face {
@@ -893,16 +942,21 @@
     transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .cs-card--row:hover .cs-face > img { transform: scale(1.05); }
-  /* Ink pooled at the foot, under the name, and a short band of it at the
-     top, under the counter — the project cards' two scrims: the foot's fades
-     out long before the top edge, and a pale photograph there would take the
-     counter with it. */
+  /* Shade at the foot only, under the name, and gone by the middle of the
+     card: the rest of the photograph is as it was shot. The counter carries
+     its own backing, so the top needs none. Measured: every name, eyebrow and
+     counter clears 4.5:1 against the brightest 5% of the photograph behind it. */
   .cs-face__shade {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(to bottom, theme(colors.ink.950 / 55%), theme(colors.ink.950 / 0%) 28%),
-      linear-gradient(to top, theme(colors.ink.950 / 90%) 0%, theme(colors.ink.950 / 25%) 50%, theme(colors.ink.950 / 0%) 100%);
+    background: linear-gradient(
+      to top,
+      rgb(var(--scrim) / 0.86) 0%,
+      rgb(var(--scrim) / 0.66) 22%,
+      rgb(var(--scrim) / 0.42) 38%,
+      rgb(var(--scrim) / 0.16) 52%,
+      rgb(var(--scrim) / 0) 64%
+    );
   }
   .cs-face__count {
     position: absolute;
@@ -913,8 +967,8 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 9999px;
-    border: 1.5px solid theme(colors.cyan.500);
-    background-color: theme(colors.ink.950 / 70%);
+    border: 1px solid rgb(255 255 255 / 0.28);
+    background-color: rgb(var(--scrim) / 0.62);
     color: #fff;
     font: 600 0.75rem/1 theme(fontFamily.display);
   }
@@ -933,25 +987,33 @@
     width: 3.5rem;
     height: 3.5rem;
     border-radius: 9999px;
-    border: 2px solid theme(colors.cyan.500);
-    background-color: theme(colors.ink.950 / 45%);
-    color: theme(colors.cyan.500);
-    box-shadow: 0 0 24px theme(colors.cyan.500 / 25%);
-    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .cs-card--row:hover .cs-face__play > span { transform: scale(1.08); }
-  /* The phone's card draws its play button plainer, with a label. */
-  .cs-face__play--stage > span {
-    border-color: rgb(255 255 255 / 0.35);
-    background-color: theme(colors.ink.950 / 40%);
+    /* Dark glass: white on navy at 45%, readable on a white sky or a black
+       door alike. No backdrop blur — six of these on a row, and the phone's
+       scroll is what the client judges the site by. */
+    border: 1px solid rgb(255 255 255 / 0.5);
+    background-color: rgb(var(--scrim) / 0.45);
     color: #fff;
-    box-shadow: none;
+    box-shadow: 0 8px 24px -10px rgb(var(--scrim) / 0.5);
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1), background-color 300ms, color 300ms, border-color 300ms;
   }
+  /* Hover turns it over: a white disc with a navy icon. */
+  .cs-card--row:hover .cs-face__play > span {
+    transform: scale(1.08);
+    border-color: #fff;
+    background-color: #fff;
+    color: rgb(var(--c-navy));
+  }
+  /* The phone's card adds a label under its button. */
+  /* It sits mid-photo, where nothing else shades it, so it carries its own
+     backing, like the counter. */
   .cs-face__play > small {
-    font-size: 0.625rem;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--scrim) / 0.62);
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: rgb(255 255 255 / 0.9);
+    color: #fff;
   }
   .cs-face__name {
     position: absolute;
@@ -959,22 +1021,24 @@
     right: 1.25rem;
     bottom: 1.25rem;
     display: block;
-    border-left: 3px solid theme(colors.cyan.500);
+    border-left: 2px solid rgb(255 255 255 / 0.6);
     padding-left: 0.875rem;
     color: #fff;
     font: 600 1.25rem/1.25 theme(fontFamily.display);
     letter-spacing: -0.01em;
   }
+  /* The surname on its own line, in the chapters' second voice: lighter
+     weight, not a colour. */
   .cs-face__name > span {
     display: block;
-    color: theme(colors.cyan.500);
+    font-weight: 400;
   }
   .cs-face__name > .cs-face__eyebrow {
     margin-bottom: 0.375rem;
-    font: 500 0.6875rem/1.3 theme(fontFamily.sans);
+    font: 500 0.75rem/1.3 theme(fontFamily.sans);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.65);
+    color: rgb(255 255 255 / 0.92);
   }
   @media (max-width: 1279px) {
     .cs-card--row .cs-face__name { left: 1rem; right: 1rem; bottom: 1rem; font-size: 1.125rem; }
@@ -982,8 +1046,8 @@
 
   /* The phone's screen. The band is exactly one screen tall — a stop of its
      own for the section engine, which counts anything with a screen-tall
-     `min-height` as one — and the card takes what the heading, the strip
-     and the controls leave. Doubled where `section-sm`'s padding utilities
+     `min-height` as one — and the card takes what the heading and the
+     controls leave. Doubled where `section-sm`'s padding utilities
      would otherwise win. */
   .cs-stage { display: none; }
   @media (max-width: 767px) and (min-height: 521px) {
@@ -996,7 +1060,7 @@
     }
     .cs-head { justify-content: center; }
     .cs-head .overline { display: none; }
-    .cs-title { margin-top: 0; text-align: center; font-size: 1.375rem; letter-spacing: 0.1em; }
+    .cs-title { margin-top: 0; text-align: center; font-size: 1.75rem; letter-spacing: -0.02em; }
     .cs-rail { display: none; }
     .cs-stage {
       display: flex;
@@ -1005,33 +1069,14 @@
       min-height: 0;
     }
   }
-  /* "5% | ◂ 90% center video stage ▸ | 5%", over the card and its neighbours. */
-  .cs-strip {
-    display: grid;
-    grid-template-columns: 1fr 18fr 1fr;
-    gap: 0.25rem;
-    margin: 0.625rem 0.375rem 0;
-    font: 600 0.5625rem/1 theme(fontFamily.mono);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: rgb(var(--c-brand-text));
-  }
-  .cs-strip > span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1.125rem;
-    border: 1px solid theme(colors.cyan.500 / 45%);
-    border-radius: 0.1875rem;
-    white-space: nowrap;
-  }
-  .cs-strip > span:nth-child(odd) { font-size: 0.5rem; letter-spacing: 0; }
-  .cs-strip > span:nth-child(2) { justify-content: space-between; padding: 0 0.375rem; }
+  /* The prototype's "5% | ◂ 90% center stage ▸ | 5%" strip sat here, its
+     notes on its own proportions; it came off with the other notes on
+     25 Oct 2026, and the card took its height. */
   .cs-stage__area {
     position: relative;
     flex: 1;
     min-height: 0;
-    margin-top: 0.375rem;
+    margin-top: 0.625rem;
     overflow: hidden;
   }
   .cs-card--stage {
@@ -1040,8 +1085,8 @@
     bottom: 0.375rem;
     left: 5%;
     width: 90%;
-    border: 2px solid theme(colors.cyan.500 / 75%);
-    box-shadow: 0 0 0 3px theme(colors.cyan.500 / 10%), 0 10px 28px -12px theme(colors.cyan.500 / 50%);
+    border: 1px solid rgb(var(--c-border));
+    box-shadow: 0 18px 36px -18px rgb(var(--scrim) / 0.4);
   }
   /* A neighbour: the same card, parked so only its outer 5% is on screen. */
   .cs-peek {
@@ -1049,7 +1094,7 @@
     top: 1.125rem;
     bottom: 1.125rem;
     width: 90%;
-    border: 1px solid theme(colors.cyan.500 / 35%);
+    border: 1px solid rgb(var(--c-border));
   }
   .cs-peek--prev { right: calc(95% + 0.375rem); }
   .cs-peek--next { left: calc(95% + 0.375rem); }
@@ -1075,6 +1120,7 @@
   .cs-stage__controls {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.375rem;
     min-height: 2.75rem;
     margin-top: 0.375rem;
@@ -1099,9 +1145,9 @@
   }
   .cs-step:hover,
   .cs-step:active {
-    border-color: theme(colors.cyan.500);
-    background-color: theme(colors.cyan.500);
-    color: #fff;
+    border-color: rgb(var(--c-text));
+    background-color: rgb(var(--c-text));
+    color: rgb(var(--c-bg));
   }
   .cs-dot {
     display: grid;
@@ -1122,27 +1168,19 @@
   .cs-dot[aria-current] { width: 1.75rem; }
   .cs-dot[aria-current]::before {
     width: 1.25rem;
-    background-color: theme(colors.cyan.500);
+    background-color: rgb(var(--c-text));
   }
   .cs-step:focus-visible,
   .cs-dot:focus-visible {
-    outline: 2px solid theme(colors.cyan.500);
+    outline: 2px solid rgb(var(--c-text));
     outline-offset: 2px;
-  }
-  /* The prototype's notes on its proportions, in its small mono type. */
-  .cs-note {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font: 600 0.5625rem/1 theme(fontFamily.mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: rgb(var(--c-brand-text));
   }
 
   /* The full-screen player. Dark whatever the band is: a film is watched in
-     the dark. */
+     the dark. Neutral since 25 Oct 2026, like the cards that open it: its
+     cyan — a glowing close disc and counter, a cyan title, frame, ring, bar
+     and slider — came off, and its controls are the cards' own dark glass.
+     The logo is the one brand mark left in it. */
   .cs-player {
     position: fixed;
     inset: 0;
@@ -1156,7 +1194,7 @@
       linear-gradient(180deg, theme(colors.ink.900), theme(colors.ink.950));
   }
   .cs-player button:focus-visible {
-    outline: 2px solid theme(colors.cyan.400);
+    outline: 2px solid #fff;
     outline-offset: 2px;
   }
   .cs-player__bar {
@@ -1173,17 +1211,21 @@
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 9999px;
-    background-color: theme(colors.cyan.500);
-    color: theme(colors.ink.950);
-    box-shadow: 0 0 20px theme(colors.cyan.500 / 45%);
+    border: 1px solid rgb(255 255 255 / 0.25);
+    background-color: rgb(255 255 255 / 0.1);
+    color: #fff;
+    transition: background-color 200ms;
   }
+  .cs-player__close:hover { background-color: rgb(255 255 255 / 0.2); }
+  /* The deck's name over the film: the site's small caps label (Inter 600,
+     13px, 0.2em), not a second, larger caps title. */
   .cs-player__title {
     flex: none;
     text-align: center;
-    font: 600 1.125rem/1 theme(fontFamily.display);
-    letter-spacing: 0.14em;
+    font: 600 0.8125rem/1.2 theme(fontFamily.sans);
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: theme(colors.cyan.400);
+    color: rgb(255 255 255 / 0.85);
   }
   .cs-player__stage {
     display: flex;
@@ -1195,7 +1237,7 @@
   .cs-player__name {
     flex: none;
     margin: 1rem 1.25rem 1.25rem;
-    border-left: 3px solid theme(colors.cyan.500);
+    border-left: 2px solid rgb(255 255 255 / 0.6);
     padding-left: 0.875rem;
   }
   .cs-player__name > p:first-child { font: 600 1.5rem/1.15 theme(fontFamily.display); }
@@ -1215,9 +1257,9 @@
     height: 100%;
     overflow: hidden;
     border-radius: 1.25rem;
-    border: 1px solid theme(colors.cyan.400 / 45%);
+    border: 1px solid rgb(255 255 255 / 0.12);
     background-color: #000;
-    box-shadow: 0 0 0 4px theme(colors.cyan.500 / 8%), 0 0 48px theme(colors.cyan.500 / 18%);
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.6);
   }
   @media (min-width: 768px) {
     .cs-reel { width: auto; max-width: 100%; aspect-ratio: 9 / 16; }
@@ -1256,7 +1298,7 @@
     height: 2rem;
     padding: 0 0.875rem;
     border-radius: 9999px;
-    border: 1px solid theme(colors.cyan.400 / 40%);
+    border: 1px solid rgb(255 255 255 / 0.25);
     background-color: theme(colors.ink.950 / 75%);
     font-size: 0.75rem;
     font-weight: 600;
@@ -1270,10 +1312,11 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 9999px;
-    background-color: theme(colors.cyan.500);
-    color: theme(colors.ink.950);
-    font: 700 0.75rem/1 theme(fontFamily.display);
-    box-shadow: 0 0 18px theme(colors.cyan.500 / 50%);
+    /* The deck card's counter. */
+    border: 1px solid rgb(255 255 255 / 0.28);
+    background-color: rgb(var(--scrim) / 0.62);
+    color: #fff;
+    font: 600 0.75rem/1 theme(fontFamily.display);
   }
   .cs-reel__play {
     position: absolute;
@@ -1284,11 +1327,18 @@
     width: 3.5rem;
     height: 3.5rem;
     border-radius: 9999px;
-    border: 2px solid theme(colors.cyan.500);
-    background-color: theme(colors.ink.950 / 50%);
+    /* The deck card's button: dark glass, and white with a navy icon on hover. */
+    border: 1px solid rgb(255 255 255 / 0.5);
+    background-color: rgb(var(--scrim) / 0.45);
     color: #fff;
-    box-shadow: 0 0 24px theme(colors.cyan.500 / 35%);
+    box-shadow: 0 8px 24px -10px rgb(var(--scrim) / 0.5);
     transform: translate(-50%, -50%);
+    transition: background-color 300ms, color 300ms, border-color 300ms;
+  }
+  .cs-reel__play:hover {
+    border-color: #fff;
+    background-color: #fff;
+    color: rgb(var(--c-navy));
   }
   .cs-reel__step {
     position: absolute;
@@ -1315,9 +1365,8 @@
     justify-content: space-between;
     gap: 0.5rem;
     margin-bottom: 0.375rem;
-    font: 700 0.6875rem/1 theme(fontFamily.mono);
+    font: 600 0.75rem/1 theme(fontFamily.mono);
   }
-  .cs-reel__times .cs-note { color: theme(colors.cyan.400); }
   .cs-range {
     display: block;
     width: 100%;
@@ -1330,7 +1379,7 @@
   .cs-range::-webkit-slider-runnable-track {
     height: 4px;
     border-radius: 9999px;
-    background: linear-gradient(to right, theme(colors.cyan.500) var(--p), rgb(255 255 255 / 0.28) var(--p));
+    background: linear-gradient(to right, #fff var(--p), rgb(255 255 255 / 0.28) var(--p));
   }
   .cs-range::-webkit-slider-thumb {
     width: 12px;
@@ -1338,7 +1387,7 @@
     margin-top: -4px;
     border-radius: 9999px;
     background: #fff;
-    box-shadow: 0 0 0 3px theme(colors.cyan.500 / 40%);
+    box-shadow: 0 0 0 3px rgb(255 255 255 / 0.3);
     appearance: none;
   }
   .cs-range::-moz-range-track {
@@ -1349,7 +1398,7 @@
   .cs-range::-moz-range-progress {
     height: 4px;
     border-radius: 9999px;
-    background: theme(colors.cyan.500);
+    background: #fff;
   }
   .cs-range::-moz-range-thumb {
     width: 12px;
@@ -1359,7 +1408,7 @@
     background: #fff;
   }
   .cs-range:focus-visible {
-    outline: 2px solid theme(colors.cyan.400);
+    outline: 2px solid #fff;
     outline-offset: 4px;
   }
 
@@ -1559,12 +1608,21 @@
     color: rgb(255 255 255 / 0.92);
     text-wrap: pretty;
   }
+  /* Call and WhatsApp, under the lede (25 Oct 2026). Pills from
+     components/chapter/PillLink — 44px tall, a full finger's target. */
+  .hero-v2__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+  @media (min-width: 1024px) {
+    .hero-v2__actions { margin-top: 1.5rem; }
+  }
   @media (min-width: 768px) {
     .hero-v2__bottom > * { flex: 0 1 auto; }
     .hero-v2__hi { margin-top: 1.375rem; font-size: clamp(1.625rem, 2.6vw, 2.5rem); }
-    /* The figures keep 72px clear of the right edge, where the site's floating
-       contact button sits from this width up. */
-    .hero-v2__figures { flex: 1 1 26rem; max-width: 35rem; margin-right: 4.5rem; }
+    .hero-v2__figures { flex: 1 1 26rem; max-width: 35rem; }
   }
   @media (min-width: 1024px) {
     .hero-v2__copy {
@@ -1579,10 +1637,20 @@
     .hero-v2 .chapter-title[data-size='hero'] { font-size: 15vh; }
     .hero-v2__copy { padding-top: calc(72px + env(safe-area-inset-top, 0px) + 3vh); }
     .hero-v2__hi { font-size: 1.375rem; margin-top: 0.5rem; }
+    /* Width to spare and no height: the pills sit beside the lede, not under
+       it, so the hero stays one screen (under it, it measured 396px of 360). */
+    .hero-v2__lead { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; }
+    /* The lede gives way (two lines if it must) so the pills keep the row,
+       down to an iPhone SE on its side (667px). */
+    .hero-v2__lead > :first-child { flex: 1 1 12rem; min-width: 0; }
+    .hero-v2__lead > :last-child { flex: none; }
+    /* Doubled to outrank the short-phone rule below, which also matches here. */
+    .hero-v2__lead .hero-v2__actions { margin-top: 0; }
   }
   @media (max-width: 767.98px) and (max-height: 700px) {
     .hero-v2__copy { gap: 1.125rem; padding-top: calc(72px + env(safe-area-inset-top, 0px) + 5vh); padding-bottom: 4vh; }
     .hero-v2__hi { margin-top: 0.75rem; font-size: 1.5rem; }
+    .hero-v2__actions { margin-top: 0.875rem; }
   }
 
   /* The gutters the header uses, so chapter copy lines up under the logo at
@@ -1626,7 +1694,7 @@
     text-overflow: ellipsis;
     padding: 0 1.125rem 0 0.625rem;
     font: 600 0.75rem / 1 var(--font-sans);
-    letter-spacing: 0.16em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
   @media (hover: hover) {
@@ -1691,22 +1759,38 @@
     background-size: 56px 56px;
   }
 
+  /* ── Chapter grade ─────────────────────────────────────────────────────────
+     Every chapter's photograph is graded the same way, and lightly: the photo
+     keeps its own colour, and shade (navy-950, the hero's) sits only where
+     words sit — up from the foot, in from the copy's side, and in a patch
+     behind the plate at the top. The upper half of the frame is left as shot.
+
+     Until 25 Oct 2026 the services and the MEPF intro multiplied the brand navy
+     into the whole photograph (`tone="deep"`). The client found the page
+     inconsistent and asked for it lighter: the wash turned every pale wall
+     grey-blue, while the MEPF systems, which never had it, looked like a
+     different site. One grade now, measured rather than chosen: see the
+     numbers in ServicesChapters.tsx. */
   .chapter__scrim {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
     background:
-      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.34) 42%, rgb(var(--scrim) / 0) 68%),
-      linear-gradient(90deg, rgb(var(--scrim) / 0.55), rgb(var(--scrim) / 0) 52%);
+      linear-gradient(0deg, rgb(var(--scrim) / 0.88), rgb(var(--scrim) / 0.52) 32%, rgb(var(--scrim) / 0.16) 55%, rgb(var(--scrim) / 0) 70%),
+      linear-gradient(90deg, rgb(var(--scrim) / 0.5), rgb(var(--scrim) / 0) 55%);
   }
   .chapter[data-align='right'] .chapter__scrim {
     background:
-      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.34) 42%, rgb(var(--scrim) / 0) 68%),
-      linear-gradient(270deg, rgb(var(--scrim) / 0.55), rgb(var(--scrim) / 0) 52%);
+      linear-gradient(0deg, rgb(var(--scrim) / 0.88), rgb(var(--scrim) / 0.52) 32%, rgb(var(--scrim) / 0.16) 55%, rgb(var(--scrim) / 0) 70%),
+      linear-gradient(270deg, rgb(var(--scrim) / 0.5), rgb(var(--scrim) / 0) 55%);
   }
+  /* Centred copy has no darker side of the frame to sit on, so an ellipse
+     behind it does that job (MEPF's ceiling). */
   .chapter[data-align='center'] .chapter__scrim {
-    background: linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.34) 44%, rgb(var(--scrim) / 0.06) 70%);
+    background:
+      radial-gradient(ellipse 70% 56% at 50% 62%, rgb(var(--scrim) / 0.52), rgb(var(--scrim) / 0.26) 60%, rgb(var(--scrim) / 0) 100%),
+      linear-gradient(0deg, rgb(var(--scrim) / 0.88), rgb(var(--scrim) / 0.5) 34%, rgb(var(--scrim) / 0.14) 58%, rgb(var(--scrim) / 0) 74%);
   }
   /* Long text over a bright photograph (quotes, lists). */
   .chapter__scrim[data-scrim='dense'] {
@@ -1747,7 +1831,9 @@
     font: 600 var(--type-label) / 1.4 var(--font-sans);
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.8);
+    /* Full white: at 13px it is the smallest line over the brightest part of
+       the frame, and at 80% it lost 4.2:1 to 3.7:1 there. */
+    color: #fff;
   }
   /* A plate without its number: the label starts where the number would. */
   .chapter-plate__label:first-child { margin-top: 0; }
@@ -1766,16 +1852,23 @@
     background: rgb(255 255 255 / 0.35);
   }
   .chapter-plate__parts > span[data-on] { background: rgb(var(--c-brand)); }
-  /* A part's photograph was graded for the copy at its foot; the plate it now
-     carries sits at the top, so it gets the band the hero puts behind the
-     header — longer, to reach under the label. So does any chapter that asks
-     for it (`plate.band`): the Services intro, whose blueprint photograph is
-     pale paper along the top — its label measured 2.7:1 without, 4.8:1 with. */
+  /* The plate sits at the top, where the grade above leaves the photograph
+     untouched, so it gets a patch of shade of its own: down to just under the
+     label, and only across the left of the frame, where the label is — the
+     rest of the top stays as bright as it was shot. Without it the "MEPF"
+     label over the Water photograph measured 3.7:1. */
   .chapter[data-plate-band] .chapter__scrim::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0) 42%);
+    background: linear-gradient(
+      180deg,
+      rgb(var(--scrim) / 0.66) 0,
+      rgb(var(--scrim) / 0.62) calc(var(--nav-h) + 4rem),
+      rgb(var(--scrim) / 0) calc(var(--nav-h) + 11rem)
+    );
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 20rem, transparent 42rem);
+    mask-image: linear-gradient(90deg, #000 0, #000 20rem, transparent 42rem);
   }
 
   .chapter-eyebrow {
@@ -1784,7 +1877,7 @@
     padding-bottom: 0.875rem;
     border-bottom: 1px solid rgb(255 255 255 / 0.32);
     font: 600 var(--type-label) / 1.5 var(--font-sans);
-    letter-spacing: 0.22em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: rgb(255 255 255 / 0.85);
   }
@@ -1837,7 +1930,7 @@
     padding: 0;
     list-style: none;
     font: 500 var(--type-label) / 1.6 var(--font-sans);
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: rgb(255 255 255 / 0.8);
   }
@@ -1884,56 +1977,6 @@
 
   /* Centred copy rests a little higher than a side column does. */
   .chapter[data-align='center'] .chapter__copy { padding-bottom: 9vh; }
-  /* From md up the floating contact button holds the bottom-right corner
-     (FloatingRail: 56px, 28px in from the edges) — exactly where right-aligned
-     copy ends, and at 1440 it sat on the last word. That copy rests above it. */
-  @media (min-width: 768px) {
-    .chapter[data-align='right'] .chapter__copy { padding-bottom: max(7vh, 6.5rem); }
-  }
-
-  /* ── Deep tone: a bright photograph graded into the navy ──────────────────
-     The scrim only darkens. Over a pale frame (grey concrete, white paper, a
-     white wall) that reads as a grey veil, and the copy still sits on a light
-     ground — measured on the design's services chapters, the small lines over
-     these photographs went as low as 2.6:1 (4.5:1 is the floor). Multiplying the brand navy into the photograph first turns its
-     light greys into the page's own blue while its darks stay dark and its
-     colours stay put, then a scrim, deepest under the copy, seats the words.
-
-     The numbers are measured, not chosen: every line of copy on every deep
-     chapter clears WCAG AA against the brightest 5% of the photograph behind
-     it, at 360–1920px — 4.5:1 for the lede and the labels (the closest is the
-     "Services" plate label, 5.3:1), 3:1 for the headings (all above 5.9:1).
-     Lighter than this and the plate label over the services scaffold drops
-     below 4.5:1 first.
-
-     `.chapter__media` is a stacking context (z-index -2), so the blend reaches
-     the photograph and nothing else. */
-  .chapter[data-tone='deep'] .chapter__media::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgb(var(--c-navy) / 0.3);
-    mix-blend-mode: multiply;
-  }
-  /* Up from the bottom, and in from the side the copy sits on… */
-  .chapter[data-tone='deep'] .chapter__scrim {
-    background:
-      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.36) 48%, rgb(var(--scrim) / 0.06)),
-      linear-gradient(90deg, rgb(var(--scrim) / 0.5), rgb(var(--scrim) / 0) 58%);
-  }
-  .chapter[data-tone='deep'][data-align='right'] .chapter__scrim {
-    background:
-      linear-gradient(0deg, rgb(var(--scrim) / 0.86), rgb(var(--scrim) / 0.36) 48%, rgb(var(--scrim) / 0.06)),
-      linear-gradient(270deg, rgb(var(--scrim) / 0.5), rgb(var(--scrim) / 0) 58%);
-  }
-  /* …or, for centred copy, an ellipse behind it — and a deeper grade, since
-     centred copy has no darker side of the frame to sit on (MEPF's ceiling). */
-  .chapter[data-tone='deep'][data-align='center'] .chapter__media::after { background: rgb(var(--c-navy) / 0.38); }
-  .chapter[data-tone='deep'][data-align='center'] .chapter__scrim {
-    background:
-      radial-gradient(ellipse 62% 48% at 50% 66%, rgb(var(--scrim) / 0.44), rgb(var(--scrim) / 0) 100%),
-      linear-gradient(0deg, rgb(var(--scrim) / 0.88), rgb(var(--scrim) / 0.36) 46%, rgb(var(--scrim) / 0.12));
-  }
 
   .chapter-links {
     display: flex;
@@ -1949,7 +1992,7 @@
     gap: 0.625rem;
     min-height: 2.75rem;
     font: 600 var(--type-label) / 1 var(--font-sans);
-    letter-spacing: 0.22em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     text-decoration: none;
     color: #fff;
@@ -2202,6 +2245,12 @@
   .mask-fade-x {
     -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
     mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+  /* Top and bottom, for a texture that should not draw a line where its band
+     meets the next one on the same ground (OneSystem's grid under the logos). */
+  .mask-fade-y {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 22%, black 78%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 22%, black 78%, transparent);
   }
   .perspective { perspective: 1200px; }
 }

@@ -33,10 +33,12 @@ import { IMG } from '@/lib/media';
  *
  * Two departures from the design, both deliberate:
  *
- * - **The intro is graded into the navy** (`tone="deep"`). Its photograph is a
- *   bright grey-concrete ceiling, and in the design the centred heading sat on
- *   a light ground and looked washed out. The systems keep the ordinary scrim;
- *   their copy sits to one side, over the darker half of each frame.
+ * - **The intro's centred copy sits on an ellipse of shade.** Its photograph is
+ *   a bright grey-concrete ceiling, and in the design the centred heading sat
+ *   on a light ground and looked washed out. (It was also graded into the navy
+ *   until 25 Oct 2026; every chapter now shares one natural grade, measured in
+ *   ServicesChapters.tsx.) The systems' copy sits to one side, over the
+ *   shaded half of each frame.
  * - **The consequence line is white with a cyan hairline**, not coral, so the
  *   page keeps to its two brand colours (decision 7).
  *
@@ -82,7 +84,6 @@ export function MepfChapters() {
       <Chapter
         id="mepf"
         align="center"
-        tone="deep"
         plate={PLATE}
         aria-labelledby="mepf-h"
         media={<ResponsiveImage src={IMG.wide('home-mepf-intro')} alt="" position="58% 50%" />}

@@ -88,6 +88,13 @@ The navbar is **transparent at scroll-top**, so it inherits whatever hero sits b
 | Numeric / technical | **JetBrains Mono** | 400–600 | Costs, specs, dimensions, IDs, admin tables. Monospace makes numbers feel *engineered*. |
 | Devanagari | **Noto Sans Devanagari** | 400–600 | For नक़्शे से निर्माण तक and Hindi testimonials. Non-negotiable — the brand is bilingual. |
 
+**Four families and no more** (audited 25 Oct 2026). Montserrat, once loaded for the navbar links,
+was removed; the links are Inter. Big marketing figures (hero stats, `PageHero`, `StatTile`,
+`ProjectsHero`) are **Outfit**; JetBrains Mono (`.num`) is only for tabular or technical numbers —
+prices, quantities, admin tables, timers. None of the families loads an italic, so **nothing is set
+in italic**: emphasis is weight (a heading's "second voice" is Outfit 400 beside 600), never a
+browser-slanted face. Only the loaded weights are used (Outfit 400–600, Inter 400–600, Mono 400–600).
+
 ### 2.1 Type scale (fluid, `clamp()`)
 | Token | Min → Max | Use |
 | --- | --- | --- |
@@ -99,9 +106,13 @@ The navbar is **transparent at scroll-top**, so it inherits whatever hero sits b
 | `body-lg` | 1.0625rem → 1.25rem | Lead paragraphs |
 | `body` | 1rem | Default |
 | `caption` | 0.8125rem | Meta, labels |
-| `overline` | 0.75rem, `0.18em` tracking, uppercase | Section eyebrows |
+| `overline` | 0.8125rem (13px), `0.2em` tracking, uppercase, Inter 600 | Every small caps label: section eyebrows, chapter labels, footer column headings, the popup's deck name |
 
 ### 2.2 Rules
+- **Headings are sentence case**, tight-tracked. Section h2 is `display-md`; nothing at heading size is all caps.
+- **One small caps label**: Inter 600, 13px (12px on phones), 0.2em. Quieter variants (chapter tags, the
+  trust line) change only the weight. Card metadata ("Jagatpura · 2024") is data, not a label, and stays at 0.08em.
+- **No label under 12px** — the client could not read 12px in a demo.
 - Display type: `letter-spacing: -0.03em`, `line-height: 0.95–1.05`. Tight tracking = expensive.
 - Measure capped at `68ch`; lead paragraphs at `56ch`.
 - Never centre more than 3 lines of body copy.
