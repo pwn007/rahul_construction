@@ -1,0 +1,25 @@
+OpenStreetMap data — scripts/data/osm/
+
+The files in scripts/data/osm/ are responses from the Overpass API: extracts of
+OpenStreetMap data for Jaipur and the surrounding region, fetched by
+scripts/build-jaipur-map.mjs (see osm/MANIFEST.json for each query, the date it
+was fetched and the OSM snapshot it came from).
+
+  © OpenStreetMap contributors
+  Licence: Open Database License (ODbL) 1.0
+  https://www.openstreetmap.org/copyright
+  https://opendatacommons.org/licenses/odbl/1-0/
+
+What this obliges us to do, as used here:
+
+  1. Attribution. The home page's project map shows "© OpenStreetMap
+     contributors", linked to https://www.openstreetmap.org/copyright, whenever
+     the map is on screen (features/home/sections/ProjectMap). Do not remove it.
+
+  2. Share-alike for the data. The map art (public/map/jaipur.<hash>.svg) is a
+     derived database of OSM data and is offered under the ODbL too: its
+     <metadata> says so. The page's design, code and copy are not OSM data and
+     are not covered by the ODbL.
+
+Rebuild:  npm run build:map          (from these files, offline)
+Refetch:  npm run build:map:fetch    (from Overpass; heavy — be kind to the public servers)

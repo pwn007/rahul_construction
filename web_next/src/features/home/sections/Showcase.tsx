@@ -17,6 +17,11 @@ import { useHomeSections } from '@/hooks/useHomeSections';
 /* Featured projects                                                     */
 /* ==================================================================== */
 
+/**
+ * Rendered nowhere since 25 Oct 2026: the home page's projects band is the map
+ * now (ProjectMap/, a port of the client's benchmark). Kept, as the repo keeps
+ * retired sections, in case the deck is wanted back — here or on /projects.
+ */
 export function FeaturedProjects() {
   const section = useHomeSections().find((s) => s.key === 'projects');
   /*

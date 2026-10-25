@@ -794,6 +794,350 @@
   }
 
   /* ----------------------------------------------------------------
+     Project map — features/home/sections/ProjectMap (the home page's
+     "Built across Jaipur"): a port of the precinct map on
+     residences.loamhouse.com.au, the client's benchmark (Oct 2026).
+
+     One screen: the map (an SVG whose viewBox is the camera), an ink
+     scrim, the copy bottom-left as in every chapter, and a numbered dot
+     per project. A dive flies the camera into a dot; the photograph opens
+     through a circle that rides it (`.map-photo`, clipped every frame by
+     the controller) and the project's panel performs over it. Stacking,
+     as the benchmark: map, scrim (2), photograph with its own grade (4),
+     panels (5), the copy and plate (6), the chrome (10).
+
+     The map is treated like a photograph — one palette in both themes,
+     drawn in the home page's navy hue at the benchmark's lightness. Its
+     roads are real widths in metres with a floor in screen pixels
+     (`--sw-*`, written per frame), and its labels are sized in screen
+     pixels at rest (`--map-upx`, metres per pixel there), so they read at
+     12–13px when the band settles and grow as the camera dives, as the
+     benchmark's do.
+     ---------------------------------------------------------------- */
+  /* Doubled with .chapter, which is defined further down and would otherwise win. */
+  .chapter.map-chapter {
+    height: calc(var(--vh) * 100);
+    align-items: stretch;
+    background-color: #c3c9d6;
+  }
+  .map-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    touch-action: pan-y pinch-zoom;
+    backface-visibility: hidden;
+  }
+  /* Gecko reuses a promoted layer's old raster while the viewBox flies (the benchmark's note). */
+  @supports (-moz-appearance: none) { .map-stage { backface-visibility: visible; } }
+  .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; }
+  /* Covered by the photograph: the vector map adds nothing on screen, so it is not painted at all. */
+  .map-svg.occluded { visibility: hidden; }
+  .map-stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    /* The benchmark's two gradients, plus a shade of our own under the copy: over the benchmark's alone
+       the lede's far end measured 3.6:1 against white roads (needs 4.5). It stops short of the dots. */
+    background:
+      radial-gradient(ellipse 52% 46% at 16% 86%, rgb(var(--scrim) / 0.62), rgb(var(--scrim) / 0.4) 50%, rgb(var(--scrim) / 0) 100%),
+      linear-gradient(90deg, rgb(var(--scrim) / 0.78), rgb(var(--scrim) / 0.32) 34%, rgb(var(--scrim) / 0) 56%),
+      linear-gradient(180deg, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0) 38%);
+  }
+  .map-chapter .chapter-plate { z-index: 6; pointer-events: none; }
+
+  /* The art (classes from scripts/build-jaipur-map.mjs). */
+  .map-svg .ground { fill: #c3c9d6; }
+  /* even-odd: an area's holes are drawn in any winding (the generator merges rings freely) */
+  .map-svg .a { fill-rule: evenodd; }
+  .map-svg .a-forest { fill: #acc4ce; }
+  .map-svg .a-park { fill: #bbd0da; }
+  .map-svg .a-airport { fill: #c9ceda; }
+  .map-svg .a-water { fill: #92aec9; }
+  .map-svg .l,
+  .map-svg .r,
+  .map-svg .rc { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .map-svg .l-river { stroke: #92aec9; stroke-width: var(--sw-river, 24); }
+  .map-svg .l-runway { stroke: #dce0e8; stroke-width: var(--sw-runway, 45); stroke-linecap: butt; }
+  .map-svg .l-rail { stroke: #7e8699; stroke-width: var(--sw-rail, 10); }
+  .map-svg .l-metro { stroke: #6e7fa0; stroke-width: var(--sw-metro, 10); }
+  .map-svg .r-minor { stroke: #e6eaf0; stroke-width: var(--sw-minor, 7); }
+  /* Drawn for the city only: they fade out as the camera pulls back to the region (and resolve as the entry
+     flies in), so the city's edge never shows as a line where they stop. */
+  .map-svg .r-tertiary,
+  .map-svg .r-secondary,
+  .map-svg .l-river { opacity: var(--lod-city, 1); }
+  .map-svg .r-tertiary { stroke: #eef1f6; stroke-width: var(--sw-tertiary, 12); }
+  .map-svg .r-secondary { stroke: #f5f7fb; stroke-width: var(--sw-secondary, 18); }
+  .map-svg .r-primary { stroke: #f9fafd; stroke-width: var(--sw-primary, 24); }
+  .map-svg .r-trunk,
+  .map-svg .r-ring { stroke: #fff; stroke-width: var(--sw-trunk, 30); }
+  .map-svg .r-ring { stroke-width: var(--sw-ring, 30); }
+  .map-svg .rc { stroke: #b1b7c6; }
+  .map-svg .rc-trunk { stroke-width: calc(var(--sw-trunk, 30) + 2 * var(--sw-case, 4)); }
+  .map-svg .rc-ring { stroke-width: calc(var(--sw-ring, 30) + 2 * var(--sw-case, 4)); }
+  .map-svg .lb {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: calc(var(--map-upx, 30) * 12px);
+    fill: #445069;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: rgb(195 201 214 / 0.85);
+    stroke-width: calc(var(--map-upx, 30) * 3px);
+    stroke-linejoin: round;
+    opacity: var(--lb-near, 1);
+  }
+  /* Localities: the house small-caps label, 13px / 0.2em / 600. */
+  .map-svg .lb-loc { font-weight: 600; font-size: calc(var(--map-upx, 30) * 13px); letter-spacing: 0.2em; text-transform: uppercase; fill: #2e3c5d; }
+  .map-svg .lb-town,
+  .map-svg .lb-city { font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; fill: #2e3c5d; opacity: var(--lb-far, 0); }
+  .map-svg .lb-town { font-size: calc(var(--map-upx, 30) * 13px * 2.5); stroke-width: calc(var(--map-upx, 30) * 7.5px); }
+  .map-svg .lb-city { font-size: calc(var(--map-upx, 30) * 16px * 2.5); stroke-width: calc(var(--map-upx, 30) * 7.5px); }
+  .map-svg .st { opacity: var(--lb-far, 0); }
+  .map-svg .st-dot { fill: #fff; stroke: #445069; stroke-width: 30; }
+  .map-svg .lb-station { font-size: 180px; stroke-width: 40px; text-anchor: start; transform: translate(160px, 0); opacity: 1; }
+  .map-svg.near-off .lb-loc,
+  .map-svg.near-off .lb-mark,
+  .map-svg.near-off .lb-road,
+  .map-svg.far-off .lb-town,
+  .map-svg.far-off .lb-city,
+  .map-svg.far-off .st,
+  .map-svg .lb-hidden { display: none; }
+
+  /* The dots. Everything is drawn about a 10-unit core (the benchmark's DOT_R); the controller scales each dot to its size on screen. */
+  .map-dots .dot { cursor: pointer; outline: none; }
+  .map-dots .hit { fill: transparent; pointer-events: all; }
+  .map-dots .halo,
+  .map-dots .pulse,
+  .map-dots .core,
+  .map-dots .num,
+  .map-dots .ring { pointer-events: none; }
+  .map-dots .core,
+  .map-dots .ping { fill: rgb(var(--c-navy)); }
+  .map-dots .num {
+    font: 600 10px var(--font-display);
+    letter-spacing: 0.02em;
+    font-variant-numeric: lining-nums;
+    fill: #fff;
+    text-anchor: middle;
+    opacity: var(--num-op, 1);
+  }
+  /* The breath and its ping (the benchmark's tuned 4.1 s, ×1.2, ping ×4.2 at .36): one clock per dot, phase set inline. */
+  .map-dots .pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: map-breath 4.1s ease-in-out infinite;
+  }
+  @keyframes map-breath {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(var(--breath-scale, 1.2)); }
+  }
+  .map-dots .ping {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: map-ping 4.1s ease-out infinite;
+  }
+  @keyframes map-ping {
+    0% { transform: scale(1); opacity: 0.36; }
+    70%, 100% { transform: scale(4.2); opacity: 0; }
+  }
+  .map-dots .halo { transition: opacity 0.45s; }
+  .map-dots.diving .halo { opacity: 0; }
+  .map-dots .core { transform-box: fill-box; transform-origin: center; transition: transform 0.4s cubic-bezier(0.3, 1.4, 0.4, 1); }
+  @media (hover: hover) {
+    .map-dots:not(.diving) .dot:hover .core { transform: scale(1.14); }
+  }
+  .map-dots .ring { fill: none; stroke: #fff; stroke-width: 2; opacity: 0; }
+  .map-dots .dot:focus-visible .ring { opacity: 1; }
+  .map-dots .dot:focus-visible .core { transform: scale(1.14); }
+  .map-chapter.is-off .map-dots .pulse,
+  .map-chapter.is-off .map-dots .ping { animation-play-state: paused; }
+
+  /* The lens: the open project's photograph, full-bleed and still, seen through a circle that rides its dot. */
+  .map-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    clip-path: circle(0px at 50% 50%);
+    will-change: clip-path, opacity;
+    background: rgb(var(--c-navy));
+  }
+  .map-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .map-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* The benchmark's grade (52°), and a foot under the copy: its renders are darker than our covers, and
+       over a bright one the panel text measured down to 2.3:1 without them (the eyebrow, highest, needs the ellipse). */
+    background:
+      radial-gradient(ellipse 52% 64% at 18% 55%, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0) 100%),
+      linear-gradient(0deg, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0.35) 40%, rgb(var(--scrim) / 0) 72%),
+      linear-gradient(52deg, rgb(var(--scrim) / 0.82) 0%, rgb(var(--scrim) / 0.5) 30%, rgb(var(--scrim) / 0) 60%);
+  }
+
+  /* The copy: a chapter's, resting bottom-left; it steps back (fade and blur) while a dive has the screen. */
+  .map-chapter .map-note {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 6;
+    padding-top: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease, filter 0.6s ease;
+  }
+  .map-note.dived { opacity: 0; filter: blur(8px); }
+  .map-note .chapter__inner { position: relative; }
+  .map-note a { pointer-events: auto; }
+  .map-note .chapter-lede { max-width: min(46ch, 38vw); }
+  /* Hovering a dot whispers its name above the eyebrow. */
+  .map-dotname {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin: 0 0 1rem;
+    font: 500 clamp(1.375rem, 2.1vw, 1.875rem) / 1.1 var(--font-display);
+    letter-spacing: -0.01em;
+    color: #fff;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.45s, transform 0.45s cubic-bezier(0.3, 1.3, 0.4, 1);
+    pointer-events: none;
+  }
+  .map-dotname[data-on] { opacity: 1; transform: none; }
+
+  /* The panels: a project's story over its photograph. */
+  .map-content { position: absolute; inset: 0; z-index: 5; pointer-events: none; transform: translateZ(0); }
+  .map-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 16vh;
+    overflow: hidden;
+    opacity: 0;
+    color: #fff;
+    cursor: pointer;
+    will-change: opacity;
+  }
+  .map-panel > .chapter-gutters { width: 100%; }
+  .map-panel__in { position: relative; max-width: 40rem; cursor: default; }
+  .map-panel__eyebrow {
+    display: inline-block;
+    margin: 0 0 1.625rem;
+    padding-bottom: 0.875rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.34);
+    font: 600 var(--type-label) / 1.5 var(--font-sans);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.92);
+  }
+  .map-panel__title {
+    margin: 0 0 1.375rem;
+    font: 600 clamp(2.75rem, 6.2vw, 6.25rem) / 0.92 var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    text-shadow: 0 0.022em 0 rgb(var(--scrim) / 0.4);
+    outline: none;
+  }
+  .map-panel__title .pl { display: block; }
+  .map-panel__body {
+    max-width: 46ch;
+    margin: 0 0 2.25rem;
+    font: 400 clamp(0.9375rem, 1.3vw, 1.1875rem) / 1.6 var(--font-sans);
+    color: rgb(255 255 255 / 0.9);
+    text-wrap: pretty;
+  }
+  .map-panel__lockup { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 2rem; }
+  .map-panel__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    font: 600 var(--type-label) / 1 var(--font-sans);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.85);
+    border-radius: 999px;
+  }
+  .map-panel__back::before { content: ''; width: 1.625rem; height: 1px; background: rgb(255 255 255 / 0.5); }
+  .map-panel__back:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 4px; }
+
+  /* The journey: see the projects in the region, and back. */
+  .map-nav { position: absolute; left: 42vw; bottom: 3.25rem; z-index: 10; transition: opacity 0.5s; }
+  .map-journey {
+    display: block;
+    padding: 0.5625rem;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: #2e3c5d;
+    cursor: pointer;
+    transition: color 0.25s;
+  }
+  .map-journey:focus-visible { outline: 2px solid rgb(var(--c-navy)); outline-offset: 2px; }
+  .mj-icon { display: block; width: 1.625rem; height: 1.625rem; }
+  .mj-icon .mj-tr,
+  .mj-icon .mj-bl { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  @media (hover: hover) {
+    .map-journey:hover { color: rgb(var(--c-navy)); }
+    .map-journey:hover .mj-tr { transform: translate(1.6px, -1.6px); }
+    .map-journey:hover .mj-bl { transform: translate(-1.6px, 1.6px); }
+    .map-journey:hover .mj-tr.mj-in { transform: translate(-1.6px, 1.6px); }
+    .map-journey:hover .mj-bl.mj-in { transform: translate(1.6px, -1.6px); }
+  }
+  .map-credit {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 10;
+    padding: 0.3125rem 0.75rem;
+    border-radius: 999px;
+    background: rgb(var(--scrim) / 0.7);
+    color: rgb(255 255 255 / 0.92);
+    font: 500 0.75rem / 1.4 var(--font-sans);
+    text-decoration: none;
+    transition: opacity 0.5s;
+  }
+  .map-credit:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 2px; }
+
+  /* A phone: the copy at the top under the plate, the dots below it (the benchmark's mobile layout), a little more shade. */
+  @media (max-width: 800px) {
+    .map-chapter .map-note { inset: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 3.25rem) 0 auto; padding: 0; }
+    /* The lede gives its room to the map: with it, the dots had a 210 px strip of an 844 px screen. */
+    .map-note .chapter-lede { display: none; }
+    .map-note .chapter-links { margin-top: 0.5rem; }
+    .map-stage::after {
+      background:
+        linear-gradient(90deg, rgb(var(--scrim) / 0.83), rgb(var(--scrim) / 0.37) 34%, rgb(var(--scrim) / 0) 56%),
+        linear-gradient(180deg, rgb(var(--scrim) / 0.72), rgb(var(--scrim) / 0.5) var(--note-shade, 42%), rgb(var(--scrim) / 0) calc(var(--note-shade, 42%) + 14%));
+    }
+    .map-panel { padding-bottom: 14vh; }
+    /* On a phone the story covers most of the photograph, up to its top quarter: the dense grade (as the
+       chapters' `dense` scrim) — anything lighter measured under 4.5:1 on the brighter covers. */
+    .map-photo::after {
+      background: linear-gradient(0deg, rgb(var(--scrim) / 0.9), rgb(var(--scrim) / 0.66) 50%, rgb(var(--scrim) / 0.52));
+    }
+    .map-nav { left: 0.5rem; bottom: 1.5rem; }
+    .map-journey { color: #fff; }
+    .map-credit { right: 0.75rem; bottom: 0.75rem; }
+  }
+
+  /* No breath, no ping (the benchmark too); flights become cuts and cross-fades (controller). */
+  @media (prefers-reduced-motion: reduce) {
+    .map-dots .pulse,
+    .map-dots .ping { animation: none; }
+    .map-dots .ping { opacity: 0; }
+    .map-photo { transition: opacity 0.25s; }
+    .map-dotname { transition: opacity 0.2s; transform: none; }
+  }
+
+  /* ----------------------------------------------------------------
      Story deck — features/home/sections/StoryDeck: the client stories
      (ClientVideos, and its ClientStoryPlayer) and the selected work.
 

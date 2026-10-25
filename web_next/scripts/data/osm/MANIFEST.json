@@ -1,0 +1,200 @@
+{
+  "city-airport": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"aeroway\"~\"^(aerodrome|runway)$\"](26.66,75.56,27.1,76);relation[\"aeroway\"=\"aerodrome\"](26.66,75.56,27.1,76););out tags geom qt;",
+    "endpoint": "https://overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:55:06Z",
+    "sha256": "0bfcdd9743a5616c00ab3b616b1dce7157c4307ed0f88f088f4f02bd5921c4c3",
+    "bytes": 6648,
+    "elements": 2
+  },
+  "city-green": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"leisure\"~\"^(park|garden|nature_reserve)$\"](26.66,75.56,27.1,76);relation[\"leisure\"~\"^(park|garden|nature_reserve)$\"](26.66,75.56,27.1,76);way[\"landuse\"~\"^(forest|recreation_ground|grass|meadow)$\"](26.66,75.56,27.1,76);relation[\"landuse\"=\"forest\"](26.66,75.56,27.1,76);way[\"natural\"~\"^(wood|scrub)$\"](26.66,75.56,27.1,76);relation[\"natural\"~\"^(wood|scrub)$\"](26.66,75.56,27.1,76);way[\"boundary\"=\"protected_area\"](26.66,75.56,27.1,76);relation[\"boundary\"=\"protected_area\"](26.66,75.56,27.1,76););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:57:06Z",
+    "sha256": "c906efc8cf077a651c89b698a36404cb4cb484ba82a603cf38028ac4f36616e5",
+    "bytes": 425137,
+    "elements": 670
+  },
+  "city-rail": {
+    "query": "[out:json][timeout:120][maxsize:134217728];way[\"railway\"~\"^(rail|subway|light_rail)$\"](26.66,75.56,27.1,76);out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:54:06Z",
+    "sha256": "e7df563a2fdbd66f48beb5a2adbeffd57aac95f0c58f4c0f022ba1dfd16ee5fd",
+    "bytes": 143155,
+    "elements": 240
+  },
+  "city-roads": {
+    "query": "[out:json][timeout:120][maxsize:134217728];way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](26.66,75.56,27.1,76);out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:04:08Z",
+    "sha256": "50d2d965b21f25ac27c6634b50b821876f517215e2e40fb25293fa267fe2db83",
+    "bytes": 4141586,
+    "elements": 5862
+  },
+  "city-stations": {
+    "query": "[out:json][timeout:120][maxsize:134217728];node[\"railway\"=\"station\"](26.66,75.56,27.1,76);out body qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:09:21Z",
+    "sha256": "70879a07346707d32e097bd0ebed1298457bf06ac9a4e4f05271909aab0f84d9",
+    "bytes": 11089,
+    "elements": 27
+  },
+  "city-water": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"natural\"=\"water\"](26.66,75.56,27.1,76);relation[\"natural\"=\"water\"](26.66,75.56,27.1,76);way[\"landuse\"=\"reservoir\"](26.66,75.56,27.1,76);way[\"waterway\"=\"riverbank\"](26.66,75.56,27.1,76);way[\"waterway\"~\"^(river|canal)$\"](26.66,75.56,27.1,76););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:57:06Z",
+    "sha256": "8fff7099997a523bfac21fd1d06342f116a9a007973d5d08b43f3330d321ad93",
+    "bytes": 194637,
+    "elements": 188
+  },
+  "landmarks": {
+    "query": "[out:json][timeout:120][maxsize:134217728];nwr[\"name\"~\"^(Hawa Mahal|City Palace|Amber Fort|Amer Fort|Amber Palace|Nahargarh Fort|Jaigarh Fort|Jal Mahal|Albert Hall|Albert Hall Museum|Birla Mandir|Lakshmi Narayan Temple|Sawai Mansingh Stadium|Sawai Man Singh Stadium|Jaipur International Airport|Central Park|Galtaji|Galta Ji|Galta Temple|World Trade Park|Patrika Gate|Jantar Mantar)$\",i](26.66,75.56,27.1,76);out body center qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:10:21Z",
+    "sha256": "1600b33041a009a0604e22f5d19225886066cbd293a2fd543162c9e0b2137c92",
+    "bytes": 10592,
+    "elements": 18
+  },
+  "patch-ajmer-road-hospital-mepf": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.9089,75.7141);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.9089,75.7141);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.9089,75.7141);way[\"natural\"=\"water\"](around:1300,26.9089,75.7141););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:03:06Z",
+    "sha256": "ff5cc2aabcad76db012dc7e0b7e3dfe85a3215f9de3d88a39f691cf74b328e9e",
+    "bytes": 371951,
+    "elements": 1036
+  },
+  "patch-jagatpura-terrace-residence": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.8129,75.8447);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.8129,75.8447);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.8129,75.8447);way[\"natural\"=\"water\"](around:1300,26.8129,75.8447););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:58:05Z",
+    "sha256": "fae6274c35d14d36606756dd703870cca43bd6b862f6534823dafb87d18dfe18",
+    "bytes": 254367,
+    "elements": 622
+  },
+  "patch-jhotwara-row-housing": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.9432,75.7473);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.9432,75.7473);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.9432,75.7473);way[\"natural\"=\"water\"](around:1300,26.9432,75.7473););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:04:08Z",
+    "sha256": "22450a177c146111d1e871c788f029fe183e1cf9c122ab32ff09b62a50f89f94",
+    "bytes": 403217,
+    "elements": 1158
+  },
+  "patch-malviya-nagar-garden-house": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.8535,75.8095);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.8535,75.8095);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.8535,75.8095);way[\"natural\"=\"water\"](around:1300,26.8535,75.8095););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:01:06Z",
+    "sha256": "d562fa0fbf7b912e6aa0bde85cdd6af58394126b8afd6f1791333e14705f529c",
+    "bytes": 328142,
+    "elements": 845
+  },
+  "patch-mansarovar-courtyard-villa": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.8505,75.7628);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.8505,75.7628);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.8505,75.7628);way[\"natural\"=\"water\"](around:1300,26.8505,75.7628););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:59:06Z",
+    "sha256": "c7e4a7bda52e6699e752c321c73a6571cce023308f11891d5d701941d4624d52",
+    "bytes": 423120,
+    "elements": 1109
+  },
+  "patch-pratap-nagar-gaushala-residence": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.7791,75.8264);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.7791,75.8264);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.7791,75.8264);way[\"natural\"=\"water\"](around:1300,26.7791,75.8264););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:00:06Z",
+    "sha256": "1c04e62b574bd32424c14af9531c6e723323aaf9a3d979ac16d2090e1ab15dca",
+    "bytes": 214836,
+    "elements": 542
+  },
+  "patch-pratap-nagar-slim-house": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.7833,75.8378);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.7833,75.8378);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.7833,75.8378);way[\"natural\"=\"water\"](around:1300,26.7833,75.8378););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T17:58:05Z",
+    "sha256": "0d33e353e98bbd80bef6c3e764120885f43f0c50775cce79a45d4bf12955599c",
+    "bytes": 132756,
+    "elements": 292
+  },
+  "patch-sanganer-mixed-use-block": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.8168,75.7891);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.8168,75.7891);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.8168,75.7891);way[\"natural\"=\"water\"](around:1300,26.8168,75.7891););out tags geom qt;",
+    "endpoint": "https://z.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:01:06Z",
+    "sha256": "669ea566c5abbe3332428c43dc6e7c378abf6a1a6127c4ed13c4df642bf0d287",
+    "bytes": 366694,
+    "elements": 918
+  },
+  "patch-tonk-road-corporate-office": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.8467,75.8065);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.8467,75.8065);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.8467,75.8065);way[\"natural\"=\"water\"](around:1300,26.8467,75.8065););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:03:06Z",
+    "sha256": "32e47cb9d1bae27d338a509a847b739b5f7a4aadade3a39ee8f6b371e01b768a",
+    "bytes": 369292,
+    "elements": 948
+  },
+  "patch-vaishali-nagar-apartment-interiors": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"highway\"~\"^(residential|unclassified|living_street|pedestrian)$\"][\"access\"!~\"^(private|no)$\"](around:1300,26.9124,75.7395);way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)(_link)?$\"](around:1300,26.9124,75.7395);way[\"leisure\"~\"^(park|garden|pitch|playground)$\"](around:1300,26.9124,75.7395);way[\"natural\"=\"water\"](around:1300,26.9124,75.7395););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:02:06Z",
+    "sha256": "865dd719eb878f5ad68c2f2355dc8082ae3e7034cc78d60fe253fbe21ba6d02d",
+    "bytes": 331721,
+    "elements": 910
+  },
+  "places": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(node[\"place\"~\"^(suburb|neighbourhood|quarter|city)$\"](26.66,75.56,27.1,76);node[\"place\"~\"^(city|town)$\"](26.2,75,27.55,76.55););out body qt;",
+    "endpoint": "https://z.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:08:21Z",
+    "sha256": "52342a4d6981e940324d2da08a04137f05f704305c8db650c6608b0df36fabd1",
+    "bytes": 38854,
+    "elements": 273
+  },
+  "region-green": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(relation[\"boundary\"=\"protected_area\"](26.2,75,27.55,76.55);relation[\"landuse\"=\"forest\"](26.2,75,27.55,76.55);relation[\"leisure\"=\"nature_reserve\"](26.2,75,27.55,76.55););out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:06:16Z",
+    "sha256": "a1b7ac5b7d2418fd5ad5338138817738326f9ff5bcca56fb0b0723c498550e2c",
+    "bytes": 659,
+    "elements": 1
+  },
+  "region-rail": {
+    "query": "[out:json][timeout:120][maxsize:134217728];way[\"railway\"=\"rail\"](26.2,75,27.55,76.55);out tags geom qt;",
+    "endpoint": "https://lz4.overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:04:08Z",
+    "sha256": "47b4746727e4dac0b99eff0904cf4e9651310a09ddd01bfa1796c543c6278c48",
+    "bytes": 366229,
+    "elements": 591
+  },
+  "region-roads": {
+    "query": "[out:json][timeout:120][maxsize:134217728];way[\"highway\"~\"^(motorway|trunk|primary)$\"](26.2,75,27.55,76.55);out tags geom qt;",
+    "endpoint": "https://overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:07:21Z",
+    "sha256": "cd4b0c81fd17495552eef9abf2f7ba3ebde04fdba6f71a02e22b44676b6c39e7",
+    "bytes": 2692206,
+    "elements": 2982
+  },
+  "region-water": {
+    "query": "[out:json][timeout:120][maxsize:134217728];(way[\"natural\"=\"water\"][\"water\"~\"^(lake|reservoir)$\"](26.2,75,27.55,76.55);relation[\"natural\"=\"water\"][\"water\"~\"^(lake|reservoir)$\"](26.2,75,27.55,76.55);way[\"landuse\"=\"reservoir\"](26.2,75,27.55,76.55);relation[\"landuse\"=\"reservoir\"](26.2,75,27.55,76.55););out tags geom qt;",
+    "endpoint": "https://overpass-api.de/api/interpreter",
+    "retrieved": "2026-10-25",
+    "osmBase": "2026-10-25T18:05:11Z",
+    "sha256": "a0c09376cd6935731b99325b1f26c3b9e488e3b4b80772bf27cca6d80410cb7f",
+    "bytes": 230845,
+    "elements": 251
+  }
+}

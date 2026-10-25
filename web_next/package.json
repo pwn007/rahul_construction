@@ -8,6 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "build:districts": "node scripts/build-districts.mjs",
+    "build:map": "node scripts/build-jaipur-map.mjs",
+    "build:map:fetch": "node scripts/build-jaipur-map.mjs --fetch",
     "optimize:images": "node scripts/optimize-images.mjs",
     "images:variants": "node scripts/build-image-variants.mjs",
     "check:estimator": "tsx scripts/check-estimator.ts",

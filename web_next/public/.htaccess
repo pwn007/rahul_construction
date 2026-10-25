@@ -1,4 +1,4 @@
-# Neetu Archstone — public_html/.htaccess  (v5)
+# Neetu Archstone — public_html/.htaccess  (v6)
 #
 # Next.js copies everything in `public/` into the export, so this file ships
 # inside site.zip and lands at the docroot on its own. It carries what
@@ -31,7 +31,7 @@ RewriteBase /
 # Marker to verify which version of this file is live — check with:
 #   curl -sI https://neetuarchstone.com/ | grep -i x-na-version
 <IfModule mod_headers.c>
-  Header always set X-NA-Version "v5"
+  Header always set X-NA-Version "v6"
 </IfModule>
 
 # ── 1. Lock /backend, except its public/ folder ─────────────────────────────
@@ -67,3 +67,12 @@ RewriteRule ^mepf/?$ /services/mepf-consultancy/ [R=301,L]
 # ── 4. Not-found ────────────────────────────────────────────────────────────
 # Next writes the 404 page to /404.html in an export.
 ErrorDocument 404 /404.html
+
+# ── 5. Compress the map art (v6, 26 Oct 2026) ───────────────────────────────
+# The home page's project map is one SVG of OpenStreetMap streets
+# (/map/jaipur.<hash>.svg, ~390 KB raw, ~170 KB gzipped). LiteSpeed compresses
+# HTML, CSS and JS by itself but not necessarily SVG. Check after deploy:
+#   curl -sI -H 'Accept-Encoding: gzip' https://neetuarchstone.com/map/<file> | grep -i content-encoding
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>

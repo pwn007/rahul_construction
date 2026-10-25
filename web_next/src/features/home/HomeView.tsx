@@ -6,7 +6,8 @@ import { ServicesChapters } from './sections/ServicesChapters';
 import { MepfChapters } from '@/features/mepf/MepfChapters';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
-import { FeaturedProjects, Testimonials } from './sections/Showcase';
+import { Testimonials } from './sections/Showcase';
+import { ProjectMapChapter } from './sections/ProjectMap';
 import { ClientVideos } from './sections/ClientVideos';
 import { useHomeSections } from '@/hooks/useHomeSections';
 import { useSectionNav } from '@/hooks/useSectionNav';
@@ -104,10 +105,14 @@ export function HomeView() {
           migration — the promise, then one per system; `MepfTeaser` (the
           stacked cards) is no longer rendered here. */}
       {on('mepf') && <MepfChapters />}
-      {on('projects') && <FeaturedProjects />}
+      {/* The projects as a map you dive into (client's benchmark, residences.loamhouse.com.au —
+          25 Oct 2026). It replaced the card deck (`FeaturedProjects`, still in Showcase.tsx,
+          rendered nowhere now): one screen of Jaipur, a dot per project; a click flies into the
+          dot and opens the project's photograph and story. A chapter like the ones above it. */}
+      {on('projects') && <ProjectMapChapter />}
       {/* The claims, then the people backing them. This band is `--c-surface-2`
           (mist-2, one step darker than the mist around it), sitting between the
-          projects rail and the client videos, both on page ground: a change of
+          projects map and the client videos, both on page ground: a change of
           topic, marked quietly. */}
       {on('testimonials') && <Testimonials />}
       {/* The same people on camera. Split out of the testimonials band at the

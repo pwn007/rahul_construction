@@ -1,4 +1,5 @@
 import { MAP_FRAME, LOCALITY_TO_DISTRICT, JAIPUR_DISTRICTS } from '@/data/jaipur-districts';
+import { CITY_FRAME } from '@/data/jaipur-map';
 import type { Project } from '@/types/domain';
 
 /**
@@ -20,10 +21,29 @@ const SX = MAP_FRAME.width / (MAP_FRAME.lon1 - MAP_FRAME.lon0);
  * agree by construction.
  */
 const SY = SX * MAP_FRAME.cosMidLat;
+/*
+ * NOTE (25 Oct 2026, found while building the home page's project map): the
+ * reasoning above is upside down. Equirectangular needs the vertical scale to
+ * be the horizontal one *divided* by cos φ — a degree of latitude is the longer
+ * one on the ground — so this frame (and the generated district paths, which
+ * bake in the same constant) is squashed north–south by about 20%. Pins and
+ * polygons still agree with each other, which is why it has gone unnoticed on
+ * district blobs. Not fixed here: correcting it means regenerating the atlas
+ * and re-checking its layout. The project map uses its own frame (projectCity).
+ */
 
 /** Latitude/longitude → frame units (the SVG's own coordinate space). */
 export function projectPoint(lat: number, lng: number): { x: number; y: number } {
   return { x: (lng - MAP_FRAME.lon0) * SX, y: (MAP_FRAME.lat1 - lat) * SY };
+}
+
+/**
+ * Latitude/longitude → the home page project map's frame: metres east (x) and
+ * south (y) of its centre, a true equirectangular projection (see
+ * scripts/jaipur-map.config.mjs). Its art is in the same units.
+ */
+export function projectCity(lat: number, lng: number): { x: number; y: number } {
+  return { x: (lng - CITY_FRAME.lng0) * CITY_FRAME.mx, y: (CITY_FRAME.lat0 - lat) * CITY_FRAME.my };
 }
 
 /**
