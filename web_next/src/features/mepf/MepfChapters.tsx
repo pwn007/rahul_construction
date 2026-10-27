@@ -36,8 +36,8 @@ import { IMG } from '@/lib/media';
  * - **The intro's centred copy sits on an ellipse of shade.** Its photograph is
  *   a bright grey-concrete ceiling, and in the design the centred heading sat
  *   on a light ground and looked washed out. (It was also graded into the navy
- *   until 25 Oct 2026; every chapter now shares one natural grade, measured in
- *   ServicesChapters.tsx.) The systems' copy sits to one side, over the
+ *   until 25 Oct 2026; every chapter now shares one natural grade, measured as
+ *   globals.css, "Chapter grade", records.) The systems' copy sits to one side, over the
  *   shaded half of each frame.
  * - **The consequence line is white with a cyan hairline**, not coral, so the
  *   page keeps to its two brand colours (decision 7).

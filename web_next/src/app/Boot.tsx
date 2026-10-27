@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { loadAnalytics } from '@/lib/analytics';
 import { getAttribution } from '@/lib/attribution';
+import { watchBuildFreshness } from '@/lib/build-freshness';
 
 /**
  * Boot side-effects, in this order.
@@ -14,11 +15,15 @@ import { getAttribution } from '@/lib/attribution';
  * it is the earliest point that exists, since neither can run on the server.
  *
  * Both are inert without NEXT_PUBLIC_GTM_ID and a tagged URL respectively.
+ *
+ * Last, the stale-release watch: a tab running an older build reloads itself
+ * (`lib/build-freshness.ts`). Inert outside a production build.
  */
 export function Boot() {
   useEffect(() => {
     loadAnalytics();
     getAttribution();
+    return watchBuildFreshness();
   }, []);
 
   return null;

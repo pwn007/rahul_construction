@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode, type TouchEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { LogoLockup } from '@/components/common/Logo';
 import { useLockBodyScroll } from '@/hooks';
+import { cn } from '@/lib/cn';
 import { splitName } from './StoryDeck';
 
 /**
@@ -18,6 +19,11 @@ import { splitName } from './StoryDeck';
  * across the top, the deck's title, the frame (the caller's) filling what is
  * left, and the name under it. On a laptop the frame is an upright 9:16,
  * centred (globals.css, `.cs-reel`); the prototype only drew the phone.
+ *
+ * `reel` (the client stories only) makes it a reel on a phone (client, 27 Oct
+ * 2026): the frame is the whole screen, and the lockup, title and name float
+ * on the film rather than stacking round it. The photographs and every laptop
+ * keep the frame.
  *
  * The plumbing is `VideoLightbox`'s: a portal, mounted only while open, the
  * body locked (which also stands the section engine down — lib/section-nav
@@ -33,6 +39,7 @@ export function StoryPopup({
   name,
   line,
   action,
+  reel,
   onClose,
   onStep,
   children,
@@ -49,6 +56,8 @@ export function StoryPopup({
   line: string;
   /** Under the name, e.g. a link to the page behind it. */
   action?: ReactNode;
+  /** On a phone, the frame fills the screen and the rest floats on it. */
+  reel?: boolean;
   onClose: () => void;
   /** The previous or next of the deck's cards; absent with only one. */
   onStep?: (by: 1 | -1) => void;
@@ -90,7 +99,7 @@ export function StoryPopup({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-          className="cs-player"
+          className={cn('cs-player', reel && 'cs-player--reel')}
           role="dialog"
           aria-modal="true"
           aria-label={label}
@@ -121,6 +130,28 @@ export function StoryPopup({
     </AnimatePresence>,
     document.body,
   );
+}
+
+/**
+ * A sideways swipe on the frame steps, as on the deck (StoryDeck). The page is
+ * locked under the popup, so any clearly horizontal stroke counts — except one
+ * that starts on a control's input (the film's seek bar), which is dragging.
+ */
+export function useSwipeStep(onStep?: (by: 1 | -1) => void) {
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: TouchEvent) => {
+    if (!onStep || e.touches.length !== 1 || (e.target as Element).closest('input')) return;
+    touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const onTouchEnd = (e: TouchEvent) => {
+    const from = touch.current;
+    touch.current = null;
+    if (!from || !onStep) return;
+    const dx = e.changedTouches[0].clientX - from.x;
+    const dy = e.changedTouches[0].clientY - from.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > 1.5 * Math.abs(dy)) onStep(dx < 0 ? 1 : -1);
+  };
+  return { onTouchStart, onTouchEnd };
 }
 
 /** The frame's previous and next buttons, at its sides. */

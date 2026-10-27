@@ -639,6 +639,217 @@
   }
 
   /* ----------------------------------------------------------------
+     Services — features/home/sections/ServicesRows (27 Oct 2026).
+
+     The offer as a band of its own on mist-2, then a row per service: a
+     contained, rounded photograph beside its words, sides alternating from
+     `md`. It replaced four stacked photo chapters, whose offer photograph read
+     as About's and whose gaps read as seams (see the component). The
+     whitespace between rows is the space between them the client asked for —
+     kept tight (27 Oct 2026: the first cut's 7–8rem read as empty), with the
+     heading and the rows on one 12-column grid so their edges line up.
+
+     A phone keeps the page's rule, one screen per stop: the heading is a
+     screen, with an index of the three, and every service is a screen, its
+     photograph taking the height the words leave. A phone held sideways has no
+     screen to fill and gets the side-by-side rows.
+     ---------------------------------------------------------------- */
+  .services-band {
+    background-color: rgb(var(--c-surface-2));
+    color: rgb(var(--c-text));
+    padding-block: 3.5rem;
+  }
+  @media (min-width: 1024px) {
+    .services-band { padding-block: 4.5rem; }
+  }
+  .services-head__grid {
+    display: grid;
+    row-gap: 1.5rem;
+  }
+  /* On the rows' own grid (below): the heading over the photographs' columns,
+     the lede over the first row's words, so the two start on one line. */
+  @media (min-width: 1024px) {
+    .services-head__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: end;
+      column-gap: 3rem;
+    }
+    .services-head__grid > :first-child { grid-column: 1 / span 7; }
+    .services-head__grid > :last-child { grid-column: 8 / span 5; }
+  }
+  @media (min-width: 1280px) {
+    .services-head__grid { column-gap: 4rem; }
+  }
+  /* The index of the three: a tablet's contents for the band (below). Not on a
+     phone (27 Oct 2026, user): the next three screens say it themselves. */
+  .services-index {
+    display: none;
+    margin-top: 2rem;
+    border-top: 1px solid rgb(var(--c-border));
+  }
+  .services-index a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 3.5rem;
+    border-bottom: 1px solid rgb(var(--c-border));
+    color: rgb(var(--c-text));
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .services-index__num {
+    min-width: 1.75rem;
+    font: 500 0.875rem / 1 var(--font-display);
+    color: rgb(var(--c-brand-text));
+  }
+  .services-index__name { flex: 1; min-width: 0; }
+  .services-rows {
+    display: grid;
+    row-gap: 3rem;
+    margin-top: 2.5rem;
+  }
+  /* 3rem apart at `lg` since 28 Oct 2026 (4rem read as spread out). */
+  @media (min-width: 1024px) {
+    .services-rows { row-gap: 3rem; margin-top: 2.5rem; }
+  }
+  .service-row {
+    display: grid;
+    row-gap: 1.75rem;
+    align-items: center;
+  }
+  .service-row__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    /* Keeps the rounded clip while the photograph scales (Safari drops it otherwise). */
+    isolation: isolate;
+    border-radius: 1rem;
+    aspect-ratio: 4 / 3;
+    /* A light placeholder while the photograph loads, as the deck's cards. */
+    background-color: rgb(var(--c-border));
+  }
+  .service-row__media picture,
+  .service-row__media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .service-row__media img {
+    object-fit: cover;
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (hover: hover) {
+    .service-row:hover .service-row__media img { transform: scale(1.04); }
+  }
+  .service-row__title { color: rgb(var(--c-text)); }
+  .service-row__title a { color: inherit; text-decoration: none; border-radius: 0.125rem; }
+  .service-row__title a:focus-visible { outline: 2px solid rgb(var(--c-brand)); outline-offset: 4px; }
+  @media (hover: hover) {
+    .service-row__title a:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.14em;
+      text-decoration-color: rgb(var(--c-text) / 0.4);
+    }
+  }
+  .service-row__scope { margin-top: 1rem; max-width: 34ch; }
+  /* The page's one small-caps label (type system): 13px, 0.2em, Inter 600. */
+  .service-row__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.25rem;
+    font: 600 var(--type-label) / 1.4 var(--font-sans);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(var(--c-text-muted));
+  }
+  .service-row__cta { margin-top: 1.5rem; }
+
+  /* Side by side: a tablet, a laptop, a phone held sideways. Under the section
+     engine (a tablet, a phone sideways) a stop rests at its top, and the header
+     stays on screen over it, so a row starts below the header. */
+  @media (min-width: 768px), (orientation: landscape) and (max-height: 520px) {
+    .service-row { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 2rem; }
+    .service-row__media { grid-column: 1 / span 6; grid-row: 1; }
+    .service-row__body { grid-column: 7 / span 6; grid-row: 1; }
+    .service-row[data-flip] .service-row__media { grid-column: 7 / span 6; }
+    .service-row[data-flip] .service-row__body { grid-column: 1 / span 6; }
+    html.snapnav .service-row { padding-top: calc(var(--nav-h) + 1rem); }
+    /* The engine rests two short rows together on a tablet's screen; at the
+       desktop's tighter gap the next row's photograph showed a sliver under them. */
+    html.snapnav .services-rows { row-gap: 4.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .service-row { column-gap: 3rem; }
+    .service-row__media { grid-column: 1 / span 7; aspect-ratio: 16 / 10; }
+    .service-row__body { grid-column: 8 / span 5; }
+    .service-row[data-flip] .service-row__media { grid-column: 6 / span 7; }
+    .service-row[data-flip] .service-row__body { grid-column: 1 / span 5; }
+  }
+  @media (min-width: 1280px) {
+    .service-row { column-gap: 4rem; }
+  }
+
+  /* A phone: a screen per stop. The heading's screen is the heading, its lede
+     and the link; each service's photograph grows into whatever its words leave. */
+  @media (max-width: 767.98px) and (min-height: 521px) {
+    .services-band { padding-block: 0; }
+    .services-head,
+    .service-row {
+      min-height: calc(var(--vh) * 100);
+      padding-top: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 1.25rem);
+      padding-bottom: 1.5rem;
+    }
+    .services-head {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .services-rows { margin-top: 0; row-gap: 0; }
+    .service-row {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.25rem;
+    }
+    .service-row__media { flex: 1 1 auto; min-height: 26svh; aspect-ratio: auto; }
+    .service-row__tags { margin-top: 1rem; }
+    .service-row__cta { margin-top: 1.25rem; }
+  }
+  /* A tablet, either way up (touch-first, so under the section engine; a phone
+     held sideways is under 600px tall and keeps its rows): the heading is a
+     screen and a stop of its own too, with the index. Otherwise it fits on one
+     screen with About or with the first row, the engine folds them into one
+     stop, and the band starts half way down a screen again — the very
+     confusion this band was redrawn to end. */
+  @media (hover: none) and (pointer: coarse) and (min-width: 768px) and (min-height: 600px) {
+    .services-band { padding-top: 0; }
+    .services-head {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(var(--vh) * 100);
+      padding-block: calc(var(--nav-h) + 2rem) 3rem;
+    }
+    .services-index { display: block; max-width: 36rem; }
+  }
+  /* A phone held sideways: 360-odd pixels less the header is not room for a
+     row with everything, and its pill was cut at the foot. The tags go (the
+     service page lists them all), the photograph goes wider, the gaps tighten. */
+  @media (orientation: landscape) and (max-height: 520px) {
+    .service-row__media { aspect-ratio: 16 / 10; }
+    .service-row__tags { display: none; }
+    .service-row__scope { margin-top: 0.5rem; }
+    .service-row__cta { margin-top: 1rem; }
+  }
+  /* A short phone (Safari with its bars, an SE): the scope line sits closer. */
+  @media (max-width: 767.98px) and (min-height: 521px) and (max-height: 700px) {
+    .service-row__scope { margin-top: 0.75rem; }
+  }
+
+  /* ----------------------------------------------------------------
      Client reviews — features/home/sections/ClientReviews.
 
      One review at a time, dissolving into the next. On touch the band is a
@@ -646,8 +857,8 @@
      stops under it are what the page — and the section engine — scroll
      through. The stops are pulled up under the stage so the band is
      exactly that many screens, and let every click through to it. On
-     desktop it is one screen, and a scroll over the reviews' half turns
-     them in place (ClientReviews `useReviewWheel`).
+     desktop it is one screen the page scrolls past like any other, and the
+     arrows under the review (or the dots) turn them.
 
      The dissolve is the client prototype's, timing and all: the review
      going leaves completely (420ms) before the one coming starts (after
@@ -674,11 +885,20 @@
     min-height: calc(var(--vh) * 100);
   }
   /* Desktop (anything but a touch-first device — the section engine's own test): one ordinary screen,
-     no hold and no stops (25 Oct 2026). The heading's half scrolls the page; a scroll over the reviews'
-     half turns one review while the page holds, and goes on to the page after the last. */
+     no hold and no stops (25 Oct 2026). The page scrolls over all of it; the arrows under the review
+     turn it (27 Oct 2026). They are the client videos' deck arrows (`.cs-arrow`). */
+  .review-arrows {
+    display: none;
+  }
+  /* Its content's height on desktop since 28 Oct 2026, not a screen: at
+     1440×900 a screen left 289px over the review and 229px under it, the
+     page's widest gap. Every review shares one cell, so the band does not
+     change height as they turn. 4.5rem a side: both neighbours are another
+     ground (the projects map, the page's mist). */
   @media not all and (hover: none) and (pointer: coarse) {
-    .review-stage { position: relative; height: auto; min-height: calc(var(--vh) * 100); }
+    .review-stage { position: relative; height: auto; min-height: 0; padding: 4.5rem 0; }
     .review-stops { display: none; }
+    .review-arrows { display: flex; gap: 0.75rem; margin-top: 2rem; }
   }
   .review-stack {
     display: grid;
@@ -788,7 +1008,7 @@
     .review-stage { position: static; height: auto; padding: 3rem 0; }
     .review-stage > .container { align-items: start; }
     /* Doubled to outrank the dots' `flex` utility. */
-    .review-stops, .review-dots.review-dots { display: none; }
+    .review-stops, .review-dots.review-dots, .review-arrows { display: none; }
     .review-stack { gap: 2.5rem; }
     .review-stack > * { grid-area: auto; opacity: 1; filter: none; transform: none; visibility: visible; }
   }
@@ -1755,6 +1975,47 @@
     outline: 2px solid #fff;
     outline-offset: 4px;
   }
+  /* The client stories on a phone: a reel (client, 27 Oct 2026). The film is
+     the whole screen and the rest floats on it in the same order as before —
+     the lockup and close, the title, the sound chip and counter, and at the
+     foot the name over the seek bar — on taller scrims, so a bright sky does
+     not wash them out. The chrome lets taps through to the film (play/pause,
+     the swipe); only the close button takes them. A wide film stays whole
+     over a blur of itself (ClientStoryPlayer). Laptops, and the photographs
+     everywhere, keep the frame. */
+  @media (max-width: 767px) {
+    .cs-player--reel { background: #000; }
+    .cs-player--reel .cs-player__stage {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+    }
+    .cs-player--reel .cs-reel {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .cs-player--reel .cs-player__bar,
+    .cs-player--reel .cs-player__title,
+    .cs-player--reel .cs-player__name {
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .cs-player--reel .cs-player__close { pointer-events: auto; }
+    .cs-player--reel .cs-player__name {
+      margin-top: auto;
+      margin-bottom: 4.25rem;
+    }
+    .cs-player--reel .cs-reel__chip,
+    .cs-player--reel .cs-reel__count { top: calc(env(safe-area-inset-top) + var(--nav-h) + 2.25rem); }
+    .cs-player--reel .cs-reel__foot { bottom: calc(1rem + env(safe-area-inset-bottom)); }
+    .cs-player--reel .cs-reel__scrim--top {
+      height: calc(env(safe-area-inset-top) + 11rem);
+      background: linear-gradient(to bottom, theme(colors.ink.950 / 70%), transparent);
+    }
+    .cs-player--reel .cs-reel__scrim--bottom { height: calc(env(safe-area-inset-bottom) + 15rem); }
+  }
 
   /* The preloader worker's hammer swing, walk cycle and dust used to live here
      as keyframes. They are now computed in BuildScene.tsx instead: a CSS
@@ -1788,22 +2049,42 @@
   .section { @apply py-16 md:py-20 lg:py-24; }
   .section-sm { @apply py-12 md:py-14 lg:py-16; }
 
-  /* OneSystem on a phone: a screen of its own, like every band of the home
-     page there (client, Oct 2026). Its copy sits in the middle of what the
+  /* About (OneSystem): one band, two blocks since 27 Oct 2026 — the claim, and
+     the six stages that keep it ("How we work"). From `lg` they stand side by
+     side, each padded alike so their boxes match and the section engine (a
+     touch tablet held sideways) folds them into one stop. Below `lg` the
+     stages follow the claim, the copy's block carrying the band's top padding
+     (`.section`'s 4/5/6rem) and the stages its foot.
+
+     On a phone each block is a screen of its own, like every band of the home
+     page there (client, Oct 2026). The copy sits in the middle of what the
      header leaves, and the trust strip's logos — which run along its foot on a
      phone, the strip itself being hidden there (`.trust-bar`) — at the bottom.
-     A screen-tall `min-height` is also what makes the section engine give it
-     a stop of its own. Doubled to outrank `.section`'s padding. */
+     A screen-tall `min-height` is also what makes the engine give each a stop
+     of its own. */
+  /* Desktop spacing, 28 Oct 2026 (the user found the page spread out): 4rem
+     under the trust strip, which shares the ground and brings 2rem of its
+     own; 4.5rem over the services' mist-2 edge. */
+  .one-system__intro { padding-top: 4rem; }
+  @media (min-width: 1024px) {
+    .one-system__layout {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      column-gap: clamp(3rem, 7vw, 6.5rem);
+    }
+    .one-system__intro { padding-block: 4rem 4.5rem; }
+  }
   @media (max-width: 767px) {
     .trust-bar { display: none; }
-    .one-system.one-system {
+    .one-system__intro {
       display: flex;
       flex-direction: column;
       min-height: calc(var(--vh) * 100);
       padding: calc(var(--nav-h) + 1rem) 0 max(1.5rem, env(safe-area-inset-bottom));
     }
-    .one-system > .container { margin-block: auto; }
-    .one-system__logos { padding-top: 1.5rem; }
+    .one-system__copy { margin-block: auto; }
+    /* Edge to edge, out of the container, as the strip it stands in for. */
+    .one-system__logos { margin-inline: calc(50% - 50vw); padding-top: 1.5rem; }
   }
   /* A phone browser with its toolbars showing leaves about 660px, and the
      band's copy measured 767px with its logos: so on shorter screens it steps
@@ -1811,11 +2092,11 @@
      line at the pill's small size. Doubled where utilities on the same
      elements would win. */
   @media (max-width: 767px) and (max-height: 800px) {
-    .one-system.one-system {
+    .one-system__intro {
       padding-top: calc(var(--nav-h) + 0.5rem);
       padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
-    .one-system.one-system > .container > div { gap: 1.25rem; }
+    .one-system__ctas.one-system__ctas { margin-top: 1.25rem; }
     .one-system.one-system h2 { font-size: 1.75rem; }
     .one-system.one-system .text-body-lg { margin-top: 1rem; font-size: 0.9375rem; line-height: 1.55; }
     .one-system__payoff.one-system__payoff { margin-top: 0.75rem; font-size: 0.9375rem; }
@@ -1826,6 +2107,130 @@
     .one-system.one-system h2 { font-size: 1.625rem; }
     .one-system__ctas.one-system__ctas { flex-direction: row; flex-wrap: wrap; gap: 0.5rem; }
     .one-system__ctas.one-system__ctas > a { padding: 0.375rem 0.875rem; font-size: 0.8125rem; }
+  }
+
+  /* How we work: the six on a rail standing up, as in the PDF, at every width,
+     under a caption ruled to the column's edge (a caption, not a second
+     heading: the band is one section). The line between two marks is the
+     step's `::before`, from its mark's centre to the next mark's, under that
+     mark (opaque, on the page ground). */
+  .how-we-work {
+    --hww-mark: 2.5rem;
+    --hww-gap: 1.75rem;
+    padding-block: 3rem 4rem;
+  }
+  @media (min-width: 1024px) {
+    .how-we-work { --hww-mark: 2.75rem; --hww-gap: 1.5rem; padding-block: 4rem 4.5rem; }
+  }
+  .how-we-work__caption {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .how-we-work__caption::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgb(var(--c-text) / 0.12);
+  }
+  .how-we-work__steps {
+    display: grid;
+    row-gap: var(--hww-gap);
+    max-width: 40rem;
+    margin-top: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .how-we-work__steps { max-width: none; }
+    /* Level with the overline's words across the gutter, below its 2px bar and 10px gap. */
+    .how-we-work__caption { margin-top: 0.75rem; }
+  }
+  .how-we-work__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--hww-mark) minmax(0, 1fr);
+    column-gap: 1.25rem;
+  }
+  .how-we-work__step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--hww-mark) / 2);
+    top: calc(var(--hww-mark) / 2);
+    width: 1px;
+    height: calc(100% + var(--hww-gap));
+    background: rgb(var(--c-brand-text) / 0.3);
+  }
+  .how-we-work__mark {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--hww-mark);
+    height: var(--hww-mark);
+    border: 1px solid rgb(var(--c-brand-text) / 0.35);
+    border-radius: 9999px;
+    background: rgb(var(--c-bg));
+    color: rgb(var(--c-brand-text));
+  }
+  /* The name's first line level with the mark's centre. */
+  .how-we-work__body { padding-top: 0.5rem; }
+  .how-we-work__name {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .how-we-work__num { flex: none; }
+  /* Doubled: `text-caption`/`text-base` set a line height too, and utilities come later. */
+  .how-we-work__desc.how-we-work__desc { margin-top: 0.375rem; line-height: 1.625; text-wrap: pretty; }
+  /* A phone: the six are a screen and a stop of their own, after the copy's.
+     The step numbers go (the rail says the order), and the type and gaps
+     tighten so all six fit what Safari leaves (~660px) with nothing cut. */
+  @media (max-width: 767px) {
+    .how-we-work {
+      --hww-mark: 2.25rem;
+      --hww-gap: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(var(--vh) * 100);
+      padding: calc(var(--nav-h) + 1rem) 0 max(1.5rem, env(safe-area-inset-bottom));
+    }
+    .how-we-work__steps { margin-top: 1.5rem; }
+    .how-we-work__step { column-gap: 1rem; }
+    .how-we-work__body { padding-top: 0.375rem; }
+    .how-we-work__num { display: none; }
+    .how-we-work__name.how-we-work__name { font-size: 1rem; }
+    .how-we-work__desc.how-we-work__desc { margin-top: 0.125rem; line-height: 1.5; }
+  }
+  /* Shorter phones step down as the copy's screen does (the first cut measured
+     733px at 664): below 800px the gaps close, below 680px (Safari's ~664, an
+     SE, 360×640) the marks and names shrink too. */
+  @media (max-width: 767px) and (max-height: 800px) {
+    .how-we-work {
+      --hww-gap: 0.75rem;
+      padding-top: calc(var(--nav-h) + 0.5rem);
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    .how-we-work__desc.how-we-work__desc { line-height: 1.45; }
+  }
+  @media (max-width: 767px) and (max-height: 680px) {
+    .how-we-work { --hww-mark: 2rem; --hww-gap: 0.5rem; }
+    .how-we-work__steps { margin-top: 1rem; }
+    .how-we-work__step { column-gap: 0.75rem; }
+    .how-we-work__body { padding-top: 0.25rem; }
+    .how-we-work__name.how-we-work__name { font-size: 0.9375rem; }
+  }
+  /* A touch tablet upright (under the section engine, the two blocks stacked):
+     the six are a screen and a stop as well, or the engine folds them with the
+     copy and the services heading starts half way down a screen. */
+  @media (hover: none) and (pointer: coarse) and (min-width: 768px) and (max-width: 1023px) and (min-height: 600px) {
+    .how-we-work {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(var(--vh) * 100);
+      padding-block: calc(var(--nav-h) + 2rem) 3rem;
+    }
   }
 
   .hairline { @apply h-px w-full bg-current opacity-10; }
@@ -1945,18 +2350,31 @@
     font: 400 1.6875rem / 1.45 var(--font-deva);
     color: #fff;
   }
+  /* The lede and the pills stand on the screen's centre line at every width
+     (client, 26 Oct 2026); the eyebrow, headline and Hindi line stay left. The
+     auto margins centre the block in `.hero-v2__bottom`'s row from `md`, where
+     it is no longer full width. */
+  .hero-v2__lead {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-inline: auto;
+    text-align: center;
+  }
   .hero-v2__lede {
     margin: 0;
     max-width: 48ch;
     font: 400 clamp(1.0625rem, 1.5vw, 1.375rem) / 1.45 var(--font-sans);
     color: rgb(255 255 255 / 0.92);
-    text-wrap: pretty;
+    /* Centred lines read best evened out, not ragged. */
+    text-wrap: balance;
   }
   /* Call and WhatsApp, under the lede (25 Oct 2026). Pills from
      components/chapter/PillLink — 44px tall, a full finger's target. */
   .hero-v2__actions {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0.75rem;
     margin-top: 1.25rem;
   }
@@ -1983,10 +2401,11 @@
     .hero-v2__hi { font-size: 1.375rem; margin-top: 0.5rem; }
     /* Width to spare and no height: the pills sit beside the lede, not under
        it, so the hero stays one screen (under it, it measured 396px of 360). */
-    .hero-v2__lead { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; }
+    .hero-v2__lead { flex-flow: row wrap; justify-content: center; gap: 0.75rem 1.5rem; text-align: left; }
     /* The lede gives way (two lines if it must) so the pills keep the row,
-       down to an iPhone SE on its side (667px). */
-    .hero-v2__lead > :first-child { flex: 1 1 12rem; min-width: 0; }
+       down to an iPhone SE on its side (667px). It grows no wider than its
+       text, so on a wider phone the pair is centred as one row. */
+    .hero-v2__lead > :first-child { flex: 1 1 12rem; min-width: 0; max-width: max-content; }
     .hero-v2__lead > :last-child { flex: none; }
     /* Doubled to outrank the short-phone rule below, which also matches here. */
     .hero-v2__lead .hero-v2__actions { margin-top: 0; }
@@ -2051,6 +2470,28 @@
   @media (hover: hover) {
     .pill[data-solid]:hover { color: #fff; }
   }
+  /* `tone="light"`: the same pill in navy on a light page, the hero's white
+     pill turned inside out. The dark theme keeps the white pill above. */
+  html:not(.dark) .pill[data-tone='light'] { border-color: rgb(var(--c-navy) / 0.4); color: rgb(var(--c-navy)); }
+  html:not(.dark) .pill[data-tone='light'] .pill__fill {
+    background: rgb(var(--c-navy) / 0.08);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html:not(.dark) .pill[data-tone='light'][data-solid] { border-color: rgb(var(--c-navy)); background: rgb(var(--c-navy)); color: #fff; }
+  html:not(.dark) .pill[data-tone='light'][data-solid] .pill__fill { background: #fff; }
+  html:not(.dark) .pill[data-tone='light'][data-solid] .pill__icon { color: rgb(var(--c-navy)); }
+  /* Under 360px (a 320px phone, or a 360px one zoomed) Call and WhatsApp side
+     by side need more than the screen, and the labels were cut to "CALL U…":
+     tighter tracking keeps both whole. */
+  @media (max-width: 359.98px) {
+    .pill__label { padding-right: 0.75rem; letter-spacing: 0.12em; }
+  }
+  /* A press fills the pill too (a phone has no hover), so the label turns with it. */
+  html:not(.dark) .pill[data-tone='light'][data-solid]:active { color: rgb(var(--c-navy)); }
+  @media (hover: hover) {
+    html:not(.dark) .pill[data-tone='light'][data-solid]:hover { color: rgb(var(--c-navy)); }
+  }
 
   /* ResponsiveImage: which part of a cropped photo survives the crop
      (components/common/ResponsiveImage.tsx). The portrait query matches the one
@@ -2113,8 +2554,12 @@
      into the whole photograph (`tone="deep"`). The client found the page
      inconsistent and asked for it lighter: the wash turned every pale wall
      grey-blue, while the MEPF systems, which never had it, looked like a
-     different site. One grade now, measured rather than chosen: see the
-     numbers in ServicesChapters.tsx. */
+     different site. One grade now, measured rather than chosen (25 Oct 2026):
+     every line of copy on the nine home chapters of the time, against the
+     brightest 5% of the photograph behind it, at 360×780 to 1920×1080, clears
+     WCAG AA — ledes, tags and labels 4.5:1 (closest 5.0:1), headings 3:1
+     (closest 3.5:1). The plate label failed first, at 3.7:1, until it went
+     full white and got its patch (below). */
   .chapter__scrim {
     position: absolute;
     inset: 0;
@@ -2319,6 +2764,226 @@
      word ("Professionals"); below that they sit two by two. */
   .chapter-figures[data-count='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
+  /* Why choose us — features/home/sections/WhyChooseUs (27 Oct 2026, PDF
+     page 4): the four promises above the client stories. The heading beside
+     the PDF's 2×2 from `lg`, over it from `md`. Each promise a card on the
+     page's ground: white, a hairline, the icon in a tinted tile — nothing
+     brand-filled. On an upright phone the band is one screen and one stop
+     with the four as rows, mark beside words and a hairline between, so they
+     read in what Safari leaves (~660px) without shrinking into four tiles. */
+  /* The foot is the lighter half: the stories below share the ground and
+     bring their own top padding (`.section-sm`, 3.5/4rem), so the two add
+     up to 5/6rem, the page's same-ground boundary since 28 Oct 2026. The
+     top meets the reviews' mist-2 edge. */
+  .why-us { padding-block: 4rem 3rem; }
+  @media (min-width: 768px) { .why-us { padding-block: 4rem 1.5rem; } }
+  /* From `lg` the heading takes the left column's top, the call to action
+     its foot (level with the cards' last row), the cards the right column. */
+  @media (min-width: 1024px) {
+    .why-us { padding-block: 4.5rem 2rem; }
+    .why-us__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: auto 1fr;
+      column-gap: clamp(3rem, 6vw, 6rem);
+    }
+    .why-us__list { grid-column: 2; grid-row: 1 / span 2; }
+    .why-us__cta.why-us__cta {
+      grid-column: 1;
+      grid-row: 2;
+      align-self: end;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-top: 0;
+    }
+  }
+  .why-us__cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 2.5rem;
+  }
+  @media (max-width: 767px) { .why-us__cta { display: none; } }
+  .why-us__list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  @media (min-width: 768px) {
+    .why-us__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+  }
+  @media (min-width: 1024px) {
+    .why-us__list { margin-top: 0; gap: 1.5rem; }
+  }
+  .why-us__item {
+    padding: 1.75rem;
+    border: 1px solid rgb(var(--c-border));
+    border-radius: var(--radius-base);
+    background: rgb(var(--c-surface));
+    box-shadow: 0 1px 2px rgb(var(--c-text) / 0.04);
+  }
+  @media (min-width: 1280px) { .why-us__item { padding: 2rem; } }
+  .why-us__mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: rgb(var(--c-brand-text) / 0.08);
+    color: rgb(var(--c-brand-text));
+  }
+  .why-us__body { margin-top: 1.5rem; }
+  /* Doubled: `text-caption`/`text-base` set a line height too, and utilities come later. */
+  .why-us__desc.why-us__desc { margin-top: 0.5rem; line-height: 1.625; text-wrap: pretty; }
+  @media (max-width: 767px) {
+    .why-us {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(var(--vh) * 100);
+      padding: calc(var(--nav-h) + 1rem) 0 max(1.5rem, env(safe-area-inset-bottom));
+    }
+    .why-us__list { gap: 0; margin-top: 1.75rem; }
+    .why-us__item {
+      display: grid;
+      grid-template-columns: 2.5rem minmax(0, 1fr);
+      column-gap: 1rem;
+      padding: 1rem 0;
+      border: 0;
+      border-top: 1px solid rgb(var(--c-border));
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+    }
+    .why-us__item:last-child { padding-bottom: 0; }
+    .why-us__mark { width: 2.5rem; height: 2.5rem; border-radius: 0.625rem; }
+    /* The name's first line level with the tile's centre. */
+    .why-us__body { margin-top: 0; padding-top: 0.5rem; }
+    .why-us__name.why-us__name { font-size: 1rem; }
+    .why-us__desc.why-us__desc { margin-top: 0.125rem; line-height: 1.5; }
+  }
+  /* Shorter phones step down as the other bands do. */
+  @media (max-width: 767px) and (max-height: 800px) {
+    .why-us {
+      padding-top: calc(var(--nav-h) + 0.5rem);
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    .why-us.why-us h2 { font-size: 1.75rem; }
+    .why-us__list { margin-top: 1.25rem; }
+    .why-us__item { padding-block: 0.75rem; }
+  }
+  @media (max-width: 767px) and (max-height: 680px) {
+    .why-us.why-us h2 { font-size: 1.625rem; }
+    /* 360×640 measured 642px at the 800px step's gaps. */
+    .why-us__list { margin-top: 1rem; }
+    .why-us__item { grid-template-columns: 2.25rem minmax(0, 1fr); column-gap: 0.875rem; padding-block: 0.5rem; }
+    .why-us__mark { width: 2.25rem; height: 2.25rem; }
+    .why-us__body { padding-top: 0.375rem; }
+  }
+  /* A touch tablet, either way up (under the section engine): a screen and a
+     stop of its own, or the engine folds it into the reviews' or the stories'. */
+  @media (hover: none) and (pointer: coarse) and (min-width: 768px) and (min-height: 600px) {
+    .why-us {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(var(--vh) * 100);
+      padding-block: calc(var(--nav-h) + 2rem) 3rem;
+    }
+  }
+
+  /* Achievements — features/home/sections/AchievementsBanner: the figures as a
+     section of their own above the footer (27 Oct 2026). A navy card — the
+     footer's navy — on the page's ground, so it reads apart from the footer
+     below it. Two by two on an upright phone, with a cross of hairlines; four
+     across from `md` and on a phone held sideways, with a hairline between
+     each. The figure and its label are the chapter figures' own type, a size
+     up: here they are the whole section. */
+  .achievements { padding-bottom: 4rem; }
+  @media (min-width: 1024px) { .achievements { padding-bottom: 4rem; } }
+  .achievements__card {
+    border-radius: 1.25rem;
+    box-shadow: 0 30px 60px -30px rgb(var(--scrim) / 0.45);
+  }
+  .achievements__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding: 1.75rem 1rem;
+  }
+  .achievements__item {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 0.625rem;
+    min-width: 0;
+    padding: 1.125rem 0 1.125rem 1rem;
+  }
+  .achievements__item:nth-child(odd) { padding-left: 0; }
+  .achievements__item:nth-child(even) { border-left: 1px solid rgb(255 255 255 / 0.15); }
+  .achievements__item:nth-child(-n + 2) { padding-top: 0; }
+  .achievements__item:nth-child(n + 3) { padding-bottom: 0; border-top: 1px solid rgb(255 255 255 / 0.15); }
+  .achievements__item dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: lining-nums;
+  }
+  .achievements__suffix { color: theme(colors.cyan.400); }
+  .achievements__item dt {
+    font: 600 var(--type-label) / 1.35 var(--font-sans);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.72);
+  }
+  @media (min-width: 768px), (orientation: landscape) and (max-height: 520px) {
+    .achievements__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      padding: 2.75rem 1.5rem;
+    }
+    .achievements__item:nth-child(n) {
+      padding: 0 1rem;
+      border-top: 0;
+      border-left: 1px solid rgb(255 255 255 / 0.15);
+    }
+    .achievements__item:first-child {
+      padding-left: 0;
+      border-left: 0;
+    }
+  }
+  /* A tablet's four columns are too narrow for "Professionals" at the
+     desktop's gutters; the laptop has room for them. */
+  @media (min-width: 1024px) {
+    .achievements__grid { padding-inline: 2.5rem; }
+    .achievements__item:nth-child(n) { padding-inline: 1.5rem; }
+    .achievements__item:first-child { padding-left: 0; }
+  }
+  /* The phone's screen, either way up: the section is exactly one screen and
+     the card sits in the middle of what the header leaves — a stop of its own
+     for the section engine, which counts a screen-tall `min-height` as one
+     (the client stories' screen above does the same). */
+  @media (max-width: 767px) and (min-height: 521px), (orientation: landscape) and (max-height: 520px) {
+    .achievements {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(var(--vh) * 100);
+      padding: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 1rem) 0 max(1.5rem, env(safe-area-inset-bottom));
+    }
+  }
+  @media (orientation: landscape) and (max-height: 520px) {
+    .achievements__grid { padding: 1.5rem 1.75rem; }
+    .achievements__item:nth-child(n) { padding-inline: 1rem; }
+    .achievements__item:first-child { padding-left: 0; }
+    .achievements__item dd { font-size: 2rem; }
+  }
+
   /* Centred copy rests a little higher than a side column does. */
   .chapter[data-align='center'] .chapter__copy { padding-bottom: 9vh; }
 
@@ -2377,8 +3042,9 @@
   }
 
   /* ── Chapter stack (components/chapter/ChapterStack.tsx) ──────────────────
-     A chapter and its parts as one pile: each holds still while the next
-     slides up over it, and after the last the pile leaves as one. Sticky moves
+     A chapter and its parts as one pile (MEPF and its four systems): each holds
+     still while the next slides up over it, and after the last the pile leaves
+     as one. Sticky moves
      no box in the flow, so the page is as long as it was and every chapter is
      the stop it was for the section engine — which measures them unstuck (see
      `snapnav-measure` under SECTION ENGINE below).
@@ -2643,6 +3309,24 @@ html.snapnav [data-hscroll] {
 html.snapnav:not(.snapnav-zoom),
 html.snapnav:not(.snapnav-zoom) body {
   touch-action: pinch-zoom;
+}
+/* The browser's bars (engine.ts, "The browser's bars"). A phone folds its address bar and toolbar only for
+   a scroll the finger made, never for the engine's. So while they are out and the page rests on the first
+   section, the engine sets snapnav-native and the next swipe is the browser's own scroll: the bars fold,
+   and a mandatory snap on two empty boxes the engine places at the first two stops (`data-nav-snap`)
+   lands the page on the second, never further, or back home after a short drag. Cleared before the
+   engine moves the page again; every other swipe is the engine's, as above. */
+html.snapnav.snapnav-native:not(.snapnav-zoom),
+html.snapnav.snapnav-native:not(.snapnav-zoom) body {
+  touch-action: pan-y pinch-zoom;
+}
+html.snapnav.snapnav-native {
+  scroll-snap-type: y mandatory;
+  scroll-padding: 0;
+}
+html.snapnav.snapnav-native [data-nav-snap] {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 html.snapnav [data-section][tabindex='-1']:focus {
   outline: none;

@@ -76,4 +76,10 @@ export const STORAGE_KEYS = {
    * per visit. Read before first paint by `PRELOADER_BOOT_SCRIPT`.
    */
   preloaderSeen: 'archstone.preloader.seen',
+  /**
+   * The build id this tab last reloaded itself to reach (sessionStorage). At
+   * most one reload per new build, so a stale CDN or cache can never loop the
+   * page. See `lib/build-freshness.ts`.
+   */
+  buildReload: 'archstone.build.reloaded',
 } as const;

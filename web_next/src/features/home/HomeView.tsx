@@ -2,13 +2,15 @@
 
 import { Hero } from './sections/Hero';
 import { TrustBar, OneSystem } from './sections/Narrative';
-import { ServicesChapters } from './sections/ServicesChapters';
+import { ServicesRows } from './sections/ServicesRows';
 import { MepfChapters } from '@/features/mepf/MepfChapters';
 // Published rates are hidden for now — see the commented `<Packages />` below.
 // import { Packages } from './sections/Packages';
 import { Testimonials } from './sections/Showcase';
+import { WhyChooseUs } from './sections/WhyChooseUs';
 import { ProjectMapChapter } from './sections/ProjectMap';
 import { ClientVideos } from './sections/ClientVideos';
+import { AchievementsBanner } from './sections/AchievementsBanner';
 import { useHomeSections } from '@/hooks/useHomeSections';
 import { useSectionNav } from '@/hooks/useSectionNav';
 
@@ -56,13 +58,16 @@ export function HomeView() {
         responsibility" was asserted five times on one page; the maintenance
         promise four. Both now appear once. Its two homes — the `/vastu` link and
         the maintenance promise — moved into `OneSystem`, which is why that
-        section carries two CTAs.
+        section carries two CTAs. It came back on 27 Oct 2026, at the client's
+        request, as the PDF's four promises alone, above the client stories —
+        see the note there.
 
         `ProcessSection` — the six-stage rail — came out last, also at the
         client's request, and `OneSystem` moved down into the slot it left. The
         stages themselves are not lost: `/services` renders all six from the same
-        `PROCESS_STEPS` constant, under the same "How we work" overline. What the
-        landing page no longer says anywhere is stage 04's live-camera line.
+        `PROCESS_STEPS` constant, under the same "How we work" overline. The six
+        came back on 27 Oct 2026, again at the client's request, as the second
+        half of `OneSystem` rather than a band of their own (`HowWeWork`).
 
         A services index went back in above all of it, at the client's request —
         but as an index rather than the card grid that was taken out, and
@@ -71,7 +76,8 @@ export function HomeView() {
 
         What is left is one pass down the funnel with no repetition:
           who we are → what you can hire us for → what we engineer →
-          what we have built → who vouches for us (in writing, then on camera).
+          what we have built → who vouches for us in writing → what we promise →
+          who vouches for it on camera → what it adds up to.
 
         `OneSystem` led that pass from Sep 2026, at the client's request; before
         that it sat after the projects, in the slot `ProcessSection` left.
@@ -91,13 +97,16 @@ export function HomeView() {
       {/* Who we are, before what we sell — moved above the services index at the
           client's request (Sep 2026); it used to close the page's argument after
           the projects. On the mist ground since 25 Oct 2026 (it was the page's
-          one dark band, in saturated navy with blurred glows). */}
+          one dark band, in saturated navy with blurred glows). Since 27 Oct 2026
+          it carries the six stages of "How we work" too, under the one heading:
+          beside the claim on a desktop, the next screen on a phone. */}
       {on('one-system') && <OneSystem logos={on('trust')} />}
       {/* The offer. Three services, not four — MEPF is the section immediately
           below, and listing it here as well would put it on this page three
-          times. Four chapters since the design migration (the offer, then one
-          per service); `ServicesIndex` (the photo rows) is no longer rendered. */}
-      {on('services-index') && <ServicesChapters />}
+          times. A band of its own since 27 Oct 2026 (mist-2, its heading, then a
+          row per service, photograph beside words); before that four chapters,
+          stacked. `ServicesIndex` (the older photo rows) is not rendered. */}
+      {on('services-index') && <ServicesRows />}
       {/* MEPF expands the one service the index deliberately leaves out: it is
           the firm's core discipline and the thing a visitor is least able to
           picture, so it gets a band rather than a line. `OneSystem` above names the
@@ -115,6 +124,12 @@ export function HomeView() {
           projects map and the client videos, both on page ground: a change of
           topic, marked quietly. */}
       {on('testimonials') && <Testimonials />}
+      {/* Why choose us — the PDF's four promises (page 4), back at the client's
+          request (27 Oct 2026) directly above the client stories: what we
+          promise, then the people who can say on camera whether we kept it.
+          Page ground (mist), like the stories below; the reviews above are
+          mist-2. Code only, like the figures, so no admin row gates it. */}
+      <WhyChooseUs />
       {/* The same people on camera. Split out of the testimonials band at the
           client's request (Sep 2026): the band above is words only now, and
           every recorded testimonial lives here — a row of cards from `md`, and
@@ -122,6 +137,12 @@ export function HomeView() {
           prototype, Oct 2026). Page ground (mist), not `--c-surface-2`, so the
           two read as separate bands. */}
       {on('client-videos') && <ClientVideos />}
+      {/* The figures — 80+ projects, 30+ years, 10+ professionals, 98% — once
+          hidden from the hero, back at the client's request (27 Oct 2026) as a
+          section of their own above the footer: a navy card on the page's
+          ground, the numbers only, and one screen (one stop) on a phone. Code
+          only, so no admin row gates it. */}
+      <AchievementsBanner />
       {/*
         Published rates, hidden at the client's request.
 

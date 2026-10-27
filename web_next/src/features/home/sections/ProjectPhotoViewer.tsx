@@ -1,11 +1,11 @@
 'use client';
 
-import { useRef, useState, type TouchEvent } from 'react';
+import { useState } from 'react';
 import { CtaLink } from '@/components/common/CtaLink';
 import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
 import type { Project } from '@/types/domain';
-import { PopupSteps, StoryPopup } from './StoryPopup';
+import { PopupSteps, StoryPopup, useSwipeStep } from './StoryPopup';
 
 /**
  * The selected work's full-screen photograph: the decks' popup (StoryPopup)
@@ -69,25 +69,10 @@ export function ProjectPhotoViewer({
 function Still({ src, alt, n, total, onStep }: { src: string; alt: string; n: number; total: number; onStep?: (by: 1 | -1) => void }) {
   /* An upright photograph fills the frame; a wide one is shown whole over a blur of itself, as a wide film is. */
   const [wide, setWide] = useState(false);
-
-  /* A sideways swipe steps, as on the deck (StoryDeck). The page is locked under the popup, so any clearly
-     horizontal stroke counts. */
-  const touch = useRef<{ x: number; y: number } | null>(null);
-  const onTouchStart = (e: TouchEvent) => {
-    if (!onStep || e.touches.length !== 1) return;
-    touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  };
-  const onTouchEnd = (e: TouchEvent) => {
-    const from = touch.current;
-    touch.current = null;
-    if (!from || !onStep) return;
-    const dx = e.changedTouches[0].clientX - from.x;
-    const dy = e.changedTouches[0].clientY - from.y;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > 1.5 * Math.abs(dy)) onStep(dx < 0 ? 1 : -1);
-  };
+  const swipe = useSwipeStep(onStep);
 
   return (
-    <div className="cs-reel" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div className="cs-reel" {...swipe}>
       {wide && <img src={src} alt="" className="cs-reel__backdrop" aria-hidden />}
       <img
         src={src}

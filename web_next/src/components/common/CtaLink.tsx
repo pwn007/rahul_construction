@@ -33,6 +33,7 @@ export function CtaLink({
   size = 'md',
   as = 'link',
   className,
+  ariaLabel,
 }: {
   href?: string;
   children: ReactNode;
@@ -46,6 +47,8 @@ export function CtaLink({
    */
   as?: 'link' | 'span';
   className?: string;
+  /** The link's accessible name, where the words on it are the same for several ("Explore service"). */
+  ariaLabel?: string;
 }) {
   const classes = cn(
     'group/cta inline-flex items-center gap-2 rounded-full border font-semibold transition-all duration-300 ease-out-expo',
@@ -85,7 +88,7 @@ export function CtaLink({
   if (as === 'span' || !href) return <span className={classes}>{content}</span>;
 
   return (
-    <Link href={href} className={classes}>
+    <Link href={href} className={classes} aria-label={ariaLabel}>
       {content}
     </Link>
   );

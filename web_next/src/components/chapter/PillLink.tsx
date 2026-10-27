@@ -7,7 +7,9 @@ import { cn } from '@/lib/cn';
  *
  * For dark grounds (chapters, the hero, the header over the hero). `solid` is
  * the one filled variant, for the single most important action in a view.
- * Styles in globals.css under "PILLS".
+ * `tone="light"` is the same pill drawn in navy for a light page (the phone
+ * contact bar, the Contact hero, Oct 2026); in the dark theme it falls back to
+ * the white pill. Styles in globals.css under "PILLS".
  */
 export function PillLink({
   href,
@@ -15,6 +17,7 @@ export function PillLink({
   children,
   external = false,
   solid = false,
+  tone = 'dark',
   onClick,
   className,
   ariaLabel,
@@ -25,6 +28,8 @@ export function PillLink({
   /** Opens in a new tab (WhatsApp, external sites). `tel:` links need not set it. */
   external?: boolean;
   solid?: boolean;
+  /** The ground the pill sits on. */
+  tone?: 'dark' | 'light';
   onClick?: MouseEventHandler<HTMLAnchorElement>;
   className?: string;
   ariaLabel?: string;
@@ -38,6 +43,7 @@ export function PillLink({
       aria-label={ariaLabel}
       className={cn('pill', className)}
       data-solid={solid || undefined}
+      data-tone={tone === 'light' ? 'light' : undefined}
     >
       <span className="pill__fill" aria-hidden />
       <span className="pill__icon" aria-hidden>

@@ -1,4 +1,4 @@
-# Neetu Archstone — public_html/.htaccess  (v6)
+# Neetu Archstone — public_html/.htaccess  (v7)
 #
 # Next.js copies everything in `public/` into the export, so this file ships
 # inside site.zip and lands at the docroot on its own. It carries what
@@ -31,7 +31,7 @@ RewriteBase /
 # Marker to verify which version of this file is live — check with:
 #   curl -sI https://neetuarchstone.com/ | grep -i x-na-version
 <IfModule mod_headers.c>
-  Header always set X-NA-Version "v6"
+  Header always set X-NA-Version "v7"
 </IfModule>
 
 # ── 1. Lock /backend, except its public/ folder ─────────────────────────────
@@ -58,10 +58,18 @@ RewriteRule ^mepf/?$ /services/mepf-consultancy/ [R=301,L]
   <FilesMatch "\.(webp|jpg|jpeg|png|svg|mp4|webm|woff2?)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
-  # HTML is the one thing that must revalidate, or deploys take a day to show.
-  <FilesMatch "\.html$">
+  # HTML must revalidate, or deploys take a day to show. So must the .txt next
+  # to each page (v7): it is the RSC payload the router fetches on in-site
+  # navigation, and with no header at all browsers cached it by guesswork.
+  <FilesMatch "\.(html|txt)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
+  # The live build id (v7). Pages compare it with their own and reload when
+  # they differ (src/lib/build-freshness.ts), so it is never stored anywhere.
+  #   curl -sI https://neetuarchstone.com/version.json | grep -i cache-control
+  <Files "version.json">
+    Header set Cache-Control "no-store"
+  </Files>
 </IfModule>
 
 # ── 4. Not-found ────────────────────────────────────────────────────────────

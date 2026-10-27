@@ -1,3 +1,11 @@
+/*
+ * One id per build, baked into the client bundle and published at
+ * /version.json, so a tab running an older release can tell and reload (see
+ * src/lib/build-freshness.ts). Set on process.env rather than in `env:` so the
+ * build workers inherit this exact value instead of each making their own.
+ */
+process.env.NEXT_PUBLIC_BUILD_ID ||= new Date().toISOString();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,

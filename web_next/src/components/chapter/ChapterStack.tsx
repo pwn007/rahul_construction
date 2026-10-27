@@ -5,8 +5,10 @@ import { scrollToTarget } from '@/hooks/useLenis';
 import { cn } from '@/lib/cn';
 
 /**
- * A chapter and the chapters that are its parts — "What we do" and its
- * services, MEPF and its four systems — as one pile.
+ * A chapter and the chapters that are its parts — MEPF and its four systems —
+ * as one pile. ("What we do" and its services were one too until 27 Oct 2026;
+ * the client asked for them as ordinary sections, and they are now a band of
+ * rows, not chapters: features/home/sections/ServicesRows.tsx.)
  *
  * Inside the stack each chapter holds still while the next one slides up over
  * it; after the last, the pile leaves as one and whatever follows arrives the
@@ -60,7 +62,7 @@ export function ChapterStack({ children, className }: { children: ReactNode; cla
       });
     };
     const ro = new ResizeObserver(measure);
-    /* The services arrive from the API after the first render, and can change: follow the DOM. */
+    /* Chapters built from API data arrive after the first render, and can change: follow the DOM. */
     const watch = () => {
       ro.disconnect();
       chapters().forEach((el) => ro.observe(el));

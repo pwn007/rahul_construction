@@ -35,6 +35,8 @@ import { HERO_SLIDES, type HeroSlide } from './heroSlides';
  * had them taken off on 11 Oct 2026 and asked for them back on 25 Oct, when the
  * site's floating contact button went. Call is the one filled pill. On a phone
  * they are the home page's only contact (its bottom contact bar is off here).
+ * The lede and the pills are centred on the screen (client, 26 Oct 2026); the
+ * headline above them stays left.
  *
  * ── Entrance ────────────────────────────────────────────────────────────────
  * Plays when the preloader starts to lift (`usePreloaderDone`), not on mount —
@@ -415,9 +417,12 @@ export function Hero() {
           {/*
             The figures (80+ projects, 30+ years, 10+ professionals, 98%
             satisfaction), hidden at the client's request for now (Oct 2026).
-            Uncomment to bring them back — `ChapterFigures`, `ACHIEVEMENTS` and
-            `HeroCount` are still imported and defined for it. The lede above
-            needs no change either way: `.hero-v2__bottom` is a flex row.
+            Since 27 Oct 2026 they close the home page instead, as a section of
+            their own above the footer (AchievementsBanner). Uncomment to bring them back
+            here — `ChapterFigures`, `ACHIEVEMENTS` and `HeroCount` are still
+            imported and defined for it. The lede above is
+            centred by auto margins (`.hero-v2__lead`), so with the figures back
+            it centres in the space they leave: decide its alignment again then.
 
           <ExitLift {...exit} order={2} className="hero-v2__figures">
             <motion.div variants={riseVariants(RISE_AT + 2 * RISE_STEP, reduced)}>

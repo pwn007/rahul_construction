@@ -15,7 +15,7 @@
     "check:estimator": "tsx scripts/check-estimator.ts",
     "export:seed": "tsx scripts/export-seed.mts",
     "check:contract": "tsx scripts/contract-diff.mts && tsx scripts/contract-queries.mts",
-    "build:prod": "NEXT_PUBLIC_API_MODE=http NEXT_PUBLIC_API_URL=/backend/public/api next build"
+    "build:prod": "NEXT_PUBLIC_API_MODE=http NEXT_PUBLIC_API_URL=/backend/public/api next build && node scripts/retire-old-builds.mjs"
   },
   "engines": {
     "node": "22.x"

@@ -17,10 +17,10 @@ import { cn } from '@/lib/cn';
  * one out. Bands that are not chapters (the trust strip, the projects rail, …)
  * carry `data-section` on their own root for the same reason.
  *
- * A chapter that introduces parts of its own (Services, MEPF) goes in a
- * `ChapterStack` with them: there each chapter holds still while the next one
- * slides up over it, and all of them carry the same plate, with a tick per
- * part beside its label. See ChapterStack.tsx.
+ * A chapter that introduces parts of its own (MEPF) goes in a `ChapterStack`
+ * with them: there each chapter holds still while the next one slides up over
+ * it, and all of them carry the same plate, with a tick per part beside its
+ * label. See ChapterStack.tsx.
  *
  *   <Chapter id="about" plate={{ num: '01', label: 'About' }}
  *            media={<ResponsiveImage src={…} alt="" />} aria-labelledby="about-h">

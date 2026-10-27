@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { MessageCircle, Phone } from 'lucide-react';
+import { PillLink } from '@/components/chapter/PillLink';
 import { SITE } from '@/constants/site';
 import { track } from '@/lib/analytics';
 
@@ -19,6 +20,10 @@ import { track } from '@/lib/analytics';
  * serve every other page. Never two of the same affordance in one viewport —
  * the stacked-overlay failure NN/G names as the most common way good
  * individual components add up to a bad page.
+ *
+ * The two actions are the home hero's pills, in their navy light-page tone
+ * (client, 26 Oct 2026): the same words, label and icons on every page. The bar
+ * stays 56px tall, so the spacer and every page's last line are unchanged.
  */
 export function StickyContactBar() {
   const pathname = usePathname();
@@ -29,14 +34,18 @@ export function StickyContactBar() {
      already offers WhatsApp inline next to the PDF button. */
   if (pathname.startsWith('/estimator')) return null;
 
+  /* The Contact hero carries the same two pills (ContactView), and the page
+     is about nothing else; a bar under them would offer each one twice. */
+  if (pathname.startsWith('/contact')) return null;
+
   /* Not on the home page (design migration, decision 5). The home page is
-     becoming a run of full-screen chapters whose copy rests at the bottom of
-     the screen — exactly where this bar sits — so it covered the last line of
-     every chapter on a phone. On a phone, Call is in the menu and the footer
-     (the hero's own Call and WhatsApp pills were removed at the client's
-     request, 11 Oct 2026). It used to stand down only
-     while the hero was on screen and slide in after; one line brings that
-     back if the client wants it (`useWithinFirstScreen`, see git history). */
+     a run of full-screen chapters whose copy rests at the bottom of the
+     screen — exactly where this bar sits — so it covered the last line of
+     every chapter on a phone. There, Call and WhatsApp are the hero's own
+     pills (back since 25 Oct 2026), then the menu and the footer. It used to
+     stand down only while the hero was on screen and slide in after; one line
+     brings that back if the client wants it (`useWithinFirstScreen`, see git
+     history). */
   if (pathname === '/') return null;
 
   /*
@@ -60,28 +69,31 @@ export function StickyContactBar() {
       */}
       <div className="h-[calc(3.5rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden />
 
+      {/* 6px above and below a 44px pill: the bar's old 56px. */}
       <nav
         aria-label="Contact us"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-2 border-t border-[rgb(var(--c-border))] bg-[rgb(var(--c-surface))]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 flex justify-center gap-3 border-t border-[rgb(var(--c-border))] bg-[rgb(var(--c-surface))]/95 px-4 pb-[calc(0.375rem+env(safe-area-inset-bottom))] pt-1.5 backdrop-blur-md md:hidden"
       >
-        <a
+        <PillLink
           href={`tel:${SITE.phoneRaw}`}
+          icon={<Phone strokeWidth={1.75} />}
+          solid
+          tone="light"
           onClick={() => track('call_click', { placement: 'sticky-bar', page: pathname })}
-          className="flex h-14 items-center justify-center gap-2 border-r border-[rgb(var(--c-border))] text-sm font-medium text-[rgb(var(--c-text))] transition-colors active:bg-[rgb(var(--c-text))]/[0.06]"
+          ariaLabel={`Call us on ${SITE.phone}`}
         >
-          <Phone className="h-4 w-4 text-cyan-700 dark:text-cyan-300" aria-hidden />
-          Call
-        </a>
-        <a
+          Call us
+        </PillLink>
+        <PillLink
           href={whatsappHref}
-          target="_blank"
-          rel="noopener noreferrer"
+          icon={<MessageCircle strokeWidth={1.75} />}
+          external
+          tone="light"
           onClick={() => track('whatsapp_click', { placement: 'sticky-bar', page: pathname })}
-          className="flex h-14 items-center justify-center gap-2 text-sm font-medium text-[rgb(var(--c-text))] transition-colors active:bg-[rgb(var(--c-text))]/[0.06]"
+          ariaLabel="Chat with us on WhatsApp (opens in a new tab)"
         >
-          <MessageCircle className="h-4 w-4 text-[#25D366]" aria-hidden />
           WhatsApp
-        </a>
+        </PillLink>
       </nav>
     </>
   );

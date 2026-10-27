@@ -53,13 +53,13 @@ export const ACHIEVEMENTS = [
 ] as const;
 
 /**
- * Differentiators — PDF page 4.
+ * Differentiators — PDF page 4 ("Why choose us?").
  *
- * ⚠️ Not rendered anywhere. These four were the `WhyChooseUs` cards on the home
- * page; that section was merged into `OneSystem`, where each claim now hangs off
- * the discipline that actually owns it (quality → Engineering, transparency →
- * Execution, on-time → Handover) and "Zero Chaos" is the headline itself. Kept
- * because it is PDF-sourced copy, not because anything reads it.
+ * Read by /about (the four under "What we actually optimise for") and, since
+ * 27 Oct 2026, by the home page's `WhyChooseUs` band again (above the client
+ * stories, at the client's request; it was merged into `OneSystem` in Sep
+ * 2026). One source, so the two pages make the same four promises in the same
+ * words.
  */
 export const DIFFERENTIATORS = [
   {
@@ -84,7 +84,7 @@ export const DIFFERENTIATORS = [
     key: 'zero-chaos',
     title: 'Zero Chaos',
     description: 'One team, one contract, one point of responsibility. No contractor blame games.',
-    icon: 'Workflow',
+    icon: 'Route', // the PDF's icon: a path between points
   },
 ] as const;
 
@@ -118,9 +118,9 @@ export const APPROACH = {
  * What Makes Us Different — PDF page 22. Distinct from the four differentiators
  * on page 4.
  *
- * ⚠️ Not rendered anywhere, for the same reason as `DIFFERENTIATORS` above —
- * these five were the chips in `WhyChooseUs`, and each of them restated a claim
- * the page already made somewhere else.
+ * ⚠️ Not rendered anywhere — these five were the chips in `WhyChooseUs`, and
+ * each of them restated a claim the page already made somewhere else. They
+ * stayed out when that section came back (27 Oct 2026) as the four alone.
  */
 export const WHAT_MAKES_US_DIFFERENT = [
   'Single point of responsibility',
@@ -190,10 +190,12 @@ export const SERVICES_INTRO =
  * Descriptions are deliberately short (≈80 characters). They were written for a
  * six-across rail on the home page, where anything longer turned each column
  * into a paragraph and the process stopped being readable at a glance. That rail
- * has been removed at the client's request; the only renderer left is the
- * three-across grid on `/services` (`ServicesView.tsx`), which has more room —
- * but the brevity is worth keeping, and this is now the sole place the six
- * stages appear on the site.
+ * was removed at the client's request, then came back (27 Oct 2026) inside the
+ * home page's About band (`HowWeWork` in Narrative.tsx): a rail beside the
+ * claim from `lg`, and one phone screen for all six, which is why the brevity
+ * still matters.
+ * `/services` (`ServicesView.tsx`) renders them too, three across. This is the
+ * one place the six stages are written.
  */
 export const PROCESS_STEPS = [
   {

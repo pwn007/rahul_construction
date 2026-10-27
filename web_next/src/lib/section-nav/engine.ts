@@ -97,6 +97,35 @@
  *   has passed, it is treated as someone else's scroll and tidied.
  * The tests reproduce the iPhone by delaying `scrollTo` by two frames.
  *
+ * ── The browser's bars ───────────────────────────────────────────────────────
+ * A phone's browser (Safari and Chrome on an iPhone, Chrome on Android) folds
+ * its address bar and toolbar away only for a scroll the finger made itself.
+ * The engine's scroll is a script's, so on this page the bars stayed out for
+ * the whole visit while every other page put them away on the first swipe
+ * (client's screen recording, 26 Oct 2026). No API hides them.
+ *
+ * So while the bars are out and the page rests on the first section, the next
+ * swipe is handed to the browser (`armed`, html.snapnav-native in globals.css):
+ * the page takes the browser's own pans, and a mandatory scroll-snap with
+ * `scroll-snap-stop: always` on two empty boxes the engine places at the first
+ * two stops lands it on the second, never further, or back home after a short
+ * drag. The bars fold as it goes. If the screen grows meanwhile, the sections
+ * take the new height at once and the boxes move with the stop. Every later
+ * swipe is the engine's, as before. Boxes of its own, not the sections: a stop
+ * inside anything that clips is snapped by that box, not by the page (27 Oct
+ * 2026, the About band's stop sat in one and every handed swipe went home). And
+ * should the browser ever put a long handed swipe back home anyway, handing
+ * over stops for good and the page goes where the swipe meant to.
+ *
+ * Whether the bars are out: the tallest inner height seen at this width, or the
+ * large viewport (`100lvh`) where the browser reports it, against the height
+ * now. With neither yet known, a phone hands over its first swipe once and
+ * learns from it; a browser with no bars to fold (an iPad, a home-screen app)
+ * is then left alone. That first swipe moves on the browser's snap curve, not
+ * Loam's glide. Only from the first section: elsewhere the page is mid-story
+ * and keeps the engine's feel, so a visit that starts lower down (a link to a
+ * section, the back button) keeps the bars until it passes the top again.
+ *
  * ── The stage ────────────────────────────────────────────────────────────────
  * `stage: true` (the page's `?navstage=1` until it has been compared on an
  * iPhone) changes one thing: what moves the page. Not the scroll position —
@@ -166,6 +195,8 @@ type Gesture = {
   S: { t: number; p: number }[];
   multi: boolean;
   native: boolean;
+  /** Handed to the browser on purpose, so its bars fold (see "The browser's bars"). */
+  handed: boolean;
   /** The finger landed on a page that was still moving. */
   caught: boolean;
 };
@@ -307,7 +338,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   let extPending = false;
   let verT: ReturnType<typeof setTimeout> | undefined;
   let swallowUntil = 0; // a tap that caught a moving page is not a click
-  let nativeSwipe: { k: number; y0: number } | null = null; // a swipe the browser scrolled itself (see tidy)
+  let nativeSwipe: { k: number; y0: number; handed: boolean; moved: number } | null = null; // a swipe the browser scrolled itself (see tidy)
   let lastW = window.innerWidth;
   let lastH = window.innerHeight;
   let prevRestoration: ScrollRestoration | null = null;
@@ -321,6 +352,16 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   let pins: Pin[] = [];
   let ghost = NaN; // the scroll position last written to follow the stage
   let stageRO: ResizeObserver | null = null;
+  /* The browser's bars (see "The browser's bars"). */
+  let armed = false; // html.snapnav-native is up: the next swipe from the first section is the browser's
+  let handing = false; // a swipe handed to the browser is under way, until tidy has put the page to rest
+  let marks: HTMLElement[] = []; // two empty boxes on the body, at the stops the browser's snap may land on
+  let snapBroken = false; // the browser put a long handed swipe back home: its snap is not to be trusted here
+  let tallest = 0; // the tallest inner height seen at this width: the screen with the bars away
+  let tallW = 0;
+  let tried = false; // a swipe has been handed over once: what the bars do is known from here on
+  let probe: HTMLElement | null = null; // 100lvh, the large viewport, where the browser reports it
+  let mo: MutationObserver | null = null;
   /** Where an element sits: in the document, or on the surface while that is what moves. */
   const topOf = (el: HTMLElement) => pageTop(el, stage?.surface ?? null);
 
@@ -359,6 +400,11 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     }
   }
   function setY(y: number) {
+    // the engine moves the page from here: the browser's snap must not take its writes for a scroll of its own
+    if (armed) {
+      handing = false;
+      disarm();
+    }
     wrote = y;
     wroteT = performance.now();
     ext = false;
@@ -492,7 +538,78 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   const zoomed = () => !!window.visualViewport && window.visualViewport.scale > 1.02;
   /* html.snapnav takes pans away from the browser (globals.css) so a swipe is the engine's from its first
      pixel; once the visitor has pinched in, panning the zoomed page is theirs again. */
-  const onZoom = () => html.classList.toggle('snapnav-zoom', zoomed());
+  const onZoom = () => {
+    html.classList.toggle('snapnav-zoom', zoomed());
+    arm();
+  };
+
+  /* ── The browser's bars ────────────────────────────────────── */
+  function seeHeight() {
+    const w = window.innerWidth;
+    if (w !== tallW) {
+      tallW = w; // turned: heights seen the other way round say nothing about this one
+      tallest = 0;
+    }
+    tallest = Math.max(tallest, window.innerHeight);
+  }
+  const phone = () => Math.min(screen.width, screen.height) < 600;
+  function barsOpen(): boolean {
+    seeHeight();
+    if (Math.max(tallest, probe?.offsetHeight ?? 0) > window.innerHeight + 24) return true; // known to be out
+    return !tried && phone(); // not known yet: hand over one swipe and see
+  }
+  /* The boxes the browser's snap lands on, at the first two stops, in the document's own coordinates: a
+     section's box may sit inside something that clips (it then snaps for that, not for the page). */
+  function placeMarks() {
+    if (!marks.length) {
+      marks = [0, 1].map(() => {
+        const m = document.createElement('div');
+        m.setAttribute('aria-hidden', 'true');
+        m.setAttribute('data-nav-snap', '');
+        m.style.cssText = 'position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+        document.body.append(m);
+        return m;
+      });
+    }
+    marks.forEach((m, i) => {
+      const a = iv[i].a;
+      m.style.top = `${a}px`;
+      const off = m.getBoundingClientRect().top + window.scrollY - a; // a positioned body would shift it
+      if (Math.abs(off) > 0.5) m.style.top = `${a - off}px`;
+    });
+  }
+  function disarm() {
+    if (!armed) return;
+    armed = false;
+    html.classList.remove('snapnav-native');
+    marks.forEach((m) => m.remove());
+    marks = [];
+  }
+  /* Up only while the page rests on the first section with the bars out; a swipe handed over keeps it up
+     until tidy has put the page to rest, since the browser's snap is what lands it. */
+  function arm() {
+    if (handing) return;
+    const on =
+      NAV &&
+      !stage &&
+      !g &&
+      !anim &&
+      !extPending &&
+      !blocked() &&
+      !zoomed() &&
+      iv.length > 1 &&
+      cur === 0 &&
+      iv[0].a === iv[0].b &&
+      Math.abs(here() - iv[0].a) <= 1 &&
+      !snapBroken &&
+      barsOpen();
+    if (!on) return disarm();
+    placeMarks(); // first, so the snap the class turns on finds them where the stops are
+    if (armed) return;
+    armed = true;
+    html.classList.add('snapnav-native');
+    if (DEBUG) meterLine(`bars  out (inner ${window.innerHeight}, tallest ${Math.max(tallest, probe?.offsetHeight ?? 0)}): the next swipe is the browser's`);
+  }
 
   /* ── Motion ────────────────────────────────────────────────── */
   function glide(y1: number, o: { kind: 'nav' | 'settle'; dur: number; ease: Ease; from?: number; to?: number }) {
@@ -626,6 +743,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
   function rested() {
     if (dirty && !g) relayout();
     warm(cur);
+    arm();
   }
   /* Fetch and decode the photographs either side of where the page rests, so the next glide never waits on one. */
   const warmed = new WeakSet<HTMLImageElement>();
@@ -795,9 +913,15 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       p: y,
       S: [{ t: now, p: y }],
       multi: false,
-      native: false,
+      // the bars are out and the page is on the first section: this swipe is the browser's, so they fold
+      native: armed,
+      handed: armed,
       caught,
     };
+    if (armed) {
+      handing = true;
+      ext = true;
+    }
   }
   function tMove(e: TouchEvent) {
     if (!NAV || !g || g.native) return;
@@ -846,8 +970,8 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     if (DEBUG) meterDrag();
     if (G.native) {
       ext = true;
-      nativeSwipe = { k: G.k, y0: G.sy0 };
-      if (DEBUG) dbg.release = { native: true, moved: Math.round(sy() - G.sy0) };
+      nativeSwipe = { k: G.k, y0: G.sy0, handed: G.handed, moved: sy() - G.sy0 };
+      if (DEBUG) dbg.release = { native: true, handed: G.handed, moved: Math.round(sy() - G.sy0) };
       clearTimeout(extT);
       extT = setTimeout(tidy, 160);
       return;
@@ -1101,8 +1225,16 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       return;
     }
     extPending = false;
-    if (g || anim || blocked() || zoomed()) return;
+    if (!g) handing = false; // a swipe handed to the browser has landed (a new touch would carry it on)
+    if (g || anim || blocked() || zoomed()) return arm();
     relayout(true);
+    try {
+      tidyOnto();
+    } finally {
+      arm(); // back on the first section with the bars still out: the next swipe is the browser's again
+    }
+  }
+  function tidyOnto() {
     if (!iv.length) return;
     const y = here(); // someone else moved the page: this is the browser's position
     // The browser took a swipe for itself (it had already begun scrolling — a busy page just after load,
@@ -1110,10 +1242,26 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     // has died, finish on the neighbour it was headed for, never further and never back home.
     const N = nativeSwipe;
     nativeSwipe = null;
+    // A handed swipe the browser carried more than half a screen and then put back home: its snap is not
+    // landing on the stop here. Never hand one over again, and go where the swipe meant to.
+    if (N && N.handed && Math.abs(y - N.y0) <= 2 * SLOP && Math.abs(N.moved) > 0.5 * VH()) {
+      snapBroken = true;
+      if (DEBUG) meterLine(`bars  the browser put the swipe (${Math.round(N.moved)} px) back home: no more handing over`);
+      travel(clamp(N.k + Math.sign(N.moved), 0, iv.length - 1), N.k, N.moved / 400);
+      return;
+    }
     if (N && N.k < iv.length && Math.abs(y - N.y0) > 2 * SLOP) {
+      if (N.handed) tried = true;
       const { a, b } = iv[N.k];
       if (y < a - 1 || y > b + 1) {
-        travel(clamp(N.k + Math.sign(y - N.y0), 0, iv.length - 1), N.k, 0);
+        const to = clamp(N.k + Math.sign(y - N.y0), 0, iv.length - 1);
+        const y1 = land(to, N.k);
+        if (DEBUG && N.handed)
+          meterLine(`bars  after the browser's swipe: inner ${window.innerHeight}, tallest ${tallest}, landed ${Math.round(y)}, section ${to} at ${y1}`);
+        // A handed swipe was landed by the browser's snap, on the section itself. Off it only when the bars
+        // folding moved the section after the browser had picked its stop: close that gap briskly.
+        if (N.handed && Math.abs(y1 - y) < 0.25 * VH()) glide(y1, { kind: 'settle', dur: SETTLE_MS, ease: 'quart', to });
+        else travel(to, N.k, 0);
         return;
       }
     }
@@ -1144,13 +1292,30 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     const y1 = clamp(iv[t].a + rel, iv[t].a, iv[t].b);
     if (Math.abs(y1 - here()) > 0.5) setY(y1);
   }
+  /* A relayout at rest, from outside any gesture (not tStart's: a touch's pans are settled before it
+     starts, so the handover is never taken up in the middle of one). */
+  function relaid() {
+    relayout();
+    arm();
+  }
   function onResize() {
     if (!NAV) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
     const ae = document.activeElement;
     const typing = !!ae?.matches('input, textarea, select');
+    seeHeight();
     if (w === lastW && (h === lastH || typing)) return; // soft keyboard or nothing: leave the layout alone
+    // The bars folding under a swipe the browser is moving: the sections take the new screen at once, and
+    // the stops are read again so the snap's box can follow its stop. A write of the engine's would fight
+    // that snap.
+    if (handing && w === lastW) {
+      lastH = h;
+      setVh();
+      measure(); // reads only; no write of the engine's while the browser's snap is landing
+      if (armed) placeMarks(); // the stop moved with the sections: so does the box the snap lands on
+      return;
+    }
     lastW = w;
     lastH = h;
     const A = anim;
@@ -1163,6 +1328,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     cur = Math.min(k, iv.length - 1);
     const y1 = A && A.kind === 'nav' && A.from != null ? land(cur, A.from) : clamp(iv[cur].a + rel, iv[cur].a, iv[cur].b);
     setY(y1); // turned or resized: the same section, aligned, at once
+    arm();
   }
 
   /* ── The frame loop: runs only while something moves ─────── */
@@ -1171,6 +1337,11 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     else running = false;
   }
   function kick() {
+    // a motion of the engine's own starts: a touch that catches it must be the engine's too
+    if (armed) {
+      handing = false;
+      disarm();
+    }
     if (running || destroyed) return;
     running = true;
     raf = requestAnimationFrame(frame);
@@ -1194,11 +1365,11 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       roFirst = false;
       return;
     }
-    relayout();
+    relaid();
   };
-  const onLoad = () => relayout();
+  const onLoad = () => relaid();
   const onPageShow = (e: PageTransitionEvent) => {
-    if (e.persisted) relayout();
+    if (e.persisted) relaid();
   };
   const onMouseDown = () => {
     mouseDown = true;
@@ -1291,8 +1462,20 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     window.addEventListener('load', onLoad);
     window.addEventListener('pageshow', onPageShow);
     window.visualViewport?.addEventListener('resize', onZoom);
+    // the large viewport, where the browser reports one: the screen's height with its bars away
+    probe = document.createElement('div');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;visibility:hidden;pointer-events:none';
+    document.body.append(probe);
+    seeHeight();
+    // an overlay (the preloader, the menu) lets go of the page by its style: the bars' handover may be due then
+    if ('MutationObserver' in window) {
+      mo = new MutationObserver(() => arm());
+      mo.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+      mo.observe(html, { attributes: true, attributeFilter: ['style'] });
+    }
     onZoom();
-    document.fonts?.ready.then(() => relayout());
+    document.fonts?.ready.then(() => relaid());
 
     const y0 = sy(); // where the page is, read before the stage takes it out of the flow
     stageUp();
@@ -1312,6 +1495,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       settle(cur, 0);
     }
     warm(cur);
+    arm();
   }
   function navOff() {
     // back to plain native scrolling
@@ -1326,6 +1510,12 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     cancelAnimationFrame(raf);
     running = false;
     html.classList.remove('snapnav', 'snapnav-zoom');
+    handing = false;
+    disarm();
+    mo?.disconnect();
+    mo = null;
+    probe?.remove();
+    probe = null;
     stageDown(); // the scroll position has followed the stage all along: the page is where it was
     window.visualViewport?.removeEventListener('resize', onZoom);
     nativeSwipe = null;
@@ -1376,6 +1566,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
     release: () => unknown;
     glide: () => unknown;
     frames: [number, number, string][];
+    bars: () => { armed: boolean; handing: boolean; tried: boolean; tallest: number; lvh: number; inner: number };
   };
   const w = window as unknown as { __nav?: NavDebug };
   if (DEBUG) {
@@ -1392,6 +1583,7 @@ export function createSectionNav(opts: SectionNavOptions = {}): SectionNav {
       release: () => dbg.release,
       glide: () => dbg.glide,
       frames: dbg.frames,
+      bars: () => ({ armed, handing, tried, tallest, lvh: probe?.offsetHeight ?? 0, inner: window.innerHeight }),
     };
   }
 

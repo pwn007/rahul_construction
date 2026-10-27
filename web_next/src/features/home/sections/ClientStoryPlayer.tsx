@@ -5,13 +5,16 @@ import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { resolveVideo } from '@/components/common/VideoLightbox';
 import { cn } from '@/lib/cn';
 import type { ClientVideo } from '@/types/domain';
-import { PopupSteps, StoryPopup } from './StoryPopup';
+import { PopupSteps, StoryPopup, useSwipeStep } from './StoryPopup';
 
 /**
  * The client stories' full-screen player: the decks' popup (StoryPopup) with a
  * film in its frame. In the frame: the sound chip, the counter, play/pause,
- * the previous and next films (running round, like the deck), and the time
- * with a seek bar.
+ * the previous and next films (running round, like the deck, and by a sideways
+ * swipe), and the time with a seek bar.
+ *
+ * On a phone it is a reel (client, 27 Oct 2026): the film is the whole screen,
+ * the lockup, title and name on it (StoryPopup `reel`).
  *
  * It starts muted, as browsers require for a film that starts itself; the chip
  * turns the sound on, and the choice holds for the next film.
@@ -41,6 +44,7 @@ export function ClientStoryPlayer({
       closeLabel="Close Full-Screen Video"
       name={video?.name ?? ''}
       line="Client Story"
+      reel
       onClose={onClose}
       onStep={step}
     >
@@ -76,6 +80,8 @@ function Reel({
   const [length, setLength] = useState(0);
   /* An upright film fills the frame; a wide one is shown whole, letterboxed, rather than cropped to a sliver. */
   const [wide, setWide] = useState(false);
+  const backdrop = useRef<HTMLCanvasElement>(null);
+  const swipe = useSwipeStep(onStep);
   const source = resolveVideo(video.videoUrl);
 
   /* React does not keep the `muted` attribute in step with the prop, and a browser decides whether a film
@@ -83,6 +89,33 @@ function Reel({
   useEffect(() => {
     if (ref.current) ref.current.muted = muted;
   }, [muted]);
+
+  /* A wide film's backdrop is the film itself, a few pixels across and blurred, painted as it plays — its
+     poster need not be a still of it (27 Oct 2026). The canvas is only drawn to, never read back, so a film
+     from another origin without CORS still paints. */
+  useEffect(() => {
+    const v = ref.current;
+    const ctx = backdrop.current?.getContext('2d');
+    if (!wide || !v || !ctx) return;
+    const paint = () => {
+      if (v.readyState >= 2) ctx.drawImage(v, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    };
+    /* Every frame where the browser offers it; otherwise the few times a second `timeupdate` fires. */
+    const perFrame = typeof v.requestVideoFrameCallback === 'function';
+    const events = perFrame ? ['loadeddata', 'seeked'] : ['loadeddata', 'seeked', 'timeupdate'];
+    let frame = 0;
+    const loop = () => {
+      paint();
+      frame = v.requestVideoFrameCallback(loop);
+    };
+    events.forEach((t) => v.addEventListener(t, paint));
+    if (perFrame) frame = v.requestVideoFrameCallback(loop);
+    paint();
+    return () => {
+      events.forEach((t) => v.removeEventListener(t, paint));
+      if (perFrame) v.cancelVideoFrameCallback(frame);
+    };
+  }, [wide]);
 
   const toggle = () => {
     const v = ref.current;
@@ -96,7 +129,7 @@ function Reel({
 
   if (source?.kind === 'embed') {
     return (
-      <div className="cs-reel">
+      <div className="cs-reel" {...swipe}>
         <iframe
           src={source.src}
           title={`${video.name} — ${video.locality}`}
@@ -111,9 +144,9 @@ function Reel({
   }
 
   return (
-    <div className="cs-reel">
-      {/* Behind a wide film, its poster, blurred, so the letterbox is not two slabs of black. */}
-      {wide && <img src={video.poster} alt="" className="cs-reel__backdrop" aria-hidden />}
+    <div className="cs-reel" {...swipe}>
+      {/* Behind a wide film, the film, blurred, so the letterbox is not two slabs of black. */}
+      {wide && <canvas ref={backdrop} width={32} height={18} className="cs-reel__backdrop" aria-hidden />}
       <video
         ref={ref}
         src={video.videoUrl}

@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowRight, Check, Clock, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
 import { PageHero, SectionHeader, ConsentCheckbox, CONSENT_REQUIRED } from '@/components/common';
+import { PillLink } from '@/components/chapter/PillLink';
 import { Accordion, Button, FormField, Input, Select, Textarea, useToast } from '@/components/ui';
 import { leadMeta } from '@/lib/consent';
 import { track } from '@/lib/analytics';
@@ -133,19 +134,31 @@ export function ContactView() {
         lead="Tell us the plot size, the locality and roughly what you have in mind. We reply within one working day — with a real answer, not a brochure."
         breadcrumbs={[{ label: 'Contact' }]}
         actions={
+          /* The home hero's two pills, in their light-page tone (26 Oct 2026):
+             the same Call / WhatsApp on every page. The number itself is in the
+             "Reach us directly" card beside them. On a phone they replace the
+             bottom contact bar here (StickyContactBar). */
           <>
-            <Button href={`tel:${SITE.phoneRaw}`} variant="accent" size="lg" leftIcon={<Phone className="h-4 w-4" />}>
-              {SITE.phone}
-            </Button>
-            <Button
+            <PillLink
+              href={`tel:${SITE.phoneRaw}`}
+              icon={<Phone strokeWidth={1.75} />}
+              solid
+              tone="light"
+              onClick={() => track('call_click', { placement: 'contact-hero' })}
+              ariaLabel={`Call us on ${SITE.phone}`}
+            >
+              Call us
+            </PillLink>
+            <PillLink
               href={WHATSAPP_HREF}
+              icon={<MessageCircle strokeWidth={1.75} />}
               external
-              variant="secondary"
-              size="lg"
-              leftIcon={<MessageCircle className="h-4 w-4" />}
+              tone="light"
+              onClick={() => track('whatsapp_click', { placement: 'contact-hero' })}
+              ariaLabel="Chat with us on WhatsApp (opens in a new tab)"
             >
               WhatsApp
-            </Button>
+            </PillLink>
           </>
         }
         aside={
