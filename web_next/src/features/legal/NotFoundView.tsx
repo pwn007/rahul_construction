@@ -144,7 +144,7 @@ export function NotFoundView() {
     <>
       <section className="on-dark grain relative flex min-h-[80svh] items-center overflow-hidden bg-ink-950 pt-32 text-white">
         <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
-        <div className="pointer-events-none absolute -left-32 top-1/3 h-[420px] w-[420px] rounded-full bg-cyan-500/10 blur-[110px]" aria-hidden />
+        <div className="pointer-events-none absolute -left-32 top-1/3 h-[420px] w-[420px] rounded-full bg-cyan-500/10 glow blur-[110px]" aria-hidden />
 
         <div className="container relative py-20">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-center">

@@ -137,10 +137,18 @@ const PINNED: Record<string, string> = {
   /* Architectural and Interior became the client's own design renders on
      10 Oct 2026 (a timber-framed villa elevation and a living room), served
      with responsive sizes from /images/v — see scripts/image-variants.config.mjs.
-     service-arch-01 and interior-08 are still in /images, unused here. */
-  'home-service-architectural-design': 'v/elevation-villa-timber-1536.webp',
+     service-arch-01 and interior-08 are still in /images, unused here.
+     On 28 Oct 2026 Architectural took the Services intro's compass on a navy
+     blueprint (below; Pexels, see ATTRIBUTION.md) in its place, at the user's
+     ask. The villa render stays in /images/v, unused on home: /images/* is
+     immutable for a year. */
+  'home-service-architectural-design': 'v/services-blueprint-compass-1920.webp',
   'home-service-interior-design': 'v/interior-living-lounge-1280.webp',
-  'home-service-project-management': 'service-pm-01.webp',
+  /* Project Management: the same Pexels frame as service-pm-01, from its
+     original at 640–3840 px (28 Oct 2026). The home page now sets these behind
+     the words across a whole card, and 1400 px was soft there. service-pm-01
+     stays in /images, unused here. */
+  'home-service-project-management': 'v/service-pm-site-tablet-1920.webp',
   /* The chapter that introduces those three: a drawing compass on a navy
      blueprint (11 Oct 2026; Pexels, see ATTRIBUTION.md), served with responsive
      sizes from /images/v like the two renders above. It replaced mepf-10 — two

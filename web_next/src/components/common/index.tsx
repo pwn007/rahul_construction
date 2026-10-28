@@ -332,7 +332,7 @@ export function CtaBand({
         <div className="on-dark grain relative overflow-hidden rounded-2xl bg-navy-800 px-8 py-14 text-white md:px-14 md:py-20">
           <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
           <div
-            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-cyan-500/25 blur-[90px]"
+            className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-cyan-500/25 glow blur-[90px]"
             aria-hidden
           />
           <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">

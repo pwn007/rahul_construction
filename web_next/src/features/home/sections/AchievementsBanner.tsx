@@ -6,8 +6,9 @@ import { useInView, usePrefersReducedMotion } from '@/hooks';
 
 /**
  * The figures — 80+ projects, 30+ years, 10+ professionals, 98% satisfaction —
- * as a section of their own at the foot of the home page, after the client
- * stories and above the footer.
+ * as a section of their own, between the projects map and the written reviews
+ * ("What our clients say"). At the foot of the home page, after the client
+ * stories and above the footer, until the user moved them up on 29 Oct 2026.
  *
  * They sat under the hero's lede until the client had them hidden (Oct 2026;
  * the markup is still there, commented out, in Hero.tsx). On 27 Oct 2026 the
@@ -20,7 +21,8 @@ import { useInView, usePrefersReducedMotion } from '@/hooks';
  * the page's mist all round it. On a phone the section is one screen with the
  * card centred — a stop of its own for the section engine (lib/section-nav),
  * which counts a screen-tall `min-height` as one; under half a screen it would
- * have travelled with the footer. Four across from `md` and on a phone held
+ * travel with a neighbour's stop. A touch tablet gives it a screen too, for
+ * the same reason. Four across from `md` and on a phone held
  * sideways, two by two upright, with hairlines between the figures
  * (globals.css, "Achievements").
  *

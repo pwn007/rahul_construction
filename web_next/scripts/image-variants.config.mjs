@@ -48,5 +48,11 @@ export default {
        and there the compass's near leg is whole, with the far one coming in
        at the top — two legs read as a compass, one as a black bar. */
     { source: 'services-blueprint-compass.jpg', key: '/images/v/services-blueprint-compass-1920.webp', portrait: { focus: [0.37, 0.5] } },
+    /* Project Management's photograph (28 Oct 2026): the same Pexels frame as
+       service-pm-01 (licence in ATTRIBUTION.md), from its 6000 px original
+       brought down to 3840, now that the home page sets it behind the words
+       across a whole card. The portrait crop keeps the site supervisor and her
+       tablet; the plain wall to her right is where a card's words sit. */
+    { source: 'service-pm-site-tablet.jpg', key: '/images/v/service-pm-site-tablet-1920.webp', portrait: { focus: [0.46, 0.5] } },
   ],
 };

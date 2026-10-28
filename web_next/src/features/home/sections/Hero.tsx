@@ -1,6 +1,7 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState, type MouseEventHandler, type ReactNode, type TouchEvent } from 'react';
+import Link from 'next/link';
 import {
   AnimatePresence,
   motion,
@@ -11,8 +12,9 @@ import {
   type Variants,
 } from 'framer-motion';
 import { ArrowLeft, ArrowRight, MessageCircle, Phone } from 'lucide-react';
-import { ChapterEyebrow, ChapterFigures, PillLink } from '@/components/chapter';
+import { ChapterEyebrow, ChapterFigures } from '@/components/chapter';
 import { usePreloaderDone } from '@/components/common/Chrome';
+import { ROUTES } from '@/constants/routes';
 import { SITE, ACHIEVEMENTS } from '@/constants/site';
 import { useMediaQuery, usePrefersReducedMotion } from '@/hooks';
 import { useRegisterHeroTone } from '@/app/hero-tone';
@@ -31,12 +33,17 @@ import { HERO_SLIDES, type HeroSlide } from './heroSlides';
  * Hindi line under it; the lede and the four figures run along the bottom
  * edge. Styles: `.hero-v2*` in globals.css.
  *
- * Call and WhatsApp sit under the lede, as the design drew them — the client
- * had them taken off on 11 Oct 2026 and asked for them back on 25 Oct, when the
- * site's floating contact button went. Call is the one filled pill. On a phone
- * they are the home page's only contact (its bottom contact bar is off here).
- * The lede and the pills are centred on the screen (client, 26 Oct 2026); the
- * headline above them stays left.
+ * Under the lede, Design B's buttons (client, 28 Oct 2026 — the proposal's
+ * Design B slide, circled): "Get free estimate", filled in brand cyan, then
+ * "View projects" in outline on a laptop or tablet; on a phone the estimate
+ * runs the full width with Call and WhatsApp side by side under it, since on
+ * a phone they are the home page's only contact (its bottom contact bar is off
+ * here). Rectangles, as the slide drew them, not the site's pills; the cyan
+ * fill is the hero's one brand colour on a photograph besides the headline's
+ * second line. Call and WhatsApp had been the pills here since 25 Oct (taken
+ * off 11 Oct, back when the floating contact button went). The lede and the
+ * buttons are centred on the screen (client, 26 Oct 2026); the headline above
+ * them stays left.
  *
  * ── Entrance ────────────────────────────────────────────────────────────────
  * Plays when the preloader starts to lift (`usePreloaderDone`), not on mount —
@@ -147,6 +154,65 @@ interface ExitProps {
   soft: boolean;
   active: boolean;
   children: ReactNode;
+}
+
+/**
+ * One of the hero's buttons (Design B): a rectangle, filled cyan or outlined in
+ * white, its label the site's small caps. `only` keeps it to one set — `wide`
+ * for a laptop or tablet, `phone` for a phone either way up — and the other set
+ * is `display: none`, so out of the tab order too. Styles: `.hero-btn`.
+ */
+function HeroButton({
+  href,
+  children,
+  solid = false,
+  icon,
+  arrow = false,
+  only,
+  external = false,
+  onClick,
+  ariaLabel,
+}: {
+  href: string;
+  children: ReactNode;
+  solid?: boolean;
+  icon?: ReactNode;
+  arrow?: boolean;
+  only?: 'wide' | 'phone';
+  external?: boolean;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  ariaLabel?: string;
+}) {
+  const shared = {
+    className: 'hero-btn',
+    onClick,
+    'aria-label': ariaLabel,
+    'data-solid': solid || undefined,
+    'data-only': only,
+  };
+  const body = (
+    <>
+      {icon ? (
+        <span className="hero-btn__icon" aria-hidden>
+          {icon}
+        </span>
+      ) : null}
+      <span className="hero-btn__label">{children}</span>
+      {arrow ? <ArrowRight className="hero-btn__arrow" strokeWidth={2} aria-hidden /> : null}
+    </>
+  );
+  if (href.startsWith('/')) {
+    return (
+      <Link href={href} {...shared}>
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} {...shared}>
+      {body}
+    </a>
+  );
 }
 
 /**
@@ -383,33 +449,40 @@ export function Hero() {
         </div>
 
         <div className="hero-v2__bottom">
-          {/* The lede and, under it, the two ways to reach the firm. */}
+          {/* The lede and, under it, Design B's buttons. */}
           <div className="hero-v2__lead">
             <ExitLift {...exit} order={1}>
               <motion.div variants={riseVariants(RISE_AT + RISE_STEP, reduced)}>
                 <p className="hero-v2__lede">{subtitle}</p>
               </motion.div>
             </ExitLift>
-            <ExitLift {...exit} order={2}>
+            <ExitLift {...exit} order={2} className="hero-v2__actions-wrap">
               <motion.div className="hero-v2__actions" variants={riseVariants(RISE_AT + 2 * RISE_STEP, reduced)}>
-                <PillLink
+                <HeroButton href={ROUTES.estimator} solid arrow>
+                  Get free estimate
+                </HeroButton>
+                <HeroButton href={ROUTES.projects} only="wide">
+                  View projects
+                </HeroButton>
+                <HeroButton
                   href={`tel:${SITE.phoneRaw}`}
                   icon={<Phone strokeWidth={1.75} />}
-                  solid
+                  only="phone"
                   onClick={() => track('call_click', { placement: 'hero' })}
                   ariaLabel={`Call us on ${SITE.phone}`}
                 >
-                  Call us
-                </PillLink>
-                <PillLink
+                  Call
+                </HeroButton>
+                <HeroButton
                   href={WHATSAPP_HREF}
                   icon={<MessageCircle strokeWidth={1.75} />}
+                  only="phone"
                   external
                   onClick={() => track('whatsapp_click', { placement: 'hero' })}
                   ariaLabel="Chat with us on WhatsApp (opens in a new tab)"
                 >
                   WhatsApp
-                </PillLink>
+                </HeroButton>
               </motion.div>
             </ExitLift>
           </div>

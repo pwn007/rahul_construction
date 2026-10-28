@@ -53,6 +53,7 @@ export function Navbar() {
   const heroTone = useHeroTone();
   const headerRef = useRef<HTMLElement>(null);
   const toneUnder = useToneUnder(headerRef);
+  const { resolved, toggle } = useTheme();
 
   /**
    * The bar is see-through at every scroll position (client, Oct 2026), so it
@@ -72,7 +73,9 @@ export function Navbar() {
   /**
    * One header everywhere (Design B, made site-wide in Sep 2026): phones get
    * menu · logo · estimate, desktop gets uppercase tracked links and an outline
-   * CTA, with no search, theme or greeting in the bar.
+   * CTA, with no search or greeting in the bar. A light/dark switch sits
+   * beside the estimate since 29 Oct 2026 (user) — until then only the
+   * phone's menu drawer had one, so a desktop could not change the theme.
    *
    * The only thing that varies is height. The homepage's photo hero, at the top,
    * uses the render's taller bar (72px phones / 101px desktop); everywhere else,
@@ -211,6 +214,27 @@ export function Navbar() {
 
             {/* Actions */}
             <div className="flex items-center justify-self-end">
+              {/*
+                Light or dark, at every width: the same bare glyph as the
+                calculator beside it. Both icons are drawn and `html.dark` picks
+                one — the boot script sets that class before the first paint,
+                while `resolved` only catches up after hydration, so the icon
+                never shows the wrong state for a frame.
+              */}
+              <button
+                type="button"
+                onClick={toggle}
+                aria-label="Dark mode"
+                aria-pressed={resolved === 'dark'}
+                title={resolved === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                className={cn(
+                  'flex h-11 w-11 items-center justify-center transition-colors duration-300',
+                  overDark ? 'text-white hover:text-cyan-300' : 'hover:text-cyan-700 dark:hover:text-cyan-400',
+                )}
+              >
+                <Moon className="h-[19px] w-[19px] dark:hidden" strokeWidth={1.75} aria-hidden />
+                <Sun className="hidden h-[19px] w-[19px] dark:block" strokeWidth={1.75} aria-hidden />
+              </button>
               {/*
                 The estimate link, at every width: the calculator alone, bare —
                 no fill, no ring — like the phone's menu button it faces (client,

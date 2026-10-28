@@ -1,7 +1,7 @@
 'use client';
 
 import { Hero } from './sections/Hero';
-import { TrustBar, OneSystem } from './sections/Narrative';
+import { TrustBar, OneSystem, HowWeWork } from './sections/Narrative';
 import { ServicesRows } from './sections/ServicesRows';
 import { MepfChapters } from '@/features/mepf/MepfChapters';
 // Published rates are hidden for now — see the commented `<Packages />` below.
@@ -67,7 +67,8 @@ export function HomeView() {
         stages themselves are not lost: `/services` renders all six from the same
         `PROCESS_STEPS` constant, under the same "How we work" overline. The six
         came back on 27 Oct 2026, again at the client's request, as the second
-        half of `OneSystem` rather than a band of their own (`HowWeWork`).
+        half of `OneSystem`, and became a band of their own the next day
+        (`HowWeWork`).
 
         A services index went back in above all of it, at the client's request —
         but as an index rather than the card grid that was taken out, and
@@ -76,8 +77,8 @@ export function HomeView() {
 
         What is left is one pass down the funnel with no repetition:
           who we are → what you can hire us for → what we engineer →
-          what we have built → who vouches for us in writing → what we promise →
-          who vouches for it on camera → what it adds up to.
+          what we have built → what it adds up to → who vouches for us in
+          writing → what we promise → who vouches for it on camera.
 
         `OneSystem` led that pass from Sep 2026, at the client's request; before
         that it sat after the projects, in the slot `ProcessSection` left.
@@ -97,15 +98,20 @@ export function HomeView() {
       {/* Who we are, before what we sell — moved above the services index at the
           client's request (Sep 2026); it used to close the page's argument after
           the projects. On the mist ground since 25 Oct 2026 (it was the page's
-          one dark band, in saturated navy with blurred glows). Since 27 Oct 2026
-          it carries the six stages of "How we work" too, under the one heading:
-          beside the claim on a desktop, the next screen on a phone. */}
+          one dark band, in saturated navy with blurred glows). */}
       {on('one-system') && <OneSystem logos={on('trust')} />}
+      {/* How the claim is kept: the six stages (PDF page 7). Half of the band
+          above for a day (27 Oct 2026), a section of its own since 28 Oct at the
+          user's word — on mist-2, so the two read as two. Code only, like the
+          promises and the figures, so no admin row gates it. */}
+      <HowWeWork />
       {/* The offer. Three services, not four — MEPF is the section immediately
           below, and listing it here as well would put it on this page three
-          times. A band of its own since 27 Oct 2026 (mist-2, its heading, then a
-          row per service, photograph beside words); before that four chapters,
-          stacked. `ServicesIndex` (the older photo rows) is not rendered. */}
+          times. A band of its own since 27 Oct 2026 (its heading, then a photo
+          card per service, the words over the photograph since 28 Oct); before
+          that four chapters, stacked. On the page's mist since 28 Oct, when How
+          we work above took mist-2. `ServicesIndex` (the older photo rows) is
+          not rendered. */}
       {on('services-index') && <ServicesRows />}
       {/* MEPF expands the one service the index deliberately leaves out: it is
           the firm's core discipline and the thing a visitor is least able to
@@ -119,10 +125,18 @@ export function HomeView() {
           rendered nowhere now): one screen of Jaipur, a dot per project; a click flies into the
           dot and opens the project's photograph and story. A chapter like the ones above it. */}
       {on('projects') && <ProjectMapChapter />}
+      {/* The figures — 80+ projects, 30+ years, 10+ professionals, 98% — once
+          hidden from the hero, back at the client's request (27 Oct 2026) as a
+          section of their own: a navy card on the page's ground, the numbers
+          only, and one screen (one stop) on a phone. At the foot of the page,
+          above the footer, until 29 Oct 2026, when the user moved them here:
+          what the projects add up to, before the clients say so in words. Code
+          only, so no admin row gates it. */}
+      <AchievementsBanner />
       {/* The claims, then the people backing them. This band is `--c-surface-2`
           (mist-2, one step darker than the mist around it), sitting between the
-          projects map and the client videos, both on page ground: a change of
-          topic, marked quietly. */}
+          figures and the promises, both on page ground: a change of topic,
+          marked quietly. */}
       {on('testimonials') && <Testimonials />}
       {/* Why choose us — the PDF's four promises (page 4), back at the client's
           request (27 Oct 2026) directly above the client stories: what we
@@ -137,12 +151,6 @@ export function HomeView() {
           prototype, Oct 2026). Page ground (mist), not `--c-surface-2`, so the
           two read as separate bands. */}
       {on('client-videos') && <ClientVideos />}
-      {/* The figures — 80+ projects, 30+ years, 10+ professionals, 98% — once
-          hidden from the hero, back at the client's request (27 Oct 2026) as a
-          section of their own above the footer: a navy card on the page's
-          ground, the numbers only, and one screen (one stop) on a phone. Code
-          only, so no admin row gates it. */}
-      <AchievementsBanner />
       {/*
         Published rates, hidden at the client's request.
 

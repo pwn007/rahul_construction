@@ -294,5 +294,101 @@
         ]
       ]
     }
+  },
+  "/images/v/service-pm-site-tablet-1920.webp": {
+    "width": 3840,
+    "height": 2560,
+    "avif": [
+      [
+        640,
+        "/images/v/service-pm-site-tablet-640.avif"
+      ],
+      [
+        960,
+        "/images/v/service-pm-site-tablet-960.avif"
+      ],
+      [
+        1280,
+        "/images/v/service-pm-site-tablet-1280.avif"
+      ],
+      [
+        1920,
+        "/images/v/service-pm-site-tablet-1920.avif"
+      ],
+      [
+        2560,
+        "/images/v/service-pm-site-tablet-2560.avif"
+      ],
+      [
+        3840,
+        "/images/v/service-pm-site-tablet-3840.avif"
+      ]
+    ],
+    "webp": [
+      [
+        640,
+        "/images/v/service-pm-site-tablet-640.webp"
+      ],
+      [
+        960,
+        "/images/v/service-pm-site-tablet-960.webp"
+      ],
+      [
+        1280,
+        "/images/v/service-pm-site-tablet-1280.webp"
+      ],
+      [
+        1920,
+        "/images/v/service-pm-site-tablet-1920.webp"
+      ],
+      [
+        2560,
+        "/images/v/service-pm-site-tablet-2560.webp"
+      ],
+      [
+        3840,
+        "/images/v/service-pm-site-tablet-3840.webp"
+      ]
+    ],
+    "portrait": {
+      "width": 1440,
+      "height": 2560,
+      "avif": [
+        [
+          640,
+          "/images/v/service-pm-site-tablet-portrait-640.avif"
+        ],
+        [
+          960,
+          "/images/v/service-pm-site-tablet-portrait-960.avif"
+        ],
+        [
+          1280,
+          "/images/v/service-pm-site-tablet-portrait-1280.avif"
+        ],
+        [
+          1440,
+          "/images/v/service-pm-site-tablet-portrait-1440.avif"
+        ]
+      ],
+      "webp": [
+        [
+          640,
+          "/images/v/service-pm-site-tablet-portrait-640.webp"
+        ],
+        [
+          960,
+          "/images/v/service-pm-site-tablet-portrait-960.webp"
+        ],
+        [
+          1280,
+          "/images/v/service-pm-site-tablet-portrait-1280.webp"
+        ],
+        [
+          1440,
+          "/images/v/service-pm-site-tablet-portrait-1440.webp"
+        ]
+      ]
+    }
   }
 }

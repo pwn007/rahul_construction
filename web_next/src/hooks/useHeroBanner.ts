@@ -14,9 +14,11 @@ const heroOf = (rows: Banner[]): Banner | undefined =>
     (admin module: Hero & banners), hybrid-read like every other hook here;
     recipe reasoning in features/projects/useProjects.ts. The anonymous API
     already filters drafts, so drafting the row falls back to the baked copy
-    rather than blanking the hero. Only title and subtitle render — the hero
-    design carries no CTA button and no photograph (see sections/Hero.tsx),
-    so `ctaLabel`/`ctaHref`/`image` are inert for this placement. */
+    rather than blanking the hero. Only title and subtitle render: the hero's
+    photographs are its own, and its buttons are fixed in code — Design B's
+    "Get free estimate" and the rest, the client's pick (28 Oct 2026; see
+    sections/Hero.tsx) — so `ctaLabel`/`ctaHref`/`image` are inert for this
+    placement. The baked row's "Start Your Project" must not replace them. */
 export function useHeroBanner(): Banner | undefined {
   const { data } = useQuery<Banner[]>({
     queryKey: ['banners', 'all'],

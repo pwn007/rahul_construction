@@ -69,8 +69,8 @@ export function ProjectsHero({
     <section className="relative overflow-hidden border-b bg-[rgb(var(--c-surface-2))]" style={{ paddingTop: 'var(--nav-h)' }}>
       {/* Ground — no photographic wash; the covers carry the visual weight now. */}
       <div className="pointer-events-none absolute inset-0 bg-grid-light bg-grid opacity-70 dark:bg-grid-blueprint dark:opacity-[0.09]" aria-hidden />
-      <div className="pointer-events-none absolute -left-32 -top-24 h-[460px] w-[460px] rounded-full bg-cyan-500/[0.10] blur-[120px]" aria-hidden />
-      <div className="pointer-events-none absolute -right-28 top-1/3 h-[420px] w-[420px] rounded-full bg-sand-300/35 blur-[120px] dark:bg-sand-500/10" aria-hidden />
+      <div className="pointer-events-none absolute -left-32 -top-24 h-[460px] w-[460px] rounded-full bg-cyan-500/[0.10] glow blur-[120px]" aria-hidden />
+      <div className="pointer-events-none absolute -right-28 top-1/3 h-[420px] w-[420px] rounded-full bg-sand-300/35 glow blur-[120px] dark:bg-sand-500/10" aria-hidden />
 
       <div className="container relative">
         <div className="grid gap-12 pb-14 pt-12 lg:grid-cols-12 lg:gap-10 lg:pb-20 lg:pt-16">

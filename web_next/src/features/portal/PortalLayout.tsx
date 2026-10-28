@@ -68,7 +68,7 @@ function PortalLogin({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="on-dark grain relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 px-5 py-16 text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid-blueprint bg-grid opacity-25" aria-hidden />
-      <div className="pointer-events-none absolute -left-32 top-1/4 h-[420px] w-[420px] rounded-full bg-cyan-500/12 blur-[110px]" aria-hidden />
+      <div className="pointer-events-none absolute -left-32 top-1/4 h-[420px] w-[420px] rounded-full bg-cyan-500/12 glow blur-[110px]" aria-hidden />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

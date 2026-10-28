@@ -177,7 +177,7 @@ export function MepfSystemStack() {
                 their dot, which is what the drawing convention in scene/systems
                 does with the same four colours. */}
             <div
-              className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full opacity-[0.07] blur-[110px]"
+              className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full opacity-[0.07] glow blur-[110px]"
               style={{ backgroundColor: SYSTEM_STYLES[key].colour }}
               aria-hidden
             />

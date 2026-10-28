@@ -101,14 +101,14 @@ export function PageHero({
       />
       <div
         className={cn(
-          'pointer-events-none absolute -left-32 -top-24 h-[460px] w-[460px] rounded-full blur-[120px]',
+          'pointer-events-none absolute -left-32 -top-24 h-[460px] w-[460px] rounded-full glow blur-[120px]',
           dark ? 'bg-cyan-500/10' : 'bg-cyan-500/[0.10]',
         )}
         aria-hidden
       />
       {!dark && (
         <div
-          className="pointer-events-none absolute -right-28 top-1/3 h-[420px] w-[420px] rounded-full bg-sand-300/35 blur-[120px] dark:bg-sand-500/10"
+          className="pointer-events-none absolute -right-28 top-1/3 h-[420px] w-[420px] rounded-full bg-sand-300/35 glow blur-[120px] dark:bg-sand-500/10"
           aria-hidden
         />
       )}

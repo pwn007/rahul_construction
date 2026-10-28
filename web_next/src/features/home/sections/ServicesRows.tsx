@@ -2,7 +2,16 @@
 
 import Link from 'next/link';
 import { ArrowDown } from 'lucide-react';
-import { chapterLines, type ChapterLine } from '@/components/chapter';
+import {
+  ChapterEyebrow,
+  ChapterLede,
+  ChapterLink,
+  ChapterLinks,
+  ChapterTags,
+  ChapterTitle,
+  chapterLines,
+  type ChapterLine,
+} from '@/components/chapter';
 import { CtaLink } from '@/components/common/CtaLink';
 import { ResponsiveImage } from '@/components/common/ResponsiveImage';
 import { Reveal, SplitText } from '@/components/motion';
@@ -13,8 +22,8 @@ import { cn } from '@/lib/cn';
 import { IMG } from '@/lib/media';
 
 /**
- * "What we do" on the home page: a band of its own, then one row per service,
- * the photograph and the words side by side (27 Oct 2026).
+ * "What we do" on the home page: a band of its own, then one photo card per
+ * service, the words laid over the photograph (28 Oct 2026).
  *
  * ── Why not chapters any more ────────────────────────────────────────────────
  * From 11 Oct the offer and its three services were full-screen photo chapters
@@ -23,29 +32,46 @@ import { IMG } from '@/lib/media';
  * things showed once they were: the offer's photograph rose under About with
  * its heading still a screen away, so it read as About's picture, not a new
  * section; and space between photographs that run edge to edge reads as a
- * seam, not a gap. So the services became an editorial band, the client's
- * pick of two layouts:
+ * seam, not a gap. So the services became an editorial band (27 Oct 2026):
  *
  * - **Its own ground.** mist-2 (`--c-surface-2`), the page's quiet change of
  *   topic (the client reviews use it too), against About's mist, with its own
  *   heading in the page's two-voice style ("One system." / cyan second line).
- * - **Rows, not slides.** Each service is a contained, rounded photograph and
- *   its words on the light ground, sides alternating from `md`; the room
- *   between rows is ordinary whitespace, which is what the client asked for.
- *   The renders are landscape, so the frames are too (3:2, 4:3 on a tablet).
+ *   Since 28 Oct 2026 the page's mist instead: How we work became a band of
+ *   its own between About and here, and took mist-2.
+ * - **Contained, not full-bleed.** Each service is a rounded frame on that
+ *   ground; the room between them is ordinary whitespace, which is what the
+ *   client asked for.
  * - **A phone keeps its rule** (one screen per stop, nothing peeking): the
- *   heading is a screen, and every service is a screen — its photograph taking
- *   whatever height the words leave. A tablet's heading screen also lists the
- *   three, each a glide away; a phone's does not (27 Oct 2026, user). The header block and every row carry `data-section` for the
+ *   heading is a screen, and every service is a screen. A tablet's heading
+ *   screen also lists the three, each a glide away; a phone's does not (27 Oct
+ *   2026, user). The header block and every row carry `data-section` for the
  *   section engine; the band itself must not, or its stops would be ignored.
  *
+ * ── The photograph behind the words (28 Oct 2026) ────────────────────────────
+ * The first cut set each photograph beside its words. The client asked for the
+ * photograph in the background and the words on top of it, so each frame grew
+ * into a card the words sit inside — the user's pick of three layouts:
+ *
+ * - **The chapters' grade and type.** Shade sits only on the words' side, low,
+ *   as on the MEPF chapters directly below; the words are the chapters' own
+ *   white eyebrow, title, lede and tags, already measured on photographs, and
+ *   the link is theirs too ("Look inside the house", "All projects"). Nothing
+ *   brand-coloured goes on a photograph (25 Oct 2026); the band's one touch of
+ *   cyan stays in its heading and its pill, on the light ground.
+ * - **Sides alternate** as the rows did: words on the right, then the left.
+ * - **A phone's card is its screen**, the words at its foot; a touch tablet's
+ *   too, so a portrait tablet gets the portrait crops it is served.
+ * - **No `.on-dark`.** The navbar reads that class under itself to switch to
+ *   its dark veil, which over a card with mist all round it would be wrong.
+ *
  * Words and pictures are the ones the chapters settled — `SCOPE`, `PICK`,
- * `ALT`, the positions — and the admin's `services-index` row still sets the
- * heading and the lede. MEPF stays out: it has its own chapters below.
+ * `ALT` — and the admin's `services-index` row still sets the heading and the
+ * lede. MEPF stays out: it has its own chapters below.
  *
  * Each service is reachable three ways that all go to the same page: its
- * heading, the "Explore service" pill, and the photograph. The photograph's
- * link is for the pointer only (out of the tab order and hidden from assistive
+ * heading, the "Explore service" link, and the card itself. The card's link is
+ * for the pointer only (out of the tab order and hidden from assistive
  * technology), so a keyboard meets each service twice, not three times.
  */
 
@@ -66,24 +92,22 @@ const PICK: Record<string, number[]> = {
 };
 
 const ALT: Record<string, string> = {
-  'architectural-design': 'Design render of a two-storey house with a timber-framed upper floor, stone cladding and palms.',
+  'architectural-design': 'A drawing compass on a navy architectural blueprint, its points on a floor plan.',
   'interior-design': 'Design render of a living room: a curved sofa, a lounge chair, a brass screen and a fireplace.',
   'project-management': 'A site supervisor checking a tablet inside a room still under work.',
 };
 
-/** Where the subject sits, so a crop keeps it. */
+/* Where the subject sits, so a crop keeps it. A card is wider than the 3:2
+   photographs, so it crops top and bottom, and the height is what matters. */
 const POSITION: Record<string, string> = {
-  'architectural-design': '62% 50%',
-  'interior-design': '40% 50%',
-  'project-management': '72% 50%',
+  'architectural-design': '50% 62%', // the points and the plan; the hinge goes
+  'interior-design': '50% 60%', //      the sofa and the table; most of the ceiling goes
+  'project-management': '46% 30%', //   her helmet and the tablet
 };
 
-/* On phones these two are served as portrait crops already centred on the
-   subject (scripts/image-variants.config.mjs), so they sit centred there. */
-const POSITION_PORTRAIT: Record<string, string> = {
-  'architectural-design': '50% 50%',
-  'interior-design': '50% 50%',
-};
+/* On phones and portrait tablets all three are served as portrait crops
+   already centred on the subject (scripts/image-variants.config.mjs). */
+const POSITION_PORTRAIT = '50% 50%';
 
 const TITLE: ChapterLine[] = ['Hand us one part,', { text: 'or the whole build.', em: true }];
 const LEDE = 'Each of these is a team that already sits in the same office as the others.';
@@ -170,45 +194,40 @@ export function ServicesRows() {
               key={service.slug}
               id={`service-${service.slug}`}
               className="service-row"
-              /* Sides alternate, as the chapters did: photograph left, then right, … */
-              data-flip={i % 2 ? '' : undefined}
               data-section=""
               aria-labelledby={headingId}
             >
-              <Link href={href} className="service-row__media" tabIndex={-1} aria-hidden>
-                <ResponsiveImage
-                  src={IMG.card(`home-service-${service.slug}`)}
-                  alt={ALT[service.slug] ?? service.title}
-                  position={POSITION[service.slug]}
-                  positionPortrait={POSITION_PORTRAIT[service.slug]}
-                  sizes="(min-width: 1024px) 58vw, (min-width: 768px) 50vw, 100vw"
-                />
-              </Link>
-              <Reveal className="service-row__body" delay={0.1}>
-                <p className="overline">Service {num(i)}</p>
-                <h3 id={headingId} className="service-row__title mt-4 text-display-sm">
-                  <Link href={href}>
-                    {titleLines(service.title).map((line, n) => (
-                      <span key={n} className={cn('block', typeof line !== 'string' && line.em && 'font-normal')}>
-                        {typeof line === 'string' ? line : line.text}
-                      </span>
-                    ))}
-                  </Link>
-                </h3>
-                <p className="service-row__scope text-body-lg text-[rgb(var(--c-text-muted))]">
-                  {SCOPE[service.slug] ?? service.tagline}
-                </p>
-                {features.length > 0 && (
-                  <ul className="service-row__tags">
-                    {features.map((f) => (
-                      <li key={f}>{f}</li>
-                    ))}
-                  </ul>
-                )}
-                <CtaLink href={href} className="service-row__cta" ariaLabel={`Explore ${service.title}`}>
-                  Explore service
-                </CtaLink>
-              </Reveal>
+              {/* Words on the right, then the left, as the rows were. */}
+              <div className="service-card" data-side={i % 2 ? 'left' : 'right'}>
+                {/* The photograph is the pointer's link: the shade and the words let a click through to it. */}
+                <Link href={href} className="service-card__media" tabIndex={-1} aria-hidden>
+                  <ResponsiveImage
+                    src={IMG.card(`home-service-${service.slug}`)}
+                    alt={ALT[service.slug] ?? service.title}
+                    position={POSITION[service.slug]}
+                    positionPortrait={POSITION_PORTRAIT}
+                    sizes="(min-width: 1440px) 1400px, 100vw"
+                  />
+                </Link>
+                <span className="service-card__shade" aria-hidden />
+                <Reveal className="service-card__copy" delay={0.1}>
+                  <ChapterEyebrow>Service {num(i)}</ChapterEyebrow>
+                  <ChapterTitle
+                    as="h3"
+                    id={headingId}
+                    href={href}
+                    lines={titleLines(service.title)}
+                    className="text-display-sm"
+                  />
+                  <ChapterLede>{SCOPE[service.slug] ?? service.tagline}</ChapterLede>
+                  <ChapterTags items={features} />
+                  <ChapterLinks>
+                    <ChapterLink href={href} ariaLabel={`Explore ${service.title}`}>
+                      Explore service
+                    </ChapterLink>
+                  </ChapterLinks>
+                </Reveal>
+              </div>
             </article>
           );
         })}
