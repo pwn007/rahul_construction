@@ -24,7 +24,8 @@ export type LeadSource =
   | 'estimator-pdf'
   | 'idle-popup'
   | 'download'
-  | 'newsletter';
+  | 'newsletter'
+  | 'home-consultation';
 
 /**
  * What opened the popup. One value — it only ever opens on a pause.

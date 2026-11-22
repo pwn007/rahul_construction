@@ -89,7 +89,9 @@ export default {
         /* Four families and no more (25 Oct 2026): Outfit for headings and big
            figures, Inter for text, UI and every small caps label, mono only for
            tabular numbers, Noto for Hindi. Montserrat, once here for the navbar,
-           is gone. See docs/03-design-system.md §2. */
+           is gone. See docs/03-design-system.md §2. The home page alone uses
+           the client's design faces (Montserrat, Playfair Display, Poppins),
+           named in its own classes (features/home/template) rather than here. */
       },
       fontSize: {
         'display-xl': ['clamp(3.25rem, 9vw, 7.5rem)', { lineHeight: '0.92', letterSpacing: '-0.035em', fontWeight: '600' }],

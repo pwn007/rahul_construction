@@ -7,6 +7,8 @@ import { Navbar, Footer, Preloader, StickyContactBar, CommandPalette, useCommand
 import { ScrollProgress } from '@/components/motion';
 import { useLenisScroll, getLenis } from '@/hooks/useLenis';
 import { HeroToneProvider } from './hero-tone';
+import { HomeHeader } from '@/features/home/template/HomeHeader';
+import { HomeFooter } from '@/features/home/template/HomeFooter';
 
 function ScrollToTop() {
   const pathname = usePathname();
@@ -46,6 +48,10 @@ function ScrollToTop() {
  */
 export function SiteChrome({ children }: { children: ReactNode }) {
   const { open, setOpen } = useCommandPalette();
+  /* The home page wears the client's template header and footer (Nov 2026);
+     every other page keeps the site's own. By pathname, so the exported HTML
+     of `/` already has the right ones. */
+  const home = usePathname() === '/';
 
   useLenisScroll();
 
@@ -53,8 +59,9 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <HeroToneProvider>
       <Preloader />
       <ScrollToTop />
-      <ScrollProgress />
-      <Navbar />
+      {/* Not on the home page: a cyan line across the template's white bar. */}
+      {!home && <ScrollProgress />}
+      {home ? <HomeHeader /> : <Navbar />}
       <CommandPalette open={open} onClose={() => setOpen(false)} />
 
       {/* The section engine's stage (lib/section-nav, "The stage"). On a touch
@@ -68,11 +75,11 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         <div data-nav-surface="">
           <main id="main">{children}</main>
 
-          <Footer />
+          {home ? <HomeFooter /> : <Footer />}
         </div>
       </div>
       {/* No floating contact button since 25 Oct 2026 (client): Call and WhatsApp sit in
-          the home hero, and in the bottom bar on other pages' phones. */}
+          the bottom bar on phones, the home page included since Nov 2026. */}
       <StickyContactBar />
       {/* Rate-card popup disabled — it kept reopening on idle.
           Mounted once, above the routes, so the offer survives navigation and

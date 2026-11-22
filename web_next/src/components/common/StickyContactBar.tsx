@@ -38,15 +38,10 @@ export function StickyContactBar() {
      is about nothing else; a bar under them would offer each one twice. */
   if (pathname.startsWith('/contact')) return null;
 
-  /* Not on the home page (design migration, decision 5). The home page is
-     a run of full-screen chapters whose copy rests at the bottom of the
-     screen — exactly where this bar sits — so it covered the last line of
-     every chapter on a phone. There, Call and WhatsApp are the hero's own
-     pills (back since 25 Oct 2026), then the menu and the footer. It used to
-     stand down only while the hero was on screen and slide in after; one line
-     brings that back if the client wants it (`useWithinFirstScreen`, see git
-     history). */
-  if (pathname === '/') return null;
+  /* On the home page too since 19 Nov 2026. It stood down there while the
+     page was full-screen chapters with copy resting where this bar sits, and
+     Call and WhatsApp were the hero's own; the client's template hero has
+     neither, and its bands scroll normally. */
 
   /*
    * A page-aware opener beats a generic one: the message arrives already
@@ -67,7 +62,7 @@ export function StickyContactBar() {
         element of every page sits underneath it. Doing this with a global body
         rule would mean the desktop layout paying for a bar it never renders.
       */}
-      <div className="h-[calc(3.5rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden />
+      <div data-contact-spacer="" className="h-[calc(3.5rem+env(safe-area-inset-bottom))] md:hidden" aria-hidden />
 
       {/* 6px above and below a 44px pill: the bar's old 56px. */}
       <nav

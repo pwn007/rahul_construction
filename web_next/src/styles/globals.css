@@ -53,7 +53,8 @@
        layout — the same stacks as `fontFamily` in tailwind.config. The chapter
        styles below read these roles rather than naming a face. (The design
        migration tried Cormorant Garamond and DM Sans; the client found them too
-       light for the site and they were reverted on 10 Oct 2026.) */
+       light for the site and they were reverted on 10 Oct 2026.) The home
+       page's own faces are named in its components (features/home/template). */
     --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-deva: 'Noto Sans Devanagari', 'Outfit', sans-serif;
@@ -3471,6 +3472,49 @@
   }
 }
 
+/* ============================================================
+   HOME TEMPLATE (Nov 2026)
+
+   The home page is the client's own design: the Figma Make file
+   "Interactive Neetu Archstone Slides" (v10, 6 Nov 2026), itself a React +
+   Tailwind app. features/home/template/* ports its App.tsx class for class,
+   so almost everything is Tailwind there — sizes in vw, as the client's code
+   has them, with its own `max-lg:`/`max-md:` rules for phones. What lives
+   here is only what that code kept in CSS: the root's resets, and (at the
+   end of this file, outside any layer, where they outrank utilities exactly
+   as they did in the client's build) the reveal, the service cards' glow,
+   the floating emblems and the hidden scrollbar.
+
+   Light-only (app/providers.tsx keeps `.dark` off `/`) and literal colours,
+   so the theme tokens never reach in.
+   ============================================================ */
+@layer components {
+  .ht {
+    /* Its own block formatting context: the hero's top margin would otherwise
+       fall through the root and show the body's cream above it. */
+    display: flow-root;
+    color-scheme: light;
+    background: #fff;
+    color: #000;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    /* body's Inter character variants mean nothing to Montserrat. */
+    font-feature-settings: normal;
+    /* The site sets `antialiased` on body; the design doesn't, and on a Mac its
+       light white type (the story names, the footer) reads that much heavier. */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
+  /* The phone contact bar's spacer sits under the footer; on this page it
+     carries the footer's navy, not the body's cream. */
+  html:has(.ht) [data-contact-spacer] { background: #03094e; }
+  /* The base layer sets headings in Outfit, balanced; the template's are
+     Montserrat (or named per element) and wrap normally. */
+  .ht :where(h1, h2, h3, h4, p) {
+    font-family: inherit;
+    text-wrap: wrap;
+  }
+}
+
 @layer utilities {
   .text-gradient-brand {
     background: linear-gradient(100deg, rgb(var(--c-brand)) 0%, #4FD2F6 50%, rgb(var(--c-brand-deep)) 100%);
@@ -3640,4 +3684,90 @@ html.snapnav-stage [data-nav-surface] {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ============================================================
+   HOME TEMPLATE — the client's own CSS classes (see the block above).
+   Unlayered on purpose: in their build these outranked the utilities on the
+   same element (the card's transition, the reveal's transform), and they do
+   here too. Values copied from it unchanged; `ht-` because `.service-card`
+   and friends already exist above for the retired home bands.
+   ============================================================ */
+/* Fades up into place once seen. Only after hydration (`data-motion` on the
+   page root), so the exported HTML and a visitor without JS see everything. */
+.ht[data-motion] .ht-reveal {
+  transition: opacity 0.8s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--d, 0s);
+}
+.ht[data-motion] .ht-reveal:not(.in) {
+  opacity: 0;
+  transform: translateY(26px);
+}
+.hide-scroll { scrollbar-width: none; }
+.hide-scroll::-webkit-scrollbar { display: none; }
+
+@keyframes ht-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.ht-float {
+  animation: 6s ease-in-out infinite ht-float;
+  animation-delay: var(--fd, 0s);
+}
+
+.ht-service-card {
+  transform-origin: center;
+  transition: box-shadow 0.5s, transform 0.5s;
+  box-shadow: inset 0 0 0 1px #00bbee8c, 0 0 24px #00bbee4d;
+}
+.ht-service-card:hover,
+.ht-service-card:focus-within {
+  z-index: 1;
+  transform: scale(1.008);
+  box-shadow: inset 0 0 0 1px #0be, 0 0 40px #00bbee80, 0 20px 44px -18px #00bbee80;
+}
+.ht-service-cta:hover,
+.ht-service-cta:focus-visible {
+  transform: scale(1.02);
+  box-shadow: 0 8px 22px -10px #00bbeea6;
+}
+.ht-service-cta:focus-visible {
+  outline-offset: 4px;
+  outline: 2px solid;
+}
+.ht-emblem {
+  isolation: isolate;
+  aspect-ratio: 1;
+  width: min(17vw, 320px);
+  position: relative;
+}
+.ht-icon-glow {
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(circle, #00bbee52 0%, #00bbee21 35%, #0000 70%);
+  position: absolute;
+  inset: -28%;
+}
+.ht-icon {
+  color: #03094e;
+  filter: drop-shadow(0 8px 12px #03094e24);
+  width: 100%;
+  height: auto;
+  transition: transform 0.7s;
+}
+.ht-icon-accent { stroke: #0be; }
+.ht-service-card:hover .ht-icon,
+.ht-service-card:focus-within .ht-icon { transform: scale(1.1); }
+@media (max-width: 767px) {
+  .ht-emblem { width: 192px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ht[data-motion] .ht-reveal,
+  .ht[data-motion] .ht-reveal:not(.in) { opacity: 1; transition: none; transform: none; }
+  .ht-float { animation: none; }
+  .ht-service-card, .ht-icon, .ht-service-cta { transition: none; }
+  .ht-service-card:hover, .ht-service-card:focus-within,
+  .ht-service-cta:hover, .ht-service-cta:focus-visible,
+  .ht-service-card:hover .ht-icon, .ht-service-card:focus-within .ht-icon { transform: none; }
 }

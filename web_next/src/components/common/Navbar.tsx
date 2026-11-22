@@ -28,8 +28,11 @@ import { useHeroTone } from '@/app/hero-tone';
  * table has no columns for them — extending it is a later phase, recorded in
  * the plan). A DB row whose href matches nothing becomes a plain link.
  * The `highlight` row is the accent CTA button, not a nav item.
+ *
+ * Exported, with the mega menu and the drawer, for the home page's own header
+ * (features/home/template/HomeHeader.tsx, Nov 2026).
  */
-function mergeNav(rows: NavItem[]): NavLinkType[] {
+export function mergeNav(rows: NavItem[]): NavLinkType[] {
   return rows
     .filter((r) => !r.parentId && !r.highlight)
     .slice()
@@ -325,7 +328,7 @@ function useToneUnder(headerRef: RefObject<HTMLElement | null>): 'dark' | 'light
   return tone;
 }
 
-function MegaMenuContent({ item }: { item?: NavLinkType }) {
+export function MegaMenuContent({ item }: { item?: NavLinkType }) {
   if (!item?.children) return null;
   return (
     <div className="grid grid-cols-12 gap-8">
@@ -377,8 +380,10 @@ function MegaMenuContent({ item }: { item?: NavLinkType }) {
 }
 
 /* Slides in from the left — the side the menu button sits on. */
-function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navRows = useNavItems();
+  /* The home page is light-only (the client's template), so no switch there. */
+  const home = usePathname() === '/';
   const nav = mergeNav(navRows);
   const cta = navRows.find((r) => r.highlight);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -481,9 +486,11 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                 <Button href={`tel:${SITE.phoneRaw}`} variant="secondary" size="lg" full leftIcon={<Phone className="h-4 w-4" />}>
                   Call us
                 </Button>
-                <Button onClick={toggle} variant="secondary" size="lg" aria-label="Toggle theme">
-                  {resolved === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
-                </Button>
+                {!home && (
+                  <Button onClick={toggle} variant="secondary" size="lg" aria-label="Toggle theme">
+                    {resolved === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+                  </Button>
+                )}
               </div>
             </div>
           </motion.div>

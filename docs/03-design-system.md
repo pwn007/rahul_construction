@@ -95,6 +95,13 @@ prices, quantities, admin tables, timers. None of the families loads an italic, 
 in italic**: emphasis is weight (a heading's "second voice" is Outfit 400 beside 600), never a
 browser-slanted face. Only the loaded weights are used (Outfit 400–600, Inter 400–600, Mono 400–600).
 
+**The home page is the exception (Nov 2026).** It is the client's own design (the Figma Make file
+"Interactive Neetu Archstone Slides", ported from its code) and uses its faces: Montserrat 300–700
+for nearly everything, Playfair Display 700 for the hero heading, Poppins 300/400 for the section
+labels, Inter 300 for the two holding bands, Arial for its buttons and Noto Sans Devanagari 500 for
+the Hindi line. All of it is scoped to the home page (`features/home/template`, `.ht` in
+globals.css); every other page keeps the four families above.
+
 ### 2.1 Type scale (fluid, `clamp()`)
 | Token | Min → Max | Use |
 | --- | --- | --- |

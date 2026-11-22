@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from '@/components/ui';
 import { readStore, writeStore, STORAGE_KEYS } from '@/lib/storage';
@@ -66,10 +67,17 @@ function ThemeProvider({ children }: { children: ReactNode }) {
 
   const resolved: 'light' | 'dark' = mode === 'system' ? (systemDark ? 'dark' : 'light') : mode;
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', resolved === 'dark');
-    document.documentElement.style.colorScheme = resolved;
-  }, [resolved]);
+  /* The home page is the client's template (Nov 2026), drawn light only: it
+     never takes `.dark`, whatever is saved, and the saved theme comes back on
+     the next page. A layout effect, so a route change never paints a frame in
+     the wrong theme. The boot script below makes the same exception. */
+  const lightOnly = usePathname() === '/';
+  const applied = lightOnly ? 'light' : resolved;
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle('dark', applied === 'dark');
+    document.documentElement.style.colorScheme = applied;
+  }, [applied]);
 
   const setMode = useCallback((m: ThemeMode) => {
     setModeState(m);
@@ -96,11 +104,13 @@ function ThemeProvider({ children }: { children: ReactNode }) {
 /**
  * Applies the saved theme before the first paint. Inlined into <head> by
  * app/layout.tsx, deliberately blocking — it is a few hundred bytes, and
- * deferring it is exactly the flash it exists to prevent.
+ * deferring it is exactly the flash it exists to prevent. The home page is
+ * light-only (`h`), as ThemeProvider explains.
  */
 export const THEME_BOOT_SCRIPT = `(function(){try{
 var m=JSON.parse(localStorage.getItem('${STORAGE_KEYS.theme}')||'"light"');
-var d=m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);
+var p=location.pathname,h=p==='/'||p==='/index.html';
+var d=!h&&(m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme: dark)').matches));
 if(d)document.documentElement.classList.add('dark');
 document.documentElement.style.colorScheme=d?'dark':'light';
 }catch(e){}})();`;

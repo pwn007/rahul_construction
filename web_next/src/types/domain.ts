@@ -336,7 +336,7 @@ export interface Enquiry extends BaseEntity, LeadMeta {
    * capture surfaces were removed; `exit-offer` became `idle-popup` when the
    * popup stopped being exit-triggered.
    */
-  source: 'contact-form' | 'estimator' | 'idle-popup' | 'download' | 'newsletter';
+  source: 'contact-form' | 'estimator' | 'idle-popup' | 'download' | 'newsletter' | 'home-consultation';
   stage: 'new' | 'contacted' | 'qualified' | 'proposal' | 'won' | 'lost';
   assignedTo?: string;
 }
