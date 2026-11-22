@@ -12,7 +12,7 @@ go through `npm run images:variants` like the client’s renders beside them in
 
 **`home/` (22 Nov 2026)** comes from the client's own home-page design, the Figma Make file
 "Interactive Neetu Archstone Slides": the bedroom render (`hero-bedroom`, re-encoded to webp from
-their 1890×1786 JPEG), the dummy story frame (`story`), the four material brands' logos as they
+their 1890×1786 JPEG), the four material brands' logos as they
 supplied them (JSW, Kajaria, Ambuja Cement, Tata Steel — their trademarks, shown as suppliers) and
 the calculator icon (`calc.png`). Their logo PNGs are redrawn in code from our own vector mark. Ask
 the client for the render's source and licence before launch.

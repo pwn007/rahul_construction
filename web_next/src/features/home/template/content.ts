@@ -5,9 +5,10 @@ import { ROUTES } from '@/constants/routes';
  * ("Interactive Neetu Archstone Slides", v10, Nov 2026). One file, so the
  * dummies they mean to replace later are a one-file change.
  *
- * Kept verbatim, dummies included: the "DR. A.A. PATHAN" story cards, the two
- * holding bands, the figures (300+ clients, not the 98% used elsewhere) and
- * the footer's "Vatika Road" address. Only their spelling slips are corrected
+ * Kept verbatim, dummies included: the two holding bands, the figures (300+
+ * clients, not the 98% used elsewhere) and the footer's "Vatika Road" address.
+ * The client stories are not here: they are the real recorded testimonials
+ * from Admin → Client videos (ClientStories.tsx). Only their spelling slips are corrected
  * (the user's call, 19 and 22 Nov 2026): WITN, Desiging, acutually,
  * Bussinesses, managment.
  */
@@ -24,13 +25,6 @@ export const HERO = {
   secondary: { label: 'VIEW MEPF', href: ROUTES.service('mepf-consultancy') },
   image: { src: '/images/home/hero-bedroom.webp', width: 1890, height: 1786, alt: 'Luxury bedroom interior' },
 };
-
-/* Four of the same dummy card, as drawn. */
-export const STORIES = Array.from({ length: 4 }, () => ({
-  name: 'DR. A.A. PATHAN',
-  place: 'MALVIYA NAGAR',
-  image: '/images/home/story.webp',
-}));
 
 export const BRANDS = {
   title: 'WE BUILD WITH MATERIAL YOU ALREADY TRUST',
